@@ -18,7 +18,8 @@ Author **World Structure GDD** (first MVP Foundation system). Skeleton created; 
 - ✓ Codex onboarding brief delivered; Codex has completed read-only onboarding and surfaced 4 clarifying questions (all answered)
 - ✓ Codex Assignment #1 drafted — `dotnet format` setup on branch `codex/dotnet-format-setup`
 - ✅ World Structure GDD — **complete.** All 8 required sections + 4 optional sections populated. Section C amended mid-process (Rule 12 save-timeout after Section E edge A4; Day/Night named event after Section H qa-lead flag). 26 acceptance criteria (23 T1-blocking, 3 advisory). Entity registry updated (5 formulas + 3 constants). Systems-index flipped to Designed (1/26 MVP).
-- Next: run `/design-review design/gdd/world-structure.md` in a fresh session for independent validation; then `/consistency-check` before next GDD; then Save/Load & Persistence (next in Foundation order).
+- ✅ Commit `4801d8a` on `main` (GDD + registry + systems-index + active.md bundle; rebased onto PR #1 merge).
+- Next: run `/design-review design/gdd/world-structure.md` in a **fresh session** for independent validation; then `/consistency-check` before next GDD; then Save/Load & Persistence (next in Foundation order).
 - 🔄 Codex PR #1 (`codex/dotnet-format-setup` → `main`): Claude Code review posted as COMMENTED (GitHub blocks request-changes on self-owned PRs). 3 polish items requested before merge: (1) expand traversal exclusions for Unity paths, (2) attribute-decorated field regex fix, (3) document fallback rules in README. Awaiting Codex revisions.
 
 ## Files Being Worked On

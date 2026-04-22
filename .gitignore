@@ -139,3 +139,9 @@ $RECYCLE.BIN/
 *.msm
 *.msp
 *.lnk
+
+# === Codex CLI parallel setup (kept locally, not pushed) ===
+# (AGENTS.md intentionally NOT listed here — it's a tracked project file per D006.
+# Codex auto-reads it at session start. Only .agents/ stays local.)
+.agents/
+
