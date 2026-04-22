@@ -26,7 +26,7 @@ Systems marked **E** are explicit in the game concept's Core Mechanics or Techni
 
 | # | System | Category | Priority | Status | Design Doc | Depends On |
 |---|---|---|---|---|---|---|
-| 1 | World Structure (I) | Core | **MVP** | Not Started | — | — |
+| 1 | World Structure (I) | Core | **MVP** | Designed | [world-structure.md](world-structure.md) | — |
 | 2 | Save / Load & Persistence (I) | Persistence | **MVP** | Not Started | — | — |
 | 3 | Menus & Settings (I) | UI | **MVP** | Not Started | — | — |
 | 4 | NPC System (I) | Core | **MVP** | Not Started | — | World Structure |
@@ -247,10 +247,10 @@ Systems flagged for early prototyping regardless of priority tier — get these 
 | Metric | Count |
 |---|---|
 | Total systems identified | 33 |
-| Design docs started | 0 |
+| Design docs started | 1 |
 | Design docs reviewed | 0 |
 | Design docs approved | 0 |
-| MVP systems designed | 0 / 26 |
+| MVP systems designed | 1 / 26 |
 | Tier 2 systems designed | 0 / 7 |
 | Tier 3 systems designed | 0 / 5 |
 | Tier 4 systems designed | 0 / — |

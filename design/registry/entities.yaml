@@ -37,7 +37,7 @@
 #   Each entry: name, status, source, referenced_by[], attributes{}, added, revised
 
 version: 1
-last_updated: ""
+last_updated: 2026-04-22
 
 # ─── ENTITIES ────────────────────────────────────────────────────────────────
 # Named game-world objects: enemies, NPCs, characters, factions, bosses.
@@ -106,7 +106,66 @@ items: []
 #   output_range[min, max], added
 # Optional: expression (the actual formula), notes
 
-formulas: []
+formulas:
+  - name: peak_texture_residency
+    status: active
+    source: design/gdd/world-structure.md
+    referenced_by:
+      - design/gdd/world-structure.md
+    variables: [R_always, R_active, R_transient]
+    output_range: [0, 350]   # MB; must satisfy <= 350 per art-bible §8.9 hard cap
+    expression: "R_peak = R_always + R_active + R_transient"
+    notes: "F1 constraint equation. Build-blocking if violated. Informs CI memory smoke check (H-F1)."
+    added: 2026-04-22
+    revised: ""
+
+  - name: zone_art_budget_ceiling
+    status: active
+    source: design/gdd/world-structure.md
+    referenced_by:
+      - design/gdd/world-structure.md
+    variables: [R_cap, R_always, R_transient_max]
+    output_range: [0, 305]   # MB
+    expression: "R_zone_max = R_cap - R_always - R_transient_max"
+    notes: "F1.1 corollary. At MVP: 350 - 45 - 140 = 165 MB per zone."
+    added: 2026-04-22
+    revised: ""
+
+  - name: stream_ahead_trigger_distance
+    status: active
+    source: design/gdd/world-structure.md
+    referenced_by:
+      - design/gdd/world-structure.md
+    variables: [V_max, T_load, D_margin]
+    output_range: [0, 40]    # meters (soft ceiling; >40 indicates zone-split needed)
+    expression: "D_trigger = V_max * T_load + D_margin"
+    notes: "F2 level-design constraint. MVP example: 5 m/s * 3 s + 2 m = 17 m."
+    added: 2026-04-22
+    revised: ""
+
+  - name: zone_transition_total_time_budget
+    status: active
+    source: design/gdd/world-structure.md
+    referenced_by:
+      - design/gdd/world-structure.md
+    variables: [T_save, T_load, T_activate, T_unload_async]
+    output_range: [0, 0]     # accountability identity, no fixed output range
+    expression: "T_transition = T_save + T_load + T_activate + T_unload_async"
+    notes: "F3 time-budget identity. Felt latency (player-locked) = T_save + T_load + T_activate; target <5000 ms on min-spec."
+    added: 2026-04-22
+    revised: ""
+
+  - name: corpse_run_zone_retention_memory_cost
+    status: active
+    source: design/gdd/world-structure.md
+    referenced_by:
+      - design/gdd/world-structure.md
+    variables: [R_cap, R_always, R_corpse_zone]
+    output_range: [0, 305]   # MB
+    expression: "R_available_active = R_cap - R_always - R_corpse_zone"
+    notes: "F4 tradeoff lever via corpse_run_zone_retention_seconds tuning knob."
+    added: 2026-04-22
+    revised: ""
 
 # Example:
 #
@@ -139,7 +198,40 @@ formulas: []
 #
 # Required fields: name, status, source, referenced_by, value, unit, added
 
-constants: []
+constants:
+  - name: texture_residency_cap
+    status: active
+    source: design/art/art-bible.md   # originating §8.9 lock
+    referenced_by:
+      - design/art/art-bible.md
+      - design/gdd/world-structure.md
+    value: 350
+    unit: MB
+    notes: "Hard cap during normal play. Single Active Zone Invariant (world-structure Rule 3) depends on this. Not tunable."
+    added: 2026-04-22
+    revised: ""
+
+  - name: corpse_run_zone_retention_seconds_default
+    status: active
+    source: design/gdd/world-structure.md
+    referenced_by:
+      - design/gdd/world-structure.md
+    value: 300
+    unit: seconds
+    notes: "Initial pin from Section G tuning knob. Revisit at T1 playtest against 75th-percentile observed corpse-run durations."
+    added: 2026-04-22
+    revised: ""
+
+  - name: save_mutex_max_ms
+    status: active
+    source: design/gdd/world-structure.md   # Rule 12 + Section G
+    referenced_by:
+      - design/gdd/world-structure.md
+    value: 150
+    unit: milliseconds
+    notes: "Hard timeout for SaveCheckpointing per Rule 12 (SaveTimedOutEvent fires on elapse). Save/Load GDD will reference once authored — add to referenced_by at that time."
+    added: 2026-04-22
+    revised: ""
 
 # Example:
 #

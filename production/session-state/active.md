@@ -5,7 +5,7 @@
 
 ## Current Task
 
-Design of MVP system GDDs for Gravenspire.
+Author **World Structure GDD** (first MVP Foundation system). Skeleton created; Phase 4 Section A (Overview) next.
 
 ## Status
 
@@ -13,17 +13,25 @@ Design of MVP system GDDs for Gravenspire.
 - ✓ Engine configured → Unity 6.3 LTS + C# + URP (FishNet planned for Tier 2+)
 - ✓ Art bible complete → [design/art/art-bible.md](../../design/art/art-bible.md) (9/9 sections, Lean mode, AD-ART-BIBLE skipped)
 - ✓ Systems mapped → [design/gdd/systems-index.md](../../design/gdd/systems-index.md) (33 systems, 26 MVP)
-- Next: Author per-system GDDs in dependency order, starting with Foundation layer
+- ✓ Spelling normalized Gravespire → Gravenspire, AGENTS.md §0 canonical path fixed (commit `486f0a0`)
+- ✓ D006 committed — Codex onboarded as parallel implementer (commit `fae8c8c`)
+- ✓ Codex onboarding brief delivered; Codex has completed read-only onboarding and surfaced 4 clarifying questions (all answered)
+- ✓ Codex Assignment #1 drafted — `dotnet format` setup on branch `codex/dotnet-format-setup`
+- ✅ World Structure GDD — **complete.** All 8 required sections + 4 optional sections populated. Section C amended mid-process (Rule 12 save-timeout after Section E edge A4; Day/Night named event after Section H qa-lead flag). 26 acceptance criteria (23 T1-blocking, 3 advisory). Entity registry updated (5 formulas + 3 constants). Systems-index flipped to Designed (1/26 MVP).
+- Next: run `/design-review design/gdd/world-structure.md` in a fresh session for independent validation; then `/consistency-check` before next GDD; then Save/Load & Persistence (next in Foundation order).
+- 🔄 Codex PR #1 (`codex/dotnet-format-setup` → `main`): Claude Code review posted as COMMENTED (GitHub blocks request-changes on self-owned PRs). 3 polish items requested before merge: (1) expand traversal exclusions for Unity paths, (2) attribute-decorated field regex fix, (3) document fallback rules in README. Awaiting Codex revisions.
 
 ## Files Being Worked On
 
+- **Active:** [design/gdd/world-structure.md](../../design/gdd/world-structure.md) — skeleton; Section A next
 - Game concept: [design/gdd/game-concept.md](../../design/gdd/game-concept.md)
-- Art bible: [design/art/art-bible.md](../../design/art/art-bible.md)
+- Art bible: [design/art/art-bible.md](../../design/art/art-bible.md) — hard constraints for this GDD (§8.7 zone=Addressable group, §8.9 ≤350MB, §4.4 no zone-boundary LUT, §6.2 ≤3-4 unique 2K surfaces/group)
 - Systems index: [design/gdd/systems-index.md](../../design/gdd/systems-index.md)
 - CLAUDE.md (Technology Stack + Engine Version Reference)
 - .claude/docs/technical-preferences.md (Unity 6.3 LTS + C# + URP + full specialist routing)
 - docs/engine-reference/unity/VERSION.md (updated with post-May-2025 API gaps)
 - .claude/agents/unity-specialist.md (Version Awareness section added)
+- DECISIONS.md (D006 appended)
 
 ## Key Decisions Made
 
@@ -33,6 +41,7 @@ Design of MVP system GDDs for Gravenspire.
 - **Two-layer UI**: Layer 1 abstract practical HUD + Layer 2 fully diegetic world information (faction board, dialogue panels on faction-specific paper, personal journal)
 - **Onboarding**: Sister Elara AI companion mentors new players by behavior — no tutorial text. MVP-critical system.
 - **Scope staging**: 4 tiers. Tier 1 MVP = single-player vertical slice (Cleric + 1 haunt + 1 faction + 1 city hub). Tier 2 = co-op alpha. Tier 3 = persistent small-server beta. Tier 4 = full vision.
+- **Codex onboarded** (D006, 2026-04-22) — parallel implementer, own worktree `N:\GravenSpire-codex`, branch-scoped write authority, PR flow to `main`. Forbidden zones: `design/gdd/**`, art bible, DECISIONS.md, AGENTS.md, CLAUDE.md, engine-reference, `.claude/**`.
 
 ## Open Questions / Flags
 
@@ -43,5 +52,6 @@ Design of MVP system GDDs for Gravenspire.
 
 ## Next Skill to Run
 
-- `/design-system [system-name]` to author the first per-system GDD. Design order in [systems-index.md](../../design/gdd/systems-index.md) §Recommended Design Order — Foundation layer first (World Structure → Save/Load → Menus & Settings → NPC System), then Combat Core (the core hypothesis).
-- OR `/map-systems next` to auto-select the highest-priority undesigned system.
+- **Continue `/design-system world-structure`** — Phase 4 Section A (Overview). Skeleton is at [design/gdd/world-structure.md](../../design/gdd/world-structure.md). Feasibility brief already delivered in-session; jump straight to the Section A framing widget (Framing / ADR ref / Fantasy tabs).
+- After World Structure: Save/Load & Persistence → Menus & Settings → NPC System → Combat Core.
+- Codex in parallel: [Assignment #1 dotnet format setup] — waiting for brian to relay.
