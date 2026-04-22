@@ -113,3 +113,45 @@ replacing it.
 **Supersedes:** none.
 **See also:** `AGENTS.md` (the new behavioral contract), migration-source
 parent document (`docs/brian-system-prompt-v4-6.md`).
+
+---
+
+## D006 — Codex Added as Parallel Implementer (Partially Supersedes D005)
+
+**Date:** 2026-04-22
+**Status:** Locked
+**Context:** D005 (2026-04-21) excluded the `.codex/` workflow under the
+framing "Gravenspire is Claude Code only." One day later (2026-04-22) we
+reversed that framing: Codex is being onboarded as a parallel implementer,
+operating from a dedicated worktree `N:\GravenSpire-codex`. `AGENTS.md` §0
+was rewritten in commit `486f0a0` to include Codex worktree rules; that
+rewrite was ahead of the decision log. This entry closes the gap.
+**Decision:** Codex is a sanctioned parallel agent on Gravenspire:
+- **Role:** Parallel coder / implementer. Claude Code remains the
+  design/architecture authoring partner. Codex is not a reviewer.
+- **Authority:** Write only inside its own branch/worktree. Never push to
+  `main`. Never force-push.
+- **Worktree:** `N:\GravenSpire-codex`, created from `origin/main`, branch
+  naming `codex/<feature-name>`. One worktree per feature branch.
+- **Governance:** Codex honors EDIT_OK (`AGENTS.md` §2), evidence rule
+  (§3), source-of-truth table (§4), tier discipline (§6), and the pre-PR
+  4-question check (§7) — identical to Claude Code.
+- **Forbidden zones** (no edits without explicit per-file user approval):
+  `design/gdd/**`, `design/art/art-bible.md`, `DECISIONS.md`, `AGENTS.md`,
+  `CLAUDE.md`, `docs/engine-reference/**`, `.claude/agents/**`,
+  `.claude/skills/**`, `.claude/rules/**`.
+- **PR flow:** Codex opens PRs from `codex/<feature>` → `main`; user +
+  Claude Code review.
+**Consequences:**
+- `docs/brian-system-prompt-v4-6.md` placeholder line naming Codex as "not
+  used on Gravenspire" is obsolete; update when the placeholder is
+  populated.
+- D005's "excluded: `.codex/` workflow" refers specifically to the
+  clinic-notes-ai `.codex/` directory shape (tooling pattern), not to
+  Codex as an agent. That narrow exclusion remains correct; this entry
+  opens a new scope.
+**Supersedes (partial):** D005 — the "Claude Code only" framing only; all
+other D005 consequences (governance stack port, new top-level files, new
+rules, new skills) remain locked.
+**Related:** `AGENTS.md` §0 worktree rules (commit `486f0a0`); Codex
+onboarding brief (delivered 2026-04-22).
