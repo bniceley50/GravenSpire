@@ -5,7 +5,7 @@
 
 ## Current Task
 
-Design of MVP system GDDs for Gravespire.
+Design of MVP system GDDs for Gravenspire.
 
 ## Status
 

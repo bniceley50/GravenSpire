@@ -1,4 +1,4 @@
-# SECURITY.md — Gravespire Threat Model
+# SECURITY.md — Gravenspire Threat Model
 
 Game-dev adapted from clinic-notes-ai's HIPAA threat table. Rows marked
 **Active** apply to the current tier. Rows marked **Tier N** become active at

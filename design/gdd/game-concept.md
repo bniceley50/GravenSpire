@@ -1,4 +1,4 @@
-# Game Concept: Gravespire
+# Game Concept: Gravenspire
 
 *Created: 2026-04-21*
 *Status: Draft*
@@ -65,7 +65,7 @@ This hook carries three distinguishing claims that each map to a pillar:
 | **Fantasy** (make-believe, role-playing) | 5 | Gothic undead register, class identity, faction role-play |
 | **Sensation** (sensory pleasure) | 6 | Atmospheric audio-forward (silence, ambient dread), painterly/gothic visuals (TBD in `/art-bible`) |
 | **Expression** (self-expression, creativity) | 7 | Class build choices, faction path, reputation expression through renown |
-| **Submission** (relaxation) | N/A | Not a goal. Gravespire is not a comfort game. |
+| **Submission** (relaxation) | N/A | Not a goal. Gravenspire is not a comfort game. |
 
 ### Key Dynamics (Emergent player behaviors)
 
@@ -98,7 +98,7 @@ This hook carries three distinguishing claims that each map to a pillar:
 
 ### Player Type Appeal (Bartle Taxonomy)
 
-- [x] **Achievers** (slow-burn variety) — Faction reputation ladder, class mastery, named-figure-in-server-history goal. Gravespire is *rich* with achievement tracks but none are gear-score based.
+- [x] **Achievers** (slow-burn variety) — Faction reputation ladder, class mastery, named-figure-in-server-history goal. Gravenspire is *rich* with achievement tracks but none are gear-score based.
 - [x] **Explorers** — *Primary audience.* Living world + no handholding + hidden faction lore + emergent server history is their dream game.
 - [x] **Socializers** — *Primary audience.* Small server + forced grouping + named NPC drama + faction identity. Every relationship matters.
 - [ ] **Killers / Competitors** — Not the primary target. Faction raiding may provide periodic PvP in later tiers, but the game is not designed around domination.
@@ -120,17 +120,17 @@ This hook carries three distinguishing claims that each map to a pillar:
 
 Classic EQ combat: auto-attack ticking, hate management, timed spell casts every 6-10 seconds, group coordination in chat. Between pulls: sit, med, regen, re-buff. *The silence between pulls is a feature.*
 
-**Gravespire twist:** every mob carries faction weight. Killing a vampire servant is a tiny contribution to the political board. Individual kills don't matter; a night's work might.
+**Gravenspire twist:** every mob carries faction weight. Killing a vampire servant is a tiny contribution to the political board. Individual kills don't matter; a night's work might.
 
 ### Short-Term (5-15 minutes — The Camp)
 
 Camped at a specific spot in a specific zone. Pulls every 1-3 minutes. Camp goals: next rare spawn, clear to the named, fill faction tokens, hit the next XP level. "One more pull" psychology lives here.
 
-**Gravespire twist:** camps have *shifting faction control*. The mobs here this week are Vampire Court forward agents. Farm hard and the Court retreats; Ghouls move in. Next week: different mobs, different loot, different named spawn.
+**Gravenspire twist:** camps have *shifting faction control*. The mobs here this week are Vampire Court forward agents. Farm hard and the Court retreats; Ghouls move in. Next week: different mobs, different loot, different named spawn.
 
 ### Session-Level (60-180 minutes)
 
-1. **Arrive in Gravespire.** Hit the inn. Talk to NPCs (rumor, gossip). Check the faction board — who's up, who's down.
+1. **Arrive in Gravenspire.** Hit the inn. Talk to NPCs (rumor, gossip). Check the faction board — who's up, who's down.
 2. **Talk to your patron.** Faction contact has work. Maybe specific targets. Maybe strategic context.
 3. **Travel + camp.** Most of the session. 1-3 hours in the field.
 4. **Return to city.** Sell, bank, deposit faction tokens. See the faction board tilt. See if your patron survived.
@@ -147,7 +147,7 @@ Three parallel tracks:
 | ---- | ---- | ---- |
 | **Class** | Vertical | EQ-classic. Levels, spells, equipment, keyed zones. Your cleric is mechanically better at 40 than at 20. |
 | **Faction Reputation** | Horizontal | Rank in your chosen faction(s). Named NPCs know you. Titles, inner circles, political influence. *This is the story of your character.* |
-| **Server State** | Meta | The political map of Gravespire evolves over server weeks. Some of this you cause. Some happens while you sleep. |
+| **Server State** | Meta | The political map of Gravenspire evolves over server weeks. Some of this you cause. Some happens while you sleep. |
 
 **Long-term goal:** Become a **named figure in the server's history**. A personal story arc runs ~6-12 months of play: nobody → faction member → inner circle → power broker.
 
@@ -164,7 +164,7 @@ Three parallel tracks:
 
 ### Pillar 1: The World Is Not Your Story
 
-Gravespire's factions, NPCs, and politics exist **independently** of any player. The world doesn't pause when you log off. The player is a participant in the city's story, not its protagonist.
+Gravenspire's factions, NPCs, and politics exist **independently** of any player. The world doesn't pause when you log off. The player is a participant in the city's story, not its protagonist.
 
 *Design test:* When debating "should the player feel like the chosen one?" — we choose **no**. Named NPCs outrank named players. The simulation wins ties. There is no Dragonborn.
 
@@ -176,7 +176,7 @@ EQ-Classic's pacing — med breaks, careful pulls, slow travel, no markers — i
 
 ### Pillar 3: Reputation Is The Progression
 
-The deepest long-term progression in Gravespire is **faction reputation and political standing**, not item level. Your character is a *name*, not a *number*.
+The deepest long-term progression in Gravenspire is **faction reputation and political standing**, not item level. Your character is a *name*, not a *number*.
 
 *Design test:* When debating "what's the reward for this activity?" — we choose **reputation and relationship** over **gear**. Gear plateaus early. Rep has no ceiling.
 
@@ -196,7 +196,7 @@ No player can solo endgame — classes and roles are mutually necessary. The cle
 
 ### Pillar 5: Stakes Are Honest
 
-Death in Gravespire carries **real consequences** — corpse runs, XP loss, faction reputation impact. Failure is always possible, but always *legible* and *learnable*.
+Death in Gravenspire carries **real consequences** — corpse runs, XP loss, faction reputation impact. Failure is always possible, but always *legible* and *learnable*.
 
 *Design test:* When debating "should we add a safety net for Y?" — we choose **consequences over convenience**, but we also ensure every death can be explained. Mystery is good; unfairness is not.
 
@@ -342,7 +342,7 @@ Death in Gravespire carries **real consequences** — corpse runs, XP loss, fact
 | **Tier 3 — Beta / Small Persistent Server** | Add 1 more class, 2nd haunt zone (Mistmoore register), 3 factions total (+ Ghoul Syndicate, Living Resistance) | 10-person persistent server on single VPS, reactive faction simulation, 2-3 named AI companions per class, inverse-population scaling, LLM dialogue for 5-10 key NPCs | 18-30 months cumulative |
 | **Tier 4 — Full Vision** | 3-5 zones, full city, all 6 factions, 6-10 classes | Deep autonomous faction simulation, LLM dialogue throughout, 50-person server capacity, potentially multiple server communities | 36+ months cumulative, open-ended |
 
-**Shipping philosophy:** every tier is shippable on its own. If life intervenes at Tier 2, Gravespire exists as a small co-op gothic RPG. At Tier 3, it's a cult-classic small MMO. At Tier 4, it's the full vision. No tier is a stepping stone that's worthless without the next one.
+**Shipping philosophy:** every tier is shippable on its own. If life intervenes at Tier 2, Gravenspire exists as a small co-op gothic RPG. At Tier 3, it's a cult-classic small MMO. At Tier 4, it's the full vision. No tier is a stepping stone that's worthless without the next one.
 
 ---
 
@@ -351,7 +351,7 @@ Death in Gravespire carries **real consequences** — corpse runs, XP loss, fact
 Recommended order. Skipping ahead compounds risk.
 
 - [ ] **`/setup-engine`** — configure the engine and populate version-aware reference docs. (Deferred from this session; you said "help me decide.")
-- [ ] **`/art-bible`** — establish visual identity *before* writing GDDs. The art bible gates asset production and shapes technical architecture (rendering, VFX, UI). For Gravespire: gothic register, named-NPC portrait pipeline, atmospheric lighting direction.
+- [ ] **`/art-bible`** — establish visual identity *before* writing GDDs. The art bible gates asset production and shapes technical architecture (rendering, VFX, UI). For Gravenspire: gothic register, named-NPC portrait pipeline, atmospheric lighting direction.
 - [ ] **`/design-review design/gdd/game-concept.md`** — validate concept completeness before going downstream.
 - [ ] Discuss vision with the **`creative-director` agent** for pillar refinement (deferred under lean mode; optional before Tier 1).
 - [ ] **`/map-systems`** — decompose the concept into individual systems (combat, faction simulation, reputation, AI companions, LLM dialogue, networking, etc.), map dependencies, prioritize design order.

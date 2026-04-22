@@ -27,13 +27,13 @@ Promote repeating lessons to `CLAUDE-patterns.md` (cross-cutting) or a
 outage occurred because `UPSTASH_REDIS_REST_TOKEN` was missing from the Vercel
 Production env. The governance had no pre-deploy env-vars check — the team
 assumed "configured" meant configured, with no verification step that
-produced evidence. Same class of failure will hit Gravespire when a Steam
+produced evidence. Same class of failure will hit Gravenspire when a Steam
 build goes out with a broken Addressables group, a stale version stamp, or
 (T3+) a missing server config.
 
 **Lesson:** Every deploy/build surface needs a verification checklist that
 produces evidence (file:line, screenshot, console output), **not self-report**.
-"I checked" is not evidence. "Here's the line" is evidence. For Gravespire,
+"I checked" is not evidence. "Here's the line" is evidence. For Gravenspire,
 the checklist is `production/pre-build-checklist.md`.
 
 **Evidence:** `production/pre-build-checklist.md` (created 2026-04-21 as part

@@ -69,7 +69,7 @@ are the T1 surfaces.
 
 **Date:** 2026-04-21
 **Status:** Provisional (revisit at T3 entry gate)
-**Context:** Gravespire concept includes "LLM-driven NPC dialogue" as a pillar.
+**Context:** Gravenspire concept includes "LLM-driven NPC dialogue" as a pillar.
 Full LLM-per-NPC is infeasible at MMO scale (cost + latency + moderation).
 **Decision:** Default NPC dialogue is **templated** (static + slot-filled).
 LLM dialogue is reserved for **5–10 named faction NPCs** and only lights up in
@@ -89,9 +89,9 @@ vendor, fallback when LLM call fails, cache strategy.
 **Status:** Locked
 **Context:** clinic-notes-ai proved the value of a tight governance stack
 (system prompt + `AGENTS.md` + `DECISIONS.md` + `RED_TEAM` + `.claude/rules`
-+ lessons ritual) under HIPAA pressure. Gravespire has a smaller risk surface
++ lessons ritual) under HIPAA pressure. Gravenspire has a smaller risk surface
 but benefits from the same structure, right-sized to game-dev.
-**Decision:** Port the clinic-notes governance shape to Gravespire, adapted
+**Decision:** Port the clinic-notes governance shape to Gravenspire, adapted
 for the game-dev threat model. **Tier-gate rigor:** T1 skips RED_TEAM, T2
 narrows it to netcode, T3+ full. Keep CCGS's 49 agents / 72 skills / 11 rules
 / 12 hooks untouched; the governance files layer **on top of** CCGS, not
@@ -108,7 +108,7 @@ replacing it.
 **Explicitly excluded:**
 - ULTRATHINKING adversarial prompt (clinic-notes aspirational, never run)
 - `pre-tool.sh` hook (clinic-notes stubbed no-op)
-- `.codex/` workflow (Gravespire is Claude Code only)
+- `.codex/` workflow (Gravenspire is Claude Code only)
 - `.github/workflows/ci.yml` (T1 has no CI per AGENTS.md §6; add at T2)
 **Supersedes:** none.
 **See also:** `AGENTS.md` (the new behavioral contract), migration-source

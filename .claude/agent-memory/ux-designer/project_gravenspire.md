@@ -1,10 +1,10 @@
 ---
-name: Gravespire Project Context
-description: Core UX-relevant facts about Gravespire — game pillars, locked art decisions, active UX gaps, and design constraints
+name: Gravenspire Project Context
+description: Core UX-relevant facts about Gravenspire — game pillars, locked art decisions, active UX gaps, and design constraints
 type: project
 ---
 
-Gravespire is a small persistent gothic MMO (10-50 concurrent), Unity 6.3 LTS + URP, stylized 3D. Classic EQ combat (tab-target, spell memorization, med breaks, group dependency). PC only (Windows + Mac), keyboard/mouse primary, gamepad partial. First-time solo dev, multi-year passion project.
+Gravenspire is a small persistent gothic MMO (10-50 concurrent), Unity 6.3 LTS + URP, stylized 3D. Classic EQ combat (tab-target, spell memorization, med breaks, group dependency). PC only (Windows + Mac), keyboard/mouse primary, gamepad partial. First-time solo dev, multi-year passion project.
 
 **Why:** This context shapes every UX decision — the EQ pacing, the anti-tutorial pillars, and the two-layer UI architecture are load-bearing constraints, not preferences.
 

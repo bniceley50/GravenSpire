@@ -8,7 +8,7 @@ Before any task, read these in order — they define behavior, decisions, and st
 2. `AGENTS.md` — Gravenspire behavioral contract (extends the system prompt)
 3. `DECISIONS.md` — locked architecture decisions (D-numbered, append-only)
 4. `production/session-state/active.md` — current work state (may not exist yet)
-5. `design/gdd/game-concept.md` — Gravespire concept / pillars
+5. `design/gdd/game-concept.md` — Gravenspire concept / pillars
 6. `tasks/lessons.md` — accumulated lessons
 
 `.claude/docs/technical-preferences.md` (loaded below via `@import`) is the

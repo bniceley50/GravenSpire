@@ -8,7 +8,7 @@
 > **TO POPULATE:** Paste the full content from `N:\Clinic Notes AI\docs\brian-system-prompt-v4-6.md`
 > into this file, replacing this placeholder entirely.
 >
-> The Gravespire governance files (`AGENTS.md`, `DECISIONS.md`, `RED_TEAM.md`,
+> The Gravenspire governance files (`AGENTS.md`, `DECISIONS.md`, `RED_TEAM.md`,
 > `SECURITY.md`, `tasks/lessons.md`) all assume this file is present and complete.
 > If you open a new session before this is populated, the session-start ritual will
 > be incomplete — agents will still function via CCGS's `CLAUDE.md`, but the
@@ -26,13 +26,13 @@
 > - Secrets and PII Protection (always-on)
 > - Always-On Quality Gates
 > - Toolchain Roles table: Claude.ai chat (planning) / Claude Code (execution) /
->   Codex (autonomous scoped tasks — **not used on Gravespire**, per D005)
+>   Codex (autonomous scoped tasks — **not used on Gravenspire**, per D005)
 >
-> ## Gravespire-specific notes about the universal prompt
+> ## Gravenspire-specific notes about the universal prompt
 >
-> - Gravespire is **Claude Code only**. The `.codex/` workflow from clinic-notes
+> - Gravenspire is **Claude Code only**. The `.codex/` workflow from clinic-notes
 >   is not ported (see `DECISIONS.md` D005).
-> - Build Protocol modes map to Gravespire tiers: Rapid v0 ≈ T1 prototype, Beta ≈
+> - Build Protocol modes map to Gravenspire tiers: Rapid v0 ≈ T1 prototype, Beta ≈
 >   T2 co-op, Production ≈ T3+ persistent server (see `AGENTS.md` §6).
 > - The universal prompt's PII rules apply but at lower stakes than clinic-notes
->   (no HIPAA surface). See `SECURITY.md` for the Gravespire-specific threat table.
+>   (no HIPAA surface). See `SECURITY.md` for the Gravenspire-specific threat table.

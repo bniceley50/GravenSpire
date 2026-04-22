@@ -1,4 +1,4 @@
-# AGENTS.md — Gravespire Behavioral Contract
+# AGENTS.md — Gravenspire Behavioral Contract
 
 **Source of truth for universal workflow rules:** `docs/brian-system-prompt-v4-6.md`.
 This file contains **project-specific extensions only**. If `AGENTS.md` and the
@@ -13,15 +13,28 @@ rules — they inherit them.
 
 ## 0. Canonical Repo Path
 
-The canonical working directory for Gravespire is:
+The canonical working directory for Gravenspire on this machine is:
 
 ```
-/Users/brian/Desktop/Claude-Code-Game-Studios-main
+N:\GravenSpire
 ```
 
-If you ever find yourself operating on a different path (`~/Projects/Gravespire`,
-a worktree, a stale clone): **stop and verify**. The clinic-notes-ai 2026-03-22
-lesson cost a full day chasing a bug in a stale checkout.
+(Windows host. From a POSIX shell like Git Bash, also addressable as
+`/n/GravenSpire`. The camelCase folder name is identifier-form; the
+in-world/prose name is "Gravenspire".)
+
+**Legitimate alternate paths:** parallel agents (e.g. Codex) may operate from
+a dedicated worktree — canonical worktree path for Codex is
+`N:\GravenSpire-codex` (see "Codex onboarding" in `.agents/` if present).
+Other worktrees follow the same pattern: outside the primary checkout, one
+per feature branch.
+
+If you find yourself operating on a path that is NOT the primary checkout or
+a registered worktree (`~/Projects/Gravenspire`, `/Users/brian/Desktop/...`,
+a stale clone anywhere): **stop and verify**. The stale-checkout risk is real
+— the clinic-notes-ai 2026-03-22 lesson (inherited via the governance
+migration, DECISIONS.md D005) cost a full day chasing a bug in a stale
+checkout. That lesson predates Gravenspire but the failure mode is universal.
 
 ---
 
@@ -33,7 +46,7 @@ Read, in order, at session start:
 2. `AGENTS.md` — this file
 3. `DECISIONS.md` — locked architecture decisions (D-numbered)
 4. `production/session-state/active.md` — current work state (may not exist yet)
-5. `design/gdd/game-concept.md` — Gravespire concept / pillars
+5. `design/gdd/game-concept.md` — Gravenspire concept / pillars
 6. `tasks/lessons.md` — accumulated lessons
 
 Then read files relevant to the current task. CCGS's `session-start.sh` hook
@@ -105,7 +118,7 @@ See CCGS's `CLAUDE.md` tone-and-style guidance — this just reinforces it.
 
 ## 6. Tier-Gated Work Policy
 
-Gravespire has four scope tiers. Work is gated by tier. **Do not implement Tier
+Gravenspire has four scope tiers. Work is gated by tier. **Do not implement Tier
 N+1 features during a Tier N sprint** without an explicit tier-transition
 decision appended to `DECISIONS.md`.
 
@@ -186,7 +199,7 @@ This is how lessons actually make it to `tasks/lessons.md`.
 
 ## 11. Secrets and PII (Always On)
 
-Gravespire has a much smaller PII surface than a HIPAA system, but:
+Gravenspire has a much smaller PII surface than a HIPAA system, but:
 
 - **Never commit** Steam API keys, signing certs, server auth tokens
 - **Never log** player email / username / IP at severity `INFO` or above — use
@@ -209,7 +222,7 @@ Before any Steam upload (or for T1, any playtest handoff), validate:
 - (T3+) Server config: required env vars present in the target deployment
 
 **Checklist lives in `production/pre-build-checklist.md`.** This is the
-Gravespire analogue of clinic-notes's missing pre-deploy env-vars check.
+Gravenspire analogue of clinic-notes's missing pre-deploy env-vars check.
 Every item produces evidence (file:line, screenshot, console output), not
 self-report.
 

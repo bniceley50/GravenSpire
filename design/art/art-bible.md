@@ -1,4 +1,4 @@
-# Art Bible: Gravespire
+# Art Bible: Gravenspire
 
 ## Document Status
 
@@ -41,7 +41,7 @@
 
 **Design test:** When a scene feels tonally flat, add darkness and structural shadow before adding any moving element. When a VFX pass is proposed, cut it by half before reviewing.
 
-**Why this protects the pillar:** EQ Classic's pacing worked because the world did not perform for the player. A torch that flickers on a physics simulation, a banner that loops a wind cycle, a mist cloud that pulses — each one whispers "this world is attending to you." Gravespire's world does not attend to the player. Stillness communicates indifference, and indifference is where dread lives.
+**Why this protects the pillar:** EQ Classic's pacing worked because the world did not perform for the player. A torch that flickers on a physics simulation, a banner that loops a wind cycle, a mist cloud that pulses — each one whispers "this world is attending to you." Gravenspire's world does not attend to the player. Stillness communicates indifference, and indifference is where dread lives.
 
 #### Principle 2 — Faction Before Fantasy
 *Serves pillar: **Reputation Is The Progression** (P3)*
@@ -55,11 +55,11 @@
 #### Principle 3 — The Beautiful And The Wrong
 *Serves pillar: **The World Is Not Your Story** (P1)*
 
-**Definition:** Gravespire is beautiful in the way that a sleeping face is beautiful — composed, specific, and carrying a suggestion that something is not right. Nothing should look grotesque; nothing should look unambiguously safe.
+**Definition:** Gravenspire is beautiful in the way that a sleeping face is beautiful — composed, specific, and carrying a suggestion that something is not right. Nothing should look grotesque; nothing should look unambiguously safe.
 
 **Design test:** A character or environment design should produce mild unease on *second* look, not the first. If it reads as threatening immediately, pull back. If it reads as purely decorative, add one element that doesn't settle.
 
-**Why this protects the pillar:** The standard gothic game signals threat through monstrous aesthetics: the villain has a skull motif, the dangerous zone is red and black, the enemy reads hostile from across the room. This is player-service aesthetics — the world decorates itself to warn you. Gravespire's world does not warn you. The Vampire Court is genuinely beautiful. The Pale King's cathedral is genuinely devotional. The wrongness is subtle and requires attention — which is exactly the attention the simulation rewards. Atmosphere-as-warning is the visual equivalent of quest markers.
+**Why this protects the pillar:** The standard gothic game signals threat through monstrous aesthetics: the villain has a skull motif, the dangerous zone is red and black, the enemy reads hostile from across the room. This is player-service aesthetics — the world decorates itself to warn you. Gravenspire's world does not warn you. The Vampire Court is genuinely beautiful. The Pale King's cathedral is genuinely devotional. The wrongness is subtle and requires attention — which is exactly the attention the simulation rewards. Atmosphere-as-warning is the visual equivalent of quest markers.
 
 ### Productive Tensions Between Principles
 
@@ -68,11 +68,11 @@
 
 ### What This Rule FORBIDS (the teeth check)
 
-- **Glowing loot and rarity colors** — the immediate-readability shortcut every RPG uses. In Gravespire, item value is social and contextual, not visual. A ring does not glow gold because it's rare; it looks like it belongs to someone specific.
+- **Glowing loot and rarity colors** — the immediate-readability shortcut every RPG uses. In Gravenspire, item value is social and contextual, not visual. A ring does not glow gold because it's rare; it looks like it belongs to someone specific.
 - **Particle-dense ambient VFX** — floating motes, magical shimmer, drifting soul-light. These are the visual equivalent of ambient music that tells you how to feel. Mist in a haunt behaves like mist, not like a mood system.
 - **High-contrast hero silhouettes for player characters** — the temptation to make player characters read as protagonists (broader shoulders, better-lit than the world, agency-communicating posture). The world is not their story; the art refuses to grant them visual priority.
 - **Clean surfaces on anything old** — stone that looks freshly textured, wood grain that reads as an asset, cloth with no weight. The gothic shortcut is to add a dark color overlay and call it aged. Weight-and-age means texture budget goes into surface *history*, not surface complexity.
-- **Jump-cut lighting between zones** — the Bloodborne instinct: each zone has its own color grade applied like a filter. Gravespire's factions bleed into each other geographically and politically; color language shifts gradually through material and light-source logic, not through a post-process override at a loading seam.
+- **Jump-cut lighting between zones** — the Bloodborne instinct: each zone has its own color grade applied like a filter. Gravenspire's factions bleed into each other geographically and politically; color language shifts gradually through material and light-source logic, not through a post-process override at a loading seam.
 - **Skeletal / bone-motif decoration as generic "undead" signaling** — skulls on the architecture, bones in the trim. This collapses factional distinction — if everything in the undead city uses death-iconography uniformly, the Vampire Court and the Ghoul Syndicate look like the same faction with different hats. Each faction's death-relationship is specific; the visual language must honor that specificity.
 
 ---
@@ -81,7 +81,7 @@
 
 ### Atmospheric Philosophy
 
-Gravespire does not perform atmosphere. Where most gothic games announce their tone through constant environmental theater — drifting mist, pulsing shadows, orchestrated dread — Gravespire's atmosphere is made of **intervals**: the silence between a bell toll and its echo, the stillness of a room that was recently occupied. Every game state shares one underlying quality: things here have been happening for a long time without you, and will continue happening after you leave. The emotional register ranges from contemplative to suspended but never tips into spectacle. The player is always a witness, never the subject.
+Gravenspire does not perform atmosphere. Where most gothic games announce their tone through constant environmental theater — drifting mist, pulsing shadows, orchestrated dread — Gravenspire's atmosphere is made of **intervals**: the silence between a bell toll and its echo, the stillness of a room that was recently occupied. Every game state shares one underlying quality: things here have been happening for a long time without you, and will continue happening after you leave. The emotional register ranges from contemplative to suspended but never tips into spectacle. The player is always a witness, never the subject.
 
 ### The Nine Game States
 
@@ -111,7 +111,7 @@ Gravespire does not perform atmosphere. Where most gothic games announce their t
 
 - **Primary emotion:** The focused narrowing of attention in the first seconds of a confrontation you cannot leave — not panic, but the particular clarity of knowing your decisions now will determine whether you get to rest again.
 - **Lighting character:** The ambient environment does not change. No combat-state post-process, no desaturation, no red vignette. What changes is focal: spell VFX introduce brief localized light events at 3200-4500K (cool fire, not warm), very short duration (<0.4 seconds at full intensity, rapid falloff). Enemy targets may carry weak practical light sources that become visually relevant once the pull is active. No global lighting state change.
-- **Palette skew:** The environment's existing gray-brown. Spell effects skew desaturated-cool (ice, shadow, bone-white). The only warm color in combat is biological (blood, wound) — handled per biological accuracy, not stylization. Magic in Gravespire costs something; it should not look like a celebration.
+- **Palette skew:** The environment's existing gray-brown. Spell effects skew desaturated-cool (ice, shadow, bone-white). The only warm color in combat is biological (blood, wound) — handled per biological accuracy, not stylization. Magic in Gravenspire costs something; it should not look like a celebration.
 - **Atmospheric descriptors:** Compressed, consequential, fractionally brighter at specific points, staccato, load-bearing.
 - **Energy level:** Kinetic, but slow kinetic — this is EQ tab-target. The player's attention is on the hate list and the spell queue, not spectacle. Kinetic here means stakes are live, not that the camera shakes.
 - **The ONE visual element that carries this mood:** **The pivot** — the moment an enemy mesh rotates from facing-away (set dressing) to facing-toward (encounter). No particle effect signals this. The mesh rotation is the signal.
@@ -177,7 +177,7 @@ Gravespire does not perform atmosphere. Where most gothic games announce their t
 - **Distinguished from neighbors:** Combat is what this becomes once the pull initiates — the named-appearance moment is pre-pull and communicates significance without combat cues. Haunt Interior is the ambient context; the named appearance is the interruption of that ambient by something specific.
 - **Pillar alignment:** P1 (The World Is Not Your Story) — the world does not celebrate the appearance of a notable entity for the player's benefit. The world responds the way the world would respond.
 
-> **Production note (flagged by art-director — preserve this argument):** This state will be contested in production by stakeholders who want a bigger dopamine signal for rare spawns. The pillar-alignment argument is deliberately baked in here as a gate: the entire premise of Gravespire is that the world does not perform for the player. Adding glow, sting, or VFX to the rare-spawn moment would violate P1 at the most visible point. If future production pressure pushes against this, the approved tension-break is to add **weight** (even higher surface resolution, denser shadow response), never emission or celebration.
+> **Production note (flagged by art-director — preserve this argument):** This state will be contested in production by stakeholders who want a bigger dopamine signal for rare spawns. The pillar-alignment argument is deliberately baked in here as a gate: the entire premise of Gravenspire is that the world does not perform for the player. Adding glow, sting, or VFX to the rare-spawn moment would violate P1 at the most visible point. If future production pressure pushes against this, the approved tension-break is to add **weight** (even higher surface resolution, denser shadow response), never emission or celebration.
 
 #### State 9 — Faction Board / Political Inflection
 
@@ -185,16 +185,16 @@ Gravespire does not perform atmosphere. Where most gothic games announce their t
 - **Lighting character:** This is a UI state, but it lives in the world. The faction board physical object becomes the focal point: a localized narrow spot from an overhead practical source (400-600K warmer than ambient, very tight radius, 30-40° cone) illuminates the board without illuminating the space around it. A **reading-light**, not a dramatic beam. The player's environment does not change; the board's legibility increases slightly. Should read as "someone turned up the lamp over the notice board," not "the UI is activating."
 - **Palette skew:** The board's content carries the palette shift. When a major political event fires — border change, assassination, war declaration — the new notice is on different paper than the old ones. Not white, not red: the specific color of the dominant faction's communications. Vampire Court dispatches are written on gray-blue vellum with a specific seal. Ghoul Syndicate notices are on rough parchment the color of old wax. The chromatic shift is diegetic: different organizations use different materials.
 - **Atmospheric descriptors:** Document-weighted, specific, consequence-adjacent, irreversible-feeling, socially legible.
-- **Energy level:** Measured, with an undertow. The visual register is quiet; the stakes are the highest in the game (server-wide political events are Gravespire's macro-progression). The restraint of the visual treatment is proportional to the permanence of what's being communicated.
+- **Energy level:** Measured, with an undertow. The visual register is quiet; the stakes are the highest in the game (server-wide political events are Gravenspire's macro-progression). The restraint of the visual treatment is proportional to the permanence of what's being communicated.
 - **The ONE visual element that carries this mood:** **The new notice on faction-specific material, slightly less worn than the layers beneath it** — fresh but not crisp, as if posted this morning rather than new from the press. The handwriting or seal is faction-specific. The information is the environment; the environment is only its container.
 - **Distinguished from neighbors:** City Hub Day is the ambient context; the political inflection is when that context acquires a specific, irreversible event. City Hub Night shares the board but the lamp-over-board effect reads differently against the candlelit dark — it becomes even more focused because the surround is lower.
 - **Pillar alignment:** P3 (Reputation Is The Progression) — the faction board is the game's macro-progression system made visible. Its visual treatment must communicate consequence and permanence without celebration.
 
 ### Cohesion DNA — what runs through every state
 
-The single visual DNA of Gravespire is this: **light is always practical, localized, and earned**. It comes from objects that exist in the world for reasons the world has, not for reasons the player has. A campfire gives light because fire gives light. A chandelier is unlit in two-thirds of its arms because no one has tended it recently. A spotlight does not exist because a designer decided this moment needs emphasis. Every transition between states is a change in **which practical sources are present and how they behave**, not a change in the world's fundamental relationship to light. The player moves through a world that has been lit this way for centuries; they do not carry their own light with them, and the world does not adjust its light for their arrival.
+The single visual DNA of Gravenspire is this: **light is always practical, localized, and earned**. It comes from objects that exist in the world for reasons the world has, not for reasons the player has. A campfire gives light because fire gives light. A chandelier is unlit in two-thirds of its arms because no one has tended it recently. A spotlight does not exist because a designer decided this moment needs emphasis. Every transition between states is a change in **which practical sources are present and how they behave**, not a change in the world's fundamental relationship to light. The player moves through a world that has been lit this way for centuries; they do not carry their own light with them, and the world does not adjust its light for their arrival.
 
-Cohesion in Gravespire is not a visual style — it is a physical logic applied without exception.
+Cohesion in Gravenspire is not a visual style — it is a physical logic applied without exception.
 
 ---
 
@@ -202,11 +202,11 @@ Cohesion in Gravespire is not a visual style — it is a physical logic applied 
 
 ### Shape Philosophy (overall)
 
-Gravespire's shapes are the shapes of things that have been under pressure for a long time. Not broken — settled. The architectural vocabulary is load-bearing verticality compressed by centuries into horizontal spread: arches that have flattened, towers that have thickened at the base, doorframes that have shifted into slight trapezoids. Character silhouettes communicate social position through the cumulative weight of what they carry — layers of garment, tools of role, the posture of someone who has been doing this specific thing for a very long time. Nothing is designed to be legible at a glance to a stranger; everything is designed to be legible to someone who has learned to read it. Shape in Gravespire is a literacy, not a signal.
+Gravenspire's shapes are the shapes of things that have been under pressure for a long time. Not broken — settled. The architectural vocabulary is load-bearing verticality compressed by centuries into horizontal spread: arches that have flattened, towers that have thickened at the base, doorframes that have shifted into slight trapezoids. Character silhouettes communicate social position through the cumulative weight of what they carry — layers of garment, tools of role, the posture of someone who has been doing this specific thing for a very long time. Nothing is designed to be legible at a glance to a stranger; everything is designed to be legible to someone who has learned to read it. Shape in Gravenspire is a literacy, not a signal.
 
 ### 3.1 — Character Silhouettes
 
-**Philosophy.** A character in Gravespire reads as a social position before it reads as a power level, and as a faction role before it reads as a named individual. Silhouette is the earliest information a player receives at distance. The vocabulary is built around occupation and accumulated material, not heroic anatomy.
+**Philosophy.** A character in Gravenspire reads as a social position before it reads as a power level, and as a faction role before it reads as a named individual. Silhouette is the earliest information a player receives at distance. The vocabulary is built around occupation and accumulated material, not heroic anatomy.
 
 **Readability target (hard constraint).** Faction role must be identifiable at **20-30m in-world distance (~80-120px at 1080p)** on the default third-person camera, under overcast ambient conditions with no compensating hero lighting. Named individuals require proximity (<10m / <50px) and cannot rely on silhouette alone — they require material and face. **If a silhouette is not faction-role-legible at 80px without lighting aids, the design has failed.** Test every character design at this pixel height before approving.
 
@@ -253,7 +253,7 @@ The player character's silhouette obeys the same rules as NPC silhouettes. The e
 | Alley | 1.8-2.5m (two people can pass but not comfortably) |
 | Building heights | 3-6 stories, averaging 4 |
 
-Sky visible at the end of a street, rarely from the middle. The geometry communicates the world predates the player by doing the opposite of modern game environments: instead of vast scale to make the player feel small, Gravespire uses **dense, accumulated, indifferent geometry** to make the player feel recent.
+Sky visible at the end of a street, rarely from the middle. The geometry communicates the world predates the player by doing the opposite of modern game environments: instead of vast scale to make the player feel small, Gravenspire uses **dense, accumulated, indifferent geometry** to make the player feel recent.
 
 **Wear and settling specifications:**
 
@@ -313,7 +313,7 @@ The rule: **time-critical = abstract; not-time-critical = diegetic.** No third c
 
 ### 3.4 — Hero Shapes vs. Supporting Shapes
 
-**What draws the eye:** **the specific** (a candle that is the only warm source in a cool-lit room) and **the still** (a figure completely still among figures with low-amplitude idle motion). Neither uses brightness, scale, saturation, or motion emphasis. The visual hierarchy of a Gravespire scene operates through the inverse of most game design — what is most **resolved and most specific** receives attention, not what is most prominent.
+**What draws the eye:** **the specific** (a candle that is the only warm source in a cool-lit room) and **the still** (a figure completely still among figures with low-amplitude idle motion). Neither uses brightness, scale, saturation, or motion emphasis. The visual hierarchy of a Gravenspire scene operates through the inverse of most game design — what is most **resolved and most specific** receives attention, not what is most prominent.
 
 **What recedes:** set-dressing entities (ambient NPCs, background figures, environmental inhabitants) are visually quiet through:
 - Lower material resolution (fewer specific surface details)
@@ -361,15 +361,15 @@ The rule: **time-critical = abstract; not-time-critical = diegetic.** No third c
 
 ### Color Philosophy
 
-Color in Gravespire is not applied. It is what remains after 400 years of weather, soot, human contact, and factional occupation have worked on specific materials. Every color decision must have a material cause rooted in the world's physical history. "The city uses this palette" is not a justification. "This stone weathers to this temperature in this climate after this many decades of foot traffic and candle smoke" is.
+Color in Gravenspire is not applied. It is what remains after 400 years of weather, soot, human contact, and factional occupation have worked on specific materials. Every color decision must have a material cause rooted in the world's physical history. "The city uses this palette" is not a justification. "This stone weathers to this temperature in this climate after this many decades of foot traffic and candle smoke" is.
 
 The Pre-Raphaelite reference establishes the operative standard. Rossetti and Millais do not paint beauty through saturation — they paint surfaces that are specifically themselves. Every color is load-bearing. No color exists as filler. **A small palette applied with specificity produces more visual richness than a large palette applied democratically.**
 
-RPG convention uses color semiotically (red = danger, gold = reward, purple = rare). Gravespire's vocabulary is the opposite: colors mean what the materials they live on mean, within the world's history. Gold in Gravespire is not "valuable" — it is the specific color of tallow candle wax after extended burning, or aged brass, or the ochre-brown of old leather. The player learns to read it not because a legend explained it, but because they have spent time in the city.
+RPG convention uses color semiotically (red = danger, gold = reward, purple = rare). Gravenspire's vocabulary is the opposite: colors mean what the materials they live on mean, within the world's history. Gold in Gravenspire is not "valuable" — it is the specific color of tallow candle wax after extended burning, or aged brass, or the ochre-brown of old leather. The player learns to read it not because a legend explained it, but because they have spent time in the city.
 
 ### 4.1 — The Master Palette
 
-Colors of Gravespire as a city, independent of the factions that occupy it. These are the base against which all faction color reads.
+Colors of Gravenspire as a city, independent of the factions that occupy it. These are the base against which all faction color reads.
 
 | Name | Hex | Temperature/Saturation | Primary Role | Forbidden Uses |
 |---|---|---|---|---|
@@ -466,15 +466,15 @@ All six factions share the city. Their distinguishing colors are not imposed —
 
 Color carries meaning only when it carries material. These rules replace RPG convention with world-grounded reading.
 
-**Red.** In Gravespire, red means **biological** — blood, wound, fresh animal tissue — and appears in the world only as such, never as stylized danger signaling. Bloodstains on cold limestone dry to a dark red-brown closer to Rust Iron than to signaling red. Fresh blood in combat reads at biological saturation. Magic is not red. Danger indicators are not red. When a player encounters red in the world, their nervous system responds to its biological specificity, not to a trained game-convention reflex.
+**Red.** In Gravenspire, red means **biological** — blood, wound, fresh animal tissue — and appears in the world only as such, never as stylized danger signaling. Bloodstains on cold limestone dry to a dark red-brown closer to Rust Iron than to signaling red. Fresh blood in combat reads at biological saturation. Magic is not red. Danger indicators are not red. When a player encounters red in the world, their nervous system responds to its biological specificity, not to a trained game-convention reflex.
 
-**Gold/yellow.** In Gravespire, gold means **age and practice** — tallow wax, worked leather, brass that have been handled for a long time by someone with a specific occupation. The forbidden-glowing-loot rule removes gold's RPG function. A truly gold-colored object reads as an aged formal object of specific origin (Court or Academy provenance), communicating institutional age, not monetary value.
+**Gold/yellow.** In Gravenspire, gold means **age and practice** — tallow wax, worked leather, brass that have been handled for a long time by someone with a specific occupation. The forbidden-glowing-loot rule removes gold's RPG function. A truly gold-colored object reads as an aged formal object of specific origin (Court or Academy provenance), communicating institutional age, not monetary value.
 
-**Blue/green.** In Gravespire, blue means **cold-source light** (exterior sky, overcast ambient, uninhabited temperature of a space not warmed by recent occupation), and green means **biological surface time** (lichen, moss, verdigris — surfaces undisturbed long enough for organisms to colonize). Green means time has passed without human intervention at this location — a navigational read as much as atmospheric.
+**Blue/green.** In Gravenspire, blue means **cold-source light** (exterior sky, overcast ambient, uninhabited temperature of a space not warmed by recent occupation), and green means **biological surface time** (lichen, moss, verdigris — surfaces undisturbed long enough for organisms to colonize). Green means time has passed without human intervention at this location — a navigational read as much as atmospheric.
 
-**White.** In Gravespire, white means **very old and specifically exposed** — stone predating the city's centuries of occupation, not yet absorbed enough soot to gray down. Anything reading as clean white is a flag: either narratively justified as newly constructed (within 5 in-world years), or the texture asset needs an age-plausibility revision pass. **White is not in the Gravespire visual vocabulary as a positive value.**
+**White.** In Gravenspire, white means **very old and specifically exposed** — stone predating the city's centuries of occupation, not yet absorbed enough soot to gray down. Anything reading as clean white is a flag: either narratively justified as newly constructed (within 5 in-world years), or the texture asset needs an age-plausibility revision pass. **White is not in the Gravenspire visual vocabulary as a positive value.**
 
-**Black.** In Gravespire, black means **sustained formal attention** — surfaces maintained and polished by an organization that has the resources and cultural mandate to prevent wear from showing, i.e., the Vampire Court's specific form of power. What looks black in the world is always Iron Seam or deeper. The one faction that approaches true black (Court polished marble) makes it work by polishing, not by surface neutrality — the surface reflects, containing ambient light around it.
+**Black.** In Gravenspire, black means **sustained formal attention** — surfaces maintained and polished by an organization that has the resources and cultural mandate to prevent wear from showing, i.e., the Vampire Court's specific form of power. What looks black in the world is always Iron Seam or deeper. The one faction that approaches true black (Court polished marble) makes it work by polishing, not by surface neutrality — the surface reflects, containing ambient light around it.
 
 ### 4.4 — UI Palette (Layer 1 HUD)
 
@@ -542,7 +542,7 @@ All bars read as architectural materials under the compressed-arch framing from 
 
 ### 4.7 — Productive Tensions
 
-1. **Faction warmth inversion vs. emotional intuition.** Ghoul Syndicate occupies the warmest interior in the city; Vampire Court (most associated with formal power) occupies the coldest. Materially accurate but inverts the intuition that power spaces feel warm. **Load-bearing:** teaches the player that warmth in Gravespire is functional, not hierarchical — the correct lesson for a world where undead power-hierarchy does not map to human comfort logic.
+1. **Faction warmth inversion vs. emotional intuition.** Ghoul Syndicate occupies the warmest interior in the city; Vampire Court (most associated with formal power) occupies the coldest. Materially accurate but inverts the intuition that power spaces feel warm. **Load-bearing:** teaches the player that warmth in Gravenspire is functional, not hierarchical — the correct lesson for a world where undead power-hierarchy does not map to human comfort logic.
 
 2. **Corpse-run exemption vs. HUD-as-world.** Exempting the HUD from desat is technically correct and argument-supported, but means the HUD is the ONLY element retaining full saturation during the desaturated death state — inverse of the design intention (HUD invisible in normal play). May actually be appropriate: player is in high-stress navigational task (recover corpse); slightly increased HUD legibility is contextually correct even if aesthetically not ideal. **Monitor in playtest.**
 
@@ -569,7 +569,7 @@ All bars read as architectural materials under the compressed-arch framing from 
 
 ### Character Philosophy
 
-Every player character in Gravespire is a newcomer to an ancient social order, and the art must enforce that legibility gap. A character who has just arrived reads as someone who has just arrived — garments ungiven by faction, materials unweather-stained by specific occupation, posture not yet settled. A character who has spent sixty hours accumulating Vampire Court reputation reads as someone who has been admitted somewhere, slowly, across many transactions — not promoted, but **admitted**. The visual grammar of character progression is the grammar of social absorption: faction materials accumulating on the body, garment wear patterns corresponding to where you have been standing and for how long, the specific postural compression of someone who has learned the correct ways to hold themselves in certain rooms. The weight-and-age rule does not grant players a grace period. From character creation forward, every visual decision on the player character earns its place through weight and age, not through the desire to read as a protagonist.
+Every player character in Gravenspire is a newcomer to an ancient social order, and the art must enforce that legibility gap. A character who has just arrived reads as someone who has just arrived — garments ungiven by faction, materials unweather-stained by specific occupation, posture not yet settled. A character who has spent sixty hours accumulating Vampire Court reputation reads as someone who has been admitted somewhere, slowly, across many transactions — not promoted, but **admitted**. The visual grammar of character progression is the grammar of social absorption: faction materials accumulating on the body, garment wear patterns corresponding to where you have been standing and for how long, the specific postural compression of someone who has learned the correct ways to hold themselves in certain rooms. The weight-and-age rule does not grant players a grace period. From character creation forward, every visual decision on the player character earns its place through weight and age, not through the desire to read as a protagonist.
 
 ### 5.1 — Player Character Visual Archetype
 
@@ -643,7 +643,7 @@ The player who cannot tell a player from an NPC is getting the new-player experi
 
 #### Enemy Creature vs. Civilian Person — Garments Are Civilization
 
-In Gravespire, a Ghoul Syndicate member is an undead *person* operating within a social structure. A feral ghoul in a haunt is an undead *creature* with no faction affiliation. The distinction is among the most important in the game's design.
+In Gravenspire, a Ghoul Syndicate member is an undead *person* operating within a social structure. A feral ghoul in a haunt is an undead *creature* with no faction affiliation. The distinction is among the most important in the game's design.
 
 **Primary cue — behavioral:**
 - Civilian/person NPCs occupy space with social purposefulness. Occupational postures at occupational positions. Social response to proximity (turning to face, not pivoting to combat orientation). Idle-loop behavior appropriate to role.
@@ -790,7 +790,7 @@ Transitions: 0.3-0.5s cross-blend. No snapping.
 
 ### Environment Philosophy
 
-The city of Gravespire is not a set. It is the physical residue of 400 years of occupation, contestation, rebuilding, and managed decline by entities who do not die and therefore do not hurry. Every surface carries legible physical history; every room has been used in ways that slightly precede its current use. The environment does not perform atmosphere — it accumulates evidence.
+The city of Gravenspire is not a set. It is the physical residue of 400 years of occupation, contestation, rebuilding, and managed decline by entities who do not die and therefore do not hurry. Every surface carries legible physical history; every room has been used in ways that slightly precede its current use. The environment does not perform atmosphere — it accumulates evidence.
 
 This means two things operationally. First, environment art earns its place through *causal specificity* (every crack, stain, and modification has a material cause in the world's history), not through aesthetic density. Second, the artist's hardest discipline is restraint — stopping before the scene tips from *inhabited* into *staged*. A tavern with nineteen props reads as a movie set. A tavern with eleven props, each one placed where an actual person would actually put it, reads as someone's livelihood.
 
@@ -798,7 +798,7 @@ This means two things operationally. First, environment art earns its place thro
 
 #### How a First-Time Visitor Reads the City's Age
 
-Gravespire's age is not communicated through ruin or decay — both are theatrical shortcuts. The city is not ruined. It is *continuously inhabited* by an extremely old population that has been maintaining it to their own standards across multiple political regimes. Age reads through **geological-scale** persistence: street widths encoding pre-city property boundaries that no living authority remembers establishing. Second-floor overhangs extending progressively further out over a main street until they nearly touch the buildings opposite, because each was built by a different owner to capture slightly more interior space and no one ever said no. A pointed-arch doorway infilled with a round-arch insert because the original surround cracked and the repair was done two centuries later by someone with different formal training.
+Gravenspire's age is not communicated through ruin or decay — both are theatrical shortcuts. The city is not ruined. It is *continuously inhabited* by an extremely old population that has been maintaining it to their own standards across multiple political regimes. Age reads through **geological-scale** persistence: street widths encoding pre-city property boundaries that no living authority remembers establishing. Second-floor overhangs extending progressively further out over a main street until they nearly touch the buildings opposite, because each was built by a different owner to capture slightly more interior space and no one ever said no. A pointed-arch doorway infilled with a round-arch insert because the original surround cracked and the repair was done two centuries later by someone with different formal training.
 
 Visitors read age through **strata** — visible geological layering of architectural decision-making. The bottom register of any building tends to be the oldest and most massive (pre-gothic crude stonework, Romanesque round arches, load-bearing walls almost a meter thick). As the building rises, each floor may show a different architectural period of modification.
 
@@ -828,7 +828,7 @@ A **Haunt Collective** building is a palimpsest — Court molding over Syndicate
 
 #### The Five Architectural Tells of an Un-Living City
 
-Specific signals communicating Gravespire's nature — not "undead" generically, but *this city with this history*:
+Specific signals communicating Gravenspire's nature — not "undead" generically, but *this city with this history*:
 
 1. **Ergonomic calibration for undead physiology.** Court stair risers 2-3cm taller than a living city; doorframes 2.1-2.3m clear height (formal presentation requires heads-up clearance). Syndicate undercroft passages 1.8m — efficient working access, ghouls don't need headroom. A player begins to read spatial calibration as faction vocabulary.
 
@@ -872,7 +872,7 @@ Specific signals communicating Gravespire's nature — not "undead" generically,
 #### Section 6.1 — Forbidden Shortcuts
 
 - Applying a single "old and damaged" mesh pass to all buildings without stratum differentiation
-- "Gothic" as a uniform architectural style — Gravespire is specific to its history; gothic coexists with Romanesque, crude pre-city, and functional Resistance
+- "Gothic" as a uniform architectural style — Gravenspire is specific to its history; gothic coexists with Romanesque, crude pre-city, and functional Resistance
 - Fresh or uniform mortar on any pre-Stratum 5 construction
 - Faction insignia carved or applied to architecture as primary faction-identification — faction reads through material, geometry, and maintenance pattern, not logos
 
@@ -884,7 +884,7 @@ Not painterly-cartoon, not photorealistic PBR. **Grounded PBR with hand-authored
 
 Standard PBR captures material properties with physical accuracy but its failure mode is *ahistorical precision* — a fresh PBR surface looks like the day it was created. Pure handpainted (Borderlands / Wind Waker) achieves aesthetic identity but sacrifices the material specificity weight-and-age demands.
 
-**The Gravespire hybrid:** PBR physically-based properties (roughness, normal, metallic) authored for material accuracy, then **hand-authored age and history layered on top** in diffuse/albedo and roughness channels. Physically convincing material + artistically controlled history. Aligns with Pre-Raphaelite reference: not photorealistic, not illustrative, but *specifically itself*.
+**The Gravenspire hybrid:** PBR physically-based properties (roughness, normal, metallic) authored for material accuracy, then **hand-authored age and history layered on top** in diffuse/albedo and roughness channels. Physically convincing material + artistically controlled history. Aligns with Pre-Raphaelite reference: not photorealistic, not illustrative, but *specifically itself*.
 
 **Every albedo texture must pass the "cause test":** every patch of discoloration, every worn edge, every mineral staining deposit must have an identifiable physical cause. **"Variation texture" added to break visual monotony is forbidden.** The texture carries history, not randomness.
 
@@ -1017,18 +1017,18 @@ The haunt density principle: haunts are spaces with *specific use history*, not 
 - **"Scatter"** — randomly distributed props used to break visual monotony. Every prop placement is a decision, not a brush stroke.
 - **Skulls, bones, or death-iconography** as generic atmospheric props. Communicates "this is an undead space" without communicating *which* undead faction.
 - **Evenly distributed candles** on every horizontal surface. Candles are present where function requires light.
-- **Generic "medieval atmosphere" props** (wine jugs, stacked barrels, scattered parchment) in scenes without specific use-narrative. Every prop must belong to specific Gravespire faction's material vocabulary.
+- **Generic "medieval atmosphere" props** (wine jugs, stacked barrels, scattered parchment) in scenes without specific use-narrative. Every prop must belong to specific Gravenspire faction's material vocabulary.
 
 ### 6.4 — Environmental Storytelling
 
 #### What Tells the Story
 
-Gravespire's vocabulary is the vocabulary of **physical consequence.** Not narrative illustration — consequence.
+Gravenspire's vocabulary is the vocabulary of **physical consequence.** Not narrative illustration — consequence.
 
 - **Narrative illustration** shows you a story (the bloodstain tells you a fight happened here).
 - **Physical consequence** is the residue of systems operating (the drainage pattern on this floor tells you this room has been regularly hosed down — which tells you something about what regularly needs cleaning in this room).
 
-**The player who reads Gravespire's environment is doing forensics, not narrative consumption.** The environment offers residue of systems and events; the player assembles history from evidence. This is the game's deepest literacy — the visual equivalent of its political simulation.
+**The player who reads Gravenspire's environment is doing forensics, not narrative consumption.** The environment offers residue of systems and events; the player assembles history from evidence. This is the game's deepest literacy — the visual equivalent of its political simulation.
 
 **Specific details that tell the story:**
 
@@ -1041,10 +1041,10 @@ Gravespire's vocabulary is the vocabulary of **physical consequence.** Not narra
 
 #### What Must NOT Be Added
 
-The gothic-game shortcuts Gravespire categorically excludes:
+The gothic-game shortcuts Gravenspire categorically excludes:
 
 - **Readable text in the environment as environmental storytelling.** No journal pages, no inscribed notes on walls, no carved dedications as player information. Writing exists because that kind of document would exist in the space; not to tell the player a story.
-- **Skeleton-pose tableaux** — arranging bones in suggestive poses to imply a last moment. Dead remains in Gravespire look like dead remains: collapsed, settled, distributed by physics and scavenging, not arranged for narrative.
+- **Skeleton-pose tableaux** — arranging bones in suggestive poses to imply a last moment. Dead remains in Gravenspire look like dead remains: collapsed, settled, distributed by physics and scavenging, not arranged for narrative.
 - **Object arrangements designed to tell a single legible story** — three objects arranged to imply "a family gathered here" or "a last meal was eaten here" is theater. Objects present for their own reasons; player assembles what they imply.
 - **Narrative arrows** — prop placement functioning as spatial guide ("look at this, this is important"). Faction boards and notices are exempt (their diegetic function IS directing attention). Everything else must never be placed to guide player attention.
 - **Contrast-emphasis props** — a single candle in an otherwise dark room placed to light a specific point of interest. Light comes from where light sources exist in the world, not where the art department wants the player to look.
@@ -1052,7 +1052,7 @@ The gothic-game shortcuts Gravespire categorically excludes:
 
 #### How Players Learn Environmental Literacy
 
-Gravespire does not explain its environmental literacy. It trusts repeated exposure to environments where physical consequence is consistent builds pattern recognition without instruction.
+Gravenspire does not explain its environmental literacy. It trusts repeated exposure to environments where physical consequence is consistent builds pattern recognition without instruction.
 
 - **Through repetition of consistent rules** — every Syndicate undercroft has use-pattern wear at the same functional positions because Syndicate function is consistent. A third Syndicate visit, the player knows where to look.
 - **Through the delayed payoff of attention** — the detail that doesn't matter on first visit matters on second because context changed. The Court's temporary shore-post means nothing the first time. After the player learns the Court maintains its spaces at significant resource cost, the shore-post becomes readable as an anomaly — which IS story.
@@ -1074,7 +1074,7 @@ Gravespire does not explain its environmental literacy. It trusts repeated expos
 
 1. **The shrine to a past player's death** — other players' deaths commemorated with items and a note. *Violates P1: the world does not memorialize player events.*
 2. **The dungeon journal** — readable document in a haunt explaining history or purpose. *Violates P1: the world does not provide its own annotations. The haunt's history is forensically readable from its surfaces.*
-3. **The curated last-moment tableau** — skeletons arranged around a campfire suggesting "a last camp." *Violates P3: faction-agnostic tableau is generic gothic world, not Gravespire.*
+3. **The curated last-moment tableau** — skeletons arranged around a campfire suggesting "a last camp." *Violates P3: faction-agnostic tableau is generic gothic world, not Gravenspire.*
 4. **The color-coded corpse** — a body whose clothing communicates story through unusual color emphasis. *Violates P2: staging performs significance rather than letting the player find it.*
 5. **The blood-trail to a revelation** — leading the player along a path to a discovery. *Violates P1: this is navigation, not storytelling — directing attention through a world that should be indifferent.*
 6. **The single-significant-object on a pedestal** — communicating "this is important" through isolation, lighting, elevated/centered placement. *Violates weight-and-age: significance is earned through material history, not staging.*
@@ -1105,7 +1105,7 @@ Gravespire does not explain its environmental literacy. It trusts repeated expos
 - **Uniform prop distribution.** All prop density is function-clustered, not aesthetically even.
 - **Signage functioning as player navigation.** The world does not waypoint itself. Players navigate by spatial literacy, faction-zone legibility, and NPC behavior.
 - **Any environment dressing pass without a storytelling brief.** Brief is not optional and is not written after dressing.
-- **The word "creepy" as an art direction note.** Gravespire is beautiful and wrong. "Creepy" directs toward theatrical dread. Correct direction is always specific and material.
+- **The word "creepy" as an art direction note.** Gravenspire is beautiful and wrong. "Creepy" directs toward theatrical dread. Correct direction is always specific and material.
 
 ---
 
@@ -1120,7 +1120,7 @@ Gravespire does not explain its environmental literacy. It trusts repeated expos
 **Concrete specification:**
 
 - **Panels:** 1px border in Iron Seam `#3D3A38` at 100% opacity. Fill Iron Seam at 45% opacity. Contrast border-to-fill ~1.1:1 — barely perceivable as two elements. No drop shadow, gradient, rounded corners, or beveling.
-- **Panel frames** use the compressed pointed-arch terminus (Section 3.3) at the right end of horizontal bars only. The left end is a clean vertical cut. The arch terminus references Gravespire's Romanesque-over-gothic layering — structural, not decorative.
+- **Panel frames** use the compressed pointed-arch terminus (Section 3.3) at the right end of horizontal bars only. The left end is a clean vertical cut. The arch terminus references Gravenspire's Romanesque-over-gothic layering — structural, not decorative.
 - **Icon frames:** square with 45° chamfer all corners, matching floor-tile rotational symmetry. Line weight 1px Iron Seam. No fill.
 - **Bars:** 3px height, no glow, no gradient. Health (Render Umber), mana (Pewter Rain), hate (Academic blue-black at 50% opacity, peaking to Rust Iron at max). Bar tracks at Iron Seam 30% opacity — more transparent than the enclosing panel so the bar reads as inside the panel.
 - **Spacing rule:** all Layer 1 elements live at screen periphery, minimum 48px from nearest edge at 1080p. Nothing in the center of the screen; nothing near vertical center. Default placement: health/mana lower-left; hate/threat lower-right; spell queue centered-bottom above lower margin.
@@ -1199,7 +1199,7 @@ Every player character carries a small leather-bound journal — a physical obje
 - **She does NOT explain** — no dialogue balloons with tutorial text, no "press X to sit and med." She just sits and meds, and the player observes what happens.
 - **After 3-5 sessions,** Sister Elara begins to spend time away from the player — she has her own faction obligations in the world. The player is now expected to navigate alone or with other companions. The training wheels come off without ceremony.
 
-**Why this works:** the pillars prohibit explicit tutorials but permit observation-and-imitation learning. A named AI companion with authentic Gravespire identity teaches by doing — which is how a new resident would actually learn from a mentor in this world. The mechanism is 100% diegetic.
+**Why this works:** the pillars prohibit explicit tutorials but permit observation-and-imitation learning. A named AI companion with authentic Gravenspire identity teaches by doing — which is how a new resident would actually learn from a mentor in this world. The mechanism is 100% diegetic.
 
 **Production note:** Sister Elara (or the equivalent named companion) must be implemented as a named-NPC-tier AI (Section 5.2 material resolution) with expanded behavioral logic for the mentoring context. She is the single most important AI companion in the game's onboarding. Her implementation is a Tier 1 MVP load-bearing feature, not Tier 2.
 
@@ -1305,7 +1305,7 @@ Executable spec per faction — paper stock, handwriting, seal, mounting. An art
 
 **Health bar change:**
 - **On damage:** snap to new value on same frame as damage event. No damage-flash, no shake, no elastic overshoot. The bar is shorter. That is all.
-- **Why snap, not tween:** a tweening bar implies damage still in transit — the animation performs the hit. Gravespire's damage is done; the bar reports the result.
+- **Why snap, not tween:** a tweening bar implies damage still in transit — the animation performs the hit. Gravenspire's damage is done; the bar reports the result.
 - **On death approach (<20% health, Bone Pale transition):** in active combat only — a very low-amplitude pulse animation, opacity oscillates between 75% and 80% at **0.7Hz**. Almost-imperceptible — felt as much as seen, below threshold of conscious noticing but above threshold of invisibility. The one animation explicitly permitted to reference biological urgency without performing alarm. Outside combat: static Bone Pale, no animation.
 - **Corpse-run state:** bar at zero, static. HUD exempt from world-desat pass (Section 4.4) — bar retains Render Umber hue against desaturated world. The static HUD against gray-witnessed world is itself a visual statement.
 
@@ -1495,7 +1495,7 @@ Single authoritative source. Supersedes any inconsistency in earlier sections.
 | **Props — Major** | 512² | 256² | 256² | 128² | Individual UV |
 | **Props — Minor (atlas-packed)** | 256² | 128² | 128² | — | Atlas-packed in sets of 8-16 |
 | **Sky / Exterior dome** | 1024×512 panoramic | — | — | — | EXR 32-bit float |
-| **VFX — Particle sprite sheet** | **256² maximum** | — | — | — | Gravespire VFX is minimal by design (S1, S4). 256² cap enforces Stillness Is The Signal materially. |
+| **VFX — Particle sprite sheet** | **256² maximum** | — | — | — | Gravenspire VFX is minimal by design (S1, S4). 256² cap enforces Stillness Is The Signal materially. |
 | **VFX — Decal (dynamic)** | 256² | 128² | — | — | Dynamic decals are small by definition — specific physical events |
 | **Layer 1 HUD — panels, bars, frames** | 128² (if rasterized) | — | — | — | Prefer vector or shader-drawn. If raster, 128² max |
 | **Layer 1 HUD — Icons (standard)** | 64² | — | — | — | Iron Seam line art on transparent ground |
@@ -1605,7 +1605,7 @@ For complex curved exterior surfaces where tile baking is insufficient, **Decal 
 
 #### Named NPC SSS Verification
 
-URP screen-space subsurface scattering is expected to be **flat cost** (1-2ms full-screen pass regardless of character count) on GTX 1070. This is favorable for Gravespire's named-NPC density. **Flag for `unity-shader-specialist`** to verify URP 6.3 SSS implementation is screen-space and not per-draw-call before skin shader authoring begins.
+URP screen-space subsurface scattering is expected to be **flat cost** (1-2ms full-screen pass regardless of character count) on GTX 1070. This is favorable for Gravenspire's named-NPC density. **Flag for `unity-shader-specialist`** to verify URP 6.3 SSS implementation is screen-space and not per-draw-call before skin shader authoring begins.
 
 ### 8.8 — Asset Validation Pipeline
 
@@ -1668,35 +1668,35 @@ A reference list is not a mood board. Mood boards are collections of things the 
 
 - **Medium:** Painting
 - **What to take:** The technique of building material identity through locally-specific color events rather than palette-wide tonal unification. Rossetti's surfaces — cloth, hair, skin, metal — are each individually and specifically themselves; no single atmospheric wash unifies the painting's tone. Millais's *Ophelia* (1852) is the clearest production reference: every surface has been painted as if the artist spent a week looking at it before committing paint. The lesson is not "paint lushly" — it is "**each material earns its place by being specifically what it is**." Color does not mean anything beyond what the material it represents means. Elizabeth Siddal's dress in *Ophelia* is not "blue for melancholy" — it is the specific blue of waterlogged heavy fabric with embroidery pattern losing its thread tension. That is the target. Pre-Raphaelite also establishes the **sculpted-specific portrait register**: the face at rest carries expression in its form, not in its movement. A neutral face is not a blank face.
-- **What to avoid:** The saturated jewel-palette of late Pre-Raphaelite work (Burne-Jones, later Rossetti) where color becomes symbolic and decorative rather than material. Hunt's *The Light of the World* uses lantern-warm and cold-dark as emotional opposites; Gravespire refuses that convention. Also avoid: Pre-Raphaelite narrative staging, where figures are arranged to communicate a specific literary story legibly. The art bible explicitly forbids object arrangements designed to tell a single legible story. Pre-Raphaelite environmental arrangements are theater; their surface technique is not.
+- **What to avoid:** The saturated jewel-palette of late Pre-Raphaelite work (Burne-Jones, later Rossetti) where color becomes symbolic and decorative rather than material. Hunt's *The Light of the World* uses lantern-warm and cold-dark as emotional opposites; Gravenspire refuses that convention. Also avoid: Pre-Raphaelite narrative staging, where figures are arranged to communicate a specific literary story legibly. The art bible explicitly forbids object arrangements designed to tell a single legible story. Pre-Raphaelite environmental arrangements are theater; their surface technique is not.
 - **Anchor in the art bible:** Section 4 Color Philosophy ("every color is load-bearing; a small palette applied with specificity produces more visual richness than a large palette applied democratically"). Section 6.2 (every albedo must pass the cause test). Section 5.3 (sculpted-specific portrait register; "neutral mesh IS an expression").
 
 ### Reference 2 — Medieval Italian City-State Architecture (Siena and San Gimignano, 13th–15th century)
 
 - **Medium:** Architecture (historical)
-- **What to take:** The specific geometry of **contested vertical urban space** — buildings that grew upward in competition with adjacent buildings, with no single planning authority. San Gimignano's towers demonstrate what Section 3.2 specifies: streets at 3:1+ height-to-width ratio that are not narrow by design but by accumulation. More usefully: the way different centuries of building remain legible in the same structure without any single century being restored over the others. In Siena specifically, the Palazzo Pubblico and adjacent buildings show the exact stratigraphy Gravespire requires — Stratum 2 civic gothic underneath Stratum 3-4 factional modification, both present in the same facade. The Campo shows the ground-surface wear pattern specified in Section 3.2 (herringbone brick polished at traversal centerlines, rough at edges). Most usefully for production: the way windows and doors have been modified across centuries — 13th-century arches infilled with 15th-century windows, 14th-century doorframes with 16th-century lintels, 17th-century brick closures in gothic arch openings. **This is the threshold geometry contradiction (Section 6.1) as a real-world reference set.**
-- **What to avoid:** Tourist-sanitized, restored, or digitally enhanced versions of these spaces — cleaned mortar, even stone coloring, replaced hardware. Look at the least-restored, most-archaeologically-intact portions. Also avoid: the open plaza logic of Italian civic space, which is about public gathering and visibility — the opposite of Gravespire's enclosed street geometry. Gravespire takes the building vocabulary, not the urban planning philosophy.
+- **What to take:** The specific geometry of **contested vertical urban space** — buildings that grew upward in competition with adjacent buildings, with no single planning authority. San Gimignano's towers demonstrate what Section 3.2 specifies: streets at 3:1+ height-to-width ratio that are not narrow by design but by accumulation. More usefully: the way different centuries of building remain legible in the same structure without any single century being restored over the others. In Siena specifically, the Palazzo Pubblico and adjacent buildings show the exact stratigraphy Gravenspire requires — Stratum 2 civic gothic underneath Stratum 3-4 factional modification, both present in the same facade. The Campo shows the ground-surface wear pattern specified in Section 3.2 (herringbone brick polished at traversal centerlines, rough at edges). Most usefully for production: the way windows and doors have been modified across centuries — 13th-century arches infilled with 15th-century windows, 14th-century doorframes with 16th-century lintels, 17th-century brick closures in gothic arch openings. **This is the threshold geometry contradiction (Section 6.1) as a real-world reference set.**
+- **What to avoid:** Tourist-sanitized, restored, or digitally enhanced versions of these spaces — cleaned mortar, even stone coloring, replaced hardware. Look at the least-restored, most-archaeologically-intact portions. Also avoid: the open plaza logic of Italian civic space, which is about public gathering and visibility — the opposite of Gravenspire's enclosed street geometry. Gravenspire takes the building vocabulary, not the urban planning philosophy.
 - **Anchor in the art bible:** Section 3.2 (street geometry, vertical compression). Section 6.1 (age-legibility cues, chronological strata, the five architectural tells, per-faction expression). Section 6.2 (wear/settling specifications; 80/20 tile reuse strategy with stratum tagging).
 
 ### Reference 3 — *Piranesi* by Susanna Clarke (2021, novel)
 
 - **Medium:** Novel (literary)
-- **What to take:** The specific mechanism by which the protagonist develops literacy for an environment that predates him by an unknowable span and was not built for him. Clarke's Piranesi reads the House — its tides, its statues, its skeletal remains of previous inhabitants — the way Section 6.4 describes how the Gravespire player should read the city: **as physical consequence, not as narrative illustration**. The novel's operative lesson: a world can be fully legible, fully comprehensible, and still predate the viewer entirely — literacy does not require the world to have been designed for reading. Piranesi does not need the House to explain itself; the House's explanations are the tides, the wear patterns, the positions of things. Crucially, Clarke maintains this throughout without the protagonist becoming the world's subject — **the House is indifferent to Piranesi, and it is the most important thing in the novel**. The functional lesson for Gravespire artists: an environment can carry complete forensic story without arranging itself to communicate.
-- **What to avoid:** The House's unreality — impossible physics, portal-logic, explicitly magical architecture. Gravespire is not surreal. Everything about the city is physically explicable given the history. The reference is for the **epistemological relationship** between viewer and environment, not for the environment's actual physics. Also avoid: the novel's mystery-narrative structure, where environmental details are clues to a thriller plot. Gravespire's environmental stories are not clues to a detective story; they are the sediment of systems operating, not planted evidence.
-- **Anchor in the art bible:** Section 6.4 (physical consequence vs. narrative illustration; "the player who reads Gravespire's environment is doing forensics, not narrative consumption"). Section 3.4 (what draws the eye; grammar of significance without performance). Pillar 1 (The World Is Not Your Story) + Principle 3 (The Beautiful And The Wrong).
+- **What to take:** The specific mechanism by which the protagonist develops literacy for an environment that predates him by an unknowable span and was not built for him. Clarke's Piranesi reads the House — its tides, its statues, its skeletal remains of previous inhabitants — the way Section 6.4 describes how the Gravenspire player should read the city: **as physical consequence, not as narrative illustration**. The novel's operative lesson: a world can be fully legible, fully comprehensible, and still predate the viewer entirely — literacy does not require the world to have been designed for reading. Piranesi does not need the House to explain itself; the House's explanations are the tides, the wear patterns, the positions of things. Crucially, Clarke maintains this throughout without the protagonist becoming the world's subject — **the House is indifferent to Piranesi, and it is the most important thing in the novel**. The functional lesson for Gravenspire artists: an environment can carry complete forensic story without arranging itself to communicate.
+- **What to avoid:** The House's unreality — impossible physics, portal-logic, explicitly magical architecture. Gravenspire is not surreal. Everything about the city is physically explicable given the history. The reference is for the **epistemological relationship** between viewer and environment, not for the environment's actual physics. Also avoid: the novel's mystery-narrative structure, where environmental details are clues to a thriller plot. Gravenspire's environmental stories are not clues to a detective story; they are the sediment of systems operating, not planted evidence.
+- **Anchor in the art bible:** Section 6.4 (physical consequence vs. narrative illustration; "the player who reads Gravenspire's environment is doing forensics, not narrative consumption"). Section 3.4 (what draws the eye; grammar of significance without performance). Pillar 1 (The World Is Not Your Story) + Principle 3 (The Beautiful And The Wrong).
 
 ### Reference 4 — EverQuest Classic, Mistmoore and Unrest Haunts (1999)
 
 - **Medium:** Game
 - **What to take:** **Not the visual quality** (1999 low-polygon rendering is not a visual target). **The spatial grammar.** A haunt is a sequence of function nodes with inhabited material between them, not a sequence of encounters with atmospheric dressing between them. Mistmoore Castle and The Estate of Unrest are canonical because they do something almost no game before or since has replicated: **the world inside does not acknowledge the player's arrival**. No lights trigger on entry. No ambient creatures shift behavior. The space has been going about its operation before the player arrived and continues doing so. The specific pacing contribution: the pull happens when the enemy's facing changes, not when the player triggers a radius or crosses a threshold. **The world makes the decision; the player registers it.** This is the combat initiation grammar in Section 2 State 3 ("The Pivot") drawn from direct precedent. Also: the spatial relationship between inhabited low-light quiet and sudden confrontation. These haunts have long corridors of low ambient sound and minimal motion that terminate, without warning, in an encounter. **The absence of pre-encounter signaling is the point.**
-- **What to avoid:** The visual design of the spaces themselves — flat stone textures, uniform-brown color field, ambient darkness that reads as technical limitation rather than material darkness. Section 2 specifies materially-motivated darkness; Section 4 forbids true black. EQ Classic's darkness is technical absence of lighting; Gravespire's darkness is controlled practical-source-inventory logic. Also avoid: the NPC density and spawn-camp model of EQ Classic content design — irrelevant to visual direction and actively corrosive to the inhabited-space logic.
+- **What to avoid:** The visual design of the spaces themselves — flat stone textures, uniform-brown color field, ambient darkness that reads as technical limitation rather than material darkness. Section 2 specifies materially-motivated darkness; Section 4 forbids true black. EQ Classic's darkness is technical absence of lighting; Gravenspire's darkness is controlled practical-source-inventory logic. Also avoid: the NPC density and spawn-camp model of EQ Classic content design — irrelevant to visual direction and actively corrosive to the inhabited-space logic.
 - **Anchor in the art bible:** Section 2 States 3 and 6 (combat initiation through mesh pivot; haunt pacing: "long corridors of quiet attention; the encounter begins without warning"). Section 6.3 (prop density; "haunts are spaces with specific use history, not aesthetic atmosphere"). Section 3.4 (what draws the eye; named NPCs through specificity, not prominence).
 
 ### Reference 5 — Caspar David Friedrich, Overcast Atmospheric Work (*Winter Landscape*, 1811; *Monk by the Sea*, 1810)
 
 - **Medium:** Painting
-- **What to take:** **Not the compositional logic** (human figure as protagonist in a vast landscape is the wrong reading for Gravespire — see below). **The atmospheric physics.** Friedrich's overcast light is the only painting reference that demonstrates how a diffuse 6000K sky dome operates as a light source on stone, vegetation, and cold surfaces. In *Winter Landscape*, the light does not come from anywhere; it is everywhere; it compresses tonal range while preserving material identity. Stone reads as stone, dead grass reads as dead grass, ice reads as ice — not because the painting is lit dramatically, but because the ambient light is flat enough that material reflectance carries all the information load. This is the Gravespire exploration-state lighting specification in Section 2 State 1 (flat ~6000K diffuse sky dome, shadows compressed to ~1:2 contrast) **demonstrated in paint**. *Monk by the Sea* shows the specific relationship between an overcast sky and a very dark foreground: the sky is the lightest element, the land is the darkest, and nothing in between is lit by a directional source. **The light does not emphasize; it simply reveals.**
-- **What to avoid:** The Romantic Sublime compositional grammar: a small human figure overwhelmed by a vast natural world, positioning the viewer as both the figure's subject and the landscape's witness. This is spectacle-scale. Gravespire's indifference operates through **density and accumulation, not through scale**. Also avoid: the specific desolate-winter bareness of Friedrich's most well-known work — stripped trees, snow, explicit ruin. Gravespire's city is continuously inhabited, maintained, lived-in. Friedrich's landscapes are abandoned and seasonal. The lesson is the light physics, not the scene.
+- **What to take:** **Not the compositional logic** (human figure as protagonist in a vast landscape is the wrong reading for Gravenspire — see below). **The atmospheric physics.** Friedrich's overcast light is the only painting reference that demonstrates how a diffuse 6000K sky dome operates as a light source on stone, vegetation, and cold surfaces. In *Winter Landscape*, the light does not come from anywhere; it is everywhere; it compresses tonal range while preserving material identity. Stone reads as stone, dead grass reads as dead grass, ice reads as ice — not because the painting is lit dramatically, but because the ambient light is flat enough that material reflectance carries all the information load. This is the Gravenspire exploration-state lighting specification in Section 2 State 1 (flat ~6000K diffuse sky dome, shadows compressed to ~1:2 contrast) **demonstrated in paint**. *Monk by the Sea* shows the specific relationship between an overcast sky and a very dark foreground: the sky is the lightest element, the land is the darkest, and nothing in between is lit by a directional source. **The light does not emphasize; it simply reveals.**
+- **What to avoid:** The Romantic Sublime compositional grammar: a small human figure overwhelmed by a vast natural world, positioning the viewer as both the figure's subject and the landscape's witness. This is spectacle-scale. Gravenspire's indifference operates through **density and accumulation, not through scale**. Also avoid: the specific desolate-winter bareness of Friedrich's most well-known work — stripped trees, snow, explicit ruin. Gravenspire's city is continuously inhabited, maintained, lived-in. Friedrich's landscapes are abandoned and seasonal. The lesson is the light physics, not the scene.
 - **Anchor in the art bible:** Section 2 State 1 (exploration lighting spec: overcast 6000K ambient, compressed shadows, practical warm sources asserting weakly). Section 4 (Candlefall Amber only where physical source exists; Pewter Rain is overcast ambient). Section 6.1 (exterior ambient light behavior through geometry, not zone-grade).
 
 ### How to Use These References in Production
@@ -1704,7 +1704,7 @@ A reference list is not a mood board. Mood boards are collections of things the 
 These five references are consulted at **specific decision points**, not carried as general background inspiration.
 
 - **Consult Reference 1 (Pre-Raphaelite)** when a surface material lacks physical specificity — when a stone wall reads as "stone wall texture" rather than as this specific limestone under this specific history of weathering and occupation.
-- **Consult Reference 2 (Italian city-state architecture)** when designing or assessing an architectural form, threshold modification, or building stratigraphy — if Siena doesn't have it, the question is whether Gravespire's history justifies an exception.
+- **Consult Reference 2 (Italian city-state architecture)** when designing or assessing an architectural form, threshold modification, or building stratigraphy — if Siena doesn't have it, the question is whether Gravenspire's history justifies an exception.
 - **Consult Reference 3 (*Piranesi*)** when reviewing environmental dressing for the inhabited-vs.-theater distinction — if a scene's objects feel like they're telling a story rather than being the residue of one, the Piranesi standard applies.
 - **Consult Reference 4 (EQ Mistmoore/Unrest)** when assessing haunt-space layout, NPC idle behavior, or the combat initiation moment — it is the pacing reference, the grammar of what it feels like to be in a space that does not acknowledge you.
 - **Consult Reference 5 (Friedrich)** only for **exterior lighting decisions** — overcast light quality, the relationship between ambient diffuse and practical warm sources in outdoor contexts.
@@ -1713,8 +1713,8 @@ These references **do not resolve** character design decisions (governed by Sect
 
 ### References Explicitly NOT Included (and Why)
 
-- **Bloodborne (2015)** — visually the most cited gothic game reference in contemporary development, and the most dangerous for Gravespire. Bloodborne's art direction is zone-grade driven: each zone has a strong LUT-shift defining its atmosphere. **Section 1 explicitly names and forbids this** ("jump-cut lighting between zones — the Bloodborne instinct"). The game's VFX density and particle-heavy boss encounters are the opposite of Stillness Is The Signal. Bloodborne's atmosphere is performed for the player; Gravespire's is not. Any artist treating Bloodborne as a reference will produce exactly the wrong outcome.
+- **Bloodborne (2015)** — visually the most cited gothic game reference in contemporary development, and the most dangerous for Gravenspire. Bloodborne's art direction is zone-grade driven: each zone has a strong LUT-shift defining its atmosphere. **Section 1 explicitly names and forbids this** ("jump-cut lighting between zones — the Bloodborne instinct"). The game's VFX density and particle-heavy boss encounters are the opposite of Stillness Is The Signal. Bloodborne's atmosphere is performed for the player; Gravenspire's is not. Any artist treating Bloodborne as a reference will produce exactly the wrong outcome.
 - **Castlevania / Bloodstained** — gothic ornament maximalism: skulls in architectural trim, bone iconography as generic undead signal, environments where every surface carries decorative darkness. Section 6.6 forbids "gothic atmosphere" as an artistic brief. Castlevania's visual shorthand is almost entirely composed of the specific shortcuts the art bible prohibits by name.
-- **Vampire: The Masquerade — Bloodlines (2004)** — the most tempting exclusion because VtMB appears in the concept doc and its faction social complexity is relevant. However, VtMB's visual direction for faction spaces is maximalist and theatrical: the Tremere chantry is gothic-horror stagecraft, the Sabbat spaces are visceral gore-staging, Camarilla elysium spaces perform power through oppressive surface elaboration. The faction vocabulary Gravespire requires is **legibility through material and silhouette, not spectacle**. An artist using VtMB as a visual reference for faction spaces will produce spaces that *perform* their faction, not spaces that have been inhabited by it.
+- **Vampire: The Masquerade — Bloodlines (2004)** — the most tempting exclusion because VtMB appears in the concept doc and its faction social complexity is relevant. However, VtMB's visual direction for faction spaces is maximalist and theatrical: the Tremere chantry is gothic-horror stagecraft, the Sabbat spaces are visceral gore-staging, Camarilla elysium spaces perform power through oppressive surface elaboration. The faction vocabulary Gravenspire requires is **legibility through material and silhouette, not spectacle**. An artist using VtMB as a visual reference for faction spaces will produce spaces that *perform* their faction, not spaces that have been inhabited by it.
 - **Pre-Raphaelite painting after 1870 (Burne-Jones, late Rossetti)** — a specific callout within the movement. The early Pre-Raphaelites (1848–1865) built material specificity. The later work trends toward symbolic saturation and allegorical atmosphere — the exact decorative quality the color system forbids. Separating "early Pre-Raphaelite technique" from "late Pre-Raphaelite aesthetic" is a real production risk warranting the explicit call.
-- **Dark Souls atmospheric work** — the environmental patience and consequence reading in Dark Souls is relevant, but the visual direction is not. Dark Souls environments communicate age primarily through ruin, collapse, and decay — the magnificent wreckage aesthetic. **Gravespire is not ruined.** The city is continuously inhabited and maintained, which produces an entirely different visual problem. Dark Souls's ruins are spectacular. Gravespire's continued occupation is the uncanny thing, not collapse.
+- **Dark Souls atmospheric work** — the environmental patience and consequence reading in Dark Souls is relevant, but the visual direction is not. Dark Souls environments communicate age primarily through ruin, collapse, and decay — the magnificent wreckage aesthetic. **Gravenspire is not ruined.** The city is continuously inhabited and maintained, which produces an entirely different visual problem. Dark Souls's ruins are spectacular. Gravenspire's continued occupation is the uncanny thing, not collapse.

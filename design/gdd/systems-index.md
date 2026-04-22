@@ -1,4 +1,4 @@
-# Systems Index: Gravespire
+# Systems Index: Gravenspire
 
 > **Status**: Draft
 > **Created**: 2026-04-22
@@ -12,7 +12,7 @@
 
 ## Overview
 
-Gravespire is a small persistent gothic MMO that combines Classic-EQ tab-target combat with deep autonomous faction simulation. Mechanically, the game lives at the intersection of **six core pillars**: live-simulated faction politics, EQ-native combat pacing, diegetic world information, named AI companions, LLM-driven NPC dialogue, and a 10-50 concurrent persistent server.
+Gravenspire is a small persistent gothic MMO that combines Classic-EQ tab-target combat with deep autonomous faction simulation. Mechanically, the game lives at the intersection of **six core pillars**: live-simulated faction politics, EQ-native combat pacing, diegetic world information, named AI companions, LLM-driven NPC dialogue, and a 10-50 concurrent persistent server.
 
 This decomposes into **33 systems** spanning foundation infrastructure (world streaming, persistence), core gameplay (combat, classes, progression), the game's identity systems (faction simulation, reputation, zone control), AI companion depth (named NPCs with personalities), LLM dialogue (Tier 3+), interface (two-layer UI with diegetic world information), networking (FishNet Tier 2+), and polish (audio, accessibility).
 
@@ -64,7 +64,7 @@ Systems marked **E** are explicit in the game concept's Core Mechanics or Techni
 
 ## Categories
 
-| Category | Gravespire Systems |
+| Category | Gravenspire Systems |
 |---|---|
 | **Core** | World Structure, NPC System, Day/Night Cycle, Network Architecture |
 | **Gameplay** | Combat Core, Class Design, Spell Memorization, Status Effects, Creature AI, Death/Corpse, Faction Sim, Zone Control, Named AI Companions, Hiring Hall, Companion Relationships, Social Systems |
@@ -80,7 +80,7 @@ Systems marked **E** are explicit in the game concept's Core Mechanics or Techni
 
 ## Priority Tiers
 
-Priority tiers map directly to Gravespire's 4-tier scope plan from the concept document. Each tier is independently shippable.
+Priority tiers map directly to Gravenspire's 4-tier scope plan from the concept document. Each tier is independently shippable.
 
 | Tier | Definition | Milestone | Scope |
 |---|---|---|---|
@@ -89,7 +89,7 @@ Priority tiers map directly to Gravespire's 4-tier scope plan from the concept d
 | **Tier 3 (Beta)** | Persistent small-server MMO with LLM dialogue | ~18-30 months cumulative | + 2nd haunt, 3 factions, 10-person persistent server, LLM for 5-10 key NPCs |
 | **Tier 4 (Full Vision)** | Complete design with deep autonomous simulation | 36+ months cumulative, open-ended | + 3-5 zones, all 6 factions, deep autonomous faction sim, 50-person server |
 
-**Shipping philosophy:** every tier is shippable on its own. If life intervenes at Tier 2, Gravespire exists as a small co-op gothic RPG. At Tier 3, it is a cult-classic small MMO. At Tier 4, it is the full vision. No tier is a stepping stone that's worthless without the next one.
+**Shipping philosophy:** every tier is shippable on its own. If life intervenes at Tier 2, Gravenspire exists as a small co-op gothic RPG. At Tier 3, it is a cult-classic small MMO. At Tier 4, it is the full vision. No tier is a stepping stone that's worthless without the next one.
 
 ---
 
@@ -120,7 +120,7 @@ Systems sorted by dependency order. Design and build from top (Foundation) to bo
 13. **Creature / Enemy AI** — depends on: NPC System, Combat Core. The pivot; hostile creature combat state machine.
 14. **Death & Corpse Recovery** — depends on: Combat Core, Character Progression, Save/Load. Corpse runs, XP loss, rez.
 
-### Layer 4 — Faction Systems *(Gravespire's soul)*
+### Layer 4 — Faction Systems *(Gravenspire's soul)*
 
 15. **Faction State Simulation** — depends on: World Structure, NPC System, Save/Load. ⚠ **Bottleneck — 4 downstream systems.** Autonomous faction AI; reactive at MVP, autonomous at Tier 4.
 16. **Faction Reputation** — depends on: Faction State Simulation, Save/Load, Character Progression. Per-player per-faction rep, 5-tier progression.

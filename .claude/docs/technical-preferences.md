@@ -34,7 +34,7 @@
 - **Methods**: PascalCase (e.g., `TakeDamage()`)
 - **Signals/Events**: PascalCase + `Changed` or `ed` past tense suffix (e.g., `HealthChanged`, `DamageTaken`)
 - **Files**: PascalCase matching class (e.g., `PlayerController.cs`)
-- **Scenes/Prefabs**: PascalCase matching root object (e.g., `GravespireCity.unity`, `Cleric.prefab`)
+- **Scenes/Prefabs**: PascalCase matching root object (e.g., `GravenspireCity.unity`, `Cleric.prefab`)
 - **Constants**: PascalCase for instance constants (e.g., `MaxHealth`); UPPER_SNAKE_CASE for true static compile-time constants (e.g., `MAX_PARTY_SIZE`)
 
 ## Performance Budgets
