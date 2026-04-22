@@ -1,15 +1,35 @@
 # Claude Code Game Studios -- Game Studio Agent Architecture
 
+## Read First (session start ritual)
+
+Before any task, read these in order — they define behavior, decisions, and state:
+
+1. `docs/brian-system-prompt-v4-6.md` — universal cross-project system prompt (source of truth)
+2. `AGENTS.md` — Gravenspire behavioral contract (extends the system prompt)
+3. `DECISIONS.md` — locked architecture decisions (D-numbered, append-only)
+4. `production/session-state/active.md` — current work state (may not exist yet)
+5. `design/gdd/game-concept.md` — Gravespire concept / pillars
+6. `tasks/lessons.md` — accumulated lessons
+
+`.claude/docs/technical-preferences.md` (loaded below via `@import`) is the
+tech-spec source of truth. `AGENTS.md` governs **behavior**; technical-preferences
+governs **tech choices**.
+
+See `AGENTS.md` §4 for conflict resolution when sources disagree, and §14 for
+AGENTS.md vs system-prompt precedence.
+
+---
+
 Indie game development managed through 48 coordinated Claude Code subagents.
 Each agent owns a specific domain, enforcing separation of concerns and quality.
 
 ## Technology Stack
 
-- **Engine**: [CHOOSE: Godot 4 / Unity / Unreal Engine 5]
-- **Language**: [CHOOSE: GDScript / C# / C++ / Blueprint]
+- **Engine**: Unity 6.3 LTS
+- **Language**: C# (.NET 8+)
 - **Version Control**: Git with trunk-based development
-- **Build System**: [SPECIFY after choosing engine]
-- **Asset Pipeline**: [SPECIFY after choosing engine]
+- **Build System**: Unity Build Pipeline
+- **Asset Pipeline**: Unity Asset Import Pipeline + Addressables
 
 > **Note**: Engine-specialist agents exist for Godot, Unity, and Unreal with
 > dedicated sub-specialists. Use the set matching your engine.
@@ -20,7 +40,7 @@ Each agent owns a specific domain, enforcing separation of concerns and quality.
 
 ## Engine Version Reference
 
-@docs/engine-reference/godot/VERSION.md
+@docs/engine-reference/unity/VERSION.md
 
 ## Technical Preferences
 

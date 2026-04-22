@@ -2,56 +2,67 @@
 
 | Field | Value |
 |-------|-------|
-| **Engine Version** | Unity 6.3 LTS |
+| **Engine Version** | Unity 6.3 LTS (6000.3.x) |
 | **Release Date** | December 2025 |
-| **Project Pinned** | 2026-02-13 |
-| **Last Docs Verified** | 2026-02-13 |
+| **Project Pinned** | 2026-04-21 |
+| **Last Docs Verified** | 2026-04-21 |
 | **LLM Knowledge Cutoff** | May 2025 |
+| **Risk Level** | MEDIUM — beyond training data; incremental LTS diffs but includes real breaking changes (URP render passes, URP Compatibility Mode, UI Toolkit) |
 
 ## Knowledge Gap Warning
 
-The LLM's training data likely covers Unity up to ~2022 LTS (2022.3). The entire
-Unity 6 release series (formerly Unity 2023 Tech Stream) introduced significant
-changes that the model does NOT know about. Always cross-reference this directory
-before suggesting Unity API calls.
+The LLM's training data likely covers Unity up to **~6.0 LTS** (October 2024)
+and possibly early 6.1. Versions 6.1, 6.2, and 6.3 introduced changes — some
+incremental, some breaking — that the model does NOT reliably know about.
+Always cross-reference this directory before suggesting Unity API calls,
+especially for URP, UI Toolkit, and rendering-pipeline code.
 
 ## Post-Cutoff Version Timeline
 
 | Version | Release | Risk Level | Key Theme |
 |---------|---------|------------|-----------|
-| 6.0 | Oct 2024 | HIGH | Unity 6 rebrand, new rendering features, Entities 1.3, DOTS improvements |
-| 6.1 | Nov 2024 | MEDIUM | Bug fixes, stability improvements |
-| 6.2 | Dec 2024 | MEDIUM | Performance optimizations, new input system improvements |
-| 6.3 LTS | Dec 2025 | HIGH | First LTS since 6.0, production-ready DOTS, enhanced graphics features |
+| 6.0 LTS | Oct 2024 | LOW | First Unity 6 LTS — render graph in URP, Entities 1.3, UI Toolkit runtime. Likely in training data. |
+| 6.1 | Apr 2025 | MEDIUM | Forward+ foveated rendering, camera history API, incremental performance |
+| 6.2 | ~Jul 2025 | MEDIUM | `VisualElement.transform` deprecated; URP `SetupRenderPasses` deprecated (use `AddRenderPasses` + render graph); URP Compatibility Mode soft-deprecated |
+| 6.3 LTS | Dec 2025 | MEDIUM | URP Compatibility Mode hidden by default; Box2D v3 API; Shader Graph template browser; SVG native in UI Toolkit; Platform Toolkit (cross-platform account/achievement API); Kawase/Dual filtering Bloom; Profiler Captures List |
 
-## Major Changes from 2022 LTS to Unity 6.3 LTS
+Unity 6.3 LTS is supported through **December 2027**.
 
-### Breaking Changes
-- **Entities/DOTS**: Major API overhaul in Entities 1.0+, complete redesign of ECS patterns
-- **Input System**: Legacy Input Manager deprecated, new Input System is default
-- **Rendering**: URP/HDRP significant upgrades, SRP Batcher improvements
-- **Addressables**: Asset management workflow changes
-- **Scripting**: C# 9 support, new API patterns
+## Key Post-Cutoff Breaking Changes (summary — see breaking-changes.md for detail)
 
-### New Features (Post-Cutoff)
-- **DOTS**: Production-ready Entity Component System (Entities 1.3+)
-- **Graphics**: Enhanced URP/HDRP pipelines, GPU Resident Drawer
-- **Multiplayer**: Netcode for GameObjects improvements
-- **UI Toolkit**: Production-ready for runtime UI (replaces UGUI for new projects)
-- **Async Asset Loading**: Improved Addressables performance
-- **Web**: WebGPU support
+### URP / Rendering
+- **`SetupRenderPasses` deprecated (6.2)** → use `AddRenderPasses` + render graph
+- **URP Compatibility Mode hidden by default (6.3)** → migrate custom passes to render graph
+- **BIRP deprecation process starts in Unity 6.5** → all new projects must use URP (or HDRP for photoreal)
 
-### Deprecated Systems
-- **Legacy Input Manager**: Use new Input System package
-- **Legacy Particle System**: Use Visual Effect Graph
-- **UGUI**: Still supported, but UI Toolkit recommended for new projects
-- **Old ECS (GameObjectEntity)**: Replaced by modern DOTS/Entities
+### UI Toolkit
+- **`VisualElement.transform` deprecated (6.2)** → use `style.translate` / `.rotate` / `.scale`
+- **Vector Graphics package integrated (6.3)** → SVG import is native in UI Toolkit, no separate package
+
+### Physics / 2D
+- **Box2D v3 API added (6.3)** — runs alongside existing API, will replace it in future version
+
+## 2026 Render Pipeline Strategy
+
+- **URP is the recommended pipeline** for all new projects.
+- **HDRP is maintenance-only** — only adding Nintendo Switch 2 support, no new features.
+- **BIRP deprecation starts in Unity 6.5** — do NOT start new projects in BIRP.
+- URP and HDRP now share the same underlying compiler and API — moving toward a unified renderer.
+
+## Project-Specific Notes
+
+- **This project uses URP** (Universal Render Pipeline). See `.claude/docs/technical-preferences.md`.
+- All custom render-pass code must use the **render graph system** + `AddRenderPasses`, never the deprecated `SetupRenderPasses`.
+- The faction simulation system is a **candidate for DOTS/ECS** — see `unity-dots-specialist` agent.
+- Zone streaming should use **Addressables**, not `Resources` folders — see `unity-addressables-specialist`.
+- **FishNet** is planned for Tier 2+ netcode (not installed yet; will be added to Allowed Libraries when Tier 2 work begins).
 
 ## Verified Sources
 
-- Official docs: https://docs.unity3d.com/6000.0/Documentation/Manual/index.html
-- Unity 6 release: https://unity.com/releases/unity-6
+- Official Unity 6.3 what's new: https://docs.unity3d.com/6000.3/Documentation/Manual/WhatsNewUnity63.html
 - Unity 6.3 LTS announcement: https://unity.com/blog/unity-6-3-lts-is-now-available
-- Migration guide: https://docs.unity3d.com/6000.0/Documentation/Manual/upgrade-guides.html
-- Unity 6 support: https://unity.com/releases/unity-6/support
-- C# API reference: https://docs.unity3d.com/6000.0/Documentation/ScriptReference/index.html
+- Unity 6.2 upgrade guide: https://docs.unity3d.com/6000.2/Documentation/Manual/UpgradeGuideUnity62.html
+- Unity 6.0 upgrade guide: https://docs.unity3d.com/6000.1/Documentation/Manual/UpgradeGuideUnity6.html
+- Unity 6.3 planned breaking changes: https://discussions.unity.com/t/planned-breaking-changes-in-unity-6-3/1646418
+- URP 17 what's new: https://docs.unity3d.com/6000.0/Documentation/Manual/urp/whats-new/urp-whats-new.html
+- Render Pipelines strategy 2026: https://unity.com/topics/render-pipelines-strategy-for-2026
