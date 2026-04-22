@@ -6,7 +6,12 @@ $ErrorActionPreference = "Stop"
 
 $script:ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 $script:RepoRoot = (Resolve-Path -LiteralPath (Join-Path $script:ScriptDir "..\..")).Path
-$script:IgnoredDirectories = @(".git", "bin", "obj", "Library", "Temp", "Logs")
+$script:IgnoredDirectories = @(
+    ".git", "bin", "obj",
+    "Library", "Temp", "Logs", "UserSettings", "MemoryCaptures",
+    "Packages",
+    "Build", "Builds"
+)
 $script:Violations = [System.Collections.Generic.List[string]]::new()
 
 function Get-RepoRelativePath
@@ -180,7 +185,7 @@ function Test-CSharpNaming
 
         $privateFieldMatch = [regex]::Match(
             $code,
-            "^\s*private\s+(?!(?:const|class|struct|interface|enum|record|delegate)\b)(?:(?:static|readonly|volatile)\s+)*[A-Za-z0-9_<>,\[\]\.?]+\s+([A-Za-z_][A-Za-z0-9_]*)\s*(?:=|;)"
+            "^\s*(?:\[[^\]]+\]\s*)*private\s+(?!(?:const|class|struct|interface|enum|record|delegate)\b)(?:(?:static|readonly|volatile)\s+)*[A-Za-z0-9_<>,\[\]\.?]+\s+([A-Za-z_][A-Za-z0-9_]*)\s*(?:=|;)"
         )
         if ($privateFieldMatch.Success)
         {
@@ -193,7 +198,7 @@ function Test-CSharpNaming
 
         $publicFieldMatch = [regex]::Match(
             $code,
-            "^\s*public\s+(?!(?:const|class|struct|interface|enum|record|delegate)\b)(?:(?:static|readonly|volatile)\s+)*[A-Za-z0-9_<>,\[\]\.?]+\s+([A-Za-z_][A-Za-z0-9_]*)\s*(?:=|;)"
+            "^\s*(?:\[[^\]]+\]\s*)*public\s+(?!(?:const|class|struct|interface|enum|record|delegate)\b)(?:(?:static|readonly|volatile)\s+)*[A-Za-z0-9_<>,\[\]\.?]+\s+([A-Za-z_][A-Za-z0-9_]*)\s*(?:=|;)"
         )
         if ($publicFieldMatch.Success)
         {
