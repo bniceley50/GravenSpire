@@ -1,250 +1,132 @@
 ---
 name: regression-suite
 description: "Map test coverage to GDD critical paths, identify fixed bugs without regression tests, flag coverage drift from new features, and maintain tests/regression-suite.md. Run after implementing a bug fix or before a release gate."
-argument-hint: "[update | audit | report]"
+argument-hint: "[update | audit | report] [--dry-run]"
 user-invocable: true
-allowed-tools: Read, Glob, Grep, Write, Edit
+allowed-tools: Read, Glob, Grep, Write, Edit, AskUserQuestion
 ---
 
-# Regression Suite
+# Regression Suite Mapping
 
-This skill ensures that every bug fix is backed by a test that would have
-caught the original bug — and that the regression suite stays current as the
-game evolves. It also detects when new features have been added without
-corresponding regression coverage.
+Map regression test coverage to GDD critical paths, fixed bugs, high-risk systems, and release gates, then produce or update a regression suite plan.
 
-A regression suite is not a new test category — it is a **curated list of
-tests already in `tests/`** that collectively cover the game's critical paths
-and known failure points. This skill maintains that list.
+## 0. Execution Contract
 
-**Output:** `tests/regression-suite.md`
+### 0.1 Invocation and autonomy
 
-**When to run:**
-- After fixing a bug (confirm a regression test was written or identify gap)
-- Before a release gate (`/gate-check polish` requires regression suite exists)
-- As part of sprint close to detect coverage drift
+Supported modes:
 
----
+- full: full regression map
+- bug:<id>: ensure regression coverage for one bug
+- system:<name>: focus one system
 
-## 1. Parse Arguments
+The invocation authorizes routine repository-local work for this skill. Operate autonomously after resolving scope; do not ask the user to approve every normal file creation. Ask only for protected operations, destructive ambiguity, or missing source-of-truth decisions that cannot be inferred safely.
 
-**Modes:**
-- `/regression-suite update` — scan new bug fixes this sprint and check
-  for regression test presence; add new tests to the suite manifest
-- `/regression-suite audit` — full audit of all GDD critical paths vs.
-  existing test coverage; flag paths with no regression test
-- `/regression-suite report` — read-only status report (no writes); suitable
-  for sprint reviews
-- No argument — run `update` if a sprint is active, else `audit`
+If `--dry-run` is present, perform discovery and produce the complete proposed result, but do not call `Write` or `Edit`.
 
----
+### 0.2 Path safety
 
-## 2. Load Context
+All user-supplied paths must be repository-relative. Reject absolute paths, paths containing `..`, and paths outside the expected project roots for this skill. Normalize paths before reading or writing.
 
-### Step 2a — Load existing regression suite
+### 0.3 Write policy
 
-Read `tests/regression-suite.md` if it exists. Extract:
-- Total registered regression tests
-- Last updated date
-- Any tests flagged as `STALE` or `QUARANTINED`
+Routine writes allowed by invocation:
 
-If it does not exist: note "No regression suite found — will create one."
+- production/qa/regression/regression-suite.md
+- production/qa/regression/regression-gap-report-[YYYYMMDD].md
 
-### Step 2b — Load test inventory
+Protected operations require explicit confirmation through `AskUserQuestion`:
 
-Glob all test files:
-```
-tests/unit/**/*_test.*
-tests/integration/**/*_test.*
-tests/regression/**/*
-```
+- Overwriting or deleting an existing file.
+- Editing canonical source-of-truth documents outside the declared outputs.
+- Changing statuses, gates, stage files, sprint state, story state, registry entries, or release readiness.
+- Running commands that modify files, install dependencies, generate builds, publish artifacts, deploy, tag, commit, or push.
+- Applying changes whose scope is broader than the user requested.
 
-For each file, note the system (from directory path) and file name.
-Do not read test file contents unless needed for name-to-test mapping.
+Use `Edit` for targeted changes to existing files. Use `Write` for new files or complete replacement only after the replacement scope is safe and approved.
 
-### Step 2c — Load GDD critical paths
+### 0.8 Missing-file behavior
 
-For `audit` mode: read `design/gdd/systems-index.md` to get all systems.
-For each MVP-tier system, read its GDD and extract:
-- Acceptance Criteria (these define the critical paths)
-- Formulas section (formulas must have regression tests)
-- Edge Cases section (known edge cases should have regression tests)
+| Situation | Behavior |
+|---|---|
+| Primary source missing | Continue only if the skill can infer a narrower safe scope; otherwise stop with the exact missing file/folder. |
+| Referenced artifact missing | Record as a gap or blocker instead of inventing content. |
+| Existing target file present | Do not overwrite. Create a proposed dated file or ask for protected confirmation. |
+| Ambiguous scope | Choose the smallest evidence-backed scope; ask only if two or more scopes are equally plausible. |
+| Contradictory sources | Prefer explicit status/source-of-truth documents over generated reports; list the contradiction in the output. |
 
-For `update` mode: skip full GDD scan. Instead read the current sprint plan
-and story files to find stories with Status: Complete this sprint.
+## 1. Discover Context
 
-### Step 2d — Load closed bugs
+Read only the sources needed for the requested scope. Start with indexes, manifests, registries, and status files before reading large documents.
 
-Glob `production/qa/bugs/*.md` and filter for bugs with a `Status: Closed`
-or `Status: Fixed` field. Note:
-- Which story or system the bug was in
-- Whether a regression test was mentioned in the fix description
+Primary sources:
 
----
+- production/qa/bugs/**
+- production/qa/evidence/**
+- tests/**
+- design/gdd/**
+- docs/architecture/**
+- production/releases/**
 
-## 3. Map Coverage — Critical Paths
+Discovery rules:
 
-For `audit` mode only:
+1. Prefer canonical source-of-truth files over generated reports.
+2. Use `Glob` and `Grep` before reading large files.
+3. Keep a source list for the final report or artifact.
+4. When many files match, read the most relevant 5 to 10 first and summarize the rest as candidates.
+5. Treat missing or draft-status dependencies as blockers, not as approval to invent content.
 
-For each GDD acceptance criterion, determine whether a test exists:
+## 2. Build the Working Model
 
-1. Grep `tests/unit/[system]/` and `tests/integration/[system]/` for file names
-   and function names related to the criterion's key noun/verb
-2. Assign coverage:
+Use the discovered evidence to build a concise working model before producing output.
 
-| Status | Meaning |
-|--------|---------|
-| **COVERED** | A test file exists that targets this criterion's logic |
-| **PARTIAL** | A test exists but doesn't cover all cases (e.g. happy path only) |
-| **MISSING** | No test found for this critical path |
-| **EXEMPT** | Visual/Feel or UI criterion — not automatable by design |
+1. Identify fixed bugs, critical paths, release blockers, and high-risk systems.
+2. Map each to existing tests or manual regression cases.
+3. Classify coverage as Automated, Manual, Missing, Weak, or Not Applicable.
+4. Write/append regression suite entries only for missing or weak coverage; do not edit test code.
+5. Flag bugs that should not be closed until regression evidence exists.
 
-3. Elevate MISSING items that correspond to formulas or state machines to
-   **HIGH PRIORITY** gap — these are the most likely regression sources.
+Classification rules:
 
----
+- **Blocking**: prevents safe implementation, review, release, or downstream skill execution.
+- **High**: likely to cause rework, wrong implementation, invalid QA, or broken traceability.
+- **Medium**: weakens handoff quality but can be resolved during normal follow-up.
+- **Low**: cleanup, clarity, or optional improvement.
 
-## 4. Map Coverage — Fixed Bugs
+## 3. Produce the Artifact
 
-For each closed bug:
+Canonical outputs for this skill:
 
-1. Extract the system slug from the bug's metadata
-2. Grep `tests/unit/[system]/` and `tests/integration/[system]/` for a test
-   that references the bug ID or the specific failure scenario
-3. Assign:
-   - **HAS REGRESSION TEST** — a test was found that would catch this bug
-   - **MISSING REGRESSION TEST** — bug was fixed but no test guards against recurrence
+- production/qa/regression/regression-suite.md
+- production/qa/regression/regression-gap-report-[YYYYMMDD].md
 
-For MISSING REGRESSION TEST items:
-- Flag them as regression gaps
-- Suggest the test file path: `tests/unit/[system]/[bug-slug]_regression_test.[ext]`
-- Note: "Without this test, this bug can silently return in a future sprint."
+Artifact requirements:
 
----
+1. Include scope, date, source list, assumptions, and confidence.
+2. Separate facts from recommendations and inferred conclusions.
+3. Include explicit next actions and the command that should be run next.
+4. Preserve historical information; prefer additive notes over destructive rewrites.
+5. When updating an index or manifest, append or update only the relevant row and preserve unrelated content.
 
-## 5. Detect Coverage Drift
+Required report sections:
 
-Coverage drift occurs when the game grows but the regression suite doesn't.
+- Coverage summary
+- Missing regressions
+- Weak tests
+- Suite updates
+- Release risks
 
-Check for drift indicators:
-- Stories completed this sprint with no corresponding test files in `tests/`
-- New systems added to `systems-index.md` since the last regression-suite update
-- GDD sections added or revised since the regression suite was last updated
-  (use Grep on GDD file modification hints if available, or ask the user)
-- `tests/regression-suite.md` last-updated date vs. current date — if gap >
-  2 sprints, flag as likely stale
+## 4. Validation
 
----
+1. Check that every conclusion cites or names a repository source.
+2. Check that all blockers have a concrete next action.
+3. Check that proposed writes stay within the declared output paths.
+4. Check that dry-run mode produced no writes.
 
-## 6. Generate Report and Suite Manifest
+Stop conditions:
 
-### Report format (in conversation)
+- No blocking stop condition was encountered.
 
-```
-## Regression Suite Status
+## 5. Final Response
 
-**Mode**: [update | audit | report]
-**Existing registered tests**: [N]
-**Test files scanned**: [N]
-
-### Critical Path Coverage (audit mode only)
-| System | Total ACs | Covered | Partial | Missing | Exempt |
-|--------|-----------|---------|---------|---------|--------|
-| [name] | [N] | [N] | [N] | [N] | [N] |
-
-**Coverage rate (non-exempt)**: [N]%
-
-### Bug Regression Coverage
-| Bug ID | System | Severity | Has Regression Test? |
-|--------|--------|----------|----------------------|
-| BUG-NNN | [system] | S[N] | YES / NO ⚠ |
-
-**Bugs without regression tests**: [N]
-
-### Coverage Drift Indicators
-[List new systems or stories with no test coverage, or "None detected."]
-
-### Recommended New Regression Tests
-| Priority | System | Suggested Test File | Covers |
-|----------|--------|---------------------|--------|
-| HIGH | [system] | `tests/unit/[system]/[slug]_regression_test.[ext]` | BUG-NNN / AC-[N] |
-| MEDIUM | [system] | `tests/unit/[system]/[slug]_test.[ext]` | [criterion] |
-```
-
-### Suite manifest format (`tests/regression-suite.md`)
-
-The manifest is a curated index — not the tests themselves, but a registry
-of which tests should always pass before a release:
-
-```markdown
-# Regression Suite Manifest
-
-> Last Updated: [date]
-> Total registered tests: [N]
-> Coverage: [N]% of GDD critical paths
-
-## How to run
-
-[Engine-specific command to run all regression tests]
-
-## Registered Regression Tests
-
-### [System Name]
-
-| Test File | Test Function (if known) | Covers | Added |
-|-----------|--------------------------|--------|-------|
-| `tests/unit/[system]/[file]_test.[ext]` | `test_[scenario]` | AC-N / BUG-NNN | [date] |
-
-## Known Gaps
-
-Tests that should exist but don't yet:
-
-| Priority | System | Suggested Path | Covers | Reason Not Yet Written |
-|----------|--------|----------------|--------|------------------------|
-| HIGH | [system] | `tests/unit/[system]/[path]` | BUG-NNN | Bug fixed without test |
-
-## Quarantined Tests
-
-Tests that are flaky or disabled (do not run in CI):
-
-| Test File | Function | Reason | Quarantined Since |
-|-----------|----------|--------|-------------------|
-| (none) | | | |
-```
-
----
-
-## 7. Write Output
-
-Ask: "May I write/update `tests/regression-suite.md` with the current
-regression suite manifest?"
-
-For `update` mode: append new entries; never remove existing entries
-(use `Edit` with targeted insertions).
-For `audit` mode: rewrite the full manifest with updated coverage data.
-For `report` mode: do not write anything.
-
-After writing (if approved):
-
-- For each HIGH priority gap: "Consider creating the missing regression test
-  before the next sprint. Run `/test-helpers` to scaffold the test file."
-- If bug regression gaps > 0: "These bugs can silently return without regression
-  tests. The next sprint should include a story to write the missing tests."
-- If coverage drift detected: "Regression suite may be drifting. Consider
-  running `/regression-suite audit` at the next sprint boundary."
-
-Verdict: **COMPLETE** — regression suite updated. (If user declined write: Verdict: **BLOCKED**.)
-
----
-
-## Collaborative Protocol
-
-- **Never remove existing regression tests from the manifest** without
-  explicit user approval — removing a test that was deliberately written is a
-  regression risk itself
-- **Gaps are advisory, not blocking** — surface them clearly but do not prevent
-  other work from proceeding (except at release gate where regression suite is required)
-- **Quarantine is not deletion** — tests with intermittent failures should be
-  quarantined (noted in manifest) but not removed; they should be fixed by
-  `/test-flakiness`
-- **Ask before writing** — always confirm before creating or updating the manifest
+End with a concise summary of what was written, what was skipped because it was protected or unsafe, validation results, and the recommended next command. Include file paths for every artifact created or proposed.

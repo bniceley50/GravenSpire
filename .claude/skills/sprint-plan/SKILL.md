@@ -1,228 +1,140 @@
 ---
 name: sprint-plan
 description: "Generates a new sprint plan or updates an existing one based on the current milestone, completed work, and available capacity. Pulls context from production documents and design backlogs."
-argument-hint: "[new|update|status] [--review full|lean|solo]"
+argument-hint: "[new|update|status] [--review full|lean|solo] [--dry-run]"
 user-invocable: true
 allowed-tools: Read, Glob, Grep, Write, Edit, Task, AskUserQuestion
-context: |
-  !ls production/sprints/ 2>/dev/null
 ---
 
-## Phase 0: Parse Arguments
+# Sprint Plan
 
-Extract the mode argument (`new`, `update`, or `status`) and resolve the review mode (once, store for all gate spawns this run):
-1. If `--review [full|lean|solo]` was passed → use that
-2. Else read `production/review-mode.txt` → use that value
-3. Else → default to `lean`
+Create or update a sprint plan from milestone goals, ready stories, capacity, risk, QA needs, and dependency order.
 
-See `.claude/docs/director-gates.md` for the full check pattern.
+## 0. Execution Contract
 
----
+### 0.1 Invocation and autonomy
 
-## Phase 1: Gather Context
+Supported modes:
 
-1. **Read the current milestone** from `production/milestones/`.
+- new: create next sprint
+- update: update current sprint plan
+- status: produce planning-oriented status update
 
-2. **Read the previous sprint** (if any) from `production/sprints/` to
-   understand velocity and carryover.
+The invocation authorizes routine repository-local work for this skill. Operate autonomously after resolving scope; do not ask the user to approve every normal file creation. Ask only for protected operations, destructive ambiguity, or missing source-of-truth decisions that cannot be inferred safely.
 
-3. **Scan design documents** in `design/gdd/` for features tagged as ready
-   for implementation.
+If `--dry-run` is present, perform discovery and produce the complete proposed result, but do not call `Write` or `Edit`.
 
-4. **Check the risk register** at `production/risk-register/`.
+### 0.2 Path safety
 
----
+All user-supplied paths must be repository-relative. Reject absolute paths, paths containing `..`, and paths outside the expected project roots for this skill. Normalize paths before reading or writing.
 
-## Phase 2: Generate Output
+### 0.3 Write policy
 
-For `new`:
+Routine writes allowed by invocation:
 
-**Generate a sprint plan** following this format and present it to the user. Do NOT ask to write yet — the producer feasibility gate (Phase 4) runs first and may require revisions before the file is written.
+- production/sprints/sprint-[NN]/SPRINT.md
+- production/sprints/current.md
 
-```markdown
-# Sprint [N] -- [Start Date] to [End Date]
+Protected operations require explicit confirmation through `AskUserQuestion`:
 
-## Sprint Goal
-[One sentence describing what this sprint achieves toward the milestone]
+- Overwriting or deleting an existing file.
+- Editing canonical source-of-truth documents outside the declared outputs.
+- Changing statuses, gates, stage files, sprint state, story state, registry entries, or release readiness.
+- Running commands that modify files, install dependencies, generate builds, publish artifacts, deploy, tag, commit, or push.
+- Applying changes whose scope is broader than the user requested.
 
-## Capacity
-- Total days: [X]
-- Buffer (20%): [Y days reserved for unplanned work]
-- Available: [Z days]
+Use `Edit` for targeted changes to existing files. Use `Write` for new files or complete replacement only after the replacement scope is safe and approved.
 
-## Tasks
+### 0.5 Task delegation
 
-### Must Have (Critical Path)
-| ID | Task | Agent/Owner | Est. Days | Dependencies | Acceptance Criteria |
-|----|------|-------------|-----------|-------------|-------------------|
+Use Task subagents only when they materially improve the result. Pass bounded context: the request, relevant source paths, current draft/report, and the exact verdict needed. Do not spawn duplicate reviewers. If review mode is available, use `solo` for no subagents, `lean` for only essential specialist review, and `full` for cross-functional or gate review.
 
-### Should Have
-| ID | Task | Agent/Owner | Est. Days | Dependencies | Acceptance Criteria |
-|----|------|-------------|-----------|-------------|-------------------|
+### 0.8 Missing-file behavior
 
-### Nice to Have
-| ID | Task | Agent/Owner | Est. Days | Dependencies | Acceptance Criteria |
-|----|------|-------------|-----------|-------------|-------------------|
+| Situation | Behavior |
+|---|---|
+| Primary source missing | Continue only if the skill can infer a narrower safe scope; otherwise stop with the exact missing file/folder. |
+| Referenced artifact missing | Record as a gap or blocker instead of inventing content. |
+| Existing target file present | Do not overwrite. Create a proposed dated file or ask for protected confirmation. |
+| Ambiguous scope | Choose the smallest evidence-backed scope; ask only if two or more scopes are equally plausible. |
+| Contradictory sources | Prefer explicit status/source-of-truth documents over generated reports; list the contradiction in the output. |
 
-## Carryover from Previous Sprint
-| Task | Reason | New Estimate |
-|------|--------|-------------|
+## 1. Discover Context
 
-## Risks
-| Risk | Probability | Impact | Mitigation |
-|------|------------|--------|------------|
+Read only the sources needed for the requested scope. Start with indexes, manifests, registries, and status files before reading large documents.
 
-## Dependencies on External Factors
-- [List any external dependencies]
+Primary sources:
 
-## Definition of Done for this Sprint
-- [ ] All Must Have tasks completed
-- [ ] All tasks pass acceptance criteria
-- [ ] QA plan exists (`production/qa/qa-plan-sprint-[N].md`)
-- [ ] All Logic/Integration stories have passing unit/integration tests
-- [ ] Smoke check passed (`/smoke-check sprint`)
-- [ ] QA sign-off report: APPROVED or APPROVED WITH CONDITIONS (`/team-qa sprint`)
-- [ ] No S1 or S2 bugs in delivered features
-- [ ] Design documents updated for any deviations
-- [ ] Code reviewed and merged
-```
+- production/milestones/**
+- production/sprints/**
+- production/epics/**
+- production/stories/**
+- production/qa/**
+- docs/architecture/**
+- design/gdd/**
 
-For `status`:
+Discovery rules:
 
-**Generate a status report**:
+1. Prefer canonical source-of-truth files over generated reports.
+2. Use `Glob` and `Grep` before reading large files.
+3. Keep a source list for the final report or artifact.
+4. When many files match, read the most relevant 5 to 10 first and summarize the rest as candidates.
+5. Treat missing or draft-status dependencies as blockers, not as approval to invent content.
 
-```markdown
-# Sprint [N] Status -- [Date]
+## 2. Build the Working Model
 
-## Progress: [X/Y tasks complete] ([Z%])
+Use the discovered evidence to build a concise working model before producing output.
 
-### Completed
-| Task | Completed By | Notes |
-|------|-------------|-------|
+1. Determine current or next sprint number and planning horizon.
+2. Select only Ready stories unless explicitly creating a blocked/backlog section.
+3. Balance capacity across implementation, QA, polish, bug fixing, and integration.
+4. Write a sprint plan with goals, committed work, stretch work, dependencies, risks, and QA evidence expectations.
+5. Do not mark stories in progress or done; status changes require explicit confirmation.
 
-### In Progress
-| Task | Owner | % Done | Blockers |
-|------|-------|--------|----------|
+Classification rules:
 
-### Not Started
-| Task | Owner | At Risk? | Notes |
-|------|-------|----------|-------|
+- **Blocking**: prevents safe implementation, review, release, or downstream skill execution.
+- **High**: likely to cause rework, wrong implementation, invalid QA, or broken traceability.
+- **Medium**: weakens handoff quality but can be resolved during normal follow-up.
+- **Low**: cleanup, clarity, or optional improvement.
 
-### Blocked
-| Task | Blocker | Owner of Blocker | ETA |
-|------|---------|-----------------|-----|
+## 3. Produce the Artifact
 
-## Burndown Assessment
-[On track / Behind / Ahead]
-[If behind: What is being cut or deferred]
+Canonical outputs for this skill:
 
-## Emerging Risks
-- [Any new risks identified this sprint]
-```
+- production/sprints/sprint-[NN]/SPRINT.md
+- production/sprints/current.md
 
----
+Artifact requirements:
 
-## Phase 3: Write Sprint Status File
+1. Include scope, date, source list, assumptions, and confidence.
+2. Separate facts from recommendations and inferred conclusions.
+3. Include explicit next actions and the command that should be run next.
+4. Preserve historical information; prefer additive notes over destructive rewrites.
+5. When updating an index or manifest, append or update only the relevant row and preserve unrelated content.
 
-After generating a new sprint plan, also write `production/sprint-status.yaml`.
-This is the machine-readable source of truth for story status — read by
-`/sprint-status`, `/story-done`, and `/help` without markdown parsing.
+Required report sections:
 
-Ask: "May I also write `production/sprint-status.yaml` to track story status?"
+- Sprint path
+- Committed stories
+- Blocked/backlog stories
+- Capacity assumptions
+- Risks
+- QA plan hooks
+- Next command
 
-Format:
+## 4. Validation
 
-```yaml
-# Auto-generated by /sprint-plan. Updated by /story-done.
-# DO NOT edit manually — use /story-done to update story status.
+1. Check that every conclusion cites or names a repository source.
+2. Check that all blockers have a concrete next action.
+3. Check that proposed writes stay within the declared output paths.
+4. Check that dry-run mode produced no writes.
+5. Summarize any subagent verdicts and unresolved disagreements.
 
-sprint: [N]
-goal: "[sprint goal]"
-start: "[YYYY-MM-DD]"
-end: "[YYYY-MM-DD]"
-generated: "[YYYY-MM-DD]"
-updated: "[YYYY-MM-DD]"
+Stop conditions:
 
-stories:
-  - id: "[epic-story, e.g. 1-1]"
-    name: "[story name]"
-    file: "[production/stories/path.md]"
-    priority: must-have        # must-have | should-have | nice-to-have
-    status: ready-for-dev      # backlog | ready-for-dev | in-progress | review | done | blocked
-    owner: ""
-    estimate_days: 0
-    blocker: ""
-    completed: ""
-```
+- No ready stories or sprint goal can be inferred.
 
-Initialize each story from the sprint plan's task tables:
-- Must Have tasks → `priority: must-have`, `status: ready-for-dev`
-- Should Have tasks → `priority: should-have`, `status: backlog`
-- Nice to Have tasks → `priority: nice-to-have`, `status: backlog`
+## 5. Final Response
 
-For `update`: read the existing `sprint-status.yaml`, carry over statuses for
-stories that haven't changed, add new stories, remove dropped ones.
-
----
-
-## Phase 4: Producer Feasibility Gate
-
-**Review mode check** — apply before spawning PR-SPRINT:
-- `solo` → skip. Note: "PR-SPRINT skipped — Solo mode." Proceed to Phase 5 (QA plan gate).
-- `lean` → skip (not a PHASE-GATE). Note: "PR-SPRINT skipped — Lean mode." Proceed to Phase 5 (QA plan gate).
-- `full` → spawn as normal.
-
-Before finalising the sprint plan, spawn `producer` via Task using gate **PR-SPRINT** (`.claude/docs/director-gates.md`).
-
-Pass: proposed story list (titles, estimates, dependencies), total team capacity in hours/days, any carryover from the previous sprint, milestone constraints and deadline.
-
-Present the producer's assessment. If UNREALISTIC, revise the story selection (defer stories to Should Have or Nice to Have) before asking for write approval. If CONCERNS, surface them and let the user decide whether to adjust.
-
-After handling the producer's verdict, ask: "May I write this sprint plan to `production/sprints/sprint-[N].md`?" If yes, write the file, creating the directory if needed. Verdict: **COMPLETE** — sprint plan created. If no: Verdict: **BLOCKED** — user declined write.
-
-After writing, add:
-
-> **Scope check:** If this sprint includes stories added beyond the original epic scope, run `/scope-check [epic]` to detect scope creep before implementation begins.
-
----
-
-## Phase 5: QA Plan Gate
-
-Before closing the sprint plan, check whether a QA plan exists for this sprint.
-
-Use `Glob` to look for `production/qa/qa-plan-sprint-[N].md` or any file in `production/qa/` referencing this sprint number.
-
-**If a QA plan is found**: note it in the sprint plan output — "QA Plan: `[path]`" — and proceed.
-
-**If no QA plan exists**: do not silently proceed. Surface this explicitly:
-
-> "This sprint has no QA plan. A sprint plan without a QA plan means test requirements are undefined — developers won't know what 'done' looks like from a QA perspective, and the sprint cannot pass the Production → Polish gate without one.
->
-> Run `/qa-plan sprint` now, before starting any implementation. It takes one session and produces the test case requirements each story needs."
-
-Use `AskUserQuestion`:
-- Prompt: "No QA plan found for this sprint. How do you want to proceed?"
-- Options:
-  - `[A] Run /qa-plan sprint now — I'll do that before starting implementation (Recommended)`
-  - `[B] Skip for now — I understand QA sign-off will be blocked at the Production → Polish gate`
-
-If [A]: close with "Sprint plan written. Run `/qa-plan sprint` next — then begin implementation."
-If [B]: add a warning block to the sprint plan document:
-
-```markdown
-> ⚠️ **No QA Plan**: This sprint was started without a QA plan. Run `/qa-plan sprint`
-> before the last story is implemented. The Production → Polish gate requires a QA
-> sign-off report, which requires a QA plan.
-```
-
----
-
-## Phase 6: Next Steps
-
-After the sprint plan is written and QA plan status is resolved:
-
-- `/qa-plan sprint` — **required before implementation begins** — defines test cases per story so developers implement against QA specs, not a blank slate
-- `/story-readiness [story-file]` — validate a story is ready before starting it
-- `/dev-story [story-file]` — begin implementing the first story
-- `/sprint-status` — check progress mid-sprint
-- `/scope-check [epic]` — verify no scope creep before implementation begins
+End with a concise summary of what was written, what was skipped because it was protected or unsafe, validation results, and the recommended next command. Include file paths for every artifact created or proposed.

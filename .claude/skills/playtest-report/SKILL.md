@@ -1,146 +1,136 @@
 ---
 name: playtest-report
 description: "Generates a structured playtest report template or analyzes existing playtest notes into a structured format. Use this to standardize playtest feedback collection and analysis."
-argument-hint: "[new|analyze path-to-notes] [--review full|lean|solo]"
+argument-hint: "[new|analyze path-to-notes] [--review full|lean|solo] [--dry-run]"
 user-invocable: true
-allowed-tools: Read, Glob, Grep, Write, Task, AskUserQuestion
+allowed-tools: Read, Glob, Grep, Write, Edit, Task, AskUserQuestion
 ---
 
-## Phase 1: Parse Arguments
-
-Resolve the review mode (once, store for all gate spawns this run):
-1. If `--review [full|lean|solo]` was passed → use that
-2. Else read `production/review-mode.txt` → use that value
-3. Else → default to `lean`
-
-See `.claude/docs/director-gates.md` for the full check pattern.
-
-Determine the mode:
-
-- `new` → generate a blank playtest report template
-- `analyze [path]` → read raw notes and fill in the template with structured findings
-
----
-
-## Phase 2A: New Template Mode
-
-Generate this template and output it to the user:
-
-```markdown
 # Playtest Report
 
-## Session Info
-- **Date**: [Date]
-- **Build**: [Version/Commit]
-- **Duration**: [Time played]
-- **Tester**: [Name/ID]
-- **Platform**: [PC/Console/Mobile]
-- **Input Method**: [KB+M / Gamepad / Touch]
-- **Session Type**: [First time / Returning / Targeted test]
+Convert playtest notes, observations, telemetry summaries, or planned session goals into a structured report with findings, severity, and design follow-ups.
 
-## Test Focus
-[What specific features or flows were being tested]
+## 0. Execution Contract
 
-## First Impressions (First 5 minutes)
-- **Understood the goal?** [Yes/No/Partially]
-- **Understood the controls?** [Yes/No/Partially]
-- **Emotional response**: [Engaged/Confused/Bored/Frustrated/Excited]
-- **Notes**: [Observations]
+### 0.1 Invocation and autonomy
 
-## Gameplay Flow
-### What worked well
-- [Observation 1]
+Supported modes:
 
-### Pain points
-- [Issue 1 -- Severity: High/Medium/Low]
+- template: create a playtest report template
+- notes path: summarize existing notes
+- session name: infer current session
 
-### Confusion points
-- [Where the player was confused and why]
+The invocation authorizes routine repository-local work for this skill. Operate autonomously after resolving scope; do not ask the user to approve every normal file creation. Ask only for protected operations, destructive ambiguity, or missing source-of-truth decisions that cannot be inferred safely.
 
-### Moments of delight
-- [What surprised or pleased the player]
+If `--dry-run` is present, perform discovery and produce the complete proposed result, but do not call `Write` or `Edit`.
 
-## Bugs Encountered
-| # | Description | Severity | Reproducible |
-|---|-------------|----------|-------------|
+### 0.2 Path safety
 
-## Feature-Specific Feedback
-### [Feature 1]
-- **Understood purpose?** [Yes/No]
-- **Found engaging?** [Yes/No]
-- **Suggestions**: [Tester suggestions]
+All user-supplied paths must be repository-relative. Reject absolute paths, paths containing `..`, and paths outside the expected project roots for this skill. Normalize paths before reading or writing.
 
-## Quantitative Data (if available)
-- **Deaths**: [Count and locations]
-- **Time per area**: [Breakdown]
-- **Items used**: [What and when]
-- **Features discovered vs missed**: [List]
+### 0.3 Write policy
 
-## Overall Assessment
-- **Would play again?** [Yes/No/Maybe]
-- **Difficulty**: [Too Easy / Just Right / Too Hard]
-- **Pacing**: [Too Slow / Good / Too Fast]
-- **Session length preference**: [Shorter / Good / Longer]
+Routine writes allowed by invocation:
 
-## Top 3 Priorities from this session
-1. [Most important finding]
-2. [Second priority]
-3. [Third priority]
-```
+- production/playtests/reports/playtest-report-[slug-or-date].md
 
----
+Protected operations require explicit confirmation through `AskUserQuestion`:
 
-## Phase 2B: Analyze Mode
+- Overwriting or deleting an existing file.
+- Editing canonical source-of-truth documents outside the declared outputs.
+- Changing statuses, gates, stage files, sprint state, story state, registry entries, or release readiness.
+- Running commands that modify files, install dependencies, generate builds, publish artifacts, deploy, tag, commit, or push.
+- Applying changes whose scope is broader than the user requested.
 
-Read the raw notes at the provided path. Cross-reference with existing design documents. Fill in the template above with structured findings. Flag any playtest observations that conflict with design intent.
+Use `Edit` for targeted changes to existing files. Use `Write` for new files or complete replacement only after the replacement scope is safe and approved.
 
----
+### 0.5 Task delegation
 
-## Phase 3: Action Routing
+Use Task subagents only when they materially improve the result. Pass bounded context: the request, relevant source paths, current draft/report, and the exact verdict needed. Do not spawn duplicate reviewers. If review mode is available, use `solo` for no subagents, `lean` for only essential specialist review, and `full` for cross-functional or gate review.
 
-Categorize all findings into four buckets:
+### 0.8 Missing-file behavior
 
-- **Design changes needed** — fun issues, player confusion, broken mechanics, observations that conflict with the GDD's intended experience
-- **Balance adjustments** — numbers feel wrong, difficulty too spiked or too flat
-- **Bug reports** — clear implementation defects that are reproducible
-- **Polish items** — not blocking progress, but friction or feel issues for later
+| Situation | Behavior |
+|---|---|
+| Primary source missing | Continue only if the skill can infer a narrower safe scope; otherwise stop with the exact missing file/folder. |
+| Referenced artifact missing | Record as a gap or blocker instead of inventing content. |
+| Existing target file present | Do not overwrite. Create a proposed dated file or ask for protected confirmation. |
+| Ambiguous scope | Choose the smallest evidence-backed scope; ask only if two or more scopes are equally plausible. |
+| Contradictory sources | Prefer explicit status/source-of-truth documents over generated reports; list the contradiction in the output. |
 
-Present the categorized list, then route:
+## 1. Discover Context
 
-- **Design changes:** "Run `/propagate-design-change [path]` on the affected design document to find downstream impacts before making changes."
-- **Balance adjustments:** "Run `/balance-check [system]` to verify the full balance picture before tuning values."
-- **Bugs:** "Use `/bug-report` to formally track these."
-- **Polish items:** "Add to the polish backlog in `production/` when the team reaches that phase."
+Read only the sources needed for the requested scope. Start with indexes, manifests, registries, and status files before reading large documents.
 
----
+Primary sources:
 
-## Phase 3b: Creative Director Player Experience Review
+- production/playtests/**
+- production/qa/evidence/**
+- design/gdd/**
+- production/sprints/**
+- production/qa/bugs/**
 
-**Review mode check** — apply before spawning CD-PLAYTEST:
-- `solo` → skip. Note: "CD-PLAYTEST skipped — Solo mode." Proceed to Phase 4 (save the report).
-- `lean` → skip (not a PHASE-GATE). Note: "CD-PLAYTEST skipped — Lean mode." Proceed to Phase 4 (save the report).
-- `full` → spawn as normal.
+Discovery rules:
 
-After categorising findings, spawn `creative-director` via Task using gate **CD-PLAYTEST** (`.claude/docs/director-gates.md`).
+1. Prefer canonical source-of-truth files over generated reports.
+2. Use `Glob` and `Grep` before reading large files.
+3. Keep a source list for the final report or artifact.
+4. When many files match, read the most relevant 5 to 10 first and summarize the rest as candidates.
+5. Treat missing or draft-status dependencies as blockers, not as approval to invent content.
 
-Pass: the structured report content, game pillars and core fantasy (from `design/gdd/game-concept.md`), the specific hypothesis being tested.
+## 2. Build the Working Model
 
-Present the creative director's assessment before saving the report. If CONCERNS or REJECT, add a `## Creative Director Assessment` section to the report capturing the verdict and feedback. If APPROVE, note the approval in the report.
+Use the discovered evidence to build a concise working model before producing output.
 
----
+1. Resolve session scope and evidence.
+2. Separate observations, player quotes, telemetry, tester notes, bugs, and design interpretation.
+3. Classify findings by player impact and confidence.
+4. Create bug-report follow-up recommendations but do not create bug files unless explicitly requested.
+5. Write report with next design/QA actions.
 
-## Phase 4: Save Report
+Classification rules:
 
-Ask: "May I write this playtest report to `production/qa/playtests/playtest-[date]-[tester].md`?"
+- **Blocking**: prevents safe implementation, review, release, or downstream skill execution.
+- **High**: likely to cause rework, wrong implementation, invalid QA, or broken traceability.
+- **Medium**: weakens handoff quality but can be resolved during normal follow-up.
+- **Low**: cleanup, clarity, or optional improvement.
 
-If yes, write the file, creating the directory if needed.
+## 3. Produce the Artifact
 
----
+Canonical outputs for this skill:
 
-## Phase 5: Next Steps
+- production/playtests/reports/playtest-report-[slug-or-date].md
 
-Verdict: **COMPLETE** — playtest report generated.
+Artifact requirements:
 
-- Act on the highest-priority finding category first.
-- After addressing design changes: re-run `/design-review` on the updated GDD.
-- After fixing bugs: re-run `/bug-triage` to update priorities.
+1. Include scope, date, source list, assumptions, and confidence.
+2. Separate facts from recommendations and inferred conclusions.
+3. Include explicit next actions and the command that should be run next.
+4. Preserve historical information; prefer additive notes over destructive rewrites.
+5. When updating an index or manifest, append or update only the relevant row and preserve unrelated content.
+
+Required report sections:
+
+- Session context
+- Top findings
+- Evidence summary
+- Design implications
+- Bug candidates
+- Action items
+- Confidence
+
+## 4. Validation
+
+1. Check that every conclusion cites or names a repository source.
+2. Check that all blockers have a concrete next action.
+3. Check that proposed writes stay within the declared output paths.
+4. Check that dry-run mode produced no writes.
+5. Summarize any subagent verdicts and unresolved disagreements.
+
+Stop conditions:
+
+- No blocking stop condition was encountered.
+
+## 5. Final Response
+
+End with a concise summary of what was written, what was skipped because it was protected or unsafe, validation results, and the recommended next command. Include file paths for every artifact created or proposed.

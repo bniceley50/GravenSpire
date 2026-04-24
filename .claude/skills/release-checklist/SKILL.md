@@ -1,181 +1,384 @@
 ---
 name: release-checklist
-description: "Generates a comprehensive pre-release validation checklist covering build verification, certification requirements, store metadata, and launch readiness."
-argument-hint: "[platform: pc|console|mobile|all]"
+description: "Generate a pre-release validation checklist from repository evidence. Covers build verification, QA gates, platform readiness, store/distribution prep, support readiness, and go/no-go sign-offs."
+argument-hint: "[platform: pc|console|mobile|all] [version:<version>] [--dry-run]"
 user-invocable: true
 allowed-tools: Read, Glob, Grep, Write
 ---
 
-> **Explicit invocation only**: This skill should only run when the user explicitly requests it with `/release-checklist`. Do not auto-invoke based on context matching.
+# Release Checklist
 
-## Phase 1: Parse Arguments
+Generate a repository-local release checklist. This skill does not build, tag, publish, upload, submit, deploy, notify users, or alter release state. It only reads project evidence and writes a checklist artifact.
 
-Read the argument for the target platform (`pc`, `console`, `mobile`, or `all`). If no platform is specified, default to `all`.
+Output:
+
+```text
+production/releases/release-checklist-[version-or-date]-[platform].md
+```
+
+The user's invocation authorizes writing the checklist. Do not ask for confirmation before routine checklist creation.
 
 ---
 
-## Phase 2: Load Project Context
+## 0. Execution Contract
 
-- Read `CLAUDE.md` for project context, version information, and platform targets.
-- Read the current milestone from `production/milestones/` to understand what features and content should be included in this release.
+### 0.1 Parse invocation
+
+Supported platform arguments:
+
+| Argument | Scope |
+|---|---|
+| `pc` | PC/desktop release. |
+| `console` | Console release. |
+| `mobile` | Mobile release. |
+| `all` or blank | All relevant platform sections. |
+
+Optional version argument:
+
+```text
+version:1.0.0
+```
+
+If no version is supplied, infer it from repository evidence in this order:
+
+1. `AGENTS.md` release/version field.
+2. `production/milestones/` current release milestone.
+3. Project config files with version fields.
+4. Latest changelog or patch-notes artifact.
+5. `unknown-version-[YYYYMMDD]`.
+
+`--dry-run` means produce the checklist in conversation only; do not write.
+
+### 0.2 Path safety and writes
+
+Allowed write location:
+
+```text
+production/releases/
+```
+
+Reject absolute paths and paths containing `..`. If the target file already exists, create a numbered variant instead of overwriting.
+
+Do not modify:
+
+- Source code.
+- Tests.
+- QA reports.
+- Stage files.
+- Release status files.
+- CI/deploy configuration.
+- Git tags or branches.
+- External store/platform accounts.
+
+### 0.3 Evidence policy
+
+Use repository evidence when available. If evidence is missing, create an unchecked checklist item and mark the source as missing. Do not claim compliance with external certification, store, legal, or privacy requirements unless the repository contains evidence.
+
+For platform certification requirements, write generic validation items and require the team to verify against the current official platform holder documentation.
 
 ---
 
-## Phase 3: Scan Codebase
+## 1. Load Release Context
 
-Scan for outstanding issues:
+Read if present:
 
-- Count `TODO` comments
-- Count `FIXME` comments
-- Count `HACK` comments
-- Note their locations and severity
+- `AGENTS.md`.
+- `production/stage.txt`.
+- Current milestone in `production/milestones/`.
+- Latest sprint status or sprint plan in `production/sprints/`.
+- Latest `production/qa/smoke-*.md`.
+- Latest `production/qa/qa-signoff-*.md`.
+- `production/qa/bugs/*.md`.
+- `production/releases/*`.
+- `CHANGELOG.md`, `changelog.md`, or `production/changelog*.md`.
+- `production/patch-notes*.md`.
+- `docs/engine-reference/*/VERSION.md`.
+- `.claude/docs/technical-preferences.md`.
 
-Check for test results in any test output directories or CI logs if available.
+Extract:
+
+- Project name.
+- Version.
+- Engine and version.
+- Target platforms.
+- Current milestone/release scope.
+- QA verdicts.
+- Open bugs by severity.
+- Known issues.
+- Existing release artifacts.
 
 ---
 
-## Phase 4: Generate the Release Checklist
+## 2. Scan Repository Health
 
-```markdown
-## Release Checklist: [Version] -- [Platform]
-Generated: [Date]
+Use `Grep`/`Glob` to inspect the repository for release risk signals:
 
-### Codebase Health
-- TODO count: [N] ([list top 5 if many])
-- FIXME count: [N] ([list all -- these are potential blockers])
-- HACK count: [N] ([list all -- these need review])
+- `TODO`.
+- `FIXME`.
+- `HACK`.
+- `TEMP`.
+- `PLACEHOLDER`.
+- `WIP`.
+- `XXX`.
 
-### Build Verification
-- [ ] Clean build succeeds on all target platforms
-- [ ] No compiler warnings (zero-warning policy)
-- [ ] All assets included and loading correctly
-- [ ] Build size within budget ([target size])
-- [ ] Build version number correctly set ([version])
-- [ ] Build is reproducible from tagged commit
+Exclude obviously irrelevant directories when possible:
 
-### Quality Gates
-- [ ] Zero S1 (Critical) bugs
-- [ ] Zero S2 (Major) bugs -- or documented exceptions with producer approval
-- [ ] All critical path features tested and signed off by QA
-- [ ] Performance within budgets:
-  - [ ] Target FPS met on minimum spec hardware
-  - [ ] Memory usage within budget
-  - [ ] Load times within budget
-  - [ ] No memory leaks over extended play sessions
-- [ ] No regression from previous build
-- [ ] Soak test passed (4+ hours continuous play)
-
-### Content Complete
-- [ ] All placeholder assets replaced with final versions
-- [ ] All TODO/FIXME in content files resolved or documented
-- [ ] All player-facing text proofread
-- [ ] All text localization-ready (no hardcoded strings)
-- [ ] Audio mix finalized and approved
-- [ ] Credits complete and accurate
+```text
+.git/
+node_modules/
+Library/
+Temp/
+Build/
+build/
+dist/
+.import/
 ```
 
-Add platform-specific sections based on the argument:
+Classify findings:
 
-**For `pc`:**
+| Marker | Release impact |
+|---|---|
+| `FIXME` | Potential blocker. |
+| `HACK` | Needs review. |
+| `TODO` | Advisory unless in release-critical path. |
+| `PLACEHOLDER` | Content-completeness risk. |
+| `WIP` / `TEMP` / `XXX` | Potential blocker depending on location. |
+
+Also inspect known bug reports:
+
+| Severity | Release rule |
+|---|---|
+| S1 | Blocker. |
+| S2 | Blocker unless formal exception exists. |
+| S3 | Condition or deferral candidate. |
+| S4 | Advisory. |
+
+---
+
+## 3. Determine Readiness Inputs
+
+Summarize evidence:
+
+| Area | Evidence source | Status |
+|---|---|---|
+| Smoke check | Latest `production/qa/smoke-*.md` | PASS/PASS WITH WARNINGS/FAIL/Missing |
+| QA sign-off | Latest `qa-signoff` | APPROVED/APPROVED WITH CONDITIONS/NOT APPROVED/Missing |
+| Open bugs | `production/qa/bugs/` | counts by severity |
+| Changelog | `CHANGELOG.md` or production changelog | Present/Missing |
+| Patch notes | `production/patch-notes*` | Present/Missing |
+| Release artifacts | `production/releases/` | Present/Missing |
+| Engine reference | `docs/engine-reference/*/VERSION.md` | Present/Missing |
+
+Use this to set preliminary go/no-go:
+
+| Result | Conditions |
+|---|---|
+| `READY CANDIDATE` | Smoke PASS, QA APPROVED, no open S1/S2 bugs, no known release blockers. |
+| `READY WITH CONDITIONS` | Smoke PASS WITH WARNINGS or QA APPROVED WITH CONDITIONS and no S1/S2 blockers. |
+| `NOT READY` | Smoke FAIL, QA NOT APPROVED, open S1 bug, open S2 bug without exception, or missing critical evidence. |
+
+---
+
+## 4. Generate Checklist
+
+Use this structure.
+
 ```markdown
-### Platform Requirements: PC
-- [ ] Minimum and recommended specs verified and documented
-- [ ] Keyboard+mouse controls fully functional
-- [ ] Controller support tested (Xbox, PlayStation, generic)
-- [ ] Resolution scaling tested (1080p, 1440p, 4K, ultrawide)
-- [ ] Windowed, borderless, and fullscreen modes working
-- [ ] Graphics settings save and load correctly
-- [ ] Steam/Epic/GOG SDK integrated and tested
-- [ ] Achievements functional
-- [ ] Cloud saves functional
-- [ ] Steam Deck compatibility verified (if targeting)
+# Release Checklist: [Project] [Version] — [Platform]
+
+Generated: [YYYY-MM-DD]
+Preliminary Go/No-Go: [READY CANDIDATE | READY WITH CONDITIONS | NOT READY]
+
+## Evidence Summary
+
+| Area | Evidence | Status | Notes |
+|------|----------|--------|-------|
+| Smoke Check | [path/missing] | [status] | [notes] |
+| QA Sign-Off | [path/missing] | [status] | [notes] |
+| Open Bugs | [count] | [status] | [S1/S2/S3/S4 counts] |
+| Changelog | [path/missing] | [status] | [notes] |
+| Patch Notes | [path/missing] | [status] | [notes] |
+
+## Codebase Health
+
+- [ ] Review TODO/FIXME/HACK/PLACEHOLDER findings.
+- [ ] Resolve or formally defer release-critical findings.
+- [ ] Confirm no debug-only paths remain in player-facing builds.
+- [ ] Confirm logging level is appropriate for release.
+
+### Marker Findings
+
+| Marker | Count | Highest Risk Locations |
+|--------|-------|------------------------|
+| TODO | [N] | [top paths] |
+| FIXME | [N] | [top paths] |
+| HACK | [N] | [top paths] |
+| PLACEHOLDER | [N] | [top paths] |
+
+## Build Verification
+
+- [ ] Clean build succeeds for every target platform.
+- [ ] Build version matches `[version]`.
+- [ ] Build number / bundle identifier / package name are correct.
+- [ ] Build is reproducible from a known commit.
+- [ ] No release-blocking compiler or packaging warnings.
+- [ ] Build size is within target budget or exception is documented.
+- [ ] Required runtime dependencies are packaged.
+- [ ] Debug/dev-only flags are disabled unless intentionally shipping.
+
+## Quality Gates
+
+- [ ] Latest smoke check is PASS or accepted PASS WITH WARNINGS.
+- [ ] Latest QA sign-off is APPROVED or accepted APPROVED WITH CONDITIONS.
+- [ ] No open S1 bugs.
+- [ ] No open S2 bugs unless formal release exception exists.
+- [ ] All release-critical stories are Done/Closed.
+- [ ] Regression suite has been run or exception is documented.
+- [ ] Soak test completed or explicitly waived.
+- [ ] Performance budgets verified on target hardware/profile.
+
+## Content Complete
+
+- [ ] Placeholder assets replaced or explicitly accepted.
+- [ ] Player-facing text proofread.
+- [ ] Localization readiness confirmed for supported languages.
+- [ ] Credits complete and accurate.
+- [ ] Third-party license notices complete.
+- [ ] Audio mix and visual polish sign-offs completed.
+
+## Store and Distribution
+
+- [ ] Store metadata complete.
+- [ ] Screenshots and trailers current for this build.
+- [ ] Key art/capsule art current.
+- [ ] Age rating process complete or scheduled.
+- [ ] EULA, privacy policy, and legal notices available.
+- [ ] Pricing and regional availability configured.
+- [ ] Support contact and known-issues page prepared.
+
+## Launch Operations
+
+- [ ] Crash reporting configured and monitored.
+- [ ] Analytics/telemetry verified where applicable.
+- [ ] Rollback or hotfix plan documented.
+- [ ] On-call/support coverage defined for launch window.
+- [ ] Community/support FAQ prepared.
+- [ ] Day-one patch plan documented if needed.
 ```
 
-**For `console`:**
+### 4.1 PC section
+
+Include for `pc` or `all`:
+
 ```markdown
-### Platform Requirements: Console
-- [ ] TRC/TCR/Lotcheck requirements checklist complete
-- [ ] Platform-specific controller prompts display correctly
-- [ ] Suspend/resume works correctly
-- [ ] User switching handled properly
-- [ ] Network connectivity loss handled gracefully
-- [ ] Storage full scenario handled
-- [ ] Parental controls respected
-- [ ] Platform-specific achievement/trophy integration tested
-- [ ] First-party certification submission prepared
+## Platform Requirements — PC
+
+- [ ] Minimum and recommended specs verified.
+- [ ] Keyboard and mouse path tested.
+- [ ] Controller path tested if supported.
+- [ ] Windowed, borderless, fullscreen modes tested.
+- [ ] Common resolutions and ultrawide behavior tested.
+- [ ] Graphics/audio/input settings persist correctly.
+- [ ] PC storefront SDK features tested if integrated.
+- [ ] Steam Deck or handheld-PC behavior tested if targeted.
 ```
 
-**For `mobile`:**
+### 4.2 Console section
+
+Include for `console` or `all`:
+
 ```markdown
-### Platform Requirements: Mobile
-- [ ] App store guidelines compliance verified
-- [ ] All required device permissions justified and documented
-- [ ] Privacy policy linked and accurate
-- [ ] Data safety/nutrition labels completed
-- [ ] Touch controls tested on multiple screen sizes
-- [ ] Battery usage within acceptable range
-- [ ] Background behavior correct (pause, resume, terminate)
-- [ ] Push notification permissions handled correctly
-- [ ] In-app purchase flow tested (if applicable)
-- [ ] App size within store limits
+## Platform Requirements — Console
+
+- [ ] Current first-party certification checklist reviewed against official docs.
+- [ ] Controller prompts and platform terminology correct.
+- [ ] Suspend/resume behavior tested.
+- [ ] User/profile switching handled.
+- [ ] Storage-full and network-loss scenarios handled.
+- [ ] Safe-zone and TV readability verified.
+- [ ] Achievement/trophy integration tested if applicable.
+- [ ] Certification package prepared and internally reviewed.
 ```
 
-**Store and launch sections (all platforms):**
+### 4.3 Mobile section
+
+Include for `mobile` or `all`:
+
 ```markdown
-### Store / Distribution
-- [ ] Store page metadata complete and proofread
-  - [ ] Short description
-  - [ ] Long description
-  - [ ] Feature list
-  - [ ] System requirements (PC)
-- [ ] Screenshots up to date and per-platform resolution requirements met
-- [ ] Trailers up to date
-- [ ] Key art and capsule images current
-- [ ] Age rating obtained and configured:
-  - [ ] ESRB
-  - [ ] PEGI
-  - [ ] Other regional ratings as required
-- [ ] Legal notices, EULA, and privacy policy in place
-- [ ] Third-party license attributions complete
-- [ ] Pricing configured for all regions
+## Platform Requirements — Mobile
 
-### Launch Readiness
-- [ ] Analytics / telemetry verified and receiving data
-- [ ] Crash reporting configured and dashboard accessible
-- [ ] Day-one patch prepared and tested (if needed)
-- [ ] On-call team schedule set for first 72 hours
-- [ ] Community launch announcements drafted
-- [ ] Press/influencer keys prepared for distribution
-- [ ] Support team briefed on known issues and FAQ
-- [ ] Rollback plan documented (if critical issues found post-launch)
+- [ ] Current app-store policy checklist reviewed against official docs.
+- [ ] Required permissions justified and documented.
+- [ ] Privacy/data-safety labels complete.
+- [ ] Touch controls verified across supported screen sizes.
+- [ ] Orientation and background/foreground behavior tested.
+- [ ] Battery, thermal, and memory behavior acceptable.
+- [ ] In-app purchase or ad flows tested if applicable.
+- [ ] App size and asset delivery constraints checked.
+```
 
-### Go / No-Go: [READY / NOT READY]
+### 4.4 Sign-offs
 
-**Rationale:**
-[Summary of readiness assessment. List any blocking items that must be
-resolved before launch. If NOT READY, list the specific items that need
-resolution and estimated time to address them.]
+```markdown
+## Go / No-Go
 
-**Sign-offs Required:**
+Preliminary verdict: [READY CANDIDATE | READY WITH CONDITIONS | NOT READY]
+
+### Blockers
+
+- [blocker or None]
+
+### Conditions
+
+- [condition or None]
+
+### Sign-Offs Required
+
 - [ ] QA Lead
 - [ ] Technical Director
 - [ ] Producer
-- [ ] Creative Director
+- [ ] Creative Director / Product Owner
+- [ ] Release Manager
+
+### Final Decision
+
+- [ ] GO
+- [ ] NO-GO
+- [ ] GO WITH CONDITIONS: [conditions]
 ```
 
 ---
 
-## Phase 5: Save Checklist
+## 5. Write Checklist
 
-Present the checklist to the user with: total checklist items, number of known blockers (FIXME/HACK counts, known bugs).
+If `--dry-run`, present the checklist and do not write.
 
-Ask: "May I write this to `production/releases/release-checklist-[version].md`?"
+Otherwise:
 
-If yes, write the file, creating the directory if needed.
+1. Create `production/releases/` if missing.
+2. Write to `production/releases/release-checklist-[version]-[platform].md`.
+3. If the target exists, write a numbered variant.
+
+Do not update release status or stage files.
 
 ---
 
-## Phase 6: Next Steps
+## 6. Completion Output
 
-- Run `/gate-check` for a formal phase gate verdict before proceeding to release.
-- Coordinate final sign-offs via `/team-release`.
+End with:
+
+```text
+Verdict: [READY CANDIDATE | READY WITH CONDITIONS | NOT READY | DRY RUN]
+Checklist: [path or not written]
+Blockers: [N]
+Conditions: [N]
+Next best action: [command]
+```
+
+Recommended next actions:
+
+| Preliminary verdict | Next action |
+|---|---|
+| `READY CANDIDATE` | `/team-release` for coordinated sign-off. |
+| `READY WITH CONDITIONS` | Resolve or formally defer listed conditions, then `/team-release`. |
+| `NOT READY` | Resolve blockers, rerun `/smoke-check` and `/team-qa`, then regenerate this checklist. |

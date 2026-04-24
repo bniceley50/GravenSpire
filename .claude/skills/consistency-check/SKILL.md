@@ -1,275 +1,137 @@
 ---
 name: consistency-check
 description: "Scan all GDDs against the entity registry to detect cross-document inconsistencies: same entity with different stats, same item with different values, same formula with different variables. Grep-first approach — reads registry then targets only conflicting GDD sections rather than full document reads."
-argument-hint: "[full | since-last-review | entity:<name> | item:<name>]"
+argument-hint: "[full | since-last-review | entity:<name> | item:<name>] [--dry-run]"
 user-invocable: true
-allowed-tools: Read, Glob, Grep, Write, Edit, Bash
+allowed-tools: Read, Glob, Grep, Write, Edit, Bash, AskUserQuestion
 ---
 
 # Consistency Check
 
-Detects cross-document inconsistencies by comparing all GDDs against the
-entity registry (`design/registry/entities.yaml`). Uses a grep-first approach:
-reads the registry once, then targets only the GDD sections that mention
-registered names — no full document reads unless a conflict needs investigation.
+Detect cross-document inconsistencies between GDDs, entity registries, formulas, item definitions, stat values, and implementation-facing design contracts.
 
-**This skill is the write-time safety net.** It catches what `/design-system`'s
-per-section checks may have missed and what `/review-all-gdds`'s holistic review
-catches too late.
+## 0. Execution Contract
 
-**When to run:**
-- After writing each new GDD (before moving to the next system)
-- Before `/review-all-gdds` (so that skill starts with a clean baseline)
-- Before `/create-architecture` (inconsistencies poison downstream ADRs)
-- On demand: `/consistency-check entity:[name]` to check one entity specifically
+### 0.1 Invocation and autonomy
 
-**Output:** Conflict report + optional registry corrections
+Supported modes:
 
----
+- full: scan all known entities and GDDs
+- since-last-review: focus on changed docs using safe git diff
+- entity:<name>: focus one entity
+- item:<name>: focus one item
 
-## Phase 1: Parse Arguments and Load Registry
+The invocation authorizes routine repository-local work for this skill. Operate autonomously after resolving scope; do not ask the user to approve every normal file creation. Ask only for protected operations, destructive ambiguity, or missing source-of-truth decisions that cannot be inferred safely.
 
-**Modes:**
-- No argument / `full` — check all registered entries against all GDDs
-- `since-last-review` — check only GDDs modified since the last review report
-- `entity:<name>` — check one specific entity across all GDDs
-- `item:<name>` — check one specific item across all GDDs
+If `--dry-run` is present, perform discovery and produce the complete proposed result, but do not call `Write` or `Edit`.
 
-**Load the registry:**
+### 0.2 Path safety
 
-```
-Read path="design/registry/entities.yaml"
-```
+All user-supplied paths must be repository-relative. Reject absolute paths, paths containing `..`, and paths outside the expected project roots for this skill. Normalize paths before reading or writing.
 
-If the file does not exist or has no entries:
-> "Entity registry is empty. Run `/design-system` to write GDDs — the registry
-> is populated automatically after each GDD is completed. Nothing to check yet."
+### 0.3 Write policy
 
-Stop and exit.
+Routine writes allowed by invocation:
 
-Build four lookup tables from the registry:
-- **entity_map**: `{ name → { source, attributes, referenced_by } }`
-- **item_map**: `{ name → { source, value_gold, weight, ... } }`
-- **formula_map**: `{ name → { source, variables, output_range } }`
-- **constant_map**: `{ name → { source, value, unit } }`
+- design/reviews/consistency-check-[YYYYMMDD].md
 
-Count total registered entries. Report:
-```
-Registry loaded: [N] entities, [N] items, [N] formulas, [N] constants
-Scope: [full | since-last-review | entity:name]
-```
+Protected operations require explicit confirmation through `AskUserQuestion`:
 
----
+- Overwriting or deleting an existing file.
+- Editing canonical source-of-truth documents outside the declared outputs.
+- Changing statuses, gates, stage files, sprint state, story state, registry entries, or release readiness.
+- Running commands that modify files, install dependencies, generate builds, publish artifacts, deploy, tag, commit, or push.
+- Applying changes whose scope is broader than the user requested.
 
-## Phase 2: Locate In-Scope GDDs
+Use `Edit` for targeted changes to existing files. Use `Write` for new files or complete replacement only after the replacement scope is safe and approved.
 
-```
-Glob pattern="design/gdd/*.md"
-```
+### 0.4 Bash safety
 
-Exclude: `game-concept.md`, `systems-index.md`, `game-pillars.md` — these are
-not system GDDs.
+Bash is limited to diagnostics and read-only discovery unless the user explicitly approved a protected operation. Safe examples include `git status --short`, `git log`, `git diff --name-only`, existing test commands that do not update snapshots, and local grep/listing commands. Never run package installation, clean/reset, rm, deploy, publish, commit, tag, push, or build upload commands from this skill.
 
-For `since-last-review` mode:
-```bash
-git log --name-only --pretty=format: -- design/gdd/ | grep "\.md$" | sort -u
-```
-Limit to GDDs modified since the most recent `design/gdd/gdd-cross-review-*.md`
-file's creation date.
+### 0.8 Missing-file behavior
 
-Report the in-scope GDD list before scanning.
+| Situation | Behavior |
+|---|---|
+| Primary source missing | Continue only if the skill can infer a narrower safe scope; otherwise stop with the exact missing file/folder. |
+| Referenced artifact missing | Record as a gap or blocker instead of inventing content. |
+| Existing target file present | Do not overwrite. Create a proposed dated file or ask for protected confirmation. |
+| Ambiguous scope | Choose the smallest evidence-backed scope; ask only if two or more scopes are equally plausible. |
+| Contradictory sources | Prefer explicit status/source-of-truth documents over generated reports; list the contradiction in the output. |
 
----
+## 1. Discover Context
 
-## Phase 3: Grep-First Conflict Scan
+Read only the sources needed for the requested scope. Start with indexes, manifests, registries, and status files before reading large documents.
 
-For each registered entry, grep every in-scope GDD for the entry's name.
-Do NOT do full reads — extract only the matching lines and their immediate
-context (-C 3 lines).
+Primary sources:
 
-This is the core optimization: instead of reading 10 GDDs × 400 lines each
-(4,000 lines), you grep 50 entity names × 10 GDDs (50 targeted searches,
-each returning ~10 lines on a hit).
+- design/gdd/**/*.md
+- design/registry/**
+- docs/registry/**
+- production/content/**
+- data/**
+- previous consistency reports
 
-### 3a: Entity Scan
+Discovery rules:
 
-For each entity in entity_map:
+1. Prefer canonical source-of-truth files over generated reports.
+2. Use `Glob` and `Grep` before reading large files.
+3. Keep a source list for the final report or artifact.
+4. When many files match, read the most relevant 5 to 10 first and summarize the rest as candidates.
+5. Treat missing or draft-status dependencies as blockers, not as approval to invent content.
 
-```
-Grep pattern="[entity_name]" glob="design/gdd/*.md" output_mode="content" -C 3
-```
+## 2. Build the Working Model
 
-For each GDD hit, extract the values mentioned near the entity name:
-- any numeric attributes (counts, costs, durations, ranges, rates)
-- any categorical attributes (types, tiers, categories)
-- any derived values (totals, outputs, results)
-- any other attributes registered in entity_map
+Use the discovered evidence to build a concise working model before producing output.
 
-Compare extracted values against the registry entry.
+1. Read registries first, then target only GDD sections and data files that mention those entities or formulas.
+2. Use grep-first discovery to avoid loading irrelevant documents.
+3. Detect divergent names, aliases, stats, formulas, rarity values, unlock rules, costs, and source-of-truth conflicts.
+4. Write a report with canonical-value recommendations; do not rewrite GDDs or registries without explicit confirmation.
+5. Use safe git diff commands only when since-last-review mode needs changed-file discovery.
 
-**Conflict detection:**
-- Registry says `[entity_name].[attribute] = [value_A]`. GDD says `[entity_name] has [value_B]`. → **CONFLICT**
-- Registry says `[item_name].[attribute] = [value_A]`. GDD says `[item_name] is [value_B]`. → **CONFLICT**
-- GDD mentions `[entity_name]` but doesn't specify the attribute. → **NOTE** (no conflict, just unverifiable)
+Classification rules:
 
-### 3b: Item Scan
+- **Blocking**: prevents safe implementation, review, release, or downstream skill execution.
+- **High**: likely to cause rework, wrong implementation, invalid QA, or broken traceability.
+- **Medium**: weakens handoff quality but can be resolved during normal follow-up.
+- **Low**: cleanup, clarity, or optional improvement.
 
-For each item in item_map, grep all GDDs for the item name. Extract:
-- sell price / value / gold value
-- weight
-- stack rules (stackable / non-stackable)
-- category
+## 3. Produce the Artifact
 
-Compare against registry entry values.
+Canonical outputs for this skill:
 
-### 3c: Formula Scan
+- design/reviews/consistency-check-[YYYYMMDD].md
 
-For each formula in formula_map, grep all GDDs for the formula name. Extract:
-- variable names mentioned near the formula
-- output range or cap values mentioned
+Artifact requirements:
 
-Compare against registry entry:
-- Different variable names → **CONFLICT**
-- Output range stated differently → **CONFLICT**
+1. Include scope, date, source list, assumptions, and confidence.
+2. Separate facts from recommendations and inferred conclusions.
+3. Include explicit next actions and the command that should be run next.
+4. Preserve historical information; prefer additive notes over destructive rewrites.
+5. When updating an index or manifest, append or update only the relevant row and preserve unrelated content.
 
-### 3d: Constant Scan
+Required report sections:
 
-For each constant in constant_map, grep all GDDs for the constant name. Extract:
-- Any numeric value mentioned near the constant name
+- Verdict
+- Canonical source map
+- Conflicts by entity/item/formula
+- Impact assessment
+- Recommended fixes
+- Files requiring manual review
 
-Compare against registry value:
-- Different number → **CONFLICT**
+## 4. Validation
 
----
+1. Check that every conclusion cites or names a repository source.
+2. Check that all blockers have a concrete next action.
+3. Check that proposed writes stay within the declared output paths.
+4. Check that dry-run mode produced no writes.
+5. List every Bash command run and whether it was read-only or diagnostic.
 
-## Phase 4: Deep Investigation (Conflicts Only)
+Stop conditions:
 
-For each conflict found in Phase 3, do a targeted full-section read of the
-conflicting GDD to get precise context:
+- No blocking stop condition was encountered.
 
-```
-Read path="design/gdd/[conflicting_gdd].md"
-```
-(Or use Grep with wider context if the file is large)
+## 5. Final Response
 
-Confirm the conflict with full context. Determine:
-1. **Which GDD is correct?** Check the `source:` field in the registry — the
-   source GDD is the authoritative owner. Any other GDD that contradicts it
-   is the one that needs updating.
-2. **Is the registry itself out of date?** If the source GDD was updated after
-   the registry entry was written (check git log), the registry may be stale.
-3. **Is this a genuine design change?** If the conflict represents an intentional
-   design decision, the resolution is: update the source GDD, update the registry,
-   then fix all other GDDs.
-
-For each conflict, classify:
-- **🔴 CONFLICT** — same named entity/item/formula/constant with different values
-  in different GDDs. Must resolve before architecture begins.
-- **⚠️ STALE REGISTRY** — source GDD value changed but registry not updated.
-  Registry needs updating; other GDDs may be correct already.
-- **ℹ️ UNVERIFIABLE** — entity mentioned but no comparable attribute stated.
-  Not a conflict; just noting the reference.
-
----
-
-## Phase 5: Output Report
-
-```
-## Consistency Check Report
-Date: [date]
-Registry entries checked: [N entities, N items, N formulas, N constants]
-GDDs scanned: [N] ([list names])
-
----
-
-### Conflicts Found (must resolve before architecture)
-
-🔴 [Entity/Item/Formula/Constant Name]
-   Registry (source: [gdd]): [attribute] = [value]
-   Conflict in [other_gdd].md: [attribute] = [different_value]
-   → Resolution needed: [which doc to change and to what]
-
----
-
-### Stale Registry Entries (registry behind the GDD)
-
-⚠️ [Entry Name]
-   Registry says: [value] (written [date])
-   Source GDD now says: [new value]
-   → Update registry entry to match source GDD, then check referenced_by docs.
-
----
-
-### Unverifiable References (no conflict, informational)
-
-ℹ️ [gdd].md mentions [entity_name] but states no comparable attributes.
-   No conflict detected. No action required.
-
----
-
-### Clean Entries (no issues found)
-
-✅ [N] registry entries verified across all GDDs with no conflicts.
-
----
-
-Verdict: PASS | CONFLICTS FOUND
-```
-
-**Verdict:**
-- **PASS** — no conflicts. Registry and GDDs agree on all checked values.
-- **CONFLICTS FOUND** — one or more conflicts detected. List resolution steps.
-
----
-
-## Phase 6: Registry Corrections
-
-If stale registry entries were found, ask:
-> "May I update `design/registry/entities.yaml` to fix the [N] stale entries?"
-
-For each stale entry:
-- Update the `value` / attribute field
-- Set `revised:` to today's date
-- Add a YAML comment with the old value: `# was: [old_value] before [date]`
-
-If new entries were found in GDDs that are not in the registry, ask:
-> "Found [N] entities/items mentioned in GDDs that aren't in the registry yet.
-> May I add them to `design/registry/entities.yaml`?"
-
-Only add entries that appear in more than one GDD (true cross-system facts).
-
-**Never delete registry entries.** Set `status: deprecated` if an entry is removed
-from all GDDs.
-
-After writing: Verdict: **COMPLETE** — consistency check finished.
-If conflicts remain unresolved: Verdict: **BLOCKED** — [N] conflicts need manual resolution before architecture begins.
-
-### 6b: Append to Reflexion Log
-
-If any 🔴 CONFLICT entries were found (regardless of whether they were resolved),
-append an entry to `docs/consistency-failures.md` for each conflict:
-
-```markdown
-### [YYYY-MM-DD] — /consistency-check — 🔴 CONFLICT
-**Domain**: [system domain(s) involved]
-**Documents involved**: [source GDD] vs [conflicting GDD]
-**What happened**: [specific conflict — entity name, attribute, differing values]
-**Resolution**: [how it was fixed, or "Unresolved — manual action needed"]
-**Pattern**: [generalised lesson, e.g. "Item values defined in combat GDD were not
-referenced in economy GDD before authoring — always check entities.yaml first"]
-```
-
-Only append if `docs/consistency-failures.md` exists. If the file is missing,
-skip this step silently — do not create the file from this skill.
-
----
-
-## Next Steps
-
-- **If PASS**: Run `/review-all-gdds` for holistic design-theory review, or
-  `/create-architecture` if all MVP GDDs are complete.
-- **If CONFLICTS FOUND**: Fix the flagged GDDs, then re-run
-  `/consistency-check` to confirm resolution.
-- **If STALE REGISTRY**: Update the registry (Phase 6), then re-run to verify.
-- Run `/consistency-check` after writing each new GDD to catch issues early,
-  not at architecture time.
+End with a concise summary of what was written, what was skipped because it was protected or unsafe, validation results, and the recommended next command. Include file paths for every artifact created or proposed.

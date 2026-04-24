@@ -1,121 +1,135 @@
 ---
 name: tech-debt
 description: "Track, categorize, and prioritize technical debt across the codebase. Scans for debt indicators, maintains a debt register, and recommends repayment scheduling."
-argument-hint: "[scan|add|prioritize|report]"
+argument-hint: "[scan|add|prioritize|report] [--dry-run]"
 user-invocable: true
-allowed-tools: Read, Glob, Grep, Write
+allowed-tools: Read, Glob, Grep, Write, Edit, AskUserQuestion
 ---
 
-## Phase 1: Parse Subcommand
+# Tech Debt
 
-Determine the mode from the argument:
+Track, categorize, and prioritize technical debt across code, architecture, tests, tooling, performance, and production process.
 
-- `scan` — Scan the codebase for tech debt indicators
-- `add` — Add a new tech debt entry manually
-- `prioritize` — Re-prioritize the existing debt register
-- `report` — Generate a summary report of current debt status
+## 0. Execution Contract
 
-If no subcommand is provided, output usage and stop. Verdict: **FAIL** — missing required subcommand.
+### 0.1 Invocation and autonomy
 
----
+Supported modes:
 
-## Phase 2A: Scan Mode
+- scan: discover debt indicators
+- add: create one manual debt item
+- prioritize: rank existing debt register
+- report: summarize current debt
 
-Search the codebase for debt indicators:
+The invocation authorizes routine repository-local work for this skill. Operate autonomously after resolving scope; do not ask the user to approve every normal file creation. Ask only for protected operations, destructive ambiguity, or missing source-of-truth decisions that cannot be inferred safely.
 
-- `TODO` comments (count and categorize)
-- `FIXME` comments (these are bugs disguised as debt)
-- `HACK` comments (workarounds that need proper solutions)
-- `@deprecated` markers
-- Duplicated code blocks (similar patterns in multiple files)
-- Files over 500 lines (potential god objects)
-- Functions over 50 lines (potential complexity)
+If `--dry-run` is present, perform discovery and produce the complete proposed result, but do not call `Write` or `Edit`.
 
-Categorize each finding:
+### 0.2 Path safety
 
-- **Architecture Debt**: Wrong abstractions, missing patterns, coupling issues
-- **Code Quality Debt**: Duplication, complexity, naming, missing types
-- **Test Debt**: Missing tests, flaky tests, untested edge cases
-- **Documentation Debt**: Missing docs, outdated docs, undocumented APIs
-- **Dependency Debt**: Outdated packages, deprecated APIs, version conflicts
-- **Performance Debt**: Known slow paths, unoptimized queries, memory issues
+All user-supplied paths must be repository-relative. Reject absolute paths, paths containing `..`, and paths outside the expected project roots for this skill. Normalize paths before reading or writing.
 
-Present the findings to the user.
+### 0.3 Write policy
 
-Ask: "May I write these findings to `docs/tech-debt-register.md`?"
+Routine writes allowed by invocation:
 
-If yes, update the register (append new entries, do not overwrite existing ones). Verdict: **COMPLETE** — scan findings written to register.
+- production/tech-debt/debt-register.md
+- production/tech-debt/debt-report-[YYYYMMDD].md
 
-If no, stop here. Verdict: **BLOCKED** — user declined write.
+Protected operations require explicit confirmation through `AskUserQuestion`:
 
----
+- Overwriting or deleting an existing file.
+- Editing canonical source-of-truth documents outside the declared outputs.
+- Changing statuses, gates, stage files, sprint state, story state, registry entries, or release readiness.
+- Running commands that modify files, install dependencies, generate builds, publish artifacts, deploy, tag, commit, or push.
+- Applying changes whose scope is broader than the user requested.
 
-## Phase 2B: Add Mode
+Use `Edit` for targeted changes to existing files. Use `Write` for new files or complete replacement only after the replacement scope is safe and approved.
 
-Prompt for: description, category, affected files, estimated fix effort, impact if left unfixed.
+### 0.8 Missing-file behavior
 
-Present the new entry to the user.
+| Situation | Behavior |
+|---|---|
+| Primary source missing | Continue only if the skill can infer a narrower safe scope; otherwise stop with the exact missing file/folder. |
+| Referenced artifact missing | Record as a gap or blocker instead of inventing content. |
+| Existing target file present | Do not overwrite. Create a proposed dated file or ask for protected confirmation. |
+| Ambiguous scope | Choose the smallest evidence-backed scope; ask only if two or more scopes are equally plausible. |
+| Contradictory sources | Prefer explicit status/source-of-truth documents over generated reports; list the contradiction in the output. |
 
-Ask: "May I append this entry to `docs/tech-debt-register.md`?"
+## 1. Discover Context
 
-If yes, append the entry. Verdict: **COMPLETE** — entry added to register.
+Read only the sources needed for the requested scope. Start with indexes, manifests, registries, and status files before reading large documents.
 
-If no, stop here. Verdict: **BLOCKED** — user declined write.
+Primary sources:
 
----
+- src/**
+- tests/**
+- docs/architecture/**
+- production/stories/**
+- production/qa/**
+- production/tech-debt/**
+- safe git status/diff names if available
 
-## Phase 2C: Prioritize Mode
+Discovery rules:
 
-Read the debt register at `docs/tech-debt-register.md`.
+1. Prefer canonical source-of-truth files over generated reports.
+2. Use `Glob` and `Grep` before reading large files.
+3. Keep a source list for the final report or artifact.
+4. When many files match, read the most relevant 5 to 10 first and summarize the rest as candidates.
+5. Treat missing or draft-status dependencies as blockers, not as approval to invent content.
 
-Score each item by: `(impact_if_unfixed × frequency_of_encounter) / fix_effort`
+## 2. Build the Working Model
 
-Re-sort the register by priority score and recommend which items to include in the next sprint.
+Use the discovered evidence to build a concise working model before producing output.
 
-Present the re-prioritized register to the user.
+1. Scan for explicit TODO/FIXME/HACK markers, failing evidence, repeated bug clusters, architecture exceptions, missing tests, and stale workarounds.
+2. Normalize debt items with owner/system, impact, risk, payoff, estimated effort, and trigger for repayment.
+3. Prioritize by user impact, release risk, dependency drag, and frequency.
+4. Write reports/register updates but never change implementation code.
+5. Protected edits are required before closing or deleting debt records.
 
-Ask: "May I write the re-prioritized register back to `docs/tech-debt-register.md`?"
+Classification rules:
 
-If yes, write the updated file. Verdict: **COMPLETE** — register re-prioritized and saved.
+- **Blocking**: prevents safe implementation, review, release, or downstream skill execution.
+- **High**: likely to cause rework, wrong implementation, invalid QA, or broken traceability.
+- **Medium**: weakens handoff quality but can be resolved during normal follow-up.
+- **Low**: cleanup, clarity, or optional improvement.
 
-If no, stop here. Verdict: **BLOCKED** — user declined write.
+## 3. Produce the Artifact
 
----
+Canonical outputs for this skill:
 
-## Phase 2D: Report Mode
+- production/tech-debt/debt-register.md
+- production/tech-debt/debt-report-[YYYYMMDD].md
 
-Read the debt register. Generate summary statistics:
+Artifact requirements:
 
-- Total items by category
-- Total estimated fix effort
-- Items added vs resolved since last report
-- Trending direction (growing / stable / shrinking)
+1. Include scope, date, source list, assumptions, and confidence.
+2. Separate facts from recommendations and inferred conclusions.
+3. Include explicit next actions and the command that should be run next.
+4. Preserve historical information; prefer additive notes over destructive rewrites.
+5. When updating an index or manifest, append or update only the relevant row and preserve unrelated content.
 
-Flag any items that have been in the register for more than 3 sprints.
+Required report sections:
 
-Output the report to the user. This mode is read-only — no files are written. Verdict: **COMPLETE** — debt report generated.
+- Debt summary
+- New items
+- Priority ranking
+- Repayment recommendations
+- Risks
+- Register updates
 
----
+## 4. Validation
 
-## Phase 3: Next Steps
+1. Check that every conclusion cites or names a repository source.
+2. Check that all blockers have a concrete next action.
+3. Check that proposed writes stay within the declared output paths.
+4. Check that dry-run mode produced no writes.
 
-- Run `/sprint-plan` to schedule high-priority debt items into the next sprint.
-- Run `/tech-debt report` at the start of each sprint to track debt trends over time.
+Stop conditions:
 
-### Debt Register Format
+- No blocking stop condition was encountered.
 
-```markdown
-## Technical Debt Register
-Last updated: [Date]
-Total items: [N] | Estimated total effort: [T-shirt sizes summed]
+## 5. Final Response
 
-| ID | Category | Description | Files | Effort | Impact | Priority | Added | Sprint |
-|----|----------|-------------|-------|--------|--------|----------|-------|--------|
-| TD-001 | [Cat] | [Description] | [files] | [S/M/L/XL] | [Low/Med/High/Critical] | [Score] | [Date] | [Sprint to fix or "Backlog"] |
-```
-
-### Rules
-- Tech debt is not inherently bad — it is a tool. The register tracks conscious decisions.
-- Every debt entry must explain WHY it was accepted (deadline, prototype, missing info)
-- "Scan" should run at least once per sprint to catch new debt
-- Items older than 3 sprints without action should either be fixed or consciously accepted with a documented reason
+End with a concise summary of what was written, what was skipped because it was protected or unsafe, validation results, and the recommended next command. Include file paths for every artifact created or proposed.

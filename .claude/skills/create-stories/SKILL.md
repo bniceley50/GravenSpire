@@ -1,313 +1,408 @@
 ---
 name: create-stories
-description: "Break a single epic into implementable story files. Reads the epic, its GDD, governing ADRs, and control manifest. Each story embeds its GDD requirement TR-ID, ADR guidance, acceptance criteria, story type, and test evidence path. Run after /create-epics for each epic."
-argument-hint: "[epic-slug | epic-path] [--review full|lean|solo]"
+description: "Break one epic into implementation-ready story files. Reads the epic, GDD, governing ADRs, control manifest, and TR registry; emits traceable stories with type, dependencies, acceptance criteria, and required test evidence."
+argument-hint: "[epic-slug | epic-path] [--review full|lean|solo] [--dry-run] [--force]"
 user-invocable: true
-allowed-tools: Read, Glob, Grep, Write, Task, AskUserQuestion
+allowed-tools: Read, Glob, Grep, Write, Edit, Task, AskUserQuestion
 agent: lead-programmer
 ---
 
 # Create Stories
 
-A story is a single implementable behaviour — small enough to complete in one
-focused session, self-contained, and fully traceable to a GDD requirement and
-an ADR decision. Stories are what developers pick up. Epics are what architects
-define.
+Break a single epic into implementable story files. A story is one bounded unit of behavior that a developer can implement in one focused session, with clear acceptance criteria and evidence requirements.
 
-**Run this skill per epic**, not per layer. Run it for Foundation epics first,
-then Core, and so on — matching the dependency order.
+This skill is autonomous by default. The user's invocation authorizes creation of missing story files and safe update of the epic's story table. Ask only when no epic can be inferred, existing story files would be overwritten, or review feedback creates a material scope decision.
 
-**Output:** `production/epics/[epic-slug]/story-NNN-[slug].md` files
+Output:
 
-**Previous step:** `/create-epics [system]`
-**Next step after stories exist:** `/story-readiness [story-path]` then `/dev-story [story-path]`
+```text
+production/epics/[epic-slug]/story-NNN-[story-slug].md
+production/epics/[epic-slug]/EPIC.md  # story table update only
+```
 
----
-
-## 1. Parse Argument
-
-Extract `--review [full|lean|solo]` if present and store as the review mode
-override for this run. If not provided, read `production/review-mode.txt`
-(default `full` if missing). This resolved mode applies to all gate spawns
-in this skill — apply the check pattern from `.claude/docs/director-gates.md`
-before every gate invocation.
-
-- `/create-stories [epic-slug]` — e.g. `/create-stories combat`
-- `/create-stories production/epics/combat/EPIC.md` — full path also accepted
-- No argument — ask: "Which epic would you like to break into stories?"
-  Glob `production/epics/*/EPIC.md` and list available epics with their status.
+Do not implement code. Run `/story-readiness [story-path]` and then `/dev-story [story-path]` after stories are created.
 
 ---
 
-## 2. Load Everything for This Epic
+## 0. Execution Contract
 
-Read in full:
+### 0.1 Parse invocation
 
-- `production/epics/[epic-slug]/EPIC.md` — epic overview, governing ADRs, GDD requirements table
-- The epic's GDD (`design/gdd/[filename].md`) — read all 8 sections, especially Acceptance Criteria, Formulas, and Edge Cases
-- All governing ADRs listed in the epic — read the Decision, Implementation Guidelines, Engine Compatibility, and Engine Notes sections
-- `docs/architecture/control-manifest.md` — extract rules for this epic's layer; note the Manifest Version date from the header
-- `docs/architecture/tr-registry.yaml` — load all TR-IDs for this system
+Supported inputs:
 
-**ADR existence validation**: After reading the governing ADRs list from the epic, confirm each ADR file exists on disk. If any ADR file cannot be found, **stop immediately** before decomposing any story:
-
-> "Epic references [ADR-NNNN: title] but `docs/architecture/[adr-file].md` was not found.
-> Check the filename in the epic's Governing ADRs list, or run `/architecture-decision`
-> to create it. Cannot create stories until all referenced ADR files are present."
-
-Do not proceed to Step 3 until all referenced ADR files are confirmed present.
-
-Report: "Loaded epic [name], GDD [filename], [N] governing ADRs (all confirmed present), control manifest v[date]."
-
----
-
-## 3. Classify Stories by Type
-
-**Story Type Classification** — assign each story a type based on its acceptance criteria:
-
-| Story Type | Assign when criteria reference... |
+| Invocation | Behavior |
 |---|---|
-| **Logic** | Formulas, numerical thresholds, state transitions, AI decisions, calculations |
-| **Integration** | Two or more systems interacting, signals crossing boundaries, save/load round-trips |
-| **Visual/Feel** | Animation behaviour, VFX, "feels responsive", timing, screen shake, audio sync |
-| **UI** | Menus, HUD elements, buttons, screens, dialogue boxes, tooltips |
-| **Config/Data** | Balance tuning values, data file changes only — no new code logic |
+| `/create-stories combat` | Use `production/epics/combat/EPIC.md`. |
+| `/create-stories production/epics/combat/EPIC.md` | Use the explicit epic file. |
+| No argument | List epics missing story files and ask the user to choose. |
 
-Mixed stories: assign the type that carries the highest implementation risk.
-The type determines what test evidence is required before `/story-done` can close the story.
+Flags:
+
+- `--review full|lean|solo`
+- `--dry-run`
+- `--force`
+
+Resolve review mode once:
+
+1. Explicit `--review` value.
+2. `production/review-mode.txt`, if present and valid.
+3. `lean`.
+
+Review semantics:
+
+| Mode | QA story gate |
+|---|---|
+| `solo` | Skip Task reviews; self-generate test cases. |
+| `lean` | Skip QA lead gate; self-generate test cases. |
+| `full` | Run `qa-lead` gate `QL-STORY-READY`. |
+
+### 0.2 Path safety
+
+All paths are repository-relative. Reject absolute paths and paths containing `..`.
+
+Accepted epic paths must match:
+
+```text
+production/epics/*/EPIC.md
+```
+
+Allowed write locations:
+
+```text
+production/epics/[epic-slug]/story-[NNN]-*.md
+production/epics/[epic-slug]/EPIC.md
+```
+
+Do not write outside the selected epic directory.
+
+### 0.3 Write policy
+
+Routine writes are authorized by invocation:
+
+- Creating missing story files for the selected epic.
+- Adding or replacing the `## Stories` table in the selected `EPIC.md`.
+
+Protected writes require confirmation:
+
+- Overwriting an existing story file.
+- Changing existing story statuses.
+- Deleting story files.
+- Editing any GDD, ADR, manifest, registry, or source code file.
+
+If story files already exist and `--force` is absent, preserve them and create only missing stories using the next available story number. If `--force` is present, ask before replacing existing story files.
+
+In `--dry-run`, do not call `Write` or `Edit`.
+
+### 0.4 Required inputs
+
+| Input | Behavior if missing |
+|---|---|
+| Selected `EPIC.md` | Stop; run `/create-epics` first. |
+| Epic GDD file | Stop; stories cannot be traceable without the GDD. |
+| Governing ADR file | Stop for accepted ADR references; create stories only when the epic explicitly marks the ADR as missing/proposed blocker. |
+| `docs/architecture/tr-registry.yaml` | Continue with temporary `TR-[system]-???` IDs and mark stories `Needs Trace ID`. |
+| `docs/architecture/control-manifest.md` | Continue; mark manifest rules unavailable. |
+| Engine reference | Continue with engine risk `UNKNOWN`. |
 
 ---
 
-## 4. Decompose the GDD into Stories
+## 1. Load Epic Context
 
-For each GDD acceptance criterion:
+Read the selected `EPIC.md` completely and extract:
 
-1. Group related criteria that require the same core implementation
-2. Each group = one story
-3. Order stories: foundational behaviour first, edge cases last, UI last
+- Epic title, slug, layer, status, architecture module.
+- GDD path.
+- Governing ADR rows and statuses.
+- GDD requirement table.
+- Blockers.
+- Existing `## Stories` table, if any.
 
-**Story sizing rule:** one story = one focused session (~2-4 hours). If a
-group of criteria would take longer, split into two stories.
+Read the GDD completely. Extract:
 
-For each story, determine:
-- **GDD requirement**: which acceptance criterion(ia) does this satisfy?
-- **TR-ID**: look up in `tr-registry.yaml`. Use the stable ID. If no match, use `TR-[system]-???` and warn.
-- **Governing ADR**: which ADR governs how to implement this?
-  - `Status: Accepted` → embed normally
-  - `Status: Proposed` → set story `Status: Blocked` with note: "BLOCKED: ADR-NNNN is Proposed — run `/architecture-decision` to advance it"
-- **Story Type**: from Step 3 classification
-- **Engine risk**: from the ADR's Knowledge Risk field
+- Acceptance criteria.
+- Formulas and thresholds.
+- Edge cases.
+- Performance constraints.
+- UI, visual, audio, and feel requirements.
+- Explicit out-of-scope notes.
+
+Read all referenced ADRs that exist. For each ADR extract:
+
+- `Status`.
+- `Decision`.
+- `Key Interfaces` or implementation guidelines.
+- `Engine Compatibility`.
+- `Registry Impact`.
+- `GDD Requirements Addressed`.
+
+Read:
+
+- `docs/architecture/control-manifest.md`, if present.
+- `docs/architecture/tr-registry.yaml`, if present.
+- `.claude/docs/technical-preferences.md`, if present.
+
+Report internally:
+
+```text
+Loaded epic [name], GDD [path], [N] ADRs, [M] requirements, manifest [present/missing].
+```
 
 ---
 
-## 4b. QA Lead Story Readiness Gate
+## 2. Validate Story-Creation Preconditions
 
-**Review mode check** — apply before spawning QL-STORY-READY:
-- `solo` → skip. Note: "QL-STORY-READY skipped — Solo mode." Proceed to Step 5 (present stories for review).
-- `lean` → skip (not a PHASE-GATE). Note: "QL-STORY-READY skipped — Lean mode." Proceed to Step 5 (present stories for review).
-- `full` → spawn as normal.
+Before decomposing:
 
-After decomposing all stories (Step 4 complete) but before presenting them for write approval, spawn `qa-lead` via Task using gate **QL-STORY-READY** (`.claude/docs/director-gates.md`).
+1. If the epic status is `Blocked`, identify each blocker.
+2. If blockers are only proposed or missing ADRs, continue but create affected stories as `Blocked`.
+3. If the GDD is missing or unreadable, stop.
+4. If an accepted governing ADR is referenced but the file is missing, stop.
+5. If existing story files are present, classify this as incremental mode.
 
-Pass: the full story list with acceptance criteria, story types, and TR-IDs; the epic's GDD acceptance criteria for reference.
+Incremental mode:
 
-Present the QA lead's assessment. For each story flagged as GAPS or INADEQUATE, revise the acceptance criteria before proceeding — stories with untestable criteria cannot be implemented correctly. Once all stories reach ADEQUATE, proceed.
+- Preserve existing story files.
+- Read their TR-IDs and acceptance criteria.
+- Generate only missing stories for uncovered requirement rows.
+- Use the next available `story-NNN` number.
 
-**After ADEQUATE**: for every Logic and Integration story, ask the qa-lead to produce concrete test case specifications — one per acceptance criterion — in this format:
+Full mode:
 
-```
-Test: [criterion text]
-  Given: [precondition]
-  When: [action]
-  Then: [expected result / assertion]
-  Edge cases: [boundary values or failure states to test]
-```
-
-For Visual/Feel and UI stories, produce manual verification steps instead:
-```
-Manual check: [criterion text]
-  Setup: [how to reach the state]
-  Verify: [what to look for]
-  Pass condition: [unambiguous pass description]
-```
-
-These test case specs are embedded directly into each story's `## QA Test Cases` section. The developer implements against these cases. The programmer does not write tests from scratch — QA has already defined what "done" looks like.
+- Generate stories for all requirement rows in the epic.
 
 ---
 
-## 5. Present Stories for Review
+## 3. Decompose Requirements Into Stories
 
-Before writing any files, present the full story list:
+For each requirement row:
 
+1. Map it to one or more acceptance criteria from the GDD.
+2. Group criteria that require the same implementation unit.
+3. Split groups larger than one focused session.
+4. Order stories by dependency:
+   - foundation/config
+   - core logic
+   - integration
+   - edge cases
+   - UI/presentation
+   - visual/audio/feel polish
+5. Assign a governing ADR.
+6. Assign a story type.
+7. Assign required evidence.
+
+### 3.1 Story type classification
+
+| Type | Use when |
+|---|---|
+| `Logic` | Formula, threshold, state transition, rule, AI decision, calculation. |
+| `Integration` | Two or more systems communicate, save/load roundtrip, event/signal boundary. |
+| `Visual/Feel` | Animation timing, VFX, audio sync, game feel, screen shake, responsiveness. |
+| `UI` | HUD, menus, buttons, settings, tooltips, dialogue screens. |
+| `Config/Data` | Data-only change, tuning table, localization row, content config. |
+
+For mixed stories, choose the highest-risk type in this order:
+
+```text
+Integration > Logic > UI > Visual/Feel > Config/Data
 ```
-## Stories for Epic: [name]
 
-Story 001: [title] — Logic — ADR-NNNN
-  Covers: TR-[system]-001 ([1-line summary of requirement])
-  Test required: tests/unit/[system]/[slug]_test.[ext]
+### 3.2 Status rules
 
-Story 002: [title] — Integration — ADR-MMMM
-  Covers: TR-[system]-002, TR-[system]-003
-  Test required: tests/integration/[system]/[slug]_test.[ext]
+| Condition | Story status |
+|---|---|
+| Governing ADR is `Accepted`, dependencies clear, no unresolved design questions | `Ready` |
+| Governing ADR is `Proposed` | `Blocked` |
+| Governing ADR is missing | `Blocked` |
+| TR-ID is temporary or missing | `Needs Trace ID` |
+| Acceptance criteria contain `TBD`, `TODO`, `UNRESOLVED`, or `?` | `Needs Work` |
 
-Story 003: [title] — Visual/Feel — ADR-NNNN
-  Covers: TR-[system]-004
-  Evidence required: production/qa/evidence/[slug]-evidence.md
+Do not set a story to `Ready` when an ADR blocker exists.
 
-[N stories total: N Logic, N Integration, N Visual/Feel, N UI, N Config/Data]
-```
+### 3.3 Evidence rules
 
-Use `AskUserQuestion`:
-- Prompt: "May I write these [N] stories to `production/epics/[epic-slug]/`?"
-- Options: `[A] Yes — write all [N] stories` / `[B] Not yet — I want to review or adjust first`
+| Type | Required evidence |
+|---|---|
+| `Logic` | `tests/unit/[system]/[story-slug]_test.[ext]` |
+| `Integration` | `tests/integration/[system]/[story-slug]_test.[ext]` or documented integration playtest when automation is impossible. |
+| `Visual/Feel` | `production/qa/evidence/[story-slug]-evidence.md` |
+| `UI` | `production/qa/evidence/[story-slug]-evidence.md` or interaction test path. |
+| `Config/Data` | Smoke-check evidence in `production/qa/smoke-[date].md`. |
 
 ---
 
-## 6. Write Story Files
+## 4. Generate QA Test Cases
 
-For each story, write `production/epics/[epic-slug]/story-[NNN]-[slug].md`:
+For every story, produce test guidance before writing the file.
+
+For `Logic` and `Integration` stories:
+
+```text
+Test: [acceptance criterion]
+Given: [precondition]
+When: [action]
+Then: [assertion]
+Edge cases: [boundary values and failure states]
+```
+
+For `Visual/Feel`, `UI`, and `Config/Data` stories:
+
+```text
+Manual check: [acceptance criterion]
+Setup: [how to reach the state]
+Verify: [what to look for]
+Pass condition: [unambiguous pass description]
+```
+
+In `full` review mode, spawn `qa-lead` using gate `QL-STORY-READY`. Pass:
+
+- Proposed story list.
+- Acceptance criteria.
+- TR-IDs.
+- Types.
+- Required evidence paths.
+- Blocked/Needs Work stories.
+
+Ask the QA lead for:
+
+1. Untestable criteria.
+2. Missing edge cases.
+3. Story splits needed for testability.
+4. Evidence-path problems.
+5. Test case improvements.
+
+Apply clear fixes automatically. If the QA lead recommends a material scope split or merge, revise once; if still ambiguous, ask the user to choose.
+
+Do not run more than one QA re-review.
+
+---
+
+## 5. Story File Template
+
+Write each story as:
 
 ```markdown
-# Story [NNN]: [title]
+# Story [NNN]: [Title]
 
-> **Epic**: [epic name]
-> **Status**: Ready
-> **Layer**: [Foundation / Core / Feature / Presentation]
+> **Epic**: [Epic name]
+> **Epic Path**: `production/epics/[epic-slug]/EPIC.md`
+> **Status**: [Ready | Blocked | Needs Work | Needs Trace ID]
+> **Layer**: [Foundation | Core | Feature | Presentation | Unknown]
 > **Type**: [Logic | Integration | Visual/Feel | UI | Config/Data]
-> **Manifest Version**: [date from control-manifest.md header]
+> **Estimate**: [2h | 4h | 1 day]
+> **Manifest Version**: [version/date or Unavailable]
+> **Generated**: [YYYY-MM-DD]
 
 ## Context
 
 **GDD**: `design/gdd/[filename].md`
-**Requirement**: `TR-[system]-NNN`
-*(Requirement text lives in `docs/architecture/tr-registry.yaml` — read fresh at review time)*
+**Requirement IDs**: [TR-ID list]
+**Requirement Summary**: [self-contained requirement statement]
 
-**ADR Governing Implementation**: [ADR-NNNN: title]
-**ADR Decision Summary**: [1-2 sentence summary of what the ADR decided]
+**Governing ADRs**:
 
-**Engine**: [name + version] | **Risk**: [LOW / MEDIUM / HIGH]
-**Engine Notes**: [from ADR Engine Compatibility section — post-cutoff APIs, verification required]
+| ADR | Status | Usage |
+|-----|--------|-------|
+| ADR-NNNN: [title] | Accepted | [what this story must follow] |
 
-**Control Manifest Rules (this layer)**:
-- Required: [relevant required pattern]
-- Forbidden: [relevant forbidden pattern]
-- Guardrail: [relevant performance guardrail]
-
----
+**Architecture Module**: [module]
+**Engine**: [engine + version or Unknown]
+**Engine Risk**: [LOW | MEDIUM | HIGH | UNKNOWN]
 
 ## Acceptance Criteria
 
-*From GDD `design/gdd/[filename].md`, scoped to this story:*
-
-- [ ] [criterion 1 — directly from GDD]
-- [ ] [criterion 2]
-- [ ] [performance criterion if applicable]
-
----
+- [ ] AC-1: [specific, observable criterion from the GDD]
+- [ ] AC-2: [criterion]
+- [ ] AC-3: [criterion]
 
 ## Implementation Notes
 
-*Derived from ADR-NNNN Implementation Guidelines:*
-
-[Specific, actionable guidance from the ADR. Do not paraphrase in ways that
-change meaning. This is what the programmer reads instead of the ADR.]
-
----
+- [ADR-derived implementation requirement]
+- [control-manifest required pattern]
+- [engine-specific note]
 
 ## Out of Scope
 
-*Handled by neighbouring stories — do not implement here:*
-
-- [Story NNN+1]: [what it handles]
-
----
+- [neighboring behavior not to implement]
+- [future/polish work]
 
 ## QA Test Cases
 
-*Written by qa-lead at story creation. The developer implements against these — do not invent new test cases during implementation.*
-
-**[For Logic / Integration stories — automated test specs]:**
-
-- **AC-1**: [criterion text]
-  - Given: [precondition]
-  - When: [action]
-  - Then: [assertion]
-  - Edge cases: [boundary values / failure states]
-
-**[For Visual/Feel / UI stories — manual verification steps]:**
-
-- **AC-1**: [criterion text]
-  - Setup: [how to reach the state]
-  - Verify: [what to look for]
-  - Pass condition: [unambiguous pass description]
-
----
+[Generated test cases or manual checks.]
 
 ## Test Evidence
 
-**Story Type**: [type]
-**Required evidence**:
-- Logic: `tests/unit/[system]/[story-slug]_test.[ext]` — must exist and pass
-- Integration: `tests/integration/[system]/[story-slug]_test.[ext]` OR playtest doc
-- Visual/Feel: `production/qa/evidence/[story-slug]-evidence.md` + sign-off
-- UI: `production/qa/evidence/[story-slug]-evidence.md` or interaction test
-- Config/Data: smoke check pass (`production/qa/smoke-*.md`)
-
-**Status**: [ ] Not yet created
-
----
+**Required evidence**: `[path]`
+**Evidence status**: Not started
 
 ## Dependencies
 
-- Depends on: [Story NNN-1 must be DONE, or "None"]
-- Unlocks: [Story NNN+1, or "None"]
+| Depends On | Reason | Required Status |
+|------------|--------|-----------------|
+| [story or None] | [why] | Done |
+
+## Blockers
+
+- [ADR Proposed/Missing, unresolved design question, or "None"]
 ```
 
-### Also update `production/epics/[epic-slug]/EPIC.md`
+Story files must be self-contained. A developer should not need to open the GDD to understand the acceptance criteria.
 
-Replace the "Stories: Not yet created" line with a populated table:
+---
+
+## 6. Write Story Files and Epic Table
+
+Before writing, build a summary:
+
+```text
+Stories for [epic]:
+- story-001-[slug].md — [Type] — [Status] — [TR-IDs]
+- story-002-[slug].md — [Type] — [Status] — [TR-IDs]
+```
+
+Then:
+
+1. Validate every target path.
+2. In `--dry-run`, show proposed files and stop without writing.
+3. Write new story files.
+4. Preserve existing story files unless `--force` is present and confirmed.
+5. Update only the `## Stories` section of `EPIC.md`.
+
+`EPIC.md` story table format:
 
 ```markdown
 ## Stories
 
-| # | Story | Type | Status | ADR |
-|---|-------|------|--------|-----|
-| 001 | [title] | Logic | Ready | ADR-NNNN |
-| 002 | [title] | Integration | Ready | ADR-MMMM |
+| # | Story | Type | Status | Requirement IDs | ADRs | Evidence |
+|---|-------|------|--------|-----------------|------|----------|
+| 001 | [title] | Logic | Ready | TR-[system]-001 | ADR-NNNN | `tests/unit/...` |
 ```
 
----
-
-## 7. After Writing
-
-Use `AskUserQuestion` to close with context-aware next steps:
-
-Check:
-- Are there other epics in `production/epics/` without stories yet? List them.
-- Is this the last epic? If so, include `/sprint-plan` as an option.
-
-Widget:
-- Prompt: "[N] stories written to `production/epics/[epic-slug]/`. What next?"
-- Options (include all that apply):
-  - `[A] Start implementing — run /story-readiness [first-story-path]` (Recommended)
-  - `[B] Create stories for [next-epic-slug] — run /create-stories [slug]` (only if other epics have no stories yet)
-  - `[C] Plan the sprint — run /sprint-plan` (only if all epics have stories)
-  - `[D] Stop here for this session`
-
-Note in output: "Work through stories in order — each story's `Depends on:` field tells you what must be DONE before you can start it."
+If `EPIC.md` has no `## Stories` section, append one. If it has an old story placeholder, replace only that section.
 
 ---
 
-## Collaborative Protocol
+## 7. Completion Output
 
-1. **Read before presenting** — load all inputs silently before showing the story list
-2. **Ask once** — present all stories for the epic in one summary, not one at a time
-3. **Warn on blocked stories** — flag any story with a Proposed ADR before writing
-4. **Ask before writing** — get approval for the full story set before writing files
-5. **No invention** — acceptance criteria come from GDDs, implementation notes from ADRs, rules from the manifest
-6. **Never start implementation** — this skill stops at the story file level
+End with:
 
-After writing (or declining):
+```text
+Verdict: [COMPLETE | PARTIAL | BLOCKED]
 
-- **Verdict: COMPLETE** — [N] stories written to `production/epics/[epic-slug]/`. Run `/story-readiness` → `/dev-story` to begin implementation.
-- **Verdict: BLOCKED** — user declined. No story files written.
+Story files written:
+- [path] — [status]
+
+Blocked stories:
+- [story] — [reason]
+
+Files changed:
+- [story paths]
+- production/epics/[epic-slug]/EPIC.md
+
+Assumptions:
+- [assumption or None]
+
+Next best action:
+- /story-readiness [first-ready-story-path]
+```
+
+If no story is `Ready`, recommend the blocking action, such as `/architecture-decision` for proposed/missing ADRs or `/architecture-review` for missing traceability.

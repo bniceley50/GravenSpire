@@ -1,177 +1,139 @@
 ---
 name: changelog
 description: "Auto-generates a changelog from git commits, sprint data, and design documents. Produces both internal and player-facing versions."
-argument-hint: "[version|sprint-number]"
+argument-hint: "[version|sprint-number] [--dry-run]"
 user-invocable: true
-allowed-tools: Read, Glob, Grep, Bash, Write
-context: |
-  !git log --oneline -30 2>/dev/null
-  !git tag --list --sort=-v:refname 2>/dev/null | head -5
+allowed-tools: Read, Glob, Grep, Write, Edit, Bash, AskUserQuestion
 model: haiku
 ---
 
-## Phase 1: Parse Arguments
+# Changelog Generation
 
-Read the argument for the target version or sprint number. If a version is given, use the corresponding git tag. If a sprint number is given, use the sprint date range.
+Generate internal and player-facing changelogs from safe git history, sprint records, release notes, bug fixes, and design changes.
 
-Verify the repository is initialized: run `git rev-parse --is-inside-work-tree` to confirm git is available. If not a git repo, inform the user and abort gracefully.
+## 0. Execution Contract
 
----
+### 0.1 Invocation and autonomy
 
-## Phase 2: Gather Change Data
+Supported modes:
 
-Read the git log since the last tag or release:
+- version: produce changelog for a named version
+- sprint-number: produce sprint changelog
+- blank: infer latest range from tags and sprint docs
 
-```
-git log --oneline [last-tag]..HEAD
-```
+The invocation authorizes routine repository-local work for this skill. Operate autonomously after resolving scope; do not ask the user to approve every normal file creation. Ask only for protected operations, destructive ambiguity, or missing source-of-truth decisions that cannot be inferred safely.
 
-If no tags exist, read the full log or a reasonable recent range (last 100 commits).
+If `--dry-run` is present, perform discovery and produce the complete proposed result, but do not call `Write` or `Edit`.
 
-Read sprint reports from `production/sprints/` for the relevant period to understand planned work and context behind changes.
+### 0.2 Path safety
 
-Read completed design documents from `design/gdd/` for any new features implemented during this period.
+All user-supplied paths must be repository-relative. Reject absolute paths, paths containing `..`, and paths outside the expected project roots for this skill. Normalize paths before reading or writing.
 
----
+### 0.3 Write policy
 
-## Phase 3: Categorize Changes
+Routine writes allowed by invocation:
 
-Categorize every change into one of these categories:
+- production/releases/changelog-[version-or-date].md
+- production/releases/player-changelog-[version-or-date].md
 
-- **New Features**: Entirely new gameplay systems, modes, or content
-- **Improvements**: Enhancements to existing features, UX improvements, performance gains
-- **Bug Fixes**: Corrections to broken behavior
-- **Balance Changes**: Tuning of gameplay values, difficulty, economy
-- **Known Issues**: Issues the team is aware of but have not yet resolved
-- **Miscellaneous**: Changes that do not fit the above categories, or commits whose messages are too vague to classify confidently
+Protected operations require explicit confirmation through `AskUserQuestion`:
 
-For each commit, check whether the message contains a task ID or story reference
-(e.g. `[STORY-123]`, `TR-`, `#NNN`, or similar). Count commits that lack any task reference
-and include this count in the Phase 4 Metrics section as: `Commits without task reference: [N]`.
+- Overwriting or deleting an existing file.
+- Editing canonical source-of-truth documents outside the declared outputs.
+- Changing statuses, gates, stage files, sprint state, story state, registry entries, or release readiness.
+- Running commands that modify files, install dependencies, generate builds, publish artifacts, deploy, tag, commit, or push.
+- Applying changes whose scope is broader than the user requested.
 
----
+Use `Edit` for targeted changes to existing files. Use `Write` for new files or complete replacement only after the replacement scope is safe and approved.
 
-## Phase 4: Generate Internal Changelog
+### 0.4 Bash safety
 
-```markdown
-# Internal Changelog: [Version]
-Date: [Date]
-Sprint(s): [Sprint numbers covered]
-Commits: [Count] ([first-hash]..[last-hash])
+Bash is limited to diagnostics and read-only discovery unless the user explicitly approved a protected operation. Safe examples include `git status --short`, `git log`, `git diff --name-only`, existing test commands that do not update snapshots, and local grep/listing commands. Never run package installation, clean/reset, rm, deploy, publish, commit, tag, push, or build upload commands from this skill.
 
-## New Features
-- [Feature Name] -- [Technical description, affected systems]
-  - Commits: [hash1], [hash2]
-  - Owner: [who implemented it]
-  - Design doc: [link if applicable]
+### 0.8 Missing-file behavior
 
-## Improvements
-- [Improvement] -- [What changed technically and why]
-  - Commits: [hashes]
-  - Owner: [who]
+| Situation | Behavior |
+|---|---|
+| Primary source missing | Continue only if the skill can infer a narrower safe scope; otherwise stop with the exact missing file/folder. |
+| Referenced artifact missing | Record as a gap or blocker instead of inventing content. |
+| Existing target file present | Do not overwrite. Create a proposed dated file or ask for protected confirmation. |
+| Ambiguous scope | Choose the smallest evidence-backed scope; ask only if two or more scopes are equally plausible. |
+| Contradictory sources | Prefer explicit status/source-of-truth documents over generated reports; list the contradiction in the output. |
 
-## Bug Fixes
-- [BUG-ID] [Description of bug and root cause]
-  - Fix: [What was changed]
-  - Commits: [hashes]
-  - Owner: [who]
+## 1. Discover Context
 
-## Balance Changes
-- [What was tuned] -- [Old value -> New value] -- [Design intent]
-  - Owner: [who]
+Read only the sources needed for the requested scope. Start with indexes, manifests, registries, and status files before reading large documents.
 
-## Technical Debt / Refactoring
-- [What was cleaned up and why]
-  - Commits: [hashes]
+Primary sources:
 
-## Miscellaneous
-- [Change that didn't fit other categories, or vague commit message]
-  - Commits: [hashes]
+- git log output
+- production/sprints/**
+- production/releases/**
+- production/qa/bugs/**
+- docs/changelog/**
+- design/gdd/**
 
-## Known Issues
-- [Issue description] -- [Severity] -- [ETA for fix if known]
+Discovery rules:
 
-## Metrics
-- Total commits: [N]
-- Files changed: [N]
-- Lines added: [N]
-- Lines removed: [N]
-- Commits without task reference: [N]
-```
+1. Prefer canonical source-of-truth files over generated reports.
+2. Use `Glob` and `Grep` before reading large files.
+3. Keep a source list for the final report or artifact.
+4. When many files match, read the most relevant 5 to 10 first and summarize the rest as candidates.
+5. Treat missing or draft-status dependencies as blockers, not as approval to invent content.
 
----
+## 2. Build the Working Model
 
-## Phase 5: Generate Player-Facing Changelog
+Use the discovered evidence to build a concise working model before producing output.
 
-```markdown
-# What is New in [Version]
+1. Use safe read-only git commands only: git tag, git log, git diff --name-only, git status --short.
+2. Group changes by Features, Fixes, Balance, Content, UX, Performance, Tech, Known Issues.
+3. Translate implementation details into player-facing language without overpromising unreleased features.
+4. Flag commits or story changes that cannot be classified confidently.
+5. Write changelog files unless dry-run is active or the target exists without force.
 
-## New Features
-- **[Feature Name]**: [Player-friendly description of what they can now do
-  and why it is exciting. Focus on the experience, not the implementation.]
+Classification rules:
 
-## Improvements
-- **[What improved]**: [How this makes the game better for the player.
-  Be specific but avoid jargon.]
+- **Blocking**: prevents safe implementation, review, release, or downstream skill execution.
+- **High**: likely to cause rework, wrong implementation, invalid QA, or broken traceability.
+- **Medium**: weakens handoff quality but can be resolved during normal follow-up.
+- **Low**: cleanup, clarity, or optional improvement.
 
-## Bug Fixes
-- Fixed an issue where [describe what the player experienced, not what was
-  wrong in the code]
-- Fixed [player-visible symptom]
+## 3. Produce the Artifact
 
-## Balance Changes
-- [What changed in player-understandable terms and the design intent.
-  Example: "Healing potions now restore 50 HP (up from 30) -- we felt
-  players needed more recovery options in late-game encounters."]
+Canonical outputs for this skill:
 
-## Known Issues
-- We are aware of [issue description in player terms] and are working on a
-  fix. [Workaround if one exists.]
+- production/releases/changelog-[version-or-date].md
+- production/releases/player-changelog-[version-or-date].md
 
----
-Thank you for playing! Your feedback helps us make the game better.
-Report issues at [link].
-```
+Artifact requirements:
 
----
+1. Include scope, date, source list, assumptions, and confidence.
+2. Separate facts from recommendations and inferred conclusions.
+3. Include explicit next actions and the command that should be run next.
+4. Preserve historical information; prefer additive notes over destructive rewrites.
+5. When updating an index or manifest, append or update only the relevant row and preserve unrelated content.
 
-## Phase 6: Output
+Required report sections:
 
-Output both changelogs to the user. The internal changelog is the primary working document. The player-facing changelog is ready for community posting after review.
+- Version/range
+- Internal changelog
+- Player-facing changelog
+- Known issues
+- Unclassified changes
+- Evidence sources
 
----
+## 4. Validation
 
-## Phase 7: Offer File Write
+1. Check that every conclusion cites or names a repository source.
+2. Check that all blockers have a concrete next action.
+3. Check that proposed writes stay within the declared output paths.
+4. Check that dry-run mode produced no writes.
+5. List every Bash command run and whether it was read-only or diagnostic.
 
-After presenting the changelogs, ask the user:
+Stop conditions:
 
-> "May I write this changelog to `docs/CHANGELOG.md`?
-> [A] Yes, append this entry (recommended if the file already exists)
-> [B] Yes, overwrite the file entirely
-> [C] No — I'll copy it manually"
+- No git history, sprint records, or release scope could be identified.
 
-- Check whether `docs/CHANGELOG.md` exists before asking. If it does, default the
-  recommendation to **[A] append**.
-- If the user selects [A]: append the new internal changelog entry to the top of
-  the existing file (newest entries first).
-- If the user selects [B]: overwrite the file with the new changelog.
-- If the user selects [C]: stop here without writing.
+## 5. Final Response
 
-After a successful write: Verdict: **CHANGELOG WRITTEN** — changelog saved to `docs/CHANGELOG.md`.
-If the user declines: Verdict: **COMPLETE** — changelog generated.
-
----
-
-## Phase 7: Next Steps
-
-- Use `/patch-notes [version]` to generate a styled, saved version for public release.
-- Use `/release-checklist` before publishing the changelog externally.
-
-### Guidelines
-
-- Never expose internal code references, file paths, or developer names in the player-facing changelog
-- Group related changes together rather than listing individual commits
-- If a commit message is unclear, check the associated files and sprint data for context
-- Balance changes should always include the design reasoning, not just the numbers
-- Known issues should be honest — players appreciate transparency
-- If the git history is messy (merge commits, reverts, fixup commits), clean up the narrative rather than listing every commit literally
+End with a concise summary of what was written, what was skipped because it was protected or unsafe, validation results, and the recommended next command. Include file paths for every artifact created or proposed.

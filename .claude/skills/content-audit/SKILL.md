@@ -1,204 +1,133 @@
 ---
 name: content-audit
 description: "Audit GDD-specified content counts against implemented content. Identifies what's planned vs built."
-argument-hint: "[system-name | --summary | (no arg = full audit)]"
+argument-hint: "[system-name | --summary | (no arg = full audit)] [--dry-run]"
 user-invocable: true
-allowed-tools: Read, Glob, Grep, Write
+allowed-tools: Read, Glob, Grep, Write, Edit, AskUserQuestion
 agent: producer
 ---
 
-When this skill is invoked:
+# Content Audit
 
-Parse the argument:
-- No argument → full audit across all systems
-- `[system-name]` → audit that single system only
-- `--summary` → summary table only, no file write
+Compare planned content counts and named content requirements against implemented or produced content artifacts.
 
----
+## 0. Execution Contract
 
-## Phase 1 — Context Gathering
+### 0.1 Invocation and autonomy
 
-1. **Read `design/gdd/systems-index.md`** for the full list of systems, their
-   categories, and MVP/priority tier.
+Supported modes:
 
-2. **L0 pre-scan**: Before full-reading any GDDs, Grep all GDD files for
-   `## Summary` sections plus common content-count keywords:
-   ```
-   Grep pattern="(## Summary|N enemies|N levels|N items|N abilities|enemy types|item types)" glob="design/gdd/*.md" output_mode="files_with_matches"
-   ```
-   For a single-system audit: skip this step and go straight to full-read.
-   For a full audit: full-read only the GDDs that matched content-count keywords.
-   GDDs with no content-count language (pure mechanics GDDs) are noted as
-   "No auditable content counts" without a full read.
+- system-name: audit one GDD system
+- --summary: produce count-only summary
+- blank: full audit
 
-3. **Full-read in-scope GDD files** (or the single system GDD if a system
-   name was given).
+The invocation authorizes routine repository-local work for this skill. Operate autonomously after resolving scope; do not ask the user to approve every normal file creation. Ask only for protected operations, destructive ambiguity, or missing source-of-truth decisions that cannot be inferred safely.
 
-4. **For each GDD, extract explicit content counts or lists.** Look for patterns
-   like:
-   - "N enemies" / "enemy types:" / list of named enemies
-   - "N levels" / "N areas" / "N maps" / "N stages"
-   - "N items" / "N weapons" / "N equipment pieces"
-   - "N abilities" / "N skills" / "N spells"
-   - "N dialogue scenes" / "N conversations" / "N cutscenes"
-   - "N quests" / "N missions" / "N objectives"
-   - Any explicit enumerated list (bullet list of named content pieces)
+If `--dry-run` is present, perform discovery and produce the complete proposed result, but do not call `Write` or `Edit`.
 
-4. **Build a content inventory table** from the extracted data:
+### 0.2 Path safety
 
-   | System | Content Type | Specified Count/List | Source GDD |
-   |--------|-------------|---------------------|------------|
+All user-supplied paths must be repository-relative. Reject absolute paths, paths containing `..`, and paths outside the expected project roots for this skill. Normalize paths before reading or writing.
 
-   Note: If a GDD describes content qualitatively but gives no count, record
-   "Unspecified" and flag it — unspecified counts are a design gap worth noting.
+### 0.3 Write policy
 
----
+Routine writes allowed by invocation:
 
-## Phase 2 — Implementation Scan
+- production/content-audits/content-audit-[YYYYMMDD].md
 
-For each content type found in Phase 1, scan the relevant directories to count
-what has been implemented. Use Glob and Grep to locate files.
+Protected operations require explicit confirmation through `AskUserQuestion`:
 
-**Levels / Areas / Maps:**
-- Glob `assets/**/*.tscn`, `assets/**/*.unity`, `assets/**/*.umap`
-- Glob `src/**/*.tscn`, `src/**/*.unity`
-- Look for scene files in subdirectories named `levels/`, `areas/`, `maps/`,
-  `worlds/`, `stages/`
-- Count unique files that appear to be level/scene definitions (not UI scenes)
+- Overwriting or deleting an existing file.
+- Editing canonical source-of-truth documents outside the declared outputs.
+- Changing statuses, gates, stage files, sprint state, story state, registry entries, or release readiness.
+- Running commands that modify files, install dependencies, generate builds, publish artifacts, deploy, tag, commit, or push.
+- Applying changes whose scope is broader than the user requested.
 
-**Enemies / Characters / NPCs:**
-- Glob `assets/data/**/enemies/**`, `assets/data/**/characters/**`
-- Glob `src/**/enemies/**`, `src/**/characters/**`
-- Look for `.json`, `.tres`, `.asset`, `.yaml` data files defining entity stats
-- Look for scene/prefab files in character subdirectories
+Use `Edit` for targeted changes to existing files. Use `Write` for new files or complete replacement only after the replacement scope is safe and approved.
 
-**Items / Equipment / Loot:**
-- Glob `assets/data/**/items/**`, `assets/data/**/equipment/**`,
-  `assets/data/**/loot/**`
-- Look for `.json`, `.tres`, `.asset` data files
+### 0.8 Missing-file behavior
 
-**Abilities / Skills / Spells:**
-- Glob `assets/data/**/abilities/**`, `assets/data/**/skills/**`,
-  `assets/data/**/spells/**`
-- Look for `.json`, `.tres`, `.asset` data files
+| Situation | Behavior |
+|---|---|
+| Primary source missing | Continue only if the skill can infer a narrower safe scope; otherwise stop with the exact missing file/folder. |
+| Referenced artifact missing | Record as a gap or blocker instead of inventing content. |
+| Existing target file present | Do not overwrite. Create a proposed dated file or ask for protected confirmation. |
+| Ambiguous scope | Choose the smallest evidence-backed scope; ask only if two or more scopes are equally plausible. |
+| Contradictory sources | Prefer explicit status/source-of-truth documents over generated reports; list the contradiction in the output. |
 
-**Dialogue / Conversations / Cutscenes:**
-- Glob `assets/**/*.dialogue`, `assets/**/*.csv`, `assets/**/*.ink`
-- Grep for dialogue data files in `assets/data/`
+## 1. Discover Context
 
-**Quests / Missions:**
-- Glob `assets/data/**/quests/**`, `assets/data/**/missions/**`
-- Look for `.json`, `.yaml` definition files
+Read only the sources needed for the requested scope. Start with indexes, manifests, registries, and status files before reading large documents.
 
-**Engine-specific notes (acknowledge in the report):**
-- Counts are approximations — the skill cannot perfectly parse every engine
-  format or distinguish editor-only files from shipped content
-- Scene files may include both gameplay content and system/UI scenes; the scan
-  counts all matches and notes this caveat
+Primary sources:
 
----
+- design/gdd/**/*.md
+- production/content/**
+- assets/**
+- data/**
+- production/assets/asset-manifest.md
+- production/levels/**
 
-## Phase 3 — Gap Report
+Discovery rules:
 
-Produce the gap table:
+1. Prefer canonical source-of-truth files over generated reports.
+2. Use `Glob` and `Grep` before reading large files.
+3. Keep a source list for the final report or artifact.
+4. When many files match, read the most relevant 5 to 10 first and summarize the rest as candidates.
+5. Treat missing or draft-status dependencies as blockers, not as approval to invent content.
 
-```
-| System | Content Type | Specified | Found | Gap | Status |
-|--------|-------------|-----------|-------|-----|--------|
-```
+## 2. Build the Working Model
 
-**Status categories:**
-- `COMPLETE` — Found ≥ Specified (100%+)
-- `IN PROGRESS` — Found is 50–99% of Specified
-- `EARLY` — Found is 1–49% of Specified
-- `NOT STARTED` — Found is 0
+Use the discovered evidence to build a concise working model before producing output.
 
-**Priority flags:**
-Flag a system as `HIGH PRIORITY` in the report if:
-- Status is `NOT STARTED` or `EARLY`, AND
-- The system is tagged MVP or Vertical Slice in the systems index, OR
-- The systems index shows the system is blocking downstream systems
+1. Extract planned counts, named assets, levels, enemies, items, quests, UI screens, audio cues, and localization keys from design docs.
+2. Discover produced content using manifests and repository files.
+3. Classify each requirement as Built, Partial, Missing, Extra, Deprecated, or Unclear.
+4. Write a report with gap counts and production priority.
+5. Do not create content files; this skill audits only.
 
-**Summary line:**
-- Total content items specified (sum of all Specified column values)
-- Total content items found (sum of all Found column values)
-- Overall gap percentage: `(Specified - Found) / Specified * 100`
+Classification rules:
 
----
+- **Blocking**: prevents safe implementation, review, release, or downstream skill execution.
+- **High**: likely to cause rework, wrong implementation, invalid QA, or broken traceability.
+- **Medium**: weakens handoff quality but can be resolved during normal follow-up.
+- **Low**: cleanup, clarity, or optional improvement.
 
-## Phase 4 — Output
+## 3. Produce the Artifact
 
-### Full audit and single-system modes
+Canonical outputs for this skill:
 
-Present the gap table and summary to the user. Ask: "May I write the full report to `docs/content-audit-[YYYY-MM-DD].md`?"
+- production/content-audits/content-audit-[YYYYMMDD].md
 
-If yes, write the file:
+Artifact requirements:
 
-```markdown
-# Content Audit — [Date]
+1. Include scope, date, source list, assumptions, and confidence.
+2. Separate facts from recommendations and inferred conclusions.
+3. Include explicit next actions and the command that should be run next.
+4. Preserve historical information; prefer additive notes over destructive rewrites.
+5. When updating an index or manifest, append or update only the relevant row and preserve unrelated content.
 
-## Summary
-- **Total specified**: [N] content items across [M] systems
-- **Total found**: [N]
-- **Gap**: [N] items ([X%] unimplemented)
-- **Scope**: [Full audit | System: name]
+Required report sections:
 
-> Note: Counts are approximations based on file scanning.
-> The audit cannot distinguish shipped content from editor/test assets.
-> Manual verification is recommended for any HIGH PRIORITY gaps.
+- Scope
+- Planned vs built table
+- Missing content
+- Extra/unplanned content
+- Partial content
+- Production risk
+- Recommended next work
 
-## Gap Table
+## 4. Validation
 
-| System | Content Type | Specified | Found | Gap | Status |
-|--------|-------------|-----------|-------|-----|--------|
+1. Check that every conclusion cites or names a repository source.
+2. Check that all blockers have a concrete next action.
+3. Check that proposed writes stay within the declared output paths.
+4. Check that dry-run mode produced no writes.
 
-## HIGH PRIORITY Gaps
+Stop conditions:
 
-[List systems flagged HIGH PRIORITY with rationale]
+- No blocking stop condition was encountered.
 
-## Per-System Breakdown
+## 5. Final Response
 
-### [System Name]
-- **GDD**: `design/gdd/[file].md`
-- **Content types audited**: [list]
-- **Notes**: [any caveats about scan accuracy for this system]
-
-## Recommendation
-
-Focus implementation effort on:
-1. [Highest-gap HIGH PRIORITY system]
-2. [Second system]
-3. [Third system]
-
-## Unspecified Content Counts
-
-The following GDDs describe content without giving explicit counts.
-Consider adding counts to improve auditability:
-[List of GDDs and content types with "Unspecified"]
-```
-
-After writing the report, ask:
-
-> "Would you like to create backlog stories for any of the content gaps?"
-
-If yes: for each system the user selects, suggest a story title and point them
-to `/create-stories [epic-slug]` or `/quick-design` depending on the size of the gap.
-
-### --summary mode
-
-Print the Gap Table and Summary directly to conversation. Do not write a file.
-End with: "Run `/content-audit` without `--summary` to write the full report."
-
----
-
-## Phase 5 — Next Steps
-
-After the audit, recommend the highest-value follow-up actions:
-
-- If any system is `NOT STARTED` and MVP-tagged → "Run `/design-system [name]` to
-  add missing content counts to the GDD before implementation begins."
-- If total gap is >50% → "Run `/sprint-plan` to allocate content work across upcoming sprints."
-- If backlog stories are needed → "Run `/create-stories [epic-slug]` for each HIGH PRIORITY gap."
-- If `--summary` was used → "Run `/content-audit` (no flag) to write the full report to `docs/`."
-
-Verdict: **COMPLETE** — content audit finished.
+End with a concise summary of what was written, what was skipped because it was protected or unsafe, validation results, and the recommended next command. Include file paths for every artifact created or proposed.

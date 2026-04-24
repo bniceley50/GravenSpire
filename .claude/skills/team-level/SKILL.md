@@ -1,175 +1,150 @@
 ---
 name: team-level
 description: "Orchestrate level design team: level-designer + narrative-director + world-builder + art-director + systems-designer + qa-tester for complete area/level creation."
-argument-hint: "[level name or area to design]"
+argument-hint: "[level name or area to design] [--dry-run]"
 user-invocable: true
 allowed-tools: Read, Glob, Grep, Write, Edit, Bash, Task, AskUserQuestion, TodoWrite
 ---
 
-When this skill is invoked:
+# Team Level
 
-**Decision Points:** At each step transition, use `AskUserQuestion` to present
-the user with the subagent's proposals as selectable options. Write the agent's
-full analysis in conversation, then capture the decision with concise labels.
-The user must approve before moving to the next step.
+Coordinate level design, worldbuilding, narrative, art direction, systems hooks, and QA for an area or level.
 
-1. **Read the argument** for the target level or area (e.g., `tutorial`,
-   `forest dungeon`, `hub town`, `final boss arena`).
+## 0. Execution Contract
 
-2. **Gather context**:
-   - Read the game concept at `design/gdd/game-concept.md`
-   - Read game pillars at `design/gdd/game-pillars.md`
-   - Read existing level docs in `design/levels/`
-   - Read relevant narrative docs in `design/narrative/`
-   - Read world-building docs for the area's region/faction
+### 0.1 Invocation and autonomy
 
-## How to Delegate
+Supported modes:
 
-Use the Task tool to spawn each team member as a subagent:
-- `subagent_type: narrative-director` — Narrative purpose, characters, emotional arc
-- `subagent_type: world-builder` — Lore context, environmental storytelling, world rules
-- `subagent_type: level-designer` — Spatial layout, pacing, encounters, navigation
-- `subagent_type: systems-designer` — Enemy compositions, loot tables, difficulty balance
-- `subagent_type: art-director` — Visual theme, color palette, lighting, asset requirements
-- `subagent_type: accessibility-specialist` — Navigation clarity, colorblind safety, cognitive load
-- `subagent_type: qa-tester` — Test cases, boundary testing, playtest checklist
+- feature or area description: orchestrate full team workflow
+- --dry-run: produce plan and subagent summaries without writes
 
-Always provide full context in each agent's prompt (game concept, pillars, existing level docs, narrative docs).
+The invocation authorizes routine repository-local work for this skill. Operate autonomously after resolving scope; do not ask the user to approve every normal file creation. Ask only for protected operations, destructive ambiguity, or missing source-of-truth decisions that cannot be inferred safely.
 
-3. **Orchestrate the level design team** in sequence:
+If `--dry-run` is present, perform discovery and produce the complete proposed result, but do not call `Write` or `Edit`.
 
-### Step 1: Narrative + Visual Direction (narrative-director + world-builder + art-director, parallel)
+### 0.2 Path safety
 
-Spawn all three agents simultaneously — issue all three Task calls before waiting for any result.
+All user-supplied paths must be repository-relative. Reject absolute paths, paths containing `..`, and paths outside the expected project roots for this skill. Normalize paths before reading or writing.
 
-Spawn the `narrative-director` agent to:
-- Define the narrative purpose of this area (what story beats happen here?)
-- Identify key characters, dialogue triggers, and lore elements
-- Specify emotional arc (how should the player feel entering, during, leaving?)
+### 0.3 Write policy
 
-Spawn the `world-builder` agent to:
-- Provide lore context for the area (history, faction presence, ecology)
-- Define environmental storytelling opportunities
-- Specify any world rules that affect gameplay in this area
+Routine writes allowed by invocation:
 
-Spawn the `art-director` agent to:
-- Establish visual theme targets for this area — these are INPUTS to layout, not outputs of it
-- Define the color temperature and lighting mood for this area (how does it differ from adjacent areas?)
-- Specify shape language direction (angular fortress? organic cave? decayed grandeur?)
-- Name the primary visual landmarks that will orient the player
-- Read `design/art/art-bible.md` if it exists — anchor all direction in the established art bible
+- production/team/level/[slug]-level-plan.md
+- production/team/level/[slug]-content-checklist.md
+- production/qa/evidence/level-[slug]-checklist.md
 
-**The art-director's visual targets from Step 1 must be passed to the level-designer in Step 2** as explicit constraints. Layout decisions happen within the visual direction, not before it.
+Protected operations require explicit confirmation through `AskUserQuestion`:
 
-**Gate**: Use `AskUserQuestion` to present all three Step 1 outputs (narrative brief, lore foundation, visual direction targets) and confirm before proceeding to Step 2.
+- Overwriting or deleting an existing file.
+- Editing canonical source-of-truth documents outside the declared outputs.
+- Changing statuses, gates, stage files, sprint state, story state, registry entries, or release readiness.
+- Running commands that modify files, install dependencies, generate builds, publish artifacts, deploy, tag, commit, or push.
+- Applying changes whose scope is broader than the user requested.
 
-### Step 2: Layout and Encounter Design (level-designer)
-Spawn the `level-designer` agent with the full Step 1 output as context:
-- Narrative brief (from narrative-director)
-- Lore foundation (from world-builder)
-- **Visual direction targets (from art-director)** — layout must work within these targets, not contradict them
+Use `Edit` for targeted changes to existing files. Use `Write` for new files or complete replacement only after the replacement scope is safe and approved.
 
-The level-designer should:
-- Design the spatial layout (critical path, optional paths, secrets) — ensuring primary routes align with the visual landmark targets from Step 1
-- Define pacing curve (tension peaks, rest areas, exploration zones) — coordinated with the emotional arc from narrative-director
-- Place encounters with difficulty progression
-- Design environmental puzzles or navigation challenges
-- Define points of interest and landmarks for wayfinding — these must match the visual landmarks the art-director specified
-- Specify entry/exit points and connections to adjacent areas
+### 0.4 Bash safety
 
-**Adjacent area dependency check**: After the layout is produced, check `design/levels/` for each adjacent area referenced by the level-designer. If any referenced area's `.md` file does not exist, surface the gap:
-> "Level references [area-name] as an adjacent area but `design/levels/[area-name].md` does not exist."
+Bash is limited to diagnostics and read-only discovery unless the user explicitly approved a protected operation. Safe examples include `git status --short`, `git log`, `git diff --name-only`, existing test commands that do not update snapshots, and local grep/listing commands. Never run package installation, clean/reset, rm, deploy, publish, commit, tag, push, or build upload commands from this skill.
 
-Use `AskUserQuestion` with options:
-- (a) Proceed with a placeholder reference — mark the connection as UNRESOLVED in the level doc and list it in the open cross-level dependencies section of the summary report
-- (b) Pause and run `/team-level [area-name]` first to establish that area
+### 0.5 Task delegation
 
-Do NOT invent content for the missing adjacent area.
+Use Task subagents only when they materially improve the result. Pass bounded context: the request, relevant source paths, current draft/report, and the exact verdict needed. Do not spawn duplicate reviewers. If review mode is available, use `solo` for no subagents, `lean` for only essential specialist review, and `full` for cross-functional or gate review.
 
-**Gate**: Use `AskUserQuestion` to present Step 2 layout (including any unresolved adjacent area dependencies) and confirm before proceeding to Step 3.
+### 0.6 Todo tracking
 
-### Step 3: Systems Integration (systems-designer)
-Spawn the `systems-designer` agent to:
-- Specify enemy compositions and encounter formulas
-- Define loot tables and reward placement
-- Balance difficulty relative to expected player level/gear
-- Design any area-specific mechanics or environmental hazards
-- Specify resource distribution (health pickups, save points, shops)
+Use `TodoWrite` for multi-phase orchestration. Keep todos tied to observable phases, not low-level file operations. Close todos only when evidence exists.
 
-**Gate**: Use `AskUserQuestion` to present Step 3 outputs and confirm before proceeding to Step 4.
+### 0.8 Missing-file behavior
 
-### Step 4: Production Concepts + Accessibility (art-director + accessibility-specialist, parallel)
+| Situation | Behavior |
+|---|---|
+| Primary source missing | Continue only if the skill can infer a narrower safe scope; otherwise stop with the exact missing file/folder. |
+| Referenced artifact missing | Record as a gap or blocker instead of inventing content. |
+| Existing target file present | Do not overwrite. Create a proposed dated file or ask for protected confirmation. |
+| Ambiguous scope | Choose the smallest evidence-backed scope; ask only if two or more scopes are equally plausible. |
+| Contradictory sources | Prefer explicit status/source-of-truth documents over generated reports; list the contradiction in the output. |
 
-**Note**: The art-director's directional pass (visual theme, color targets, mood) happened in Step 1. This pass is location-specific production concepts — given the finalized layout, what does each specific space look like?
+## 1. Discover Context
 
-Spawn the `art-director` agent with the finalized layout from Step 2:
-- Produce location-specific concept specs for key spaces (entrance, key encounter zones, landmarks, exits)
-- Specify which art assets are unique to this area vs. shared from the global pool
-- Define sight-line and lighting setups per key space (these are now layout-informed, not directional)
-- Specify VFX needs that are specific to this area's layout (weather volumes, particles, atmospheric effects)
-- Flag any locations where the layout creates visual direction conflicts with the Step 1 targets — surface these as production risks
+Read only the sources needed for the requested scope. Start with indexes, manifests, registries, and status files before reading large documents.
 
-Spawn the `accessibility-specialist` agent in parallel to:
-- Review the level layout for navigation clarity (can players orient themselves without relying on color alone?)
-- Check that critical path signposting uses shape/icon/sound cues in addition to color
-- Review any puzzle mechanics for cognitive load — flag anything that requires holding more than 3 simultaneous states
-- Check that key gameplay areas have sufficient contrast for colorblind players
-- Output: accessibility concerns list with severity (BLOCKING / RECOMMENDED / NICE TO HAVE)
+Primary sources:
 
-Wait for both agents to return before proceeding.
+- design/gdd/**
+- docs/architecture/**
+- docs/registry/**
+- production/stories/**
+- production/qa/**
+- design/art/**
+- design/ux/**
+- docs/engine-reference/**
 
-**Gate**: Use `AskUserQuestion` to present both Step 4 results. If the accessibility-specialist returned any BLOCKING concerns, highlight them prominently and offer:
-- (a) Return to level-designer and art-director to redesign the flagged elements before Step 5
-- (b) Document as a known accessibility gap and proceed to Step 5 with the concern explicitly logged in the final report
+Discovery rules:
 
-Do NOT proceed to Step 5 without the user acknowledging any BLOCKING accessibility concerns.
+1. Prefer canonical source-of-truth files over generated reports.
+2. Use `Glob` and `Grep` before reading large files.
+3. Keep a source list for the final report or artifact.
+4. When many files match, read the most relevant 5 to 10 first and summarize the rest as candidates.
+5. Treat missing or draft-status dependencies as blockers, not as approval to invent content.
 
-### Step 5: QA Planning (qa-tester)
-Spawn the `qa-tester` agent to:
-- Write test cases for the critical path
-- Identify boundary and edge cases (sequence breaks, softlocks)
-- Create a playtest checklist for the area
-- Define acceptance criteria for level completion
+## 2. Build the Working Model
 
-4. **Compile the level design document** combining all team outputs into the
-   level design template format.
+Use the discovered evidence to build a concise working model before producing output.
 
-5. **Save to** `design/levels/[level-name].md`.
+1. Define the target feature/area and success criteria from existing docs before spawning specialists.
+2. Use TodoWrite to track orchestration phases: context, specialist briefs, synthesis, artifact plan, QA/evidence handoff, and open blockers.
+3. Spawn only the roles that materially contribute to this request: level-designer, narrative-director, world-builder, art-director, systems-designer, qa-tester.
+4. Synthesize specialist output into one coherent plan focused on layout goals, beats, encounter/content placement, traversal, readability, art/narrative requirements, performance risk, and QA routes.
+5. Write team artifacts and evidence checklists; do not modify canonical GDDs, ADRs, sprint status, or production code unless the invocation explicitly requests implementation and protected-write confirmation is obtained.
 
-6. **Output a summary** with: area overview, encounter count, estimated asset
-   list, narrative beats, any cross-team dependencies or open questions, open
-   cross-level dependencies (adjacent areas referenced but not yet designed, each
-   marked UNRESOLVED), and accessibility concerns with their resolution status.
+Classification rules:
 
-## File Write Protocol
+- **Blocking**: prevents safe implementation, review, release, or downstream skill execution.
+- **High**: likely to cause rework, wrong implementation, invalid QA, or broken traceability.
+- **Medium**: weakens handoff quality but can be resolved during normal follow-up.
+- **Low**: cleanup, clarity, or optional improvement.
 
-All file writes (level design docs, narrative docs, test checklists) are delegated
-to sub-agents spawned via Task. Each sub-agent enforces the "May I write to [path]?"
-protocol. This orchestrator does not write files directly.
+## 3. Produce the Artifact
 
-Verdict: **COMPLETE** — level design document produced and all team outputs compiled.
-Verdict: **BLOCKED** — one or more agents blocked; partial report produced with unresolved items listed.
+Canonical outputs for this skill:
 
-## Next Steps
+- production/team/level/[slug]-level-plan.md
+- production/team/level/[slug]-content-checklist.md
+- production/qa/evidence/level-[slug]-checklist.md
 
-- Run `/design-review design/levels/[level-name].md` to validate the completed level design doc.
-- Run `/dev-story` to implement level content once the design is approved.
-- Run `/qa-plan` to generate a QA test plan for this level.
+Artifact requirements:
 
-## Error Recovery Protocol
+1. Include scope, date, source list, assumptions, and confidence.
+2. Separate facts from recommendations and inferred conclusions.
+3. Include explicit next actions and the command that should be run next.
+4. Preserve historical information; prefer additive notes over destructive rewrites.
+5. When updating an index or manifest, append or update only the relevant row and preserve unrelated content.
 
-If any spawned agent (via Task) returns BLOCKED, errors, or cannot complete:
+Required report sections:
 
-1. **Surface immediately**: Report "[AgentName]: BLOCKED — [reason]" to the user before continuing to dependent phases
-2. **Assess dependencies**: Check whether the blocked agent's output is required by subsequent phases. If yes, do not proceed past that dependency point without user input.
-3. **Offer options** via AskUserQuestion with choices:
-   - Skip this agent and note the gap in the final report
-   - Retry with narrower scope
-   - Stop here and resolve the blocker first
-4. **Always produce a partial report** — output whatever was completed. Never discard work because one agent blocked.
+- Team verdict
+- Specialist findings
+- Integrated plan
+- Artifacts/evidence created
+- Open blockers
+- Next command
 
-Common blockers:
-- Input file missing (story not found, GDD absent) → redirect to the skill that creates it
-- ADR status is Proposed → do not implement; run `/architecture-decision` first
-- Scope too large → split into two stories via `/create-stories`
-- Conflicting instructions between ADR and story → surface the conflict, do not guess
+## 4. Validation
+
+1. Check that every conclusion cites or names a repository source.
+2. Check that all blockers have a concrete next action.
+3. Check that proposed writes stay within the declared output paths.
+4. Check that dry-run mode produced no writes.
+5. List every Bash command run and whether it was read-only or diagnostic.
+6. Summarize any subagent verdicts and unresolved disagreements.
+
+Stop conditions:
+
+- No feature, area, or current story context can be inferred.
+
+## 5. Final Response
+
+End with a concise summary of what was written, what was skipped because it was protected or unsafe, validation results, and the recommended next command. Include file paths for every artifact created or proposed.

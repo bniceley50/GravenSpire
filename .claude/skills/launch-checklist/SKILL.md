@@ -1,239 +1,132 @@
 ---
 name: launch-checklist
 description: "Complete launch readiness validation covering every department: code, content, store, marketing, community, infrastructure, legal, and go/no-go sign-offs."
-argument-hint: "[launch-date or 'dry-run']"
+argument-hint: "[launch-date or 'dry-run'] [--dry-run]"
 user-invocable: true
-allowed-tools: Read, Glob, Grep, Write
+allowed-tools: Read, Glob, Grep, Write, Edit, AskUserQuestion
 ---
 
-> **Explicit invocation only**: This skill should only run when the user explicitly requests it with `/launch-checklist`. Do not auto-invoke based on context matching.
+# Launch Checklist
 
-## Phase 1: Parse Arguments
+Produce a complete launch readiness checklist across code, content, QA, store, marketing, community, support, legal/compliance, localization, analytics, and operations.
 
-Read the argument for the launch date or `dry-run` mode. Dry-run mode generates the checklist without creating sign-off entries or writing files.
+## 0. Execution Contract
 
----
+### 0.1 Invocation and autonomy
 
-## Phase 2: Gather Project Context
+Supported modes:
 
-- Read `CLAUDE.md` for tech stack, target platforms, and team structure
-- Read the latest milestone in `production/milestones/`
-- Read any existing release checklist in `production/releases/`
-- Read the content calendar in `design/live-ops/content-calendar.md` if it exists
+- full: full launch checklist
+- department name: focus on one area
+- blank: infer release scope
 
----
+The invocation authorizes routine repository-local work for this skill. Operate autonomously after resolving scope; do not ask the user to approve every normal file creation. Ask only for protected operations, destructive ambiguity, or missing source-of-truth decisions that cannot be inferred safely.
 
-## Phase 3: Scan Codebase Health
+If `--dry-run` is present, perform discovery and produce the complete proposed result, but do not call `Write` or `Edit`.
 
-- Count `TODO`, `FIXME`, `HACK` comments and their locations
-- Check for any `console.log`, `print()`, or debug output left in production code
-- Check for placeholder assets (search for `placeholder`, `temp_`, `WIP_`)
-- Check for hardcoded test/dev values (localhost, test credentials, debug flags)
+### 0.2 Path safety
 
----
+All user-supplied paths must be repository-relative. Reject absolute paths, paths containing `..`, and paths outside the expected project roots for this skill. Normalize paths before reading or writing.
 
-## Phase 4: Generate the Launch Checklist
+### 0.3 Write policy
 
-```markdown
-# Launch Checklist: [Game Title]
-Target Launch: [Date or DRY RUN]
-Generated: [Date]
+Routine writes allowed by invocation:
 
----
+- production/releases/launch-checklist-[YYYYMMDD].md
 
-## 1. Code Readiness
+Protected operations require explicit confirmation through `AskUserQuestion`:
 
-### Build Health
-- [ ] Clean build on all target platforms
-- [ ] Zero compiler warnings
-- [ ] All unit tests passing
-- [ ] All integration tests passing
-- [ ] Performance benchmarks within targets
-- [ ] No memory leaks (verified via extended soak test)
-- [ ] Build size within platform limits
-- [ ] Build version correctly set and tagged in source control
+- Overwriting or deleting an existing file.
+- Editing canonical source-of-truth documents outside the declared outputs.
+- Changing statuses, gates, stage files, sprint state, story state, registry entries, or release readiness.
+- Running commands that modify files, install dependencies, generate builds, publish artifacts, deploy, tag, commit, or push.
+- Applying changes whose scope is broader than the user requested.
 
-### Code Quality
-- [ ] TODO count: [N] (zero required for launch, or documented exceptions)
-- [ ] FIXME count: [N] (zero required)
-- [ ] HACK count: [N] (each must have documented justification)
-- [ ] No debug output in production code
-- [ ] No hardcoded dev/test values
-- [ ] All feature flags set to production values
-- [ ] Error handling covers all critical paths
-- [ ] Crash reporting integrated and verified
+Use `Edit` for targeted changes to existing files. Use `Write` for new files or complete replacement only after the replacement scope is safe and approved.
 
-### Security
-- [ ] No exposed API keys or credentials in source
-- [ ] Save data encrypted
-- [ ] Network communication secured (TLS/DTLS)
-- [ ] Anti-cheat measures active (if multiplayer)
-- [ ] Input validation on all server endpoints (if multiplayer)
-- [ ] Privacy policy compliance verified
+### 0.8 Missing-file behavior
 
----
+| Situation | Behavior |
+|---|---|
+| Primary source missing | Continue only if the skill can infer a narrower safe scope; otherwise stop with the exact missing file/folder. |
+| Referenced artifact missing | Record as a gap or blocker instead of inventing content. |
+| Existing target file present | Do not overwrite. Create a proposed dated file or ask for protected confirmation. |
+| Ambiguous scope | Choose the smallest evidence-backed scope; ask only if two or more scopes are equally plausible. |
+| Contradictory sources | Prefer explicit status/source-of-truth documents over generated reports; list the contradiction in the output. |
 
-## 2. Content Readiness
+## 1. Discover Context
 
-### Assets
-- [ ] All placeholder art replaced with final assets
-- [ ] All placeholder audio replaced with final audio
-- [ ] Audio mix finalized and approved by audio director
-- [ ] All VFX polished and performance-verified
-- [ ] No missing or broken asset references
-- [ ] Asset naming conventions enforced
+Read only the sources needed for the requested scope. Start with indexes, manifests, registries, and status files before reading large documents.
 
-### Text and Localization
-- [ ] All player-facing text proofread
-- [ ] No hardcoded strings (all externalized for localization)
-- [ ] All supported languages translated and verified
-- [ ] Text fits UI in all languages (text fitting pass complete)
-- [ ] Font coverage verified for all supported languages
-- [ ] Credits complete, accurate, and up to date
+Primary sources:
 
-### Game Content
-- [ ] All levels/maps playable from start to finish
-- [ ] Tutorial flow complete and tested with new players
-- [ ] All achievements/trophies implemented and tested
-- [ ] Save/load works correctly for all game states
-- [ ] Difficulty settings balanced and tested
-- [ ] End-game/credits sequence complete
+- production/releases/**
+- production/qa/**
+- production/sprints/**
+- docs/architecture/**
+- design/gdd/**
+- localization/**
+- store/**
+- marketing/**
 
----
+Discovery rules:
 
-## 3. Quality Assurance
+1. Prefer canonical source-of-truth files over generated reports.
+2. Use `Glob` and `Grep` before reading large files.
+3. Keep a source list for the final report or artifact.
+4. When many files match, read the most relevant 5 to 10 first and summarize the rest as candidates.
+5. Treat missing or draft-status dependencies as blockers, not as approval to invent content.
 
-### Testing
-- [ ] Full regression test suite passed
-- [ ] Zero S1 (Critical) bugs open
-- [ ] Zero S2 (Major) bugs open (or documented exceptions)
-- [ ] Soak test passed (8+ hours continuous play)
-- [ ] Multiplayer stress test passed (if applicable)
-- [ ] All critical user paths tested on every platform
-- [ ] Edge cases tested (full storage, no network, suspend/resume)
+## 2. Build the Working Model
 
-### Platform Certification
-- [ ] PC: Steam/Epic/GOG SDK requirements met
-- [ ] Console: TRC/TCR/Lotcheck submission prepared
-- [ ] Mobile: App Store/Play Store guidelines compliant
-- [ ] Accessibility: minimum standards met (remapping, text scaling, colorblind)
-- [ ] Age ratings obtained (ESRB, PEGI, regional)
+Use the discovered evidence to build a concise working model before producing output.
 
-### Performance
-- [ ] Target FPS met on minimum spec hardware
-- [ ] Load times within budget on all platforms
-- [ ] Memory usage within budget on all platforms
-- [ ] Network bandwidth within targets (if multiplayer)
-- [ ] No frame hitches in critical gameplay moments
+1. Infer launch target, platforms, release phase, and outstanding gates from production docs.
+2. Generate checklist items with owner, evidence required, status, and deadline/risk where available.
+3. Separate true launch blockers from nice-to-have improvements.
+4. Do not change release status, publish, tag, build, or deploy.
+5. Write checklist and list missing evidence.
 
----
+Classification rules:
 
-## 4. Store and Distribution
+- **Blocking**: prevents safe implementation, review, release, or downstream skill execution.
+- **High**: likely to cause rework, wrong implementation, invalid QA, or broken traceability.
+- **Medium**: weakens handoff quality but can be resolved during normal follow-up.
+- **Low**: cleanup, clarity, or optional improvement.
 
-### Store Pages
-- [ ] Store page copy finalized and proofread
-- [ ] Screenshots current and per-platform resolution
-- [ ] Trailers current and approved
-- [ ] Key art and capsule images finalized
-- [ ] System requirements accurate (PC)
-- [ ] Pricing configured for all regions
-- [ ] Pre-purchase/wishlist campaigns active (if applicable)
+## 3. Produce the Artifact
 
-### Legal
-- [ ] EULA finalized and approved by legal
-- [ ] Privacy policy published and linked
-- [ ] Third-party license attributions complete
-- [ ] Music/audio licensing verified
-- [ ] Trademark/IP clearance confirmed
-- [ ] GDPR/CCPA compliance verified (data collection, consent, deletion)
+Canonical outputs for this skill:
 
----
+- production/releases/launch-checklist-[YYYYMMDD].md
 
-## 5. Infrastructure
+Artifact requirements:
 
-### Servers (if multiplayer/online)
-- [ ] Production servers provisioned and load-tested
-- [ ] Auto-scaling configured and tested
-- [ ] Database backups configured
-- [ ] CDN configured for content delivery
-- [ ] DDoS protection active
-- [ ] Monitoring and alerting configured
+1. Include scope, date, source list, assumptions, and confidence.
+2. Separate facts from recommendations and inferred conclusions.
+3. Include explicit next actions and the command that should be run next.
+4. Preserve historical information; prefer additive notes over destructive rewrites.
+5. When updating an index or manifest, append or update only the relevant row and preserve unrelated content.
 
-### Analytics and Monitoring
-- [ ] Analytics pipeline verified and receiving data
-- [ ] Crash reporting active and dashboard accessible
-- [ ] Server monitoring dashboards live
-- [ ] Key metrics tracked: DAU, session length, retention, crashes
-- [ ] Alerts configured for critical thresholds
+Required report sections:
 
----
+- Launch readiness summary
+- Department checklist
+- Blocking gaps
+- Evidence needed
+- Recommended go/no-go preparation
 
-## 6. Community and Marketing
+## 4. Validation
 
-### Community Readiness
-- [ ] Community guidelines published
-- [ ] Moderation team briefed and tools ready
-- [ ] Discord/forum/social channels set up
-- [ ] FAQ and known issues page prepared
-- [ ] Support email/ticketing system active
+1. Check that every conclusion cites or names a repository source.
+2. Check that all blockers have a concrete next action.
+3. Check that proposed writes stay within the declared output paths.
+4. Check that dry-run mode produced no writes.
 
-### Marketing
-- [ ] Launch trailer published
-- [ ] Press/influencer review keys distributed
-- [ ] Social media launch posts scheduled
-- [ ] Launch day blog post/dev update drafted
-- [ ] Patch notes for launch version published
+Stop conditions:
 
----
+- No blocking stop condition was encountered.
 
-## 7. Operations
+## 5. Final Response
 
-### Team Readiness
-- [ ] On-call schedule set for first 72 hours post-launch
-- [ ] Incident response playbook reviewed by team
-- [ ] Rollback plan documented and tested
-- [ ] Hotfix pipeline tested (can ship emergency fix within 4 hours)
-- [ ] Communication plan for launch issues (who posts, where, how fast)
-
-### Day-One Plan
-- [ ] Day-one patch prepared (if needed)
-- [ ] Server unlock/go-live procedure documented
-- [ ] Launch monitoring dashboard bookmarked by all leads
-- [ ] War room/channel established for launch day
-
----
-
-## Go / No-Go Decision
-
-**Overall Status**: [READY / NOT READY / CONDITIONAL]
-
-### Blocking Items
-[List any items that must be resolved before launch]
-
-### Conditional Items
-[List items that have documented workarounds or accepted risk]
-
-### Sign-Offs Required
-- [ ] Creative Director — Content and experience quality
-- [ ] Technical Director — Technical health and stability
-- [ ] QA Lead — Quality and test coverage
-- [ ] Producer — Schedule and overall readiness
-- [ ] Release Manager — Build and deployment readiness
-```
-
----
-
-## Phase 5: Save Checklist
-
-Present the completed checklist and summary to the user (total items, blocking items count, conditional items count, departments with incomplete sections).
-
-If not in dry-run mode, ask: "May I write this to `production/releases/launch-checklist-[date].md`?"
-
-If yes, write the file, creating directories as needed.
-
----
-
-## Phase 6: Next Steps
-
-- Run `/gate-check` to get a formal PASS/CONCERNS/FAIL verdict before launch.
-- Coordinate sign-offs via `/team-release`.
+End with a concise summary of what was written, what was skipped because it was protected or unsafe, validation results, and the recommended next command. Include file paths for every artifact created or proposed.

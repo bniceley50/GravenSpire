@@ -1,218 +1,425 @@
 ---
 name: day-one-patch
-description: "Prepare a day-one patch for a game launch. Scopes, prioritises, implements, and QA-gates a focused patch addressing known issues discovered after gold master but before or immediately after public launch. Treats the patch as a mini-sprint with its own QA gate and rollback plan."
-argument-hint: "[scope: known-bugs | cert-feedback | all]"
+description: "Scope, prepare, implement, and QA-gate a day-one patch as a constrained mini-sprint with rollback plan, bug deferrals, patch record, and deploy-readiness evidence."
+argument-hint: "[scope: known-bugs | cert-feedback | all] [--implement] [--dry-run] [--version vX.Y.Z]"
 user-invocable: true
 allowed-tools: Read, Glob, Grep, Write, Edit, Bash, Task, AskUserQuestion
 ---
 
 # Day-One Patch
 
-Every shipped game has a day-one patch. Planning it before launch day prevents
-chaos. This skill scopes the patch to only what is safe and necessary, gates it
-through a lightweight QA pass, and ensures a rollback plan exists before anything
-ships. It is a mini-sprint — not a hotfix, not a full sprint.
+Prepare a day-one patch for a project approaching launch. A day-one patch is a bounded fix package, not a feature sprint and not a broad refactor. Its purpose is to address launch-critical issues found after the gold master or release candidate is locked.
 
-**When to run:**
-- After the gold master build is locked (cert approved or launch candidate tagged)
-- When known bugs exist that are too risky to address in the gold master
-- When cert feedback requires minor fixes post-submission
-- When a pre-launch playtest surfaces must-fix issues after the release gate passed
-
-**Day-one patch scope rules:**
-- Only P1/P2 bugs that are SAFE to fix quickly
-- No new features — this is fix-only
-- No refactoring — minimum viable change
-- Any fix that requires more than 4 hours of dev time belongs in patch 1.1, not day-one
-
-**Output:** `production/releases/day-one-patch-[version].md`
+Invoking this skill authorizes autonomous discovery, classification, planning, rollback planning, patch record creation, and QA scoping. Code/data implementation proceeds only for approved in-scope fixes or when `--implement` is supplied. Deployment, publishing, platform submission, or external communication are never performed by this skill.
 
 ---
 
-## Phase 1: Load Release Context
+## 0. Operating Contract
 
-Read:
-- `production/stage.txt` — confirm project is in Release stage
-- The most recent file in `production/gate-checks/` — read the release gate verdict
-- `production/qa/bugs/*.md` — load all bugs with Status: Open or Fixed — Pending Verification
-- `production/sprints/` most recent — understand what shipped
-- `production/security/security-audit-*.md` most recent — check for any open security items
+### Autonomy defaults
 
-If `production/stage.txt` is not `Release` or `Polish`:
-> "Day-one patch prep is for Release-stage projects. Current stage: [stage]. This skill is not appropriate until you are approaching launch."
+- Load release, bug, QA, sprint, and security context automatically.
+- Classify bugs into Include / Defer / Exclude automatically using the policy below.
+- Write the patch plan, rollback plan, and patch record automatically after scope approval unless `--dry-run` is set.
+- Use subagents for implementation and QA where appropriate.
+- Ask only when scope is risky, ambiguous, too large, or includes implementation without `--implement`.
 
----
+### Hard boundaries
 
-## Phase 2: Scope the Patch
+Never:
 
-### Step 2a — Classify open bugs for patch inclusion
+- Add new features.
+- Refactor unrelated code.
+- Change architecture.
+- Ship or deploy the patch.
+- Merge branches or tag releases.
+- Publish patch notes externally.
+- Include a fix estimated above four hours unless the user explicitly overrides and the risk is recorded.
 
-For each open bug, evaluate:
+### Protected operations requiring confirmation
 
-| Criterion | Include in day-one? |
-|-----------|-------------------|
-| S1 or S2 severity | Yes — must include if safe to fix |
-| P1 priority | Yes |
-| Fix estimated < 4 hours | Yes |
-| Fix requires architecture change | No — defer to 1.1 |
-| Fix introduces new code paths | No — too risky |
-| Fix is data/config only (no code change) | Yes — very low risk |
-| Cert feedback requirement | Yes — required for platform approval |
-| S3/S4 severity | Only if trivial config fix; otherwise defer |
+Ask before:
 
-### Step 2b — Present patch scope to user
-
-Use `AskUserQuestion`:
-- Prompt: "Based on open bugs and cert feedback, here is the proposed day-one patch scope. Does this look right?"
-- Show: table of included bugs (ID, severity, description, estimated effort)
-- Show: table of deferred bugs (ID, severity, reason deferred)
-- Options: `[A] Approve this scope` / `[B] Adjust — I want to add or remove items` / `[C] No day-one patch needed`
-
-If [C]: output "No day-one patch required. Proceed to `/launch-checklist`." Stop.
-
-### Step 2c — Check total scope
-
-Sum estimated effort. If total exceeds 1 day of work:
-> "⚠️ Patch scope is [N hours] — this exceeds a safe day-one window. Consider deferring lower-priority items to patch 1.1. A bloated day-one patch introduces more risk than it removes."
-
-Use `AskUserQuestion` to confirm proceeding or reduce scope.
+- Implementing code fixes when `--implement` is absent.
+- Including a fix that touches architecture, save data, networking, monetization, platform integration, or security.
+- Proceeding when estimated patch effort exceeds one workday.
+- Removing a previously included S1/S2 bug from patch scope.
+- Changing release-stage files outside `production/releases/`, `production/qa/bugs/`, or approved config/data fix targets.
 
 ---
 
-## Phase 3: Rollback Plan
+## 1. Parse Invocation
 
-Before any code is written, define the rollback procedure. This is non-negotiable.
+Scope argument:
 
-Spawn `release-manager` via Task. Ask them to produce a rollback plan covering:
-- How to revert to the gold master build on each target platform
-- Platform-specific rollback constraints (some platforms cannot roll back cert builds)
-- Who is responsible for triggering the rollback
-- What player communication is required if a rollback occurs
+| Argument | Meaning |
+|---|---|
+| `known-bugs` | Use open bug reports only. |
+| `cert-feedback` | Use certification/platform feedback only. |
+| `all` or omitted | Consider bugs, cert feedback, QA findings, and security items. |
 
-Present the rollback plan. Ask: "May I write this rollback plan to `production/releases/rollback-plan-[version].md`?"
+Options:
 
-Do not proceed to Phase 4 until the rollback plan is written.
+- `--implement` — approved scope may be implemented after rollback plan exists.
+- `--dry-run` — produce plan only; write nothing.
+- `--version vX.Y.Z` — target release/patch version.
 
----
-
-## Phase 4: Implement Fixes
-
-For each bug in the approved scope, spawn a focused implementation loop:
-
-1. Spawn `lead-programmer` via Task with:
-   - The bug report (exact reproduction steps and root cause if known)
-   - The constraint: minimum viable fix only, no cleanup
-   - The affected files (from bug report Technical Context section)
-
-2. The lead-programmer implements and runs targeted tests.
-
-3. Spawn `qa-tester` via Task to verify: does the bug reproduce after the fix?
-
-For config/data-only fixes: make the change directly (no programmer agent needed). Confirm the value changed and re-run any relevant smoke test.
+If no version is supplied, infer from release checklist, milestone, `AGENTS.md`, latest release record, or ask only if inference fails.
 
 ---
 
-## Phase 5: Patch QA Gate
+## 2. Load Release Context
 
-This is a lightweight QA pass — not a full `/team-qa`. The patch is already QA-approved from the release gate; we are only re-verifying the changed areas.
+Read or inspect:
 
-Spawn `qa-lead` via Task with:
-- List of all changed files
-- List of bugs fixed (with verification status from Phase 4)
-- The smoke check scope for the affected systems
+```text
+production/stage.txt
+production/gate-checks/**
+production/releases/**
+production/qa/bugs/*.md
+production/qa/**
+production/sprints/**
+production/security/security-audit-*.md
+docs/architecture/control-manifest.md
+AGENTS.md
+```
 
-Ask qa-lead to determine: **Is a targeted smoke check sufficient, or do any fixes touch systems that require a broader regression?**
+Extract:
 
-Run the required QA scope:
-- **Targeted smoke check** — run `/smoke-check [affected-systems]`
-- **Broader regression** — run targeted tests in `tests/unit/` and `tests/integration/` for affected systems
+- Current stage.
+- Release gate verdict.
+- Gold master / release candidate tag or commit.
+- Target version and launch date, if known.
+- Open bugs and Fixed — Pending Verification bugs.
+- Certification feedback.
+- Open security items.
+- Recently shipped scope.
+- Existing rollback or release plan.
 
-QA verdict must be PASS or PASS WITH WARNINGS before proceeding. If FAIL: scope the failing fix out of the day-one patch and defer to 1.1.
+Appropriateness check:
+
+- If stage is `Release` or `Polish`, continue.
+- If stage is earlier, continue only as a dry planning exercise and mark the report `NOT READY FOR DAY-ONE PATCH` unless the user explicitly confirms.
 
 ---
 
-## Phase 6: Generate Patch Record
+## 3. Classify Candidate Fixes
+
+For each candidate issue, extract:
+
+- ID.
+- Severity `S1`–`S4`.
+- Priority `P1`–`P4`.
+- Player impact.
+- Reproduction reliability.
+- Root cause known/unknown.
+- Affected files/systems.
+- Estimated fix effort.
+- Risk class.
+- Cert/security/platform relevance.
+
+### 3.1 Inclusion policy
+
+| Condition | Default decision |
+|---|---|
+| S1 or S2 and safe minimal fix | Include |
+| P1 and safe minimal fix | Include |
+| Certification blocker | Include |
+| Security issue affecting player data, auth, integrity, or online safety | Include, but require security review |
+| Data/config-only fix | Include if low risk |
+| Fix estimated under 4 hours | Eligible |
+| S3/S4 trivial config fix | Eligible |
+| Requires architecture change | Defer to 1.1 or hotfix plan |
+| Adds new code path | Defer unless S1 and explicitly approved |
+| Requires broad refactor | Defer |
+| Root cause unknown | Investigate only; do not include until understood |
+| Estimate over 4 hours | Defer unless explicit override |
+
+### 3.2 Risk classes
+
+| Risk | Meaning | Day-one default |
+|---|---|---|
+| LOW | Config/data/test-only or isolated bug fix | Include if important |
+| MEDIUM | Code fix in local subsystem with targeted tests | Include if S1/S2/P1 |
+| HIGH | Cross-system, save/load, networking, platform, monetization, security | Require explicit approval and broader QA |
+| EXTREME | Architecture, schema migration, release pipeline, platform submission logic | Defer unless release is impossible without it |
+
+---
+
+## 4. Produce Scope Proposal
+
+Output a scope table:
 
 ```markdown
-# Day-One Patch: [Game Name] v[version]
+## Proposed Day-One Patch Scope
 
-**Date prepared**: [date]
-**Target release**: [launch date or "day of launch"]
-**Base build**: [gold master tag or commit]
-**Patch build**: [patch tag or commit]
-
----
-
-## Patch Notes (Internal)
-
-### Bugs Fixed
-| BUG-ID | Severity | Description | Fix summary |
-|--------|----------|-------------|-------------|
-| BUG-NNN | S[1-4] | [description] | [one-line fix] |
+### Included
+| ID | Severity | Priority | System | Summary | Effort | Risk | Reason |
+|---|---|---|---|---|---:|---|---|
 
 ### Deferred to 1.1
-| BUG-ID | Severity | Description | Reason deferred |
-|--------|----------|-------------|-----------------|
-| BUG-NNN | S[1-4] | [description] | [reason] |
+| ID | Severity | Priority | Summary | Reason Deferred |
+|---|---|---|---|---|
+
+### Excluded / Already Resolved
+| ID | Status | Reason |
+|---|---|---|
+```
+
+Compute:
+
+- Total estimated effort.
+- Number of S1/S2 issues included and deferred.
+- Highest risk class.
+- Systems touched.
+- QA breadth required.
+
+If total effort exceeds one workday, or any HIGH/EXTREME item is included, ask the user to approve or reduce scope.
+
+If scope is safe and `--implement` was supplied, proceed after showing the scope.
+
+If `--implement` was not supplied, ask:
+
+```text
+Proceed with this day-one patch scope?
+```
+
+Options:
+
+- `Approve scope and prepare records only`
+- `Approve scope and implement fixes`
+- `Adjust scope`
+- `No day-one patch needed`
+
+Stop if no day-one patch is needed.
 
 ---
+
+## 5. Create Rollback Plan First
+
+A rollback plan is required before implementation.
+
+Spawn `release-manager` with:
+
+- Target version.
+- Base build / gold master.
+- Included fixes and risk classes.
+- Target platforms.
+- Release pipeline facts from repository.
+
+Ask for rollback plan covering:
+
+- How to revert to the gold master or prior release.
+- Platform-specific rollback constraints.
+- Who triggers rollback.
+- Communication required.
+- Data/save compatibility considerations.
+- Conditions that trigger rollback.
+
+If online, multiplayer, player data, anti-cheat, or security-sensitive systems are touched, also spawn `security-engineer` to review rollback and exploit/player-data implications.
+
+Write rollback plan unless `--dry-run`:
+
+```text
+production/releases/rollback-plan-[version].md
+```
+
+Do not proceed to implementation without a rollback plan, unless the user explicitly chooses records-only mode.
+
+---
+
+## 6. Implement Approved Fixes
+
+Run only when implementation is approved and not `--dry-run`.
+
+### 6.1 Per-fix implementation loop
+
+For each included issue:
+
+1. Read the bug report and affected files.
+2. Confirm root cause is known or investigate with minimal file reads.
+3. Classify fix type:
+   - Config/data-only.
+   - Local code fix.
+   - Cross-system code fix.
+   - Security/platform fix.
+4. Apply the minimum viable fix.
+5. Run targeted tests.
+6. Record changed files and test output.
+
+For local code fixes, spawn `lead-programmer` with:
+
+- Bug report.
+- Affected files.
+- Constraint: minimum viable fix only.
+- No cleanup, no refactor, no feature work.
+- Required targeted tests.
+
+For config/data-only fixes, apply directly if the target path is listed in the bug report or release context. If target path is unclear, ask.
+
+For security-sensitive fixes, spawn `security-engineer` before implementation and again for review.
+
+### 6.2 Scope control during implementation
+
+If a fix expands beyond estimated effort, touches unexpected files, or requires architecture change:
+
+- Stop that fix.
+- Mark it deferred to 1.1.
+- Continue with other included fixes if safe.
+- Record the reason.
+
+---
+
+## 7. Verification and QA Gate
+
+### 7.1 Per-fix verification
+
+For every implemented fix:
+
+- Run the bug's reproduction steps where possible.
+- Run targeted tests for affected systems.
+- Spawn `qa-tester` for verification if the fix is not purely data/config.
+- Update bug status to `Fixed — Pending Verification` only after QA verification passes.
+
+### 7.2 Patch-level QA scope
+
+Spawn `qa-lead` with:
+
+- Included issues.
+- Deferred issues.
+- Changed files.
+- Test results.
+- Systems touched.
+- Risk classes.
+- Rollback plan path.
+
+Ask whether QA scope is:
+
+| Scope | Use when |
+|---|---|
+| Targeted smoke | LOW risk, isolated fixes |
+| Targeted regression | MEDIUM risk or multiple related fixes |
+| Broad regression | HIGH risk or cross-system changes |
+| Full QA re-entry | EXTREME risk, save/platform/security/core loop |
+
+Run the required tests if available. If QA returns FAIL, remove the failing fix from the day-one patch and defer it unless the user explicitly chooses to continue with documented risk.
+
+Proceed only if patch QA verdict is PASS or PASS WITH WARNINGS.
+
+---
+
+## 8. Generate Patch Record
+
+Create or preview:
+
+```text
+production/releases/day-one-patch-[version].md
+```
+
+Template:
+
+```markdown
+# Day-One Patch: [Game Name] [version]
+
+**Date prepared**: [date]
+**Target release**: [launch date or day of launch]
+**Base build**: [gold master tag/commit]
+**Patch build**: [patch tag/commit or pending]
+**Scope mode**: [known-bugs/cert-feedback/all]
+**Implementation mode**: [records only / implemented]
+
+## Summary
+
+[one paragraph]
+
+## Bugs Fixed
+
+| Bug ID | Severity | Priority | System | Fix Summary | Changed Files | Verification |
+|---|---|---|---|---|---|---|
+
+## Deferred to 1.1
+
+| Bug ID | Severity | Priority | Reason Deferred | Follow-Up |
+|---|---|---|---|---|
 
 ## QA Sign-Off
 
-**QA scope**: [Targeted smoke / Broader regression]
-**Verdict**: [PASS / PASS WITH WARNINGS]
-**QA lead**: qa-lead agent
-**Date**: [date]
-**Warnings (if any)**: [list or "None"]
-
----
+| Field | Value |
+|---|---|
+| QA Scope | [targeted smoke / regression / full] |
+| Verdict | [PASS / PASS WITH WARNINGS / FAIL] |
+| Evidence | [paths / command output summary] |
+| Warnings | [list or None] |
 
 ## Rollback Plan
 
 See: `production/releases/rollback-plan-[version].md`
 
-**Trigger condition**: If [N] or more S1 bugs are reported within [X] hours of launch, execute rollback.
-**Rollback owner**: [user / producer]
-
----
+**Rollback trigger**: [trigger]
+**Rollback owner**: [owner]
 
 ## Approvals Required Before Deploy
 
-- [ ] lead-programmer: all fixes reviewed
+- [ ] lead-programmer: fixes reviewed
 - [ ] qa-lead: QA gate PASS confirmed
 - [ ] producer: deployment timing approved
 - [ ] release-manager: platform submission confirmed
+- [ ] security-engineer: security sign-off, if applicable
 
----
+## Player-Facing Patch Notes Draft
 
-## Player-Facing Patch Notes
+[plain-language summary for `/patch-notes` or community-manager review]
 
-[Draft for community-manager to review before publishing]
+## Risks Accepted
 
-[list player-facing changes in plain language]
+[list or None]
 ```
 
-Ask: "May I write this patch record to `production/releases/day-one-patch-[version].md`?"
+Write automatically unless `--dry-run`.
 
 ---
 
-## Phase 7: Next Steps
+## 9. Update Bug Reports
 
-After the patch record is written:
+For each implemented and verified bug:
 
-1. Run `/patch-notes` to generate the player-facing version of the patch notes
-2. Run `/bug-report verify [BUG-ID]` for each fixed bug after the patch is live
-3. Run `/bug-report close [BUG-ID]` for each verified fix
-4. Schedule a post-launch review 48–72 hours after launch using `/retrospective launch`
+- Append `## Fix Record` if absent.
+- Set status to `Fixed — Pending Verification`.
+- Record patch version and verification evidence.
 
-**If any S1 bugs remain open after the patch:**
-> "⚠️ S1 bugs remain open and were not patched. These are accepted risks. Document them in the rollback plan trigger conditions — if they occur at scale, rollback may be preferable to a follow-up patch."
+Do not close bugs. Closure requires post-launch verification through `/bug-report verify` and `/bug-report close`.
+
+For deferred bugs:
+
+- Append or update `Deferred to 1.1` note.
+- Preserve original severity.
+- Do not lower severity solely because the issue was deferred.
 
 ---
 
-## Collaborative Protocol
+## 10. Closing Output
 
-- **Scope discipline is everything** — resist scope creep; every addition increases risk
-- **Rollback plan first, always** — a patch without a rollback plan is irresponsible
-- **Deferred is not forgotten** — every deferred bug gets a 1.1 ticket automatically
-- **Player communication is part of the patch** — `/patch-notes` is a required output, not optional
+End with:
+
+```markdown
+## Day-One Patch Summary
+
+**Version**: [version]
+**Mode**: [records only / implemented]
+**Patch Record**: [path or dry-run]
+**Rollback Plan**: [path or dry-run]
+**Included Fixes**: [N]
+**Deferred Fixes**: [N]
+**QA Verdict**: [PASS / PASS WITH WARNINGS / FAIL / not run]
+**Deploy Status**: Not deployed by this skill
+
+### Required next steps
+
+1. `/patch-notes [version]` — finalize player-facing notes.
+2. Final producer/release-manager approval.
+3. Deploy through the release pipeline, not through this skill.
+4. After live deployment, run `/bug-report verify [BUG-ID]` for each fixed bug.
+5. Schedule `/retrospective launch` 48–72 hours after launch.
+```
+
+If any S1 bugs remain deferred, include a warning and add them to rollback trigger considerations.

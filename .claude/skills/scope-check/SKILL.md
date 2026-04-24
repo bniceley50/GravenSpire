@@ -9,120 +9,100 @@ model: haiku
 
 # Scope Check
 
-This skill is read-only — it reports findings but writes no files.
+Compare current work, feature requests, or sprint contents against original scope to detect scope creep, hidden dependencies, and schedule risk.
 
-Compares original planned scope against current state to detect, quantify, and triage
-scope creep.
+## 0. Execution Contract
 
-**Argument:** `$ARGUMENTS[0]` — feature name, sprint number, or milestone name.
+### 0.1 Invocation and autonomy
 
----
+Supported modes:
 
-## Phase 1: Find the Original Plan
+- feature/story/sprint identifier
+- blank: infer current sprint scope
 
-Locate the baseline scope document for the given argument:
+This is a read-only skill. It may inspect files and run safe read-only diagnostics when Bash is allowed, but it must not create, edit, move, delete, rename, stage, commit, tag, deploy, publish, or update project state.
 
-- **Feature name** → read `design/gdd/[feature].md` or matching file in `design/`
-- **Sprint number** (e.g., `sprint-3`) → read `production/sprints/sprint-03.md` or similar
-- **Milestone** → read `production/milestones/[name].md`
+### 0.2 Path safety
 
-If the document is not found, report the missing file and stop. Do not proceed without
-a baseline to compare against.
+All user-supplied paths must be repository-relative. Reject absolute paths, paths containing `..`, and paths outside the expected project roots for this skill. Normalize paths before reading or writing.
 
----
+### 0.4 Bash safety
 
-## Phase 2: Read the Current State
+Bash is limited to diagnostics and read-only discovery unless the user explicitly approved a protected operation. Safe examples include `git status --short`, `git log`, `git diff --name-only`, existing test commands that do not update snapshots, and local grep/listing commands. Never run package installation, clean/reset, rm, deploy, publish, commit, tag, push, or build upload commands from this skill.
 
-Check what has actually been implemented or is in progress:
+### 0.8 Missing-file behavior
 
-- Scan the codebase for files related to the feature/sprint
-- Read git log for commits related to this work (`git log --oneline --since=[start-date]`)
-- Check for TODO/FIXME comments that indicate unfinished scope additions
-- Check active sprint plan if the feature is mid-sprint
+| Situation | Behavior |
+|---|---|
+| Primary source missing | Continue only if the skill can infer a narrower safe scope; otherwise stop with the exact missing file/folder. |
+| Referenced artifact missing | Record as a gap or blocker instead of inventing content. |
+| Existing target file present | Not applicable; this skill does not write. |
+| Ambiguous scope | Choose the smallest evidence-backed scope; ask only if two or more scopes are equally plausible. |
+| Contradictory sources | Prefer explicit status/source-of-truth documents over generated reports; list the contradiction in the output. |
 
----
+## 1. Discover Context
 
-## Phase 3: Compare Original vs Current Scope
+Read only the sources needed for the requested scope. Start with indexes, manifests, registries, and status files before reading large documents.
 
-Produce the comparison report:
+Primary sources:
 
-```markdown
-## Scope Check: [Feature/Sprint Name]
-Generated: [Date]
+- production/sprints/**
+- production/stories/**
+- production/epics/**
+- design/gdd/**
+- docs/architecture/**
+- git diff/status when useful
 
-### Original Scope
-[List of items from the original plan]
+Discovery rules:
 
-### Current Scope
-[List of items currently implemented or in progress]
+1. Prefer canonical source-of-truth files over generated reports.
+2. Use `Glob` and `Grep` before reading large files.
+3. Keep a source list for the final report or artifact.
+4. When many files match, read the most relevant 5 to 10 first and summarize the rest as candidates.
+5. Treat missing or draft-status dependencies as blockers, not as approval to invent content.
 
-### Scope Additions (not in original plan)
-| Addition | Source | When | Justified? | Effort |
-|----------|--------|------|------------|--------|
-| [item] | [commit/person] | [date] | [Yes/No/Unclear] | [S/M/L] |
+## 2. Build the Working Model
 
-### Scope Removals (in original but dropped)
-| Removed Item | Reason | Impact |
-|-------------|--------|--------|
-| [item] | [why removed] | [what's affected] |
+Use the discovered evidence to build a concise working model before producing output.
 
-### Bloat Score
-- Original items: [N]
-- Current items: [N]
-- Items added: [N] (+[X]%)
-- Items removed: [N]
-- Net scope change: [+/-N] ([X]%)
+1. Identify original scope baseline and current requested/implemented scope.
+2. Use safe git status/diff-name-only commands when implementation drift matters.
+3. Classify additions as in-scope clarification, scope expansion, dependency discovery, bug fix, or unrelated work.
+4. Estimate impact on effort, QA, design, and release risk.
+5. Return recommended cut/defer/approve decisions without changing plans.
 
-### Risk Assessment
-- **Schedule Risk**: [Low/Medium/High] — [explanation]
-- **Quality Risk**: [Low/Medium/High] — [explanation]
-- **Integration Risk**: [Low/Medium/High] — [explanation]
+Classification rules:
 
-### Recommendations
-1. **Cut**: [Items that should be removed to stay on schedule]
-2. **Defer**: [Items that can move to a future sprint/version]
-3. **Keep**: [Additions that are genuinely necessary]
-4. **Flag**: [Items that need a decision from producer/creative-director]
-```
+- **Blocking**: prevents safe implementation, review, release, or downstream skill execution.
+- **High**: likely to cause rework, wrong implementation, invalid QA, or broken traceability.
+- **Medium**: weakens handoff quality but can be resolved during normal follow-up.
+- **Low**: cleanup, clarity, or optional improvement.
 
----
+## 3. Produce the Read-Only Report
 
-## Phase 4: Verdict
+Return the report in chat. Do not write files. If a durable report would be useful, recommend the appropriate write-capable skill or command instead of creating it.
 
-Assign a canonical verdict based on net scope change:
+Required report sections:
 
-| Net Change | Verdict | Meaning |
-|-----------|---------|---------|
-| ≤10% | **PASS** | On Track — within acceptable variance |
-| 10–25% | **CONCERNS** | Minor Creep — manageable with targeted cuts |
-| 25–50% | **FAIL** | Significant Creep — must cut or formally extend timeline |
-| >50% | **FAIL** | Out of Control — stop, re-plan, escalate to producer |
+- Scope verdict
+- Original scope
+- New/expanded work
+- Impact
+- Recommended cuts/deferments
+- Risks
 
-Output the verdict prominently:
+## 4. Validation
 
-```
-**Scope Verdict: [PASS / CONCERNS / FAIL]**
-Net change: [+X%] — [On Track / Minor Creep / Significant Creep / Out of Control]
-```
+1. Check that every conclusion cites or names a repository source.
+2. Check that all blockers have a concrete next action.
+3. Check that proposed writes stay within the declared output paths.
+4. Check that no writes or state changes were performed.
+5. List every Bash command run and whether it was read-only or diagnostic.
 
----
+Stop conditions:
 
-## Phase 5: Next Steps
+- No blocking stop condition was encountered.
 
-After presenting the report, offer concrete follow-up:
+## 5. Final Response
 
-- **PASS** → no action required. Suggest re-running before next milestone.
-- **CONCERNS** → offer to identify the 2–3 additions with best cut ratio. Reference `/sprint-plan update` to formally re-scope.
-- **FAIL** → recommend escalating to producer. Reference `/sprint-plan update` for re-planning or `/estimate` to re-baseline timeline.
-
-Always end with:
-> "Run `/scope-check [name]` again after cuts are made to verify the verdict improves."
-
----
-
-### Rules
-
-- Scope creep is additions without corresponding cuts or timeline extensions
-- Not all additions are bad — some are discovered requirements. But they must be acknowledged and accounted for
-- When recommending cuts, prioritize preserving the core player experience over nice-to-haves
-- Always quantify scope changes — "it feels bigger" is not actionable, "+35% items" is
+End with a concise verdict, prioritized findings, evidence sources, and recommended next command. Do not imply that any files were changed.

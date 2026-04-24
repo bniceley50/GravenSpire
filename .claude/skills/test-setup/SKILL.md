@@ -1,213 +1,376 @@
 ---
 name: test-setup
-description: "Scaffold the test framework and CI/CD pipeline for the project's engine. Creates the tests/ directory structure, engine-specific test runner configuration, and GitHub Actions workflow. Run once during Technical Setup phase before the first sprint begins."
-argument-hint: "[force]"
+description: "Scaffold or repair test infrastructure for the configured game engine, including directory layout, engine-specific runner docs, smoke-test seed, and CI workflow, without overwriting existing tests."
+argument-hint: "[--force] [--repair] [--dry-run]"
 user-invocable: true
-allowed-tools: Read, Glob, Grep, Bash, Write
+allowed-tools: Read, Glob, Grep, Bash, Write, Edit, AskUserQuestion
 ---
 
 # Test Setup
 
-This skill scaffolds the automated testing infrastructure for the project.
-It detects the configured engine, generates the appropriate test runner
-configuration, creates the standard directory layout, and wires up CI/CD
-so tests run on every push.
+Create the repository's baseline automated and manual test infrastructure. This skill is intended for Technical Setup before implementation begins, but it can also repair missing test scaffolding later.
 
-Run this once during the Technical Setup phase, before any implementation
-begins. A test framework installed at sprint start costs 30 minutes.
-A test framework installed at sprint four costs 3 sprints.
-
-**Output:** `tests/` directory structure + `.github/workflows/tests.yml`
+Invoking `/test-setup` authorizes creation of missing test infrastructure files. It must never overwrite existing tests or CI workflows without explicit approval.
 
 ---
 
-## Phase 1: Detect Engine and Existing State
+## 0. Operating Contract
 
-1. **Read engine config**:
-   - Read `.claude/docs/technical-preferences.md` and extract the `Engine:` value.
-   - If engine is not configured (`[TO BE CONFIGURED]`), stop:
-     "Engine not configured. Run `/setup-engine` first, then re-run `/test-setup`."
+### Autonomy defaults
 
-2. **Check for existing test infrastructure**:
-   - Glob `tests/` — does the directory exist?
-   - Glob `tests/unit/` and `tests/integration/` — do subdirectories exist?
-   - Glob `.github/workflows/` — does a CI workflow file exist?
-   - Glob `tests/gdunit4_runner.gd` (Godot) or `tests/EditMode/` (Unity) or
-     `Source/Tests/` (Unreal) for engine-specific artifacts.
+- Detect engine and language automatically from repository configuration.
+- Create missing directories and scaffold files automatically unless `--dry-run` is active.
+- Skip existing files by default.
+- Ask only when engine detection is ambiguous, existing CI conflicts with the intended workflow, or `--repair` would edit an existing file.
 
-3. **Report findings**:
-   - "Engine: [engine]. Test directory: [found / not found]. CI workflow: [found / not found]."
-   - If everything already exists AND `force` argument was not passed:
-     "Test infrastructure appears to be in place. Re-run with `/test-setup force`
-     to regenerate. Proceeding will not overwrite existing test files."
+### Safety rules
 
-If the `force` argument is passed, skip the "already exists" early-exit and
-proceed — but still do not overwrite files that already exist at a given path.
-Only create files that are missing.
+Never:
 
----
+- Overwrite existing test files.
+- Delete test files.
+- Modify source code.
+- Commit, push, or run external CI.
+- Manage Unity license secrets or platform credentials.
+- Install plugins/packages automatically.
 
-## Phase 2: Present Plan
+### Protected edits
 
-Based on the engine detected and the existing state, present a plan:
+Require explicit confirmation before:
 
+- Editing an existing `.github/workflows/*.yml`.
+- Editing an existing `tests/README.md` that has user-authored content.
+- Replacing an existing engine-specific runner.
+- Changing test framework choice.
+
+### Path rules
+
+Allowed write targets:
+
+```text
+tests/**
+.github/workflows/tests.yml
+Source/Tests/**
 ```
+
+All paths must be repository-relative and must not contain `..`.
+
+---
+
+## 1. Parse Invocation
+
+Options:
+
+- `--force` — do not early-exit when infrastructure exists; still never overwrite existing files.
+- `--repair` — propose targeted edits for incomplete existing scaffold.
+- `--dry-run` — show the plan but write nothing.
+
+If both `--force` and `--repair` are present:
+
+- Create missing files.
+- Propose repairs for existing files.
+- Ask before applying repairs.
+
+---
+
+## 2. Detect Engine and Language
+
+Read in order:
+
+```text
+.claude/docs/technical-preferences.md
+AGENTS.md
+docs/engine-reference/*/VERSION.md
+project.godot
+*.sln
+*.csproj
+*.uproject
+```
+
+Determine:
+
+- Engine: Godot, Unity, Unreal, or unknown.
+- Engine version.
+- Primary language.
+- Project name.
+- Target platforms if available.
+
+If engine is unknown:
+
+1. If exactly one engine marker exists, use it.
+2. If multiple markers exist, ask which engine to scaffold.
+3. If no markers exist, stop and recommend `/setup-engine`.
+
+Do not guess an engine from directory names alone when configuration conflicts.
+
+---
+
+## 3. Inspect Existing Test State
+
+Check:
+
+```text
+tests/
+tests/unit/
+tests/integration/
+tests/smoke/
+tests/evidence/
+tests/README.md
+.github/workflows/tests.yml
+.github/workflows/*.yml
+```
+
+Engine-specific checks:
+
+| Engine | Check |
+|---|---|
+| Godot | `tests/gdunit4_runner.gd`, `addons/gdunit4/`, `.gd` tests |
+| Unity | `tests/EditMode/`, `tests/PlayMode/`, `.asmdef`, Unity Test Framework references |
+| Unreal | `Source/Tests/`, `.uproject`, Automation test docs |
+
+Classify each target file:
+
+| Status | Meaning |
+|---|---|
+| CREATE | Missing and safe to create. |
+| EXISTS_OK | Exists and appears compatible. |
+| EXISTS_CONFLICT | Exists but differs materially. |
+| REPAIRABLE | Exists but missing useful section and `--repair` may patch. |
+| SKIP | Not applicable to the detected engine. |
+
+If everything required exists and neither `--force` nor `--repair` is present, output a summary and stop.
+
+---
+
+## 4. Build Scaffold Plan
+
+Produce a plan before writing:
+
+```markdown
 ## Test Setup Plan — [Engine]
 
-I will create the following (skipping any that already exist):
+**Engine**: [engine] [version]
+**Language**: [language]
+**Mode**: [create missing / force / repair / dry-run]
 
-tests/
-  unit/           — Isolated unit tests for formulas, state, and logic
-  integration/    — Cross-system tests and save/load round-trips
-  smoke/          — Critical path test list (15-minute manual gate)
-  evidence/       — Screenshot and manual test sign-off records
-  README.md       — Test framework documentation
-
-[Engine-specific files — see per-engine details below]
-
-.github/workflows/tests.yml  — CI: run tests on every push to main
-
-Estimated time: ~5 minutes to create all files.
+| Path | Action | Reason |
+|---|---|---|
+| tests/README.md | CREATE | Missing test docs |
+| tests/unit/.keep | CREATE | Preserve empty unit test directory |
+| .github/workflows/tests.yml | EXISTS_CONFLICT | Existing workflow uses different framework |
 ```
 
-Ask: "May I create these files? I will not overwrite any test files that
-already exist at these paths."
+In normal mode, proceed with all CREATE actions automatically.
 
-Do not proceed without approval.
+For EXISTS_CONFLICT or REPAIRABLE actions, ask before editing.
 
 ---
 
-## Phase 3: Create Directory Structure
+## 5. Standard Directory Layout
 
-After approval, create the following files:
+Create missing directories:
 
-### `tests/README.md`
+```text
+tests/
+tests/unit/
+tests/integration/
+tests/smoke/
+tests/evidence/
+```
+
+Use safe directory creation such as:
+
+```bash
+mkdir -p tests/unit tests/integration tests/smoke tests/evidence .github/workflows
+```
+
+Only use Bash for directory creation and non-mutating diagnostics. Use `Write` for file content.
+
+Create placeholder files only when the directory would otherwise be empty:
+
+```text
+tests/unit/.keep
+tests/integration/.keep
+tests/smoke/.keep
+tests/evidence/.keep
+```
+
+Placeholder content:
+
+```text
+# Placeholder. Replace with real test evidence when this directory receives test files.
+```
+
+---
+
+## 6. `tests/README.md`
+
+Create if missing.
 
 ```markdown
 # Test Infrastructure
 
 **Engine**: [engine name + version]
-**Test Framework**: [GdUnit4 | Unity Test Framework | UE Automation]
-**CI**: `.github/workflows/tests.yml`
-**Setup date**: [date]
+**Primary Language**: [language]
+**Test Framework**: [framework]
+**CI Workflow**: `.github/workflows/tests.yml`
+**Setup Date**: [date]
 
 ## Directory Layout
 
-```
+```text
 tests/
-  unit/           # Isolated unit tests (formulas, state machines, logic)
-  integration/    # Cross-system and save/load tests
-  smoke/          # Critical path test list for /smoke-check gate
-  evidence/       # Screenshot logs and manual test sign-off records
+  unit/           # Isolated logic tests: formulas, state machines, pure systems
+  integration/    # Cross-system tests and save/load round trips
+  smoke/          # Critical path manual/automated smoke checks
+  evidence/       # Screenshots, walkthroughs, manual sign-off records
 ```
 
 ## Running Tests
 
-[Engine-specific command — see below]
+[engine-specific command]
 
-## Test Naming
+## Naming
 
-- **Files**: `[system]_[feature]_test.[ext]`
-- **Functions**: `test_[scenario]_[expected]`
-- **Example**: `combat_damage_test.gd` → `test_base_attack_returns_expected_damage()`
+- Test files: `[system]_[feature]_test.[ext]`
+- Test functions: `test_[scenario]_[expected_result]`
+- Evidence docs: `[story-slug]-evidence.md`
 
-## Story Type → Test Evidence
+## Story Type → Required Evidence
 
 | Story Type | Required Evidence | Location |
 |---|---|---|
-| Logic | Automated unit test — must pass | `tests/unit/[system]/` |
-| Integration | Integration test OR playtest doc | `tests/integration/[system]/` |
-| Visual/Feel | Screenshot + lead sign-off | `tests/evidence/` |
-| UI | Manual walkthrough OR interaction test | `tests/evidence/` |
-| Config/Data | Smoke check pass | `production/qa/smoke-*.md` |
+| Logic | Passing automated unit test | `tests/unit/[system]/` |
+| Integration | Passing integration test or documented playtest | `tests/integration/[system]/` |
+| Visual/Feel | Screenshot/video + sign-off | `tests/evidence/` or `production/qa/evidence/` |
+| UI | Manual walkthrough or interaction test | `tests/evidence/` or `production/qa/evidence/` |
+| Config/Data | Smoke check or config validation | `tests/smoke/` or `production/qa/smoke-*.md` |
 
 ## CI
 
-Tests run automatically on every push to `main` and on every pull request.
-A failed test suite blocks merging.
-```
-```
-
-### Engine-specific files
-
-#### Godot 4 (`Engine: Godot`)
-
-Create `tests/gdunit4_runner.gd`:
-
-```gdscript
-# GdUnit4 test runner — invoked by CI and /smoke-check
-# Usage: godot --headless --script tests/gdunit4_runner.gd
-extends SceneTree
-
-func _init() -> void:
-    var runner := load("res://addons/gdunit4/GdUnitRunner.gd")
-    if runner == null:
-        push_error("GdUnit4 not found. Install via AssetLib or addons/.")
-        quit(1)
-        return
-    var instance = runner.new()
-    instance.run_tests()
-    quit(0)
-```
-
-Create `tests/unit/.gdignore_placeholder` with content:
-`# Unit tests go here — one subdirectory per system (e.g., tests/unit/combat/)`
-
-Create `tests/integration/.gdignore_placeholder` with content:
-`# Integration tests go here — one subdirectory per system`
-
-Note in the README: **Installing GdUnit4**
-```
-1. Open Godot → AssetLib → search "GdUnit4" → Download & Install
-2. Enable the plugin: Project → Project Settings → Plugins → GdUnit4 ✓
-3. Restart the editor
-4. Verify: res://addons/gdunit4/ exists
-```
-
-#### Unity (`Engine: Unity`)
-
-Create `tests/EditMode/` placeholder file `tests/EditMode/README.md`:
-```markdown
-# Edit Mode Tests
-Unit tests that run without entering Play Mode.
-Use for pure logic: formulas, state machines, data validation.
-Assembly definition required: `tests/EditMode/EditModeTests.asmdef`
-```
-
-Create `tests/PlayMode/README.md`:
-```markdown
-# Play Mode Tests
-Integration tests that run in a real game scene.
-Use for cross-system interactions, physics, and coroutines.
-Assembly definition required: `tests/PlayMode/PlayModeTests.asmdef`
-```
-
-Note in the README: **Enabling Unity Test Framework**
-```
-Window → General → Test Runner
-(Unity Test Framework is included by default in Unity 2019+)
-```
-
-#### Unreal Engine (`Engine: Unreal` or `Engine: UE5`)
-
-Create `Source/Tests/README.md`:
-```markdown
-# Unreal Automation Tests
-Tests use the UE Automation Testing Framework.
-Run via: Session Frontend → Automation → select "MyGame." tests
-Or headlessly: UnrealEditor -nullrhi -ExecCmds="Automation RunTests MyGame.; Quit"
-
-Test class naming: F[SystemName]Test
-Test category naming: "MyGame.[System].[Feature]"
+Tests should run on pull requests and pushes to `main`. A failed required test suite should block merge.
 ```
 
 ---
 
-## Phase 4: Create CI/CD Workflow
+## 7. Engine-Specific Scaffold
 
-### Godot 4
+### 7.1 Godot 4
 
-Create `.github/workflows/tests.yml`:
+Framework recommendation: GdUnit4 for automated tests plus smoke/evidence docs.
+
+Create `tests/gdunit4_runner.gd` if missing:
+
+```gdscript
+# GdUnit4 test runner — invoked by CI and smoke/test workflows.
+# Usage: godot --headless --script tests/gdunit4_runner.gd
+extends SceneTree
+
+func _init() -> void:
+    var runner_script := load("res://addons/gdunit4/GdUnitRunner.gd")
+    if runner_script == null:
+        push_error("GdUnit4 not found. Install and enable the addon before running tests.")
+        quit(1)
+        return
+
+    var runner = runner_script.new()
+    runner.run_tests()
+    quit(0)
+```
+
+Godot README running command:
+
+```text
+godot --headless --script tests/gdunit4_runner.gd
+```
+
+Manual install note:
+
+```markdown
+## Installing GdUnit4
+
+1. Open Godot.
+2. Use AssetLib or the official GdUnit4 installation instructions.
+3. Enable the plugin in Project Settings → Plugins.
+4. Verify `res://addons/gdunit4/` exists.
+```
+
+Do not install the addon automatically.
+
+### 7.2 Unity
+
+Framework recommendation: Unity Test Framework.
+
+Create if missing:
+
+```text
+tests/EditMode/README.md
+tests/PlayMode/README.md
+```
+
+`tests/EditMode/README.md`:
+
+```markdown
+# Edit Mode Tests
+
+Use for pure logic, formulas, data validation, and editor-independent systems.
+
+Recommended assembly definition: `EditModeTests.asmdef`.
+Run via Unity Test Runner in Edit Mode or CI.
+```
+
+`tests/PlayMode/README.md`:
+
+```markdown
+# Play Mode Tests
+
+Use for integration behavior that requires scenes, physics, coroutines, or runtime GameObjects.
+
+Recommended assembly definition: `PlayModeTests.asmdef`.
+Run via Unity Test Runner in Play Mode or CI.
+```
+
+Unity README running command:
+
+```text
+Use Window → General → Test Runner, or run Unity batchmode test commands in CI.
+```
+
+Do not create Unity license secrets. Note that `UNITY_LICENSE` must be configured manually if using GitHub Actions.
+
+### 7.3 Unreal Engine
+
+Framework recommendation: Unreal Automation Testing Framework.
+
+Create `Source/Tests/README.md` if missing:
+
+```markdown
+# Unreal Automation Tests
+
+Tests use the Unreal Automation Testing Framework.
+
+Run in editor:
+Session Frontend → Automation → select project tests.
+
+Run headlessly:
+`UnrealEditor <Project>.uproject -nullrhi -nosound -ExecCmds="Automation RunTests <Project>.; Quit" -log -unattended`
+
+Naming:
+- Test class: `F[SystemName]Test`
+- Category: `<Project>.[System].[Feature]`
+```
+
+Unreal CI requires a self-hosted runner with Unreal Editor installed. Do not assume hosted GitHub runners have Unreal available.
+
+---
+
+## 8. CI Workflow
+
+Create `.github/workflows/tests.yml` only if no compatible workflow exists.
+
+If another test workflow exists, classify as EXISTS_OK, REPAIRABLE, or EXISTS_CONFLICT. Do not overwrite.
+
+### 8.1 Godot workflow
 
 ```yaml
 name: Automated Tests
@@ -220,7 +383,7 @@ on:
 
 jobs:
   test:
-    name: Run GdUnit4 Tests
+    name: Run Godot Tests
     runs-on: ubuntu-latest
 
     steps:
@@ -232,7 +395,7 @@ jobs:
       - name: Run GdUnit4 Tests
         uses: MikeSchulze/gdUnit4-action@v1
         with:
-          godot-version: '[VERSION FROM docs/engine-reference/godot/VERSION.md]'
+          godot-version: '[engine-version]'
           paths: |
             tests/unit
             tests/integration
@@ -246,9 +409,7 @@ jobs:
           path: reports/
 ```
 
-### Unity
-
-Create `.github/workflows/tests.yml`:
+### 8.2 Unity workflow
 
 ```yaml
 name: Automated Tests
@@ -294,12 +455,7 @@ jobs:
           path: test-results/
 ```
 
-Note: Unity CI requires a `UNITY_LICENSE` secret. Add to GitHub repository
-secrets before the first CI run.
-
-### Unreal Engine
-
-Create `.github/workflows/tests.yml`:
+### 8.3 Unreal workflow
 
 ```yaml
 name: Automated Tests
@@ -312,8 +468,8 @@ on:
 
 jobs:
   test:
-    name: Run UE Automation Tests
-    runs-on: self-hosted  # UE requires a local runner with the editor installed
+    name: Run Unreal Automation Tests
+    runs-on: self-hosted
 
     steps:
       - name: Checkout
@@ -325,7 +481,7 @@ jobs:
         run: |
           "$UE_EDITOR_PATH" "${{ github.workspace }}/[ProjectName].uproject" \
             -nullrhi -nosound \
-            -ExecCmds="Automation RunTests MyGame.; Quit" \
+            -ExecCmds="Automation RunTests [ProjectName].; Quit" \
             -log -unattended
         shell: bash
 
@@ -337,89 +493,120 @@ jobs:
           path: Saved/Logs/
 ```
 
-Note: UE CI requires a self-hosted runner with Unreal Editor installed.
-Set the `UE_EDITOR_PATH` environment variable on the runner.
-
 ---
 
-## Phase 5: Create Smoke Test Seed
+## 9. Smoke Test Seed
 
-Create `tests/smoke/critical-paths.md`:
+Create `tests/smoke/critical-paths.md` if missing:
 
 ```markdown
 # Smoke Test: Critical Paths
 
-**Purpose**: Run these 10-15 checks in under 15 minutes before any QA hand-off.
-**Run via**: `/smoke-check` (which reads this file)
-**Update**: Add new entries when new core systems are implemented.
+**Purpose**: Run these checks before QA hand-off, release candidate approval, or hotfix deployment.
+**Run via**: `/smoke-check`
+**Expected Duration**: 10–15 minutes
+**Update Rule**: Add entries when new core systems become release-critical.
 
-## Core Stability (always run)
+## Core Stability
 
-1. Game launches to main menu without crash
-2. New game / session can be started from the main menu
-3. Main menu responds to all inputs without freezing
+1. Game launches without crash.
+2. Main menu loads.
+3. New session can start.
+4. Input responds without freezing.
 
-## Core Mechanic (update per sprint)
+## Core Mechanic
 
-<!-- Add the primary mechanic for each sprint here as it is implemented -->
-<!-- Example: "Player can move, jump, and the camera follows correctly" -->
-4. [Primary mechanic — update when first core system is implemented]
+5. [Primary mechanic — update when the first core system is implemented.]
 
 ## Data Integrity
 
-5. Save game completes without error (once save system is implemented)
-6. Load game restores correct state (once load system is implemented)
+6. Save completes without error once save system exists.
+7. Load restores correct state once load system exists.
 
 ## Performance
 
-7. No visible frame rate drops on target hardware (60fps target)
-8. No memory growth over 5 minutes of play (once core loop is implemented)
+8. No obvious frame hitching on target hardware.
+9. No visible memory growth during a short play session.
+
+## Exit / Recovery
+
+10. Player can quit to menu or desktop without crash.
 ```
 
 ---
 
-## Phase 6: Post-Setup Summary
+## 10. Optional Example Test
 
-After writing all files, report:
+Do not create a fake passing test that asserts nothing.
 
-```
-Test infrastructure created for [engine].
+If a real first system exists, create a clearly marked starter test only when the target framework and system are known.
 
-Files created:
-- tests/README.md
-- tests/unit/ (directory)
-- tests/integration/ (directory)
-- tests/smoke/critical-paths.md
-- tests/evidence/ (directory)
-[engine-specific files]
-- .github/workflows/tests.yml
+If no system exists yet, report:
 
-Next steps:
-1. [Engine-specific install step, e.g., "Install GdUnit4 via AssetLib"]
-2. Write your first test: create tests/unit/[first-system]/[system]_test.[ext]
-3. Run `/qa-plan sprint` before your first sprint to classify stories and set
-   test evidence requirements
-4. `/smoke-check` before every QA hand-off
-
-Gate note: /gate-check Technical Setup → Pre-Production now requires:
-- tests/ directory with unit/ and integration/ subdirectories
-- .github/workflows/tests.yml
-- At least one example test file
-Run /test-setup and write one example test before advancing.
-
-Verdict: **COMPLETE** — test framework scaffolded and CI/CD wired up.
+```text
+No example test created because no implemented system was detected. /gate-check requires at least one real example test before Pre-Production.
 ```
 
 ---
 
-## Collaborative Protocol
+## 11. Apply Writes
 
-- **Never overwrite existing test files** — only create files that are missing.
-  If a test runner file exists, leave it as-is.
-- **Always ask before creating files** — Phase 2 requires explicit approval.
-- **Engine detection is non-negotiable** — if the engine is not configured,
-  stop and redirect to `/setup-engine`. Do not guess.
-- **`force` flag skips the "already exists" early-exit but never overwrites.**
-  It means "create any missing files even if the directory already exists."
-- For Unity CI, note that the `UNITY_LICENSE` secret must be configured
-  manually. Do not attempt to automate license management.
+If `--dry-run`, print the plan and stop.
+
+Otherwise:
+
+1. Create missing directories with `mkdir -p`.
+2. Write CREATE files only when they do not exist.
+3. Skip EXISTS_OK files.
+4. For REPAIRABLE files, ask before using `Edit`.
+5. For EXISTS_CONFLICT files, do not edit unless the user approves a specific patch.
+
+After writing, re-read created files that are critical to the summary:
+
+- `tests/README.md`
+- `.github/workflows/tests.yml`
+- Engine-specific runner/doc file
+- `tests/smoke/critical-paths.md`
+
+---
+
+## 12. Post-Setup Summary
+
+Output:
+
+```markdown
+## Test Setup Summary
+
+| Field | Value |
+|---|---|
+| Engine | [engine] [version] |
+| Framework | [framework] |
+| Mode | [normal/force/repair/dry-run] |
+| Files Created | [N] |
+| Files Skipped | [N] |
+| Conflicts | [N] |
+
+### Created
+- [path]
+
+### Skipped Existing
+- [path]
+
+### Conflicts / Repairs Needed
+- [path] — [reason]
+
+### Manual Setup Required
+- [engine-specific plugin/license/runner notes]
+
+### Next Steps
+1. Install/enable the engine test framework if required.
+2. Add one real example test for the first implemented system.
+3. Run `/smoke-check` after the first playable path exists.
+4. Run `/qa-plan sprint` before the first implementation sprint.
+```
+
+Verdict:
+
+- `COMPLETE` — missing scaffold created and no blocking conflicts remain.
+- `PARTIAL` — scaffold created but manual framework setup or CI secrets are required.
+- `BLOCKED` — engine unknown or conflicting existing CI requires user decision.

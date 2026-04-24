@@ -1,163 +1,137 @@
 ---
 name: bug-report
 description: "Creates a structured bug report from a description, or analyzes code to identify potential bugs. Ensures every bug report has full reproduction steps, severity assessment, and context."
-argument-hint: "[description] | analyze [path-to-file]"
+argument-hint: "[description] | analyze [path-to-file] [--dry-run]"
 user-invocable: true
-allowed-tools: Read, Glob, Grep, Write
+allowed-tools: Read, Glob, Grep, Write, Edit, Bash, AskUserQuestion
 ---
 
-## Phase 1: Parse Arguments
-
-Determine the mode from the argument:
-
-- No keyword → **Description Mode**: generate a structured bug report from the provided description
-- `analyze [path]` → **Analyze Mode**: read the target file(s) and identify potential bugs
-- `verify [BUG-ID]` → **Verify Mode**: confirm a reported fix actually resolved the bug
-- `close [BUG-ID]` → **Close Mode**: mark a verified bug as closed with resolution record
-
-If no argument is provided, ask the user for a bug description before proceeding.
-
----
-
-## Phase 2A: Description Mode
-
-1. **Parse the description** for key information: what broke, when, how to reproduce it, and what the expected behavior is.
-
-2. **Search the codebase** for related files using Grep/Glob to add context (affected system, likely files).
-
-3. **Draft the bug report**:
-
-```markdown
 # Bug Report
 
-## Summary
-**Title**: [Concise, descriptive title]
-**ID**: BUG-[NNNN]
-**Severity**: [S1-Critical / S2-Major / S3-Minor / S4-Trivial]
-**Priority**: [P1-Immediate / P2-Next Sprint / P3-Backlog / P4-Wishlist]
-**Status**: Open
-**Reported**: [Date]
-**Reporter**: [Name]
+Create a complete, reproducible bug report from user description, observed symptoms, code inspection, or safe diagnostic test output.
 
-## Classification
-- **Category**: [Gameplay / UI / Audio / Visual / Performance / Crash / Network]
-- **System**: [Which game system is affected]
-- **Frequency**: [Always / Often (>50%) / Sometimes (10-50%) / Rare (<10%)]
-- **Regression**: [Yes/No/Unknown -- was this working before?]
+## 0. Execution Contract
 
-## Environment
-- **Build**: [Version or commit hash]
-- **Platform**: [OS, hardware if relevant]
-- **Scene/Level**: [Where in the game]
-- **Game State**: [Relevant state -- inventory, quest progress, etc.]
+### 0.1 Invocation and autonomy
 
-## Reproduction Steps
-**Preconditions**: [Required state before starting]
+Supported modes:
 
-1. [Exact step 1]
-2. [Exact step 2]
-3. [Exact step 3]
+- description: create report from provided text
+- analyze <path>: inspect a file or folder for likely bugs
+- regression: create report from failed evidence or test output
 
-**Expected Result**: [What should happen]
-**Actual Result**: [What actually happens]
+The invocation authorizes routine repository-local work for this skill. Operate autonomously after resolving scope; do not ask the user to approve every normal file creation. Ask only for protected operations, destructive ambiguity, or missing source-of-truth decisions that cannot be inferred safely.
 
-## Technical Context
-- **Likely affected files**: [List of files based on codebase search]
-- **Related systems**: [What other systems might be involved]
-- **Possible root cause**: [If identifiable from the description]
+If `--dry-run` is present, perform discovery and produce the complete proposed result, but do not call `Write` or `Edit`.
 
-## Evidence
-- **Logs**: [Relevant log output if available]
-- **Visual**: [Description of visual evidence]
+### 0.2 Path safety
 
-## Related Issues
-- [Links to related bugs or design documents]
+All user-supplied paths must be repository-relative. Reject absolute paths, paths containing `..`, and paths outside the expected project roots for this skill. Normalize paths before reading or writing.
 
-## Notes
-[Any additional context or observations]
-```
+### 0.3 Write policy
 
----
+Routine writes allowed by invocation:
 
-## Phase 2B: Analyze Mode
+- production/qa/bugs/BUG-[id]-[slug].md
 
-1. **Read the target file(s)** specified in the argument.
+Protected operations require explicit confirmation through `AskUserQuestion`:
 
-2. **Identify potential bugs**: null references, off-by-one errors, race conditions, unhandled edge cases, resource leaks, incorrect state transitions.
+- Overwriting or deleting an existing file.
+- Editing canonical source-of-truth documents outside the declared outputs.
+- Changing statuses, gates, stage files, sprint state, story state, registry entries, or release readiness.
+- Running commands that modify files, install dependencies, generate builds, publish artifacts, deploy, tag, commit, or push.
+- Applying changes whose scope is broader than the user requested.
 
-3. **For each potential bug**, generate a bug report using the template above, with the likely trigger scenario and recommended fix filled in.
+Use `Edit` for targeted changes to existing files. Use `Write` for new files or complete replacement only after the replacement scope is safe and approved.
 
----
+### 0.4 Bash safety
 
-## Phase 2C: Verify Mode
+Bash is limited to diagnostics and read-only discovery unless the user explicitly approved a protected operation. Safe examples include `git status --short`, `git log`, `git diff --name-only`, existing test commands that do not update snapshots, and local grep/listing commands. Never run package installation, clean/reset, rm, deploy, publish, commit, tag, push, or build upload commands from this skill.
 
-Read `production/qa/bugs/[BUG-ID].md`. Extract the reproduction steps and expected result.
+### 0.8 Missing-file behavior
 
-1. **Re-run reproduction steps** — use Grep/Glob to check whether the root cause code path still exists as described. If the fix removed or changed it, note the change.
-2. **Run the related test** — if the bug's system has a test file in `tests/`, run it via Bash and report pass/fail.
-3. **Check for regression** — grep the codebase for any new occurrence of the pattern that caused the bug.
+| Situation | Behavior |
+|---|---|
+| Primary source missing | Continue only if the skill can infer a narrower safe scope; otherwise stop with the exact missing file/folder. |
+| Referenced artifact missing | Record as a gap or blocker instead of inventing content. |
+| Existing target file present | Do not overwrite. Create a proposed dated file or ask for protected confirmation. |
+| Ambiguous scope | Choose the smallest evidence-backed scope; ask only if two or more scopes are equally plausible. |
+| Contradictory sources | Prefer explicit status/source-of-truth documents over generated reports; list the contradiction in the output. |
 
-Produce a verification verdict:
+## 1. Discover Context
 
-- **VERIFIED FIXED** — reproduction steps no longer produce the bug; related tests pass
-- **STILL PRESENT** — bug reproduces as described; fix did not resolve the issue
-- **CANNOT VERIFY** — automated checks inconclusive; manual playtest required
+Read only the sources needed for the requested scope. Start with indexes, manifests, registries, and status files before reading large documents.
 
-Ask: "May I update `production/qa/bugs/[BUG-ID].md` to set Status: Verified Fixed / Still Present / Cannot Verify?"
+Primary sources:
 
-If STILL PRESENT: reopen the bug, set Status back to Open, and suggest re-running `/hotfix [BUG-ID]`.
+- production/qa/bugs/**
+- production/qa/evidence/**
+- production/sprints/**
+- design/gdd/**
+- docs/architecture/**
+- provided code path
 
----
+Discovery rules:
 
-## Phase 2D: Close Mode
+1. Prefer canonical source-of-truth files over generated reports.
+2. Use `Glob` and `Grep` before reading large files.
+3. Keep a source list for the final report or artifact.
+4. When many files match, read the most relevant 5 to 10 first and summarize the rest as candidates.
+5. Treat missing or draft-status dependencies as blockers, not as approval to invent content.
 
-Read `production/qa/bugs/[BUG-ID].md`. Confirm Status is `Verified Fixed` before closing. If status is anything else, stop: "Bug [ID] must be Verified Fixed before it can be closed. Run `/bug-report verify [BUG-ID]` first."
+## 2. Build the Working Model
 
-Append a closure record to the bug file:
+Use the discovered evidence to build a concise working model before producing output.
 
-```markdown
-## Closure Record
-**Closed**: [date]
-**Resolution**: Fixed — [one-line description of what was changed]
-**Fix commit / PR**: [if known]
-**Verified by**: qa-tester
-**Closed by**: [user]
-**Regression test**: [test file path, or "Manual verification"]
-**Status**: Closed
-```
+1. Normalize the symptom into expected vs actual behavior.
+2. Collect reproduction context from stories, GDDs, test evidence, logs, and code when available.
+3. Assign severity by player impact and priority by scheduling urgency; keep them separate.
+4. Run only safe diagnostic commands if the requested analyze path suggests a test or linter and the command is already present in the repo.
+5. Write a bug file with repro steps, environment, evidence, suspected area, owner suggestion, and acceptance condition for closure.
 
-Update the top-level `**Status**: Open` field to `**Status**: Closed`.
+Classification rules:
 
-Ask: "May I update `production/qa/bugs/[BUG-ID].md` to mark it Closed?"
+- **Blocking**: prevents safe implementation, review, release, or downstream skill execution.
+- **High**: likely to cause rework, wrong implementation, invalid QA, or broken traceability.
+- **Medium**: weakens handoff quality but can be resolved during normal follow-up.
+- **Low**: cleanup, clarity, or optional improvement.
 
-After closing, check `production/qa/bug-triage-*.md` — if the bug appears in an open triage report, note: "Bug [ID] is referenced in the triage report. Run `/bug-triage` to refresh the open bug count."
+## 3. Produce the Artifact
 
----
+Canonical outputs for this skill:
 
-## Phase 3: Save Report
+- production/qa/bugs/BUG-[id]-[slug].md
 
-Present the completed bug report(s) to the user.
+Artifact requirements:
 
-Ask: "May I write this to `production/qa/bugs/BUG-[NNNN].md`?"
+1. Include scope, date, source list, assumptions, and confidence.
+2. Separate facts from recommendations and inferred conclusions.
+3. Include explicit next actions and the command that should be run next.
+4. Preserve historical information; prefer additive notes over destructive rewrites.
+5. When updating an index or manifest, append or update only the relevant row and preserve unrelated content.
 
-If yes, write the file, creating the directory if needed. Verdict: **COMPLETE** — bug report filed.
+Required report sections:
 
-If no, stop here. Verdict: **BLOCKED** — user declined write.
+- Bug ID
+- Severity and priority
+- Reproduction steps
+- Evidence
+- Suspected cause
+- Owner suggestion
+- Next action
 
----
+## 4. Validation
 
-## Phase 4: Next Steps
+1. Check that every conclusion cites or names a repository source.
+2. Check that all blockers have a concrete next action.
+3. Check that proposed writes stay within the declared output paths.
+4. Check that dry-run mode produced no writes.
+5. List every Bash command run and whether it was read-only or diagnostic.
 
-After saving, suggest based on mode:
+Stop conditions:
 
-**After filing (Description/Analyze mode):**
-- Run `/bug-triage` to prioritize alongside existing open bugs
-- If S1 or S2: run `/hotfix [BUG-ID]` for emergency fix workflow
+- No symptom, failing evidence, or code path was supplied and no bug context can be inferred.
 
-**After fixing the bug (developer confirms fix is in):**
-- Run `/bug-report verify [BUG-ID]` — confirm the fix actually works before closing
-- Never mark a bug closed without verification — a fix that doesn't verify is still Open
+## 5. Final Response
 
-**After verify returns VERIFIED FIXED:**
-- Run `/bug-report close [BUG-ID]` — write the closure record and update status
-- Run `/bug-triage` to refresh the open bug count and remove it from the active list
+End with a concise summary of what was written, what was skipped because it was protected or unsafe, validation results, and the recommended next command. Include file paths for every artifact created or proposed.

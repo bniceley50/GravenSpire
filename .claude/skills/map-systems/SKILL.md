@@ -1,363 +1,142 @@
 ---
 name: map-systems
 description: "Decompose a game concept into individual systems, map dependencies, prioritize design order, and create the systems index."
-argument-hint: "[next | system-name] [--review full|lean|solo]"
+argument-hint: "[next | system-name] [--review full|lean|solo] [--dry-run]"
 user-invocable: true
-allowed-tools: Read, Glob, Grep, Write, Edit, AskUserQuestion, TodoWrite, Task
+allowed-tools: Read, Glob, Grep, Write, Edit, Task, AskUserQuestion, TodoWrite
 ---
 
-When this skill is invoked:
+# Map Systems
 
-## Parse Arguments
+Decompose the approved concept into a dependency-ordered systems map and GDD authoring sequence.
 
-Two modes:
+## 0. Execution Contract
 
-- **No argument**: `/map-systems` — Run the full decomposition workflow (Phases 1-5)
-  to create or update the systems index.
-- **`next`**: `/map-systems next` — Pick the highest-priority undesigned system
-  from the index and hand off to `/design-system` (Phase 6).
+### 0.1 Invocation and autonomy
 
-Also resolve the review mode (once, store for all gate spawns this run):
-1. If `--review [full|lean|solo]` was passed → use that
-2. Else read `production/review-mode.txt` → use that value
-3. Else → default to `lean`
+Supported modes:
 
-See `.claude/docs/director-gates.md` for the full check pattern.
+- full: complete system map
+- foundation: focus on core infrastructure systems
+- feature: focus on player-facing systems
+- blank: infer from concept
 
----
+The invocation authorizes routine repository-local work for this skill. Operate autonomously after resolving scope; do not ask the user to approve every normal file creation. Ask only for protected operations, destructive ambiguity, or missing source-of-truth decisions that cannot be inferred safely.
 
-## Phase 1: Read Concept (Required Context)
+If `--dry-run` is present, perform discovery and produce the complete proposed result, but do not call `Write` or `Edit`.
 
-Read the game concept and any existing design work. This provides the raw material
-for systems decomposition.
+### 0.2 Path safety
 
-**Required:**
-- Read `design/gdd/game-concept.md` — **fail with a clear message if missing**:
-  > "No game concept found at `design/gdd/game-concept.md`. Run `/brainstorm` first
-  > to create one, then come back to decompose it into systems."
+All user-supplied paths must be repository-relative. Reject absolute paths, paths containing `..`, and paths outside the expected project roots for this skill. Normalize paths before reading or writing.
 
-**Optional (read if they exist):**
-- Read `design/gdd/game-pillars.md` — pillars constrain priority and scope
-- Read `design/gdd/systems-index.md` — if exists, **resume** from where it left off
-  (update, don't recreate from scratch)
-- Glob `design/gdd/*.md` — check which system GDDs already exist
+### 0.3 Write policy
 
-**If the systems index already exists:**
-- Read it and present current status to the user
-- Use `AskUserQuestion` to ask:
-  "The systems index already exists with [N] systems ([M] designed, [K] not started).
-  What would you like to do?"
-  - Options: "Update the index with new systems", "Design the next undesigned system",
-    "Review and revise priorities"
+Routine writes allowed by invocation:
 
----
+- design/gdd/systems-index.md
+- design/system-map.md
 
-## Phase 2: Systems Enumeration (Collaborative)
+Protected operations require explicit confirmation through `AskUserQuestion`:
 
-Extract and identify all systems the game needs. This is the creative core of the
-skill — it requires human judgment because concept docs rarely enumerate every
-system explicitly.
+- Overwriting or deleting an existing file.
+- Editing canonical source-of-truth documents outside the declared outputs.
+- Changing statuses, gates, stage files, sprint state, story state, registry entries, or release readiness.
+- Running commands that modify files, install dependencies, generate builds, publish artifacts, deploy, tag, commit, or push.
+- Applying changes whose scope is broader than the user requested.
 
-### Step 2a: Extract Explicit Systems
+Use `Edit` for targeted changes to existing files. Use `Write` for new files or complete replacement only after the replacement scope is safe and approved.
 
-Scan the game concept for directly mentioned systems and mechanics:
-- Core Mechanics section (most explicit)
-- Core Loop section (implies what systems drive each loop tier)
-- Technical Considerations section (networking, procedural generation, etc.)
-- MVP Definition section (required features = required systems)
+### 0.5 Task delegation
 
-### Step 2b: Identify Implicit Systems
+Use Task subagents only when they materially improve the result. Pass bounded context: the request, relevant source paths, current draft/report, and the exact verdict needed. Do not spawn duplicate reviewers. If review mode is available, use `solo` for no subagents, `lean` for only essential specialist review, and `full` for cross-functional or gate review.
 
-For each explicit system, identify the **hidden systems** it implies. Games always
-need more systems than the concept doc mentions. Use this inference pattern:
+### 0.6 Todo tracking
 
-- "Inventory" implies: item database, equipment slots, weight/capacity rules,
-  inventory UI, item serialization for save/load
-- "Combat" implies: damage calculation, health system, hit detection, status effects,
-  enemy AI, combat UI (health bars, damage numbers), death/respawn
-- "Open world" implies: streaming/chunking, LOD system, fast travel, map/minimap,
-  point of interest tracking, world state persistence
-- "Multiplayer" implies: networking layer, lobby/matchmaking, state synchronization,
-  anti-cheat, network UI (ping, player list)
-- "Crafting" implies: recipe database, ingredient gathering, crafting UI,
-  success/failure mechanics, recipe discovery/learning
-- "Dialogue" implies: dialogue tree system, dialogue UI, choice tracking, NPC
-  state management, localization hooks
-- "Progression" implies: XP system, level-up mechanics, skill tree, unlock
-  tracking, progression UI, progression save data
+Use `TodoWrite` for multi-phase orchestration. Keep todos tied to observable phases, not low-level file operations. Close todos only when evidence exists.
 
-Explain in conversation text why each implicit system is needed (with examples).
+### 0.8 Missing-file behavior
 
-### Step 2c: User Review
+| Situation | Behavior |
+|---|---|
+| Primary source missing | Continue only if the skill can infer a narrower safe scope; otherwise stop with the exact missing file/folder. |
+| Referenced artifact missing | Record as a gap or blocker instead of inventing content. |
+| Existing target file present | Do not overwrite. Create a proposed dated file or ask for protected confirmation. |
+| Ambiguous scope | Choose the smallest evidence-backed scope; ask only if two or more scopes are equally plausible. |
+| Contradictory sources | Prefer explicit status/source-of-truth documents over generated reports; list the contradiction in the output. |
 
-Present the enumeration organized by category. For each system, show:
-- Name
-- Category
-- Brief description (1 sentence)
-- Whether it was explicit (from concept) or implicit (inferred)
+## 1. Discover Context
 
-Then use `AskUserQuestion` to capture feedback:
-- "Are there systems missing from this list?"
-- "Should any of these be combined or split?"
-- "Are there systems listed that this game does NOT need?"
+Read only the sources needed for the requested scope. Start with indexes, manifests, registries, and status files before reading large documents.
 
-Iterate until the user approves the enumeration.
+Primary sources:
 
----
+- design/concept/game-concept.md
+- design/art/art-bible.md
+- design/ux/**
+- existing design/gdd/**
+- docs/architecture/**
 
-## Phase 3: Dependency Mapping (Collaborative)
+Discovery rules:
 
-For each system, determine what it depends on. A system "depends on" another if
-it cannot function without that other system existing first.
+1. Prefer canonical source-of-truth files over generated reports.
+2. Use `Glob` and `Grep` before reading large files.
+3. Keep a source list for the final report or artifact.
+4. When many files match, read the most relevant 5 to 10 first and summarize the rest as candidates.
+5. Treat missing or draft-status dependencies as blockers, not as approval to invent content.
 
-### Step 3a: Map Dependencies
+## 2. Build the Working Model
 
-For each system, list its dependencies. Use these dependency heuristics:
-- **Input/output dependencies**: System A produces data System B needs
-- **Structural dependencies**: System A provides the framework System B plugs into
-- **UI dependencies**: Every gameplay system has a corresponding UI system that
-  depends on it (but UI is designed after the gameplay system)
+Use the discovered evidence to build a concise working model before producing output.
 
-### Step 3b: Sort by Dependency Order
+1. Extract player loop, progression, content types, UI surfaces, technical requirements, and production constraints from concept/art/UX sources.
+2. Define systems as design domains, not implementation classes.
+3. Order systems by dependency: foundation, core loop, feature, presentation, content, live-ops.
+4. Create entries with purpose, dependencies, required GDDs, ADR needs, and recommended design order.
+5. Use Task review in full mode for production or technical feasibility if available.
 
-Arrange systems into layers:
-1. **Foundation**: Systems with zero dependencies (designed and built first)
-2. **Core**: Systems depending only on Foundation systems
-3. **Feature**: Systems depending on Core systems
-4. **Presentation**: UI and feedback systems that wrap gameplay systems
-5. **Polish**: Meta-systems, tutorials, analytics, accessibility
+Classification rules:
 
-### Step 3c: Detect Circular Dependencies
+- **Blocking**: prevents safe implementation, review, release, or downstream skill execution.
+- **High**: likely to cause rework, wrong implementation, invalid QA, or broken traceability.
+- **Medium**: weakens handoff quality but can be resolved during normal follow-up.
+- **Low**: cleanup, clarity, or optional improvement.
 
-Check for cycles in the dependency graph. If found:
-- Highlight them to the user
-- Propose resolutions (interface abstraction, simultaneous design, breaking the
-  cycle by defining a contract between the two systems)
+## 3. Produce the Artifact
 
-### Step 3d: Present to User
+Canonical outputs for this skill:
 
-Show the dependency map as a layered list. Highlight:
-- Any circular dependencies
-- Any "bottleneck" systems (many others depend on them — these are high-risk)
-- Any systems with no dependents (leaf nodes — lower risk, can be designed late)
+- design/gdd/systems-index.md
+- design/system-map.md
 
-Use `AskUserQuestion` to ask: "Does this dependency ordering look right? Any
-dependencies I'm missing or that should be removed?"
+Artifact requirements:
 
-**Review mode check** — apply before spawning TD-SYSTEM-BOUNDARY:
-- `solo` → skip. Note: "TD-SYSTEM-BOUNDARY skipped — Solo mode." Proceed to priority assignment.
-- `lean` → skip (not a PHASE-GATE). Note: "TD-SYSTEM-BOUNDARY skipped — Lean mode." Proceed to priority assignment.
-- `full` → spawn as normal.
+1. Include scope, date, source list, assumptions, and confidence.
+2. Separate facts from recommendations and inferred conclusions.
+3. Include explicit next actions and the command that should be run next.
+4. Preserve historical information; prefer additive notes over destructive rewrites.
+5. When updating an index or manifest, append or update only the relevant row and preserve unrelated content.
 
-**After dependency mapping is approved, spawn `technical-director` via Task using gate TD-SYSTEM-BOUNDARY (`.claude/docs/director-gates.md`) before proceeding to priority assignment.**
+Required report sections:
 
-Pass: the dependency map summary, layer assignments, bottleneck systems list, any circular dependency resolutions.
+- Systems discovered
+- Dependency graph
+- Design order
+- ADR prerequisites
+- GDD backlog
+- Next command
 
-Present the assessment. If REJECT, revise the system boundaries with the user before moving to priority assignment. If CONCERNS, note them inline in the systems index and continue.
+## 4. Validation
 
----
+1. Check that every conclusion cites or names a repository source.
+2. Check that all blockers have a concrete next action.
+3. Check that proposed writes stay within the declared output paths.
+4. Check that dry-run mode produced no writes.
+5. Summarize any subagent verdicts and unresolved disagreements.
 
-## Phase 4: Priority Assignment (Collaborative)
+Stop conditions:
 
-Assign each system to a priority tier based on what milestone it's needed for.
+- No concept or comparable design source exists.
 
-### Step 4a: Auto-Assign Based on Concept
+## 5. Final Response
 
-Use these heuristics for initial assignment:
-- **MVP**: Systems mentioned in the concept's "Required for MVP" section, plus their
-  Foundation-layer dependencies
-- **Vertical Slice**: Systems needed for a complete experience in one area
-- **Alpha**: All remaining gameplay systems
-- **Full Vision**: Polish, meta, and nice-to-have systems
-
-### Step 4b: User Review
-
-Present the priority assignments in a table. For each tier, explain why systems
-were placed there.
-
-Use `AskUserQuestion` to ask: "Do these priority assignments match your vision?
-Which systems should be higher or lower priority?"
-
-Explain reasoning in conversation: "I placed [system] in MVP because the core loop
-requires it — without [system], the 30-second loop can't function."
-
-**"Why" column guidance**: When explaining why each system was placed in a priority tier, mix technical necessity with player-experience reasoning. Do not use purely technical justifications like "Combat needs damage math" — connect to player experience where relevant. Examples of good "Why" entries:
-- "Required for the core loop — without it, placement decisions have no consequence (Pillar 2: Placement is the Puzzle)"
-- "Ballista's punch-through identity is established here — this stat definition is what makes it feel different from Archer"
-- "Foundation for all economy decisions — players must understand upgrade costs to make meaningful placement choices"
-
-Pure technical necessity ("X depends on Y") is insufficient alone when the system directly shapes player experience.
-
-**Review mode check** — apply before spawning PR-SCOPE:
-- `solo` → skip. Note: "PR-SCOPE skipped — Solo mode." Proceed to writing the systems index.
-- `lean` → skip (not a PHASE-GATE). Note: "PR-SCOPE skipped — Lean mode." Proceed to writing the systems index.
-- `full` → spawn as normal.
-
-**After priorities are approved, spawn `producer` via Task using gate PR-SCOPE (`.claude/docs/director-gates.md`) before writing the index.**
-
-Pass: total system count per milestone tier, estimated implementation volume per tier (system count × average complexity), team size, stated project timeline.
-
-Present the assessment. If UNREALISTIC, offer to revise priority tier assignments before writing the index. If CONCERNS, note them and continue.
-
-### Step 4c: Determine Design Order
-
-Combine dependency sort + priority tier to produce the final design order:
-1. MVP Foundation systems first
-2. MVP Core systems second
-3. MVP Feature systems third
-4. Vertical Slice Foundation/Core systems
-5. ...and so on
-
-This is the order the team should write GDDs in.
-
----
-
-## Phase 5: Create Systems Index (Write)
-
-### Step 5a: Draft the Document
-
-Using the template at `.claude/docs/templates/systems-index.md`, populate the
-systems index with all data from Phases 2-4:
-- Fill the enumeration table
-- Fill the dependency map
-- Fill the recommended design order
-- Fill the high-risk systems
-- Fill progress tracker (all systems "Not Started" initially, unless GDDs already exist)
-
-### Step 5b: Approval
-
-Present a summary of the document:
-- Total systems count by category
-- MVP system count
-- First 3 systems in the design order
-- Any high-risk items
-
-Ask: "May I write the systems index to `design/gdd/systems-index.md`?"
-
-Wait for approval. Write the file only after "yes."
-
-**Review mode check** — apply before spawning CD-SYSTEMS:
-- `solo` → skip. Note: "CD-SYSTEMS skipped — Solo mode." Proceed to Phase 7 next steps.
-- `lean` → skip (not a PHASE-GATE). Note: "CD-SYSTEMS skipped — Lean mode." Proceed to Phase 7 next steps.
-- `full` → spawn as normal.
-
-**After the systems index is written, spawn `creative-director` via Task using gate CD-SYSTEMS (`.claude/docs/director-gates.md`).**
-
-Pass: systems index path, game pillars and core fantasy (from `design/gdd/game-concept.md`), MVP priority tier system list.
-
-Present the assessment. If REJECT, revise the system set with the user before GDD authoring begins. If CONCERNS, record them in the systems index as a `> **Creative Director Note**` at the top of the relevant tier section.
-
-### Step 5c: Update Session State
-
-After writing, create `production/session-state/active.md` if it does not exist, then update it with:
-- Task: Systems decomposition
-- Status: Systems index created
-- File: design/gdd/systems-index.md
-- Next: Design individual system GDDs
-
-**Verdict: COMPLETE** — systems index written to `design/gdd/systems-index.md`.
-If the user declined: **Verdict: BLOCKED** — user did not approve the write.
-
----
-
-## Phase 6: Design Individual Systems (Handoff to /design-system)
-
-This phase is entered when:
-- The user says "yes" to designing systems after creating the index
-- The user invokes `/map-systems [system-name]`
-- The user invokes `/map-systems next`
-
-### Step 6a: Select the System
-
-- If a system name was provided, find it in the systems index
-- If `next` was used, pick the highest-priority undesigned system (by design order)
-- If the user just finished the index, ask:
-  "Would you like to start designing individual systems now? The first system in
-  the design order is [name]. Or would you prefer to stop here and come back later?"
-
-Use `AskUserQuestion` for: "Start designing [system-name] now, pick a different
-system, or stop here?"
-
-### Step 6b: Hand Off to /design-system
-
-Once a system is selected, invoke the `/design-system [system-name]` skill.
-
-The `/design-system` skill handles the full GDD authoring process:
-- Gathers context from game concept, systems index, and dependency GDDs
-- Creates a file skeleton immediately
-- Walks through all 8 required sections one at a time (collaborative, incremental)
-- Cross-references existing docs to prevent contradictions
-- Routes to specialist agents for domain expertise
-- Writes each section to file as soon as it's approved
-- Runs `/design-review` when complete
-- Updates the systems index
-
-**Do not duplicate the /design-system workflow here.** This skill owns the systems
-*index*; `/design-system` owns individual system *GDDs*.
-
-### Step 6c: Loop or Stop
-
-After `/design-system` completes, use `AskUserQuestion`:
-- "Continue to the next system ([next system name])?"
-- "Pick a different system?"
-- "Stop here for this session?"
-
-If continuing, return to Step 6a.
-
----
-
-## Phase 7: Suggest Next Steps
-
-After the systems index is created (or after designing some systems), present next actions using `AskUserQuestion`:
-
-- "Systems index is written. What would you like to do next?"
-  - [A] Start designing GDDs — run `/design-system [first-system-in-order]`
-  - [B] Ask a director to review the index first — ask `creative-director` or `technical-director` to validate the system set before committing to 10+ GDD sessions
-  - [C] Stop here for this session
-
-**The director review option ([B]) is worth highlighting**: having a Creative Director or Technical Director review the completed systems index before starting GDD authoring catches scope issues, missing systems, and boundary problems before they're locked in across many documents. It is optional but recommended for new projects.
-
-After any individual GDD is completed:
-- "Run `/design-review design/gdd/[system].md` in a fresh session to validate quality"
-- "Run `/gate-check systems-design` when all MVP GDDs are complete"
-
----
-
-## Collaborative Protocol
-
-This skill follows the collaborative design principle at every phase:
-
-1. **Question -> Options -> Decision -> Draft -> Approval** at every step
-2. **AskUserQuestion** at every decision point (Explain -> Capture pattern):
-   - Phase 2: "Missing systems? Combine or split?"
-   - Phase 3: "Dependency ordering correct?"
-   - Phase 4: "Priority assignments match your vision?"
-   - Phase 5: "May I write the systems index?"
-   - Phase 6: "Start designing, pick different, or stop?" then hand off to `/design-system`
-3. **"May I write to [filepath]?"** before every file write
-4. **Incremental writing**: Update the systems index after each system is designed
-5. **Handoff**: Individual GDD authoring is owned by `/design-system`, which handles
-   incremental section writing, cross-referencing, design review, and index updates
-6. **Session state updates**: Write to `production/session-state/active.md` after
-   each milestone (index created, system designed, priorities changed)
-
-**Never** auto-generate the full systems list and write it without review.
-**Never** start designing a system without user confirmation.
-**Always** show the enumeration, dependencies, and priorities for user validation.
-
-## Context Window Awareness
-
-If context reaches or exceeds 70% at any point, append this notice:
-
-> **Context is approaching the limit (≥70%).** The systems index is saved to
-> `design/gdd/systems-index.md`. Open a fresh Claude Code session to continue
-> designing individual GDDs — run `/map-systems next` to pick up where you left off.
-
----
-
-## Recommended Next Steps
-
-- Run `/design-system [first-system-in-order]` to author the first GDD (use design order from the index)
-- Run `/map-systems next` to always pick the highest-priority undesigned system automatically
-- Run `/design-review design/gdd/[system].md` in a fresh session after each GDD is authored
-- Run `/gate-check pre-production` when all MVP GDDs are authored and reviewed
+End with a concise summary of what was written, what was skipped because it was protected or unsafe, validation results, and the recommended next command. Include file paths for every artifact created or proposed.

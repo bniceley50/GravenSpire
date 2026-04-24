@@ -1,323 +1,363 @@
 ---
 name: dev-story
-description: "Read a story file and implement it. Loads the full context (story, GDD requirement, ADR guidelines, control manifest), routes to the right programmer agent for the system and engine, implements the code and test, and confirms each acceptance criterion. The core implementation skill — run after /story-readiness, before /code-review and /story-done."
-argument-hint: "[story-path]"
+description: "Implement one ready story. Loads the story, GDD requirement, governing ADRs, control manifest, engine preferences, and test evidence requirements; then writes scoped source/test changes and records session state."
+argument-hint: "[story-path] [--dry-run] [--no-tests]"
 user-invocable: true
-allowed-tools: Read, Glob, Grep, Write, Bash, Task, AskUserQuestion
+allowed-tools: Read, Glob, Grep, Write, Edit, Bash, Task, AskUserQuestion
 ---
 
 # Dev Story
 
-This skill bridges planning and code. It reads a story file in full, assembles
-all the context a programmer needs, routes to the correct specialist agent, and
-drives implementation to completion — including writing the test.
+Implement one story from `production/epics/`. This skill is the coding bridge between planning and completion. It must preserve story scope, follow accepted ADRs, respect the control manifest, create required test evidence, and leave closure to `/story-done`.
 
-**The loop for every story:**
+The user's invocation authorizes routine repository-local implementation writes. Do not ask before ordinary source, test, data, or evidence-file edits that are required by the story. Ask only for protected actions, dependency overrides, out-of-scope changes, or unresolved design choices.
+
+Do not mark the story Done. `/story-done` performs closure.
+
+---
+
+## 0. Execution Contract
+
+### 0.1 Parse invocation
+
+Supported flags:
+
+- `--dry-run`: load context and produce an implementation plan; do not write code, tests, evidence, or session state.
+- `--no-tests`: allowed only for `Visual/Feel`, `UI`, or `Config/Data` stories. For `Logic` and `Integration`, this flag is ignored unless the user explicitly confirms the test deferral.
+
+If a story path is provided, validate it. It must match:
+
+```text
+production/epics/*/story-*.md
 ```
-/qa-plan sprint           ← define test requirements before sprint begins
-/story-readiness [path]   ← validate before starting
-/dev-story [path]         ← implement it  (this skill)
-/code-review [files]      ← review it
-/story-done [path]        ← verify and close it
+
+If no path is provided:
+
+1. Read `production/session-state/active.md` and look for the active story.
+2. If exactly one active story is found, use it.
+3. Otherwise glob `production/epics/**/story-*.md` and choose the first `Ready` story whose dependencies are complete.
+4. If multiple equally valid choices remain, ask the user to choose.
+
+### 0.2 Path safety
+
+Reject absolute paths and paths containing `..`.
+
+Routine write locations:
+
+- Project source directories inferred from engine/project layout.
+- `tests/`.
+- `production/qa/evidence/`.
+- `production/session-state/active.md`.
+
+Protected locations requiring explicit confirmation:
+
+- `.claude/`, `.claude/`, `.github/`, CI files, release/deploy config.
+- `AGENTS.md`.
+- `docs/architecture/`, `docs/registry/`, `design/gdd/`.
+- Other stories or epics, except session-state references.
+- Dependency story status updates.
+
+Never delete, move, publish, deploy, install packages, or modify credentials.
+
+### 0.3 Bash policy
+
+Bash is permitted for:
+
+- Listing files.
+- Running tests.
+- Reading test result artifacts.
+- Non-destructive diagnostics.
+
+Do not use Bash for destructive commands, package installation, network calls, git operations that mutate state, deployment, long-running watchers, or process killing.
+
+### 0.4 Stop conditions
+
+Stop before implementation if any of these are true:
+
+- Story file missing or invalid.
+- Story status is `Blocked`, `Needs Work`, `Draft`, or unknown.
+- Governing ADR is missing or not `Accepted`.
+- A dependency story is missing or not `Done`/`Complete`/`Closed`, unless the user explicitly accepts the dependency risk.
+- Story contains unresolved design questions in acceptance criteria or implementation notes.
+- The requested implementation would violate a forbidden control-manifest rule.
+- The story requires an architectural decision not covered by an accepted ADR.
+
+When stopping, write no source/test changes and provide the exact remediation command.
+
+---
+
+## 1. Load Story and Supporting Context
+
+Read the story completely. Extract:
+
+- Title and story number.
+- Epic path and slug.
+- Status.
+- Layer.
+- Type.
+- Estimate.
+- Manifest Version.
+- GDD path.
+- Requirement IDs.
+- Governing ADRs.
+- Acceptance criteria.
+- Implementation notes.
+- Out of scope.
+- QA test cases.
+- Test evidence path.
+- Dependencies.
+- Blockers.
+
+Read supporting files:
+
+| File | Purpose | Missing behavior |
+|---|---|---|
+| Epic `EPIC.md` | Scope and neighboring stories | Warn and continue if story is self-contained. |
+| GDD path | Requirement context | Continue only if story criteria are self-contained; otherwise stop. |
+| `docs/architecture/tr-registry.yaml` | Current requirement text | Warn and use story text if missing. |
+| Governing ADRs | Binding implementation rules | Stop if any required ADR missing or not accepted. |
+| `docs/architecture/control-manifest.md` | Required/forbidden patterns | Warn if missing; stop if story requires known manifest validation and manifest is absent. |
+| `.claude/docs/technical-preferences.md` | Engine, naming, specialists, budgets | Warn and infer from project if missing. |
+| Engine reference docs | Engine risk verification | Warn if missing; use ADR engine notes as source of truth. |
+
+---
+
+## 2. Validate Readiness Inline
+
+Before coding, run a lightweight readiness check:
+
+- Status must be `Ready` unless the only issue is `Needs Trace ID` and the story is otherwise implementable.
+- ADRs must be accepted.
+- Dependencies must be complete.
+- Acceptance criteria must be testable.
+- Out-of-scope boundaries must be clear.
+- Evidence path must exist in the story.
+- For Logic/Integration, test cases must be present or derivable from acceptance criteria.
+
+If readiness fails, stop and recommend `/story-readiness [story-path]`.
+
+### 2.1 Dependency handling
+
+For each dependency:
+
+1. Locate the dependency story.
+2. Read its status.
+3. If not complete, ask:
+
+```text
+[Current story] depends on [dependency] which is [status].
+
+[A] Stop and complete the dependency first
+[B] Proceed anyway and record a dependency-risk deviation
+[C] The dependency is complete; update is needed elsewhere
 ```
 
-**After all sprint stories are done:** run `/team-qa sprint` to execute the full QA cycle and get a sign-off verdict before advancing the project stage.
-
-**Output:** Source code + test file in the project's `src/` and `tests/` directories.
+If `[C]`, do not modify the dependency story unless the user separately confirms the protected status update. Prefer stopping and running `/story-done` on the dependency.
 
 ---
 
-## Phase 1: Find the Story
+## 3. Select Implementation Route
 
-**If a path is provided**: read that file directly.
+Use the story type, layer, and engine to decide whether to implement directly or delegate with `Task`.
 
-**If no argument**: check `production/session-state/active.md` for the active
-story. If found, confirm: "Continuing work on [story title] — is that correct?"
-If not found, ask: "Which story are we implementing?" Glob
-`production/epics/**/*.md` and list stories with Status: Ready.
-
----
-
-## Phase 2: Load Full Context
-
-**Before loading any context, verify required files exist.** Extract the ADR path from the story's `ADR Governing Implementation` field, then check:
-
-| File | Path | If missing |
-|------|------|------------|
-| TR registry | `docs/architecture/tr-registry.yaml` | **STOP** — "TR registry not found. Run `/create-epics` to generate it." |
-| Governing ADR | path from story's ADR field | **STOP** — "ADR file [path] not found. Run `/architecture-decision` to create it, or correct the filename in the story's ADR field." |
-| Control manifest | `docs/architecture/control-manifest.md` | **WARN and continue** — "Control manifest not found — layer rules cannot be checked. Run `/create-control-manifest`." |
-
-If the TR registry or governing ADR is missing, set the story status to **BLOCKED** in the session state and do not spawn any programmer agent.
-
-Read all of the following simultaneously — these are independent reads. Do not start implementation until all context is loaded:
-
-### The story file
-Extract and hold:
-- **Story title, ID, layer, type** (Logic / Integration / Visual/Feel / UI / Config/Data)
-- **TR-ID** — the GDD requirement identifier
-- **Governing ADR** reference
-- **Manifest Version** embedded in story header
-- **Acceptance Criteria** — every checkbox item, verbatim
-- **Implementation Notes** — the ADR guidance section in the story
-- **Out of Scope** boundaries
-- **Test Evidence** — the required test file path
-- **Dependencies** — what must be DONE before this story
-
-### The TR registry
-Read `docs/architecture/tr-registry.yaml`. Look up the story's TR-ID.
-Read the current `requirement` text — this is the source of truth for what the
-GDD requires now. Do not rely on any inline text in the story file (may be stale).
-
-### The governing ADR
-Read `docs/architecture/[adr-file].md`. Extract:
-- The full Decision section
-- The Implementation Guidelines section (this is what the programmer follows)
-- The Engine Compatibility section (post-cutoff APIs, known risks)
-- The ADR Dependencies section
-
-### The control manifest
-Read `docs/architecture/control-manifest.md`. Extract the rules for this story's layer:
-- Required patterns
-- Forbidden patterns
-- Performance guardrails
-
-Check: does the story's embedded Manifest Version match the current manifest header date?
-If they differ, use `AskUserQuestion` before proceeding:
-- Prompt: "Story was written against manifest v[story-date]. Current manifest is v[current-date]. New rules may apply. How do you want to proceed?"
-- Options:
-  - `[A] Update story manifest version and implement with current rules (Recommended)`
-  - `[B] Implement with old rules — I accept the risk of non-compliance`
-  - `[C] Stop here — I want to review the manifest diff first`
-
-If [A]: edit the story file's `Manifest Version:` field to the current manifest date before spawning the programmer. Then read the manifest carefully for new rules.
-If [B]: read the manifest carefully for new rules anyway, and note the version mismatch in the Phase 6 summary under "Deviations".
-If [C]: stop. Do not spawn any agent. Let the user review and re-run `/dev-story`.
-
-### Dependency validation
-
-After extracting the **Dependencies** list from the story file, validate each:
-
-1. Glob `production/epics/**/*.md` to find each dependency story file.
-2. Read its `Status:` field.
-3. If any dependency has Status other than `Complete` or `Done`:
-   - Use `AskUserQuestion`:
-     - Prompt: "Story '[current story]' depends on '[dependency title]' which is currently [status], not Complete. How do you want to proceed?"
-     - Options:
-       - `[A] Proceed anyway — I accept the dependency risk`
-       - `[B] Stop — I'll complete the dependency first`
-       - `[C] The dependency is done but status wasn't updated — mark it Complete and continue`
-   - If [B]: set story status to **BLOCKED** in session state and stop. Do not spawn any programmer agent.
-   - If [C]: ask "May I update [dependency path] Status to Complete?" before continuing.
-   - If [A]: note in Phase 6 summary under "Deviations": "Implemented with incomplete dependency: [dependency title] — [status]."
-
-If a dependency file cannot be found: warn "Dependency story not found: [path]. Verify the path or create the story file."
-
----
-
-### Engine reference
-Read `.claude/docs/technical-preferences.md`:
-- `Engine:` value — determines which programmer agents to use
-- Naming conventions (class names, file names, signal/event names)
-- Performance budgets (frame budget, memory ceiling)
-- Forbidden patterns
-
----
-
-## Phase 3: Route to the Right Programmer
-
-Based on the story's **Layer**, **Type**, and **system name**, determine which
-specialist to spawn via Task.
-
-**Config/Data stories — skip agent spawning entirely:**
-If the story's Type is `Config/Data`, no programmer agent or engine specialist is needed. Jump directly to Phase 4 (Config/Data note). The implementation is a data file edit — no routing table evaluation, no engine specialist.
-
-### Primary agent routing table
-
-| Story context | Primary agent |
+| Story context | Default route |
 |---|---|
-| Foundation layer — any type | `engine-programmer` |
-| Any layer — Type: UI | `ui-programmer` |
-| Any layer — Type: Visual/Feel | `gameplay-programmer` (implements) |
-| Core or Feature — gameplay mechanics | `gameplay-programmer` |
-| Core or Feature — AI behaviour, pathfinding | `ai-programmer` |
-| Core or Feature — networking, replication | `network-programmer` |
-| Config/Data — no code | No agent needed (see Phase 4 Config note) |
+| `Config/Data` | Implement directly. |
+| Small `Logic` story with localized files | Implement directly. |
+| `Integration` story | Spawn primary programmer Task unless straightforward. |
+| `UI` story | Spawn `ui-programmer` if available; otherwise implement directly. |
+| `Visual/Feel` story | Spawn `gameplay-programmer` if available; otherwise implement directly. |
+| Engine risk `HIGH` | Spawn engine specialist Task for review before or after implementation. |
 
-### Engine specialist — always spawn as secondary for code stories
+Primary programmer routing:
 
-Read the `Engine Specialists` section of `.claude/docs/technical-preferences.md`
-to get the configured primary specialist. Spawn them alongside the primary agent
-when the story involves engine-specific APIs, patterns, or the ADR has HIGH
-engine risk.
+| Context | Agent |
+|---|---|
+| Foundation/Core engine systems | `engine-programmer` |
+| Gameplay mechanics | `gameplay-programmer` |
+| AI/pathfinding | `ai-programmer` |
+| Networking/replication | `network-programmer` |
+| UI/HUD/menus | `ui-programmer` |
 
-| Engine | Specialist agents available |
-|--------|----------------------------|
-| Godot 4 | `godot-specialist`, `godot-gdscript-specialist`, `godot-shader-specialist` |
-| Unity | `unity-specialist`, `unity-ui-specialist`, `unity-shader-specialist` |
-| Unreal Engine | `unreal-specialist`, `ue-gas-specialist`, `ue-blueprint-specialist`, `ue-umg-specialist`, `ue-replication-specialist` |
+Engine specialist routing comes from `.claude/docs/technical-preferences.md` under `Engine Specialists`. If no specialist is configured, continue and record that specialist review was skipped.
 
-**When engine risk is HIGH** (from the ADR or VERSION.md): always spawn the engine
-specialist, even for non-engine-facing stories. High risk means the ADR records
-assumptions about post-cutoff engine APIs that need expert verification.
+When spawning a Task, pass bounded context only:
 
----
-
-## Phase 4: Implement
-
-Spawn the chosen programmer agent(s) via Task with the full context package:
-
-Provide the agent with:
-1. The complete story file content
-2. The current GDD requirement text (from TR registry)
-3. The ADR Decision + Implementation Guidelines (verbatim — do not summarise)
-4. The control manifest rules for this layer
-5. The engine naming conventions and performance budgets
-6. Any engine-specific notes from the ADR Engine Compatibility section
-7. The test file path that must be created
-8. Explicit instruction: **implement this story and write the test**
-
-The agent should:
-- Create or modify files in `src/` following the ADR guidelines
-- Respect all Required and Forbidden patterns from the control manifest
-- Stay within the story's Out of Scope boundaries (do not touch unrelated files)
-- Write clean, doc-commented public APIs
-
-### Config/Data stories (no agent needed)
-
-For Type: Config/Data stories, no programmer agent is required. The implementation
-is editing a data file. Read the story's acceptance criteria and make the specified
-changes to the data file directly. Note which values were changed and what they
-changed from/to.
-
-### Visual/Feel stories
-
-Spawn `gameplay-programmer` to implement the code/animation calls. Note that
-Visual/Feel acceptance criteria cannot be auto-verified — the "does it feel right?"
-check happens in `/story-done` via manual confirmation.
+- Story content.
+- Acceptance criteria.
+- ADR Decision and Key Interfaces verbatim.
+- Manifest rules for this layer.
+- Engine notes and risk.
+- Target evidence path.
+- Out-of-scope list.
+- Explicit instruction not to modify protected files.
 
 ---
 
-## Phase 5: Write the Test
+## 4. Implement Within Scope
 
-For **Logic** and **Integration** stories, the test must be written as part of
-this implementation — not deferred to later.
+Create a concise internal implementation plan:
 
-Remind the programmer agent:
+1. Files to create or modify.
+2. Acceptance criteria covered by each change.
+3. Test or evidence file to create.
+4. Risks or deviations.
 
-> "The test file for this story is required at: `[path from Test Evidence section]`.
-> The story cannot be closed via `/story-done` without it. Write the test
-> alongside the implementation, not after."
+Do not ask the user to approve the plan unless it touches protected files or expands scope.
 
-Test requirements (from coding-standards.md):
-- File name: `[system]_[feature]_test.[ext]`
-- Function names: `test_[scenario]_[expected_outcome]`
-- Each acceptance criterion must have at least one test function covering it
-- No random seeds, no time-dependent assertions, no external I/O
-- Test the formula bounds from the GDD Formulas section
+Implementation rules:
 
-For **Visual/Feel** and **UI** stories: no automated test. Remind the agent to
-note in the implementation summary what manual evidence will be needed:
-"Evidence doc required at `production/qa/evidence/[slug]-evidence.md`."
+- Follow the ADR over personal preference.
+- Do not introduce new architecture not covered by the ADR.
+- Do not implement out-of-scope items.
+- Do not change GDDs, ADRs, registry files, epics, or unrelated stories.
+- Prefer the smallest code change that satisfies the acceptance criteria.
+- Preserve existing public APIs unless the ADR explicitly changes them.
+- Add comments only where they clarify non-obvious constraints or public API behavior.
 
-For **Config/Data** stories: no test file. A smoke check will serve as evidence.
+If implementation requires a protected or out-of-scope change, stop and ask:
 
----
+```text
+Implementing [criterion] requires modifying [path], which is outside this story's scope.
 
-## Phase 6: Collect and Summarise
-
-After the programmer agent(s) complete, collect:
-
-- Files created or modified (with paths)
-- Test file created (path and number of test functions written)
-- Any deviations from the story's Out of Scope boundary (flag these)
-- Any questions or blockers the agent surfaced
-- Any engine-specific risks the specialist flagged
-
-Present a concise implementation summary:
-
-```
-## Implementation Complete: [Story Title]
-
-**Files changed**:
-- `src/[path]` — created / modified ([brief description])
-- `tests/[path]` — test file ([N] test functions)
-
-**Acceptance criteria covered**:
-- [x] [criterion] — implemented in [file:function]
-- [x] [criterion] — covered by test [test_name]
-- [ ] [criterion] — DEFERRED: requires playtest (Visual/Feel)
-
-**Deviations from scope**: [None] or [list files touched outside story boundary]
-**Engine risks flagged**: [None] or [specialist finding]
-**Blockers**: [None] or [describe]
-
-Ready for: `/code-review [file1] [file2]` then `/story-done [story-path]`
+[A] Proceed with this scoped exception
+[B] Stop and create a follow-up story
+[C] Revise the implementation approach
 ```
 
+Record any approved exception in the final summary.
+
 ---
 
-## Phase 7: Update Session State
+## 5. Create Required Evidence
 
-Silently append to `production/session-state/active.md`:
+### 5.1 Logic and Integration stories
 
+A test is required unless the user explicitly confirms deferral.
+
+Use the story's `## QA Test Cases` and acceptance criteria to create tests. Each acceptance criterion should map to at least one test assertion.
+
+Test rules:
+
+- Deterministic tests only.
+- No random seeds unless fixed.
+- No external network or uncontrolled time dependency.
+- Cover formula bounds and edge cases from the GDD.
+- Put tests at the evidence path declared in the story unless the project's test layout requires a close equivalent.
+
+### 5.2 Visual/Feel and UI stories
+
+If automation is impractical, create or update the evidence stub:
+
+```text
+production/qa/evidence/[story-slug]-evidence.md
 ```
-## Session Extract — /dev-story [date]
-- Story: [story-path] — [story title]
-- Files changed: [comma-separated list]
-- Test written: [path, or "None — Visual/Feel/Config story"]
-- Blockers: [None, or description]
-- Next: /code-review [files] then /story-done [story-path]
+
+Include:
+
+- Story path.
+- Acceptance criteria.
+- Manual verification steps.
+- Expected pass condition.
+- Placeholder for tester notes.
+
+### 5.3 Config/Data stories
+
+Record changed values and smoke-check expectations. If the story declares a smoke evidence path, create a small evidence stub; otherwise record in the final summary that `/smoke-check quick` is the evidence mechanism.
+
+---
+
+## 6. Run Verification
+
+Skip Bash only when `--dry-run` is active or the story type has no runnable automated evidence.
+
+Select a test command from available project evidence:
+
+1. Existing `package.json`, test scripts, or project test config.
+2. Engine-specific test setup docs.
+3. `.claude/docs/technical-preferences.md`.
+4. Recently used commands in `production/qa/` or `test-results/`.
+
+Run the narrowest relevant test first. If it passes, optionally run the broader suite if inexpensive.
+
+Record:
+
+- Command run.
+- Pass/fail/not run.
+- Test count, if available.
+- Failure names, if any.
+- Reason if not run.
+
+Do not install missing test frameworks or modify test infrastructure. If tests cannot run, record `NOT RUN` and explain what the user should run locally.
+
+---
+
+## 7. Update Session State
+
+Unless `--dry-run`, append a session extract to:
+
+```text
+production/session-state/active.md
 ```
 
-Create `active.md` if it does not exist. Confirm: "Session state updated."
+Create the file if missing.
+
+Use:
+
+```markdown
+## Session Extract — /dev-story — [YYYY-MM-DD]
+
+- Story: `[story-path]` — [title]
+- Status after implementation: Implemented, pending `/code-review` and `/story-done`
+- Files changed:
+  - `[path]` — [created/modified]
+- Evidence:
+  - `[path]` — [test/evidence status]
+- Verification:
+  - `[command]` — [PASS/FAIL/NOT RUN]
+- Deviations:
+  - [None or approved exception]
+- Next:
+  - `/code-review [files]`
+  - `/story-done [story-path]`
+```
+
+Do not change the story's status to Done. Do not update sprint status.
 
 ---
 
-## Error Recovery Protocol
+## 8. Completion Output
 
-If any spawned agent (via Task) returns BLOCKED, errors, or cannot complete:
+End with:
 
-1. **Surface immediately**: Report "[AgentName]: BLOCKED — [reason]" to the user before continuing to dependent phases
-2. **Assess dependencies**: Check whether the blocked agent's output is required by subsequent phases. If yes, do not proceed past that dependency point without user input.
-3. **Offer options** via AskUserQuestion with choices:
-   - Skip this agent and note the gap in the final report
-   - Retry with narrower scope
-   - Stop here and resolve the blocker first
-4. **Always produce a partial report** — output whatever was completed. Never discard work because one agent blocked.
+```markdown
+## Implementation Result: [Story title]
 
-Common blockers:
-- Input file missing (story not found, GDD absent) → redirect to the skill that creates it
-- ADR status is Proposed → do not implement; run `/architecture-decision` first
-- Scope too large → split into two stories via `/create-stories`
-- Conflicting instructions between ADR and story → surface the conflict, do not guess
-- Manifest version mismatch → show diff to user, ask whether to proceed with old rules or update story first
+Verdict: [IMPLEMENTED | PARTIAL | BLOCKED | DRY RUN]
 
-## Collaborative Protocol
+### Files Changed
 
-- **File writes are delegated** — all source code, test files, and evidence docs are written by sub-agents spawned via Task. Each sub-agent enforces the "May I write to [path]?" protocol individually. This orchestrator does not write files directly.
-- **Load before implementing** — do not start coding until all context is loaded
-  (story, TR-ID, ADR, manifest, engine prefs). Incomplete context produces code
-  that drifts from design.
-- **The ADR is the law** — implementation must follow the ADR's Implementation
-  Guidelines. If the guidelines conflict with what seems "better," flag it in the
-  summary rather than silently deviating.
-- **Stay in scope** — the Out of Scope section is a contract. If implementing
-  the story requires touching an out-of-scope file, stop and surface it:
-  "Implementing [criterion] requires modifying [file], which is out of scope.
-  Shall I proceed or create a separate story?"
-- **Test is not optional for Logic/Integration** — do not mark implementation
-  complete without the test file existing
-- **Visual/Feel criteria are deferred, not skipped** — mark them as DEFERRED
-  in the summary; they will be manually verified in `/story-done`
-- **Ask before large structural decisions** — if the story requires an
-  architectural pattern not covered by the ADR, surface it before implementing:
-  "The ADR doesn't specify how to handle [case]. My plan is [X]. Proceed?"
+- `[path]` — [created/modified, purpose]
 
----
+### Acceptance Criteria Coverage
 
-## Recommended Next Steps
+| AC | Status | Evidence |
+|----|--------|----------|
+| AC-1 | Covered | `[file or test]` |
 
-- Run `/code-review [file1] [file2]` to review the implementation before closing the story
-- Run `/story-done [story-path]` to verify acceptance criteria and mark the story complete
-- After all sprint stories are done: run `/team-qa sprint` for the full QA cycle before advancing the project stage
+### Verification
+
+| Command | Result | Notes |
+|---------|--------|-------|
+| `[command]` | PASS/FAIL/NOT RUN | [notes] |
+
+### Deviations
+
+- [None or explicit exception]
+
+### Next Best Action
+
+Run `/code-review [changed files]`, then `/story-done [story-path]`.
+```
+
+If blocked, include only remediation commands and do not claim implementation was completed.

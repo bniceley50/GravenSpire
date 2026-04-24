@@ -7,256 +7,98 @@ allowed-tools: Read, Glob, Grep
 agent: ux-designer
 ---
 
-## Overview
+# UX Review
 
-Validates UX design documents before they enter the implementation pipeline.
-Acts as the quality gate between UX Design and Visual Design/Implementation in
-the `/team-ui` pipeline.
+Validate UX specs, HUD designs, and interaction pattern documents for completeness, accessibility, GDD alignment, player clarity, and implementation readiness without modifying files.
 
-**Run this skill:**
-- After completing a UX spec with `/ux-design`
-- Before handing off to `ui-programmer` or `art-director`
-- Before the Pre-Production to Production gate check (which requires key screens
-  to have reviewed UX specs)
-- After major revisions to a UX spec
+## 0. Execution Contract
 
-**Verdict levels:**
-- **APPROVED** — spec is complete, consistent, and implementation-ready
-- **NEEDS REVISION** — specific gaps found; fix before handoff but not a full redesign
-- **MAJOR REVISION NEEDED** — fundamental issues with scope, player need, or
-  completeness; needs significant rework
+### 0.1 Invocation and autonomy
 
----
+Supported modes:
 
-## Phase 1: Parse Arguments
+- file-path: review one UX file
+- all: review all UX docs
+- hud: review HUD design
+- patterns: review interaction patterns
 
-- **Specific file path** (e.g., `/ux-review design/ux/inventory.md`): validate
-  that one document
-- **`all`**: find all files in `design/ux/` and validate each
-- **`hud`**: validate `design/ux/hud.md` specifically
-- **`patterns`**: validate `design/ux/interaction-patterns.md` specifically
-- **No argument**: ask the user which spec to validate
+This is a read-only skill. It may inspect files and run safe read-only diagnostics when Bash is allowed, but it must not create, edit, move, delete, rename, stage, commit, tag, deploy, publish, or update project state.
 
-For `all`, output a summary table first (file | verdict | primary issue) then
-full detail for each.
+### 0.2 Path safety
 
----
+All user-supplied paths must be repository-relative. Reject absolute paths, paths containing `..`, and paths outside the expected project roots for this skill. Normalize paths before reading or writing.
 
-## Phase 2: Load Cross-Reference Context
+### 0.8 Missing-file behavior
 
-Before validating any spec, load:
+| Situation | Behavior |
+|---|---|
+| Primary source missing | Continue only if the skill can infer a narrower safe scope; otherwise stop with the exact missing file/folder. |
+| Referenced artifact missing | Record as a gap or blocker instead of inventing content. |
+| Existing target file present | Not applicable; this skill does not write. |
+| Ambiguous scope | Choose the smallest evidence-backed scope; ask only if two or more scopes are equally plausible. |
+| Contradictory sources | Prefer explicit status/source-of-truth documents over generated reports; list the contradiction in the output. |
 
-1. **Input & Platform config**: Read `.claude/docs/technical-preferences.md` and
-   extract `## Input & Platform`. This is the authoritative source for which input
-   methods the game supports — use it to drive the Input Method Coverage checks in
-   Phase 3A, not the spec's own header. If unconfigured, fall back to the spec header.
-2. The accessibility tier committed to in `design/accessibility-requirements.md`
-   (if it exists)
-3. The interaction pattern library at `design/ux/interaction-patterns.md` (if
-   it exists)
-4. The GDDs referenced in the spec's header (read their UI Requirements sections)
-5. The player journey map at `design/player-journey.md` (if it exists) for
-   context-arrival validation
+## 1. Discover Context
 
----
+Read only the sources needed for the requested scope. Start with indexes, manifests, registries, and status files before reading large documents.
 
-## Phase 3A: UX Spec Validation Checklist
+Primary sources:
 
-Run all checks against a `ux-spec.md`-based document.
+- design/ux/**
+- design/gdd/**
+- design/art/art-bible.md
+- docs/architecture/**
+- production/playtests/**
 
-### Completeness (required sections)
+Discovery rules:
 
-- [ ] Document header present with Status, Author, Platform Target
-- [ ] Purpose & Player Need — has a player-perspective need statement (not
-  developer-perspective)
-- [ ] Player Context on Arrival — describes player's state and prior activity
-- [ ] Navigation Position — shows where screen sits in hierarchy
-- [ ] Entry & Exit Points — all entry sources and exit destinations documented
-- [ ] Layout Specification — zones defined, component inventory table present
-- [ ] States & Variants — at minimum: loading, empty/populated, and error states
-  documented
-- [ ] Interaction Map — covers all target input methods (check platform target
-  in header)
-- [ ] Data Requirements — every displayed data element has a source system and owner
-- [ ] Events Fired — every player action has a corresponding event or null
-  explanation
-- [ ] Transitions & Animations — at least enter/exit transitions specified
-- [ ] Accessibility Requirements — screen-level requirements present
-- [ ] Localization Considerations — max character counts for text elements
-- [ ] Acceptance Criteria — at least 5 specific testable criteria
+1. Prefer canonical source-of-truth files over generated reports.
+2. Use `Glob` and `Grep` before reading large files.
+3. Keep a source list for the final report or artifact.
+4. When many files match, read the most relevant 5 to 10 first and summarize the rest as candidates.
+5. Treat missing or draft-status dependencies as blockers, not as approval to invent content.
 
-### Quality Checks
+## 2. Build the Working Model
 
-**Player Need Clarity**
-- [ ] Purpose is written from player perspective, not system/developer perspective
-- [ ] Player goal on arrival is unambiguous ("The player arrives wanting to ___")
-- [ ] The player context on arrival is specific (not just "they opened the
-  inventory")
+Use the discovered evidence to build a concise working model before producing output.
 
-**Completeness of States**
-- [ ] Error state is documented (not just happy path)
-- [ ] Empty state is documented (no data scenario)
-- [ ] Loading state is documented if the screen fetches async data
-- [ ] Any state with a timer or auto-dismiss is documented with duration
+1. Resolve target UX documents.
+2. Check user goals, flow completeness, states, accessibility, input/platform support, visual hierarchy, feedback, error handling, copy, analytics, QA criteria, and implementation handoff.
+3. Compare UI terms and states against GDD systems and art direction.
+4. Classify verdict as APPROVED, NEEDS REVISION, or MAJOR REVISION NEEDED.
+5. Return precise revision instructions; do not edit UX files.
 
-**Input Method Coverage**
-- [ ] If platform includes PC: keyboard-only navigation is fully specified
-- [ ] If platform includes console/gamepad: d-pad navigation and face button
-  mapping documented
-- [ ] No interaction requires mouse-like precision on gamepad
-- [ ] Focus order is defined (Tab order for keyboard, d-pad order for gamepad)
+Classification rules:
 
-**Data Architecture**
-- [ ] No data element has "UI" listed as the owner (UI must not own game state)
-- [ ] Update frequency is specified for all real-time data (not just "realtime" —
-  what triggers update?)
-- [ ] Null handling is specified for all data elements (what shows when data is
-  unavailable?)
+- **Blocking**: prevents safe implementation, review, release, or downstream skill execution.
+- **High**: likely to cause rework, wrong implementation, invalid QA, or broken traceability.
+- **Medium**: weakens handoff quality but can be resolved during normal follow-up.
+- **Low**: cleanup, clarity, or optional improvement.
 
-**Accessibility**
-- [ ] Accessibility tier from `accessibility-requirements.md` is matched or exceeded
-- [ ] If Basic tier: no color-only information indicators
-- [ ] If Standard tier+: focus order documented, text contrast ratios specified
-- [ ] If Comprehensive tier+: screen reader announcements for key state changes
-- [ ] Colorblind check: any color-coded elements have non-color alternatives
+## 3. Produce the Read-Only Report
 
-**GDD Alignment**
-- [ ] Every GDD UI Requirement referenced in the header is addressed in this spec
-- [ ] No UI element displays or modifies game state without a corresponding GDD
-  requirement
-- [ ] No GDD UI Requirement is missing from this spec (cross-check the referenced
-  GDD sections)
+Return the report in chat. Do not write files. If a durable report would be useful, recommend the appropriate write-capable skill or command instead of creating it.
 
-**Pattern Library Consistency**
-- [ ] All interactive components reference the pattern library (or note they are
-  new patterns)
-- [ ] No pattern behavior is re-specified from scratch if it already exists in
-  the pattern library
-- [ ] Any new patterns invented in this spec are flagged for addition to the
-  pattern library
+Required report sections:
 
-**Localization**
-- [ ] Character limit warnings present for all text-heavy elements
-- [ ] Any layout-critical text has been flagged for 40% expansion accommodation
+- Verdict
+- Blocking UX gaps
+- Accessibility issues
+- GDD alignment
+- Implementation readiness
+- Recommended revisions
 
-**Acceptance Criteria Quality**
-- [ ] Criteria are specific enough for a QA tester who hasn't seen the design docs
-- [ ] Performance criterion present (screen opens within Xms)
-- [ ] Resolution criterion present
-- [ ] No criterion requires reading another document to evaluate
+## 4. Validation
 
----
+1. Check that every conclusion cites or names a repository source.
+2. Check that all blockers have a concrete next action.
+3. Check that proposed writes stay within the declared output paths.
+4. Check that no writes or state changes were performed.
 
-## Phase 3B: HUD Validation Checklist
+Stop conditions:
 
-Run all checks against a `hud-design.md`-based document.
+- No blocking stop condition was encountered.
 
-### Completeness
+## 5. Final Response
 
-- [ ] HUD Philosophy defined
-- [ ] Information Architecture table covers ALL systems with UI Requirements in GDDs
-- [ ] Layout Zones defined with safe zone margins for all target platforms
-- [ ] Every HUD element has a full specification (zone, visibility trigger, data
-  source, priority)
-- [ ] HUD States by Gameplay Context covers at minimum: exploration, combat,
-  dialogue/cutscene, paused
-- [ ] Visual Budget defined (max simultaneous elements, max screen %)
-- [ ] Platform Adaptation covers all target platforms
-- [ ] Tuning Knobs present for player-adjustable elements
-
-### Quality Checks
-
-- [ ] No HUD element covers the center play area without a visibility rule to
-  hide it
-- [ ] Every information item that exists in any GDD is either in the HUD or
-  explicitly categorized as "hidden/demand"
-- [ ] All color-coded HUD elements have colorblind variants
-- [ ] HUD elements in the Feedback & Notification section have queue/priority
-  behavior defined
-- [ ] Visual Budget compliance: total simultaneous elements is within budget
-
-### GDD Alignment
-
-- [ ] All systems in `design/gdd/systems-index.md` with UI category have
-  representation in HUD (or justified absence)
-
----
-
-## Phase 3C: Pattern Library Validation Checklist
-
-- [ ] Pattern catalog index is current (matches actual patterns in document)
-- [ ] All standard control patterns are specified: button variants, toggle,
-  slider, dropdown, list, grid, modal, dialog, toast, tooltip, progress bar,
-  input field, tab bar, scroll
-- [ ] All game-specific patterns needed by current UX specs are present
-- [ ] Each pattern has: When to Use, When NOT to Use, full state specification,
-  accessibility spec, implementation notes
-- [ ] Animation Standards table present
-- [ ] Sound Standards table present
-- [ ] No conflicting behaviors between patterns (e.g., "Back" behavior consistent
-  across all navigation patterns)
-
----
-
-## Phase 4: Output the Verdict
-
-```markdown
-## UX Review: [Document Name]
-**Date**: [date]
-**Reviewer**: ux-review skill
-**Document**: [file path]
-**Platform Target**: [from header]
-**Accessibility Tier**: [from header or accessibility-requirements.md]
-
-### Completeness: [X/Y sections present]
-- [x] Purpose & Player Need
-- [ ] States & Variants — MISSING: error state not documented
-
-### Quality Issues: [N found]
-1. **[Issue title]** [BLOCKING / ADVISORY]
-   - What's wrong: [specific description]
-   - Where: [section name]
-   - Fix: [specific action to take]
-
-### GDD Alignment: [ALIGNED / GAPS FOUND]
-- GDD [name] UI Requirements — [X/Y requirements covered]
-- Missing: [list any uncovered GDD requirements]
-
-### Accessibility: [COMPLIANT / GAPS / NON-COMPLIANT]
-- Target tier: [tier]
-- [list specific accessibility findings]
-
-### Pattern Library: [CONSISTENT / INCONSISTENCIES FOUND]
-- [findings]
-
-### Verdict: APPROVED / NEEDS REVISION / MAJOR REVISION NEEDED
-**Blocking issues**: [N] — must be resolved before implementation
-**Advisory issues**: [N] — recommended but not blocking
-
-[For APPROVED]: This spec is ready for handoff to `/team-ui` Phase 2
-(Visual Design).
-
-[For NEEDS REVISION]: Address the [N] blocking issues above, then re-run
-`/ux-review`.
-
-[For MAJOR REVISION NEEDED]: The spec has fundamental gaps in [areas].
-Recommend returning to `/ux-design` to rework [sections].
-```
-
----
-
-## Phase 5: Collaborative Protocol
-
-This skill is READ-ONLY — it never edits or writes files. It reports findings only.
-
-After delivering the verdict:
-- For **APPROVED**: suggest running `/team-ui` to begin implementation coordination
-- For **NEEDS REVISION**: offer to help fix specific gaps ("Would you like me to
-  help draft the missing error state?") — but do not auto-fix; wait for user
-  instruction
-- For **MAJOR REVISION NEEDED**: suggest returning to `/ux-design` with the
-  specific sections to rework
-
-Never block the user from proceeding — the verdict is advisory. Document risks,
-present findings, let the user decide whether to proceed despite concerns. A user
-who chooses to proceed with a NEEDS REVISION spec takes on the documented risk.
+End with a concise verdict, prioritized findings, evidence sources, and recommended next command. Do not imply that any files were changed.

@@ -1,244 +1,148 @@
 ---
 name: security-audit
 description: "Audit the game for security vulnerabilities: save tampering, cheat vectors, network exploits, data exposure, and input validation gaps. Produces a prioritised security report with remediation guidance. Run before any public release or multiplayer launch."
-argument-hint: "[full | network | save | input | quick]"
+argument-hint: "[full | network | save | input | quick] [--dry-run]"
 user-invocable: true
-allowed-tools: Read, Glob, Grep, Bash, Write, Task
+allowed-tools: Read, Glob, Grep, Write, Edit, Bash, Task, AskUserQuestion
 agent: security-engineer
 ---
 
 # Security Audit
 
-Security is not optional for any shipped game. Even single-player games have
-save tampering vectors. Multiplayer games have cheat surfaces, data exposure
-risks, and denial-of-service potential. This skill systematically audits the
-codebase for the most common game security failures and produces a prioritised
-remediation plan.
+Audit for player-impacting security and integrity risks such as save tampering, cheat vectors, network trust issues, data exposure, auth/session mistakes, and unsafe tooling.
 
-**Run this skill:**
-- Before any public release (required for the Polish → Release gate)
-- Before enabling any online/multiplayer feature
-- After implementing any system that reads from disk or network
-- When a security-related bug is reported
+## 0. Execution Contract
 
-**Output:** `production/security/security-audit-[date].md`
+### 0.1 Invocation and autonomy
 
----
+Supported modes:
 
-## Phase 1: Parse Arguments and Scope
+- full: full security audit
+- save: save/inventory tampering
+- network: network trust and exploit risks
+- data: secrets/privacy/data exposure
+- path: audit specific code area
 
-**Modes:**
-- `full` — all categories (recommended before release)
-- `network` — network/multiplayer only
-- `save` — save file and serialization only
-- `input` — input validation and injection only
-- `quick` — high-severity checks only (fastest, for iterative use)
-- No argument — run `full`
+The invocation authorizes routine repository-local work for this skill. Operate autonomously after resolving scope; do not ask the user to approve every normal file creation. Ask only for protected operations, destructive ambiguity, or missing source-of-truth decisions that cannot be inferred safely.
 
-Read `.claude/docs/technical-preferences.md` to determine:
-- Engine and language (affects which patterns to search for)
-- Target platforms (affects which attack surfaces apply)
-- Whether multiplayer/networking is in scope
+If `--dry-run` is present, perform discovery and produce the complete proposed result, but do not call `Write` or `Edit`.
 
----
+### 0.2 Path safety
 
-## Phase 2: Spawn Security Engineer
+All user-supplied paths must be repository-relative. Reject absolute paths, paths containing `..`, and paths outside the expected project roots for this skill. Normalize paths before reading or writing.
 
-Spawn `security-engineer` via Task. Pass:
-- The audit scope/mode
-- Engine and language from technical preferences
-- A manifest of all source directories: `src/`, `assets/data/`, any config files
+### 0.3 Write policy
 
-The security-engineer runs the audit across 6 categories (see Phase 3). Collect their full findings before proceeding.
+Routine writes allowed by invocation:
 
----
+- production/security/security-audit-[YYYYMMDD].md
 
-## Phase 3: Audit Categories
+Protected operations require explicit confirmation through `AskUserQuestion`:
 
-The security-engineer evaluates each of the following. Skip categories not applicable to the project scope.
+- Overwriting or deleting an existing file.
+- Editing canonical source-of-truth documents outside the declared outputs.
+- Changing statuses, gates, stage files, sprint state, story state, registry entries, or release readiness.
+- Running commands that modify files, install dependencies, generate builds, publish artifacts, deploy, tag, commit, or push.
+- Applying changes whose scope is broader than the user requested.
 
-### Category 1: Save File and Serialization Security
-- Are save files validated before loading? (no blind deserialization)
-- Are save file paths constructed from user input? (path traversal risk)
-- Are save files checksummed or signed? (tamper detection)
-- Does the game trust numeric values from save files without bounds checking?
-- Are there any eval() or dynamic code execution calls near save loading?
+Use `Edit` for targeted changes to existing files. Use `Write` for new files or complete replacement only after the replacement scope is safe and approved.
 
-Grep patterns: `File.open`, `load`, `deserialize`, `JSON.parse`, `from_json`, `read_file` — check each for validation.
+### 0.4 Bash safety
 
-### Category 2: Network and Multiplayer Security (skip if single-player only)
-- Is game state authoritative on the server, or does the client dictate outcomes?
-- Are incoming network packets validated for size, type, and value range?
-- Are player positions and state changes validated server-side?
-- Is there rate limiting on any network calls?
-- Are authentication tokens handled correctly (never sent in plaintext)?
-- Does the game expose any debug endpoints in release builds?
+Bash is limited to diagnostics and read-only discovery unless the user explicitly approved a protected operation. Safe examples include `git status --short`, `git log`, `git diff --name-only`, existing test commands that do not update snapshots, and local grep/listing commands. Never run package installation, clean/reset, rm, deploy, publish, commit, tag, push, or build upload commands from this skill.
 
-Grep for: `recv`, `receive`, `PacketPeer`, `socket`, `NetworkedMultiplayerPeer`, `rpc`, `rpc_id` — check each call site for validation.
+### 0.5 Task delegation
 
-### Category 3: Input Validation
-- Are any player-supplied strings used in file paths? (path traversal)
-- Are any player-supplied strings logged without sanitization? (log injection)
-- Are numeric inputs (e.g., item quantities, character stats) bounds-checked before use?
-- Are achievement/stat values checked before being written to any backend?
+Use Task subagents only when they materially improve the result. Pass bounded context: the request, relevant source paths, current draft/report, and the exact verdict needed. Do not spawn duplicate reviewers. If review mode is available, use `solo` for no subagents, `lean` for only essential specialist review, and `full` for cross-functional or gate review.
 
-Grep for: `get_input`, `Input.get_`, `input_map`, user-facing text fields — check validation.
+### 0.8 Missing-file behavior
 
-### Category 4: Data Exposure
-- Are any API keys, credentials, or secrets hardcoded in `src/` or `assets/`?
-- Are debug symbols or verbose error messages included in release builds?
-- Does the game log sensitive player data to disk or console?
-- Are any internal file paths or system information exposed to players?
+| Situation | Behavior |
+|---|---|
+| Primary source missing | Continue only if the skill can infer a narrower safe scope; otherwise stop with the exact missing file/folder. |
+| Referenced artifact missing | Record as a gap or blocker instead of inventing content. |
+| Existing target file present | Do not overwrite. Create a proposed dated file or ask for protected confirmation. |
+| Ambiguous scope | Choose the smallest evidence-backed scope; ask only if two or more scopes are equally plausible. |
+| Contradictory sources | Prefer explicit status/source-of-truth documents over generated reports; list the contradiction in the output. |
 
-Grep for: `api_key`, `secret`, `password`, `token`, `private_key`, `DEBUG`, `print(` in release-facing code.
+## 1. Discover Context
 
-### Category 5: Cheat and Anti-Tamper Vectors
-- Are gameplay-critical values stored only in memory, not in easily-editable files?
-- Are any critical game progression flags (e.g., "has paid for DLC") validated server-side?
-- Is there any protection against memory editing tools (Cheat Engine, etc.) for multiplayer?
-- Are leaderboard/score submissions validated before acceptance?
+Read only the sources needed for the requested scope. Start with indexes, manifests, registries, and status files before reading large documents.
 
-Note: Client-side anti-cheat is largely unenforceable. Focus on server-side validation for anything competitive or monetised.
+Primary sources:
 
-### Category 6: Dependency and Supply Chain
-- Are any third-party plugins or libraries used? List them.
-- Do any plugins have known CVEs in the version being used?
-- Are plugin sources verified (official marketplace, reviewed repository)?
+- src/**
+- scripts/**
+- config/**
+- save/data paths
+- network code
+- docs/architecture/**
+- design/gdd/**
+- tests/**
+- logs/**
 
-Glob for: `addons/`, `plugins/`, `third_party/`, `vendor/` — list all external dependencies.
+Discovery rules:
 
----
+1. Prefer canonical source-of-truth files over generated reports.
+2. Use `Glob` and `Grep` before reading large files.
+3. Keep a source list for the final report or artifact.
+4. When many files match, read the most relevant 5 to 10 first and summarize the rest as candidates.
+5. Treat missing or draft-status dependencies as blockers, not as approval to invent content.
 
-## Phase 4: Classify Findings
+## 2. Build the Working Model
 
-For each finding, assign:
+Use the discovered evidence to build a concise working model before producing output.
 
-**Severity:**
-| Level | Definition |
-|-------|-----------|
-| **CRITICAL** | Remote code execution, data breach, or trivially-exploitable cheat that breaks multiplayer integrity |
-| **HIGH** | Save tampering that bypasses progression, credential exposure, or server-side authority bypass |
-| **MEDIUM** | Client-side cheat enablement, information disclosure, or input validation gap with limited impact |
-| **LOW** | Defence-in-depth improvement — hardening that reduces attack surface but no direct exploit exists |
+1. Use safe read-only commands only; do not run exploits, fuzzers, external scanners, or destructive tests.
+2. Identify trust boundaries, authoritative state, serialization, validation, secrets, permissions, network messages, analytics, and moderation surfaces.
+3. Classify findings by severity and exploitability.
+4. Use Task specialist review when network/security complexity warrants it.
+5. Write remediation recommendations without implementing risky changes.
 
-**Status:** Open / Accepted Risk / Out of Scope
+Classification rules:
 
----
+- **Blocking**: prevents safe implementation, review, release, or downstream skill execution.
+- **High**: likely to cause rework, wrong implementation, invalid QA, or broken traceability.
+- **Medium**: weakens handoff quality but can be resolved during normal follow-up.
+- **Low**: cleanup, clarity, or optional improvement.
 
-## Phase 5: Generate Report
+## 3. Produce the Artifact
 
-```markdown
-# Security Audit Report
+Canonical outputs for this skill:
 
-**Date**: [date]
-**Scope**: [full | network | save | input | quick]
-**Engine**: [engine + version]
-**Audited by**: security-engineer via /security-audit
-**Files scanned**: [N source files, N config files]
+- production/security/security-audit-[YYYYMMDD].md
 
----
+Artifact requirements:
 
-## Executive Summary
+1. Include scope, date, source list, assumptions, and confidence.
+2. Separate facts from recommendations and inferred conclusions.
+3. Include explicit next actions and the command that should be run next.
+4. Preserve historical information; prefer additive notes over destructive rewrites.
+5. When updating an index or manifest, append or update only the relevant row and preserve unrelated content.
 
-| Severity | Count | Must Fix Before Release |
-|----------|-------|------------------------|
-| CRITICAL | [N] | Yes — all |
-| HIGH | [N] | Yes — all |
-| MEDIUM | [N] | Recommended |
-| LOW | [N] | Optional |
+Required report sections:
 
-**Release recommendation**: [CLEAR TO SHIP / FIX CRITICALS FIRST / DO NOT SHIP]
+- Audit scope
+- Threat model
+- Findings by severity
+- Evidence
+- Recommended mitigations
+- Residual risk
+- Unsafe tests not run
 
----
+## 4. Validation
 
-## CRITICAL Findings
+1. Check that every conclusion cites or names a repository source.
+2. Check that all blockers have a concrete next action.
+3. Check that proposed writes stay within the declared output paths.
+4. Check that dry-run mode produced no writes.
+5. List every Bash command run and whether it was read-only or diagnostic.
+6. Summarize any subagent verdicts and unresolved disagreements.
 
-### SEC-001: [Title]
-**Category**: [Save / Network / Input / Data / Cheat / Dependency]
-**File**: `[path]` line [N]
-**Description**: [What the vulnerability is]
-**Attack scenario**: [How a malicious user would exploit it]
-**Remediation**: [Specific code change or pattern to apply]
-**Effort**: [Low / Medium / High]
+Stop conditions:
 
-[repeat per finding]
+- No blocking stop condition was encountered.
 
----
+## 5. Final Response
 
-## HIGH Findings
-
-[same format]
-
----
-
-## MEDIUM Findings
-
-[same format]
-
----
-
-## LOW Findings
-
-[same format]
-
----
-
-## Accepted Risk
-
-[Any findings explicitly accepted by the team with rationale]
-
----
-
-## Dependency Inventory
-
-| Plugin / Library | Version | Source | Known CVEs |
-|-----------------|---------|--------|------------|
-| [name] | [version] | [source] | [none / CVE-XXXX-NNNN] |
-
----
-
-## Remediation Priority Order
-
-1. [SEC-NNN] — [1-line description] — Est. effort: [Low/Medium/High]
-2. ...
-
----
-
-## Re-Audit Trigger
-
-Run `/security-audit` again after remediating any CRITICAL or HIGH findings.
-The Polish → Release gate requires this report with no open CRITICAL or HIGH items.
-```
-
----
-
-## Phase 6: Write Report
-
-Present the report summary (executive summary + CRITICAL/HIGH findings only) in conversation.
-
-Ask: "May I write the full security audit report to `production/security/security-audit-[date].md`?"
-
-Write only after approval.
-
----
-
-## Phase 7: Gate Integration
-
-This report is a required artifact for the **Polish → Release gate**.
-
-After remediating findings, re-run: `/security-audit quick` to confirm CRITICAL/HIGH items are resolved before running `/gate-check release`.
-
-If CRITICAL findings exist:
-> "⛔ CRITICAL security findings must be resolved before any public release. Do not proceed to `/launch-checklist` until these are addressed."
-
-If no CRITICAL/HIGH findings:
-> "✅ No blocking security findings. Report written to `production/security/`. Include this path when running `/gate-check release`."
-
----
-
-## Collaborative Protocol
-
-- **Never assume a pattern is safe** — flag it and let the user decide
-- **Accepted risk is a valid outcome** — some LOW findings are acceptable trade-offs for a solo team; document the decision
-- **Multiplayer games have a higher bar** — any HIGH finding in a multiplayer context should be treated as CRITICAL
-- **This is not a penetration test** — this audit covers common patterns; a real pentest by a human security professional is recommended before any competitive or monetised multiplayer launch
+End with a concise summary of what was written, what was skipped because it was protected or unsafe, validation results, and the recommended next command. Include file paths for every artifact created or proposed.

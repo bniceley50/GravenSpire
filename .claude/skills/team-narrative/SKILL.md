@@ -1,111 +1,145 @@
 ---
 name: team-narrative
 description: "Orchestrate the narrative team: coordinates narrative-director, writer, world-builder, and level-designer to create cohesive story content, world lore, and narrative-driven level design."
-argument-hint: "[narrative content description]"
+argument-hint: "[narrative content description] [--dry-run]"
 user-invocable: true
 allowed-tools: Read, Glob, Grep, Write, Edit, Task, AskUserQuestion, TodoWrite
 ---
-If no argument is provided, output usage guidance and exit without spawning any agents:
-> Usage: `/team-narrative [narrative content description]` — describe the story content, scene, or narrative area to work on (e.g., `boss encounter cutscene`, `faction intro dialogue`, `tutorial narrative`). Do not use `AskUserQuestion` here; output the guidance directly.
 
-When this skill is invoked with an argument, orchestrate the narrative team through a structured pipeline.
+# Team Narrative
 
-**Decision Points:** At each phase transition, use `AskUserQuestion` to present
-the user with the subagent's proposals as selectable options. Write the agent's
-full analysis in conversation, then capture the decision with concise labels.
-The user must approve before moving to the next phase.
+Coordinate narrative direction, writing, worldbuilding, and level integration for story content.
 
-## Team Composition
-- **narrative-director** — Story arcs, character design, dialogue strategy, narrative vision
-- **writer** — Dialogue writing, lore entries, item descriptions, in-game text
-- **world-builder** — World rules, faction design, history, geography, environmental storytelling
-- **art-director** — Character visual design, environmental visual storytelling, cutscene/cinematic tone
-- **level-designer** — Level layouts that serve the narrative, pacing, environmental storytelling beats
+## 0. Execution Contract
 
-## How to Delegate
+### 0.1 Invocation and autonomy
 
-Use the Task tool to spawn each team member as a subagent:
-- `subagent_type: narrative-director` — Story arcs, character design, narrative vision
-- `subagent_type: writer` — Dialogue writing, lore entries, in-game text
-- `subagent_type: world-builder` — World rules, faction design, history, geography
-- `subagent_type: art-director` — Character visual profiles, environmental visual storytelling, cinematic tone
-- `subagent_type: level-designer` — Level layouts that serve the narrative, pacing
-- `subagent_type: localization-lead` — i18n validation, string key compliance, translation headroom
+Supported modes:
 
-Always provide full context in each agent's prompt (narrative brief, lore dependencies, character profiles). Launch independent agents in parallel where the pipeline allows it (e.g., Phase 2 agents can run simultaneously).
+- feature or area description: orchestrate full team workflow
+- --dry-run: produce plan and subagent summaries without writes
 
-## Pipeline
+The invocation authorizes routine repository-local work for this skill. Operate autonomously after resolving scope; do not ask the user to approve every normal file creation. Ask only for protected operations, destructive ambiguity, or missing source-of-truth decisions that cannot be inferred safely.
 
-### Phase 1: Narrative Direction
-Delegate to **narrative-director**:
-- Define the narrative purpose of this content: what story beat does it serve?
-- Identify characters involved, their motivations, and how this fits the overall arc
-- Set the emotional tone and pacing targets
-- Specify any lore dependencies or new lore this introduces
-- Output: narrative brief with story requirements
+If `--dry-run` is present, perform discovery and produce the complete proposed result, but do not call `Write` or `Edit`.
 
-### Phase 2: World Foundation (parallel)
-Delegate in parallel — issue all three Task calls simultaneously before waiting for any result:
-- **world-builder**: Create or update lore entries for factions, locations, and history relevant to this content. Cross-reference against existing lore for contradictions. Set canon level for new entries.
-- **writer**: Draft character dialogue using voice profiles. Ensure all lines are under 120 characters, use named placeholders for variables, and are localization-ready.
-- **art-director**: Define character visual design direction for key characters appearing in this content (silhouette, visual archetype, distinguishing features). Specify environmental visual storytelling elements for each key space (prop composition, lighting notes, spatial arrangement). Define tone palette and cinematic direction for any cutscenes or scripted sequences.
+### 0.2 Path safety
 
-### Phase 3: Level Narrative Integration
-Delegate to **level-designer**:
-- Review the narrative brief and lore foundation
-- Design environmental storytelling elements in the level
-- Place narrative triggers, dialogue zones, and discovery points
-- Ensure pacing serves both gameplay and story
+All user-supplied paths must be repository-relative. Reject absolute paths, paths containing `..`, and paths outside the expected project roots for this skill. Normalize paths before reading or writing.
 
-### Phase 4: Review and Consistency
-Delegate to **narrative-director**:
-- Review all dialogue against character voice profiles
-- Verify lore consistency across new and existing entries
-- Confirm narrative pacing aligns with level design
-- Check that all mysteries have documented "true answers"
+### 0.3 Write policy
 
-### Phase 5: Polish (parallel)
-Delegate in parallel:
-- **writer**: Final self-review — verify no line exceeds dialogue box constraints, all text uses string keys (not raw strings), placeholder variable names are consistent
-- **localization-lead**: Validate i18n compliance — check string key naming conventions, flag any strings with hardcoded formatting that won't survive translation, verify character limit headroom for languages that expand (German/Finnish typically +30%), confirm no cultural assumptions in text that would need locale-specific variants
-- **world-builder**: Finalize canon levels for all new lore entries
+Routine writes allowed by invocation:
 
-## Error Recovery Protocol
+- production/team/narrative/[slug]-narrative-plan.md
+- production/team/narrative/[slug]-script-brief.md
+- production/qa/evidence/narrative-[slug]-checklist.md
 
-If any spawned agent (via Task) returns BLOCKED, errors, or cannot complete:
+Protected operations require explicit confirmation through `AskUserQuestion`:
 
-1. **Surface immediately**: Report "[AgentName]: BLOCKED — [reason]" to the user before continuing to dependent phases
-2. **Assess dependencies**: Check whether the blocked agent's output is required by subsequent phases. If yes, do not proceed past that dependency point without user input.
-3. **Offer options** via AskUserQuestion with choices:
-   - Skip this agent and note the gap in the final report
-   - Retry with narrower scope
-   - Stop here and resolve the blocker first
-4. **Always produce a partial report** — output whatever was completed. Never discard work because one agent blocked.
+- Overwriting or deleting an existing file.
+- Editing canonical source-of-truth documents outside the declared outputs.
+- Changing statuses, gates, stage files, sprint state, story state, registry entries, or release readiness.
+- Running commands that modify files, install dependencies, generate builds, publish artifacts, deploy, tag, commit, or push.
+- Applying changes whose scope is broader than the user requested.
 
-Common blockers:
-- Input file missing (story not found, GDD absent) → redirect to the skill that creates it
-- ADR status is Proposed → do not implement; run `/architecture-decision` first
-- Scope too large → split into two stories via `/create-stories`
-- Conflicting instructions between ADR and story → surface the conflict, do not guess
+Use `Edit` for targeted changes to existing files. Use `Write` for new files or complete replacement only after the replacement scope is safe and approved.
 
-## File Write Protocol
+### 0.5 Task delegation
 
-All file writes (narrative docs, dialogue files, lore entries) are delegated to
-sub-agents spawned via Task. Each sub-agent enforces the "May I write to [path]?"
-protocol. This orchestrator does not write files directly.
+Use Task subagents only when they materially improve the result. Pass bounded context: the request, relevant source paths, current draft/report, and the exact verdict needed. Do not spawn duplicate reviewers. If review mode is available, use `solo` for no subagents, `lean` for only essential specialist review, and `full` for cross-functional or gate review.
 
-## Output
+### 0.6 Todo tracking
 
-A summary report covering: narrative brief status, lore entries created/updated, dialogue lines written, level narrative integration points, consistency review results, and any unresolved contradictions.
+Use `TodoWrite` for multi-phase orchestration. Keep todos tied to observable phases, not low-level file operations. Close todos only when evidence exists.
 
-Verdict: **COMPLETE** — narrative content delivered.
+### 0.8 Missing-file behavior
 
-If the pipeline stops because a dependency is unresolved (e.g., lore contradiction or missing prerequisite not resolved by the user):
+| Situation | Behavior |
+|---|---|
+| Primary source missing | Continue only if the skill can infer a narrower safe scope; otherwise stop with the exact missing file/folder. |
+| Referenced artifact missing | Record as a gap or blocker instead of inventing content. |
+| Existing target file present | Do not overwrite. Create a proposed dated file or ask for protected confirmation. |
+| Ambiguous scope | Choose the smallest evidence-backed scope; ask only if two or more scopes are equally plausible. |
+| Contradictory sources | Prefer explicit status/source-of-truth documents over generated reports; list the contradiction in the output. |
 
-Verdict: **BLOCKED** — [reason]
+## 1. Discover Context
 
-## Next Steps
+Read only the sources needed for the requested scope. Start with indexes, manifests, registries, and status files before reading large documents.
 
-- Run `/design-review` on the narrative documents for consistency validation.
-- Run `/localize extract` to extract new strings for translation after dialogue is finalized.
-- Run `/dev-story` to implement dialogue triggers and narrative events in-engine.
+Primary sources:
+
+- design/gdd/**
+- docs/architecture/**
+- docs/registry/**
+- production/stories/**
+- production/qa/**
+- design/art/**
+- design/ux/**
+- docs/engine-reference/**
+
+Discovery rules:
+
+1. Prefer canonical source-of-truth files over generated reports.
+2. Use `Glob` and `Grep` before reading large files.
+3. Keep a source list for the final report or artifact.
+4. When many files match, read the most relevant 5 to 10 first and summarize the rest as candidates.
+5. Treat missing or draft-status dependencies as blockers, not as approval to invent content.
+
+## 2. Build the Working Model
+
+Use the discovered evidence to build a concise working model before producing output.
+
+1. Define the target feature/area and success criteria from existing docs before spawning specialists.
+2. Use TodoWrite to track orchestration phases: context, specialist briefs, synthesis, artifact plan, QA/evidence handoff, and open blockers.
+3. Spawn only the roles that materially contribute to this request: narrative-director, writer, world-builder, level-designer, qa-tester.
+4. Synthesize specialist output into one coherent plan focused on story goals, character voice, lore consistency, player comprehension, level integration, localization hooks, and narrative QA checks.
+5. Write team artifacts and evidence checklists; do not modify canonical GDDs, ADRs, sprint status, or production code unless the invocation explicitly requests implementation and protected-write confirmation is obtained.
+
+Classification rules:
+
+- **Blocking**: prevents safe implementation, review, release, or downstream skill execution.
+- **High**: likely to cause rework, wrong implementation, invalid QA, or broken traceability.
+- **Medium**: weakens handoff quality but can be resolved during normal follow-up.
+- **Low**: cleanup, clarity, or optional improvement.
+
+## 3. Produce the Artifact
+
+Canonical outputs for this skill:
+
+- production/team/narrative/[slug]-narrative-plan.md
+- production/team/narrative/[slug]-script-brief.md
+- production/qa/evidence/narrative-[slug]-checklist.md
+
+Artifact requirements:
+
+1. Include scope, date, source list, assumptions, and confidence.
+2. Separate facts from recommendations and inferred conclusions.
+3. Include explicit next actions and the command that should be run next.
+4. Preserve historical information; prefer additive notes over destructive rewrites.
+5. When updating an index or manifest, append or update only the relevant row and preserve unrelated content.
+
+Required report sections:
+
+- Team verdict
+- Specialist findings
+- Integrated plan
+- Artifacts/evidence created
+- Open blockers
+- Next command
+
+## 4. Validation
+
+1. Check that every conclusion cites or names a repository source.
+2. Check that all blockers have a concrete next action.
+3. Check that proposed writes stay within the declared output paths.
+4. Check that dry-run mode produced no writes.
+5. Summarize any subagent verdicts and unresolved disagreements.
+
+Stop conditions:
+
+- No feature, area, or current story context can be inferred.
+
+## 5. Final Response
+
+End with a concise summary of what was written, what was skipped because it was protected or unsafe, validation results, and the recommended next command. Include file paths for every artifact created or proposed.

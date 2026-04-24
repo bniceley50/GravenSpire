@@ -1,417 +1,351 @@
 ---
 name: smoke-check
-description: "Run the critical path smoke test gate before QA hand-off. Executes the automated test suite, verifies core functionality, and produces a PASS/FAIL report. Run after a sprint's stories are implemented and before manual QA begins. A failed smoke check means the build is not ready for QA."
-argument-hint: "[sprint | quick | --platform pc|console|mobile|all]"
+description: "Run the critical-path smoke test gate before QA hand-off. Executes safe automated tests where available, collects manual smoke confirmations, checks evidence coverage, and writes a PASS / PASS WITH WARNINGS / FAIL report."
+argument-hint: "[sprint | quick] [--platform pc|console|mobile|all] [--dry-run]"
 user-invocable: true
 allowed-tools: Read, Glob, Grep, Bash, Write, AskUserQuestion
 ---
 
 # Smoke Check
 
-This skill is the gate between "implementation done" and "ready for QA
-hand-off". It runs the automated test suite, checks for test coverage gaps,
-batch-verifies critical paths with the developer, and produces a PASS/FAIL
-report.
+Run the gate between implementation and QA hand-off. A failed smoke check means the build is not ready for QA. This skill may run tests and write a smoke report; it must not edit source code, tests, stories, QA plans, stage files, or release files.
 
-The rule is simple: **a build that fails smoke check does not go to QA.**
-Handing a broken build to QA wastes their time and demoralises the team.
+Output:
 
-**Output:** `production/qa/smoke-[date].md`
+```text
+production/qa/smoke-[scope]-[YYYYMMDD].md
+```
 
 ---
 
-## Parse Arguments
+## 0. Execution Contract
 
-Arguments can be combined: `/smoke-check sprint --platform console`
+### 0.1 Parse invocation
 
-**Base mode** (first argument, default: `sprint`):
-- `sprint` — full smoke check against the current sprint's stories
-- `quick` — skip coverage scan (Phase 3) and Batch 3; use for rapid re-checks
+Base modes:
 
-**Platform flag** (`--platform`, default: none):
-- `--platform pc` — add PC-specific checks (keyboard, mouse, windowed mode)
-- `--platform console` — add console-specific checks (gamepad, TV safe zones,
-  platform certification requirements)
-- `--platform mobile` — add mobile-specific checks (touch, portrait/landscape,
-  battery/thermal behaviour)
-- `--platform all` — add all platform variants; output per-platform verdict table
+| Mode | Behavior |
+|---|---|
+| `sprint` or blank | Full smoke check for current sprint. |
+| `quick` | Skip coverage scan and long manual batches; use for re-checking after a fix. |
 
-If `--platform` is provided, Phase 4 adds platform-specific batches and
-Phase 5 outputs a per-platform verdict table in addition to the overall verdict.
+Platform flag:
+
+| Flag | Adds |
+|---|---|
+| `--platform pc` | PC controls, windowing, resolution checks. |
+| `--platform console` | Gamepad, safe-zone, cold boot, platform-prompt checks. |
+| `--platform mobile` | Touch, orientation, background/foreground, mobile performance checks. |
+| `--platform all` | All platform batches. |
+
+`--dry-run` means run discovery and tests, collect manual confirmations if needed, but do not write a report file.
+
+### 0.2 Path safety and write policy
+
+Allowed write location:
+
+```text
+production/qa/smoke-[scope]-[YYYYMMDD].md
+```
+
+If the target exists, create a numbered variant. Do not overwrite.
+
+Do not write anywhere else.
+
+### 0.3 Bash policy
+
+Bash may be used only for:
+
+- Running test commands.
+- Listing test result artifacts.
+- Reading logs/results.
+- Non-destructive environment checks.
+
+Do not install packages, launch watchers, delete files, modify git state, deploy, publish, call network tools, or run destructive shell commands.
+
+If a test command is unavailable, record `NOT RUN`; do not attempt installation.
 
 ---
 
-## Phase 1: Detect Test Setup
+## 1. Detect Scope and Environment
 
-Before running anything, understand the environment:
+Read or infer:
 
-1. **Test framework check**: verify `tests/` directory exists.
-   If it does not: "No test directory found at `tests/`. Run `/test-setup`
-   to scaffold the testing infrastructure, or create the directory manually
-   if tests live elsewhere." Then stop.
+- Engine from `.claude/docs/technical-preferences.md`.
+- Test framework from `tests/`, project config, and test setup docs.
+- Current sprint from `production/session-state/active.md` or most recent `production/sprints/*` file.
+- Latest QA plan from `production/qa/qa-plan-*.md`.
+- Existing smoke checklist from `production/qa/smoke-tests.md` or `tests/smoke/`.
+- Recent test result artifacts from `test-results/`, `coverage/`, engine-specific logs, or CI artifact directories.
 
-2. **CI check**: check whether `.github/workflows/` contains a workflow file
-   referencing tests. Note in the report whether CI is configured.
+Stop if no `tests/`, no QA plan, and no smoke checklist exist only when the project has no observable QA structure at all. Otherwise proceed and record missing items.
 
-3. **Engine detection**: read `.claude/docs/technical-preferences.md` and
-   extract the `Engine:` value. Store this for test command selection in
-   Phase 2.
+Environment summary:
 
-4. **Smoke test list**: check whether `production/qa/smoke-tests.md` or
-   `tests/smoke/` exists. If a smoke test list is found, load it for use in
-   Phase 4. If neither exists, smoke tests will be drawn from the current QA
-   plan (Phase 4 fallback).
-
-5. **QA plan check**: glob `production/qa/qa-plan-*.md` and take the most
-   recently modified file. If found, note the path — it will be used in
-   Phase 3 and Phase 4. If not found, note: "No QA plan found. Run
-   `/qa-plan sprint` before smoke-checking for best results."
-
-Report findings before proceeding: "Environment: [engine]. Test directory:
-[found / not found]. CI configured: [yes / no]. QA plan: [path / not found]."
+```text
+Engine: [engine or Unknown]
+Tests directory: [found/missing]
+QA plan: [path/missing]
+Smoke checklist: [path/generated fallback]
+Current sprint: [name/unknown]
+```
 
 ---
 
-## Phase 2: Run Automated Tests
+## 2. Run Automated Tests
 
-Attempt to run the test suite via Bash. Select the command based on the engine
-detected in Phase 1:
+Select the narrowest safe command from project evidence.
 
-**Godot 4:**
-```bash
-godot --headless --script tests/gdunit4_runner.gd 2>&1
-```
-If the GDUnit4 runner script does not exist at that path, try:
-```bash
-godot --headless -s addons/gdunit4/GdUnitRunner.gd 2>&1
-```
-If neither path exists, note: "GDUnit4 runner not found — confirm the runner
-path for your test framework."
+Command selection priority:
 
-**Unity:**
-Unity tests require the editor and cannot be run headlessly via shell in most
-environments. Check for recent test result artifacts:
-```bash
-ls -t test-results/ 2>/dev/null | head -5
-```
-If test result files exist (XML or JSON), read the most recent one and parse
-PASS/FAIL counts. If no artifacts exist: "Unity tests must be run from the
-editor or CI pipeline. Please confirm test status manually before proceeding."
+1. Explicit test command in `production/qa/qa-plan-*.md`.
+2. `package.json` scripts, if present.
+3. Engine-specific test setup docs.
+4. Common engine defaults below.
+5. Recent test result artifacts if no runner is available.
 
-**Unreal Engine:**
-```bash
-ls -t Saved/Logs/ 2>/dev/null | grep -i "test\|automation" | head -5
-```
-If no matching log found: "UE automation tests must be run via the Session
-Frontend or CI pipeline. Please confirm test status manually."
+Common defaults:
 
-**Unknown engine / not configured:**
-"Engine not configured in `.claude/docs/technical-preferences.md`. Run
-`/setup-engine` to specify the engine, then re-run `/smoke-check`."
+| Engine | Safe attempt |
+|---|---|
+| Godot | `godot --headless -s addons/gdunit4/GdUnitRunner.gd` if runner exists. |
+| Unity | Read latest test result artifact; do not assume Unity Editor is available. |
+| Unreal | Read latest automation/test log; do not assume editor automation is available. |
+| Unknown | Do not guess. Record `NOT RUN`. |
 
-**If the test runner is not available in this environment** (engine binary not
-on PATH, runner script not found, etc.), report clearly:
+For any Bash command:
 
-"Automated tests could not be executed — engine binary not found on PATH.
-Status will be recorded as NOT RUN. Confirm test results from your local IDE
-or CI pipeline. Unconfirmed NOT RUN is treated as PASS WITH WARNINGS, not
-FAIL — the developer must manually confirm results."
+- Prefer commands that already exist in project config.
+- Capture output.
+- Stop after one failing runner command unless an obvious fallback runner path exists.
+- Do not run commands expected to be long-running.
 
-Do not treat NOT RUN as an automatic FAIL. Record it as a warning. The
-developer's manual confirmation in Phase 4 can resolve it.
-
-Parse runner output and extract:
-- Total tests run
-- Passing count
-- Failing count
-- Names of any failing tests (up to 10; if more, note the count)
-- Any crash or error output from the runner itself
-
----
-
-## Phase 3: Check Test Coverage
-
-Draw the story list from, in priority order:
-1. The QA plan found in Phase 1 (its Test Summary table lists expected test
-   file paths per story)
-2. The current sprint plan from `production/sprints/` (most recently modified
-   file)
-3. If the `quick` argument was passed, skip this phase entirely and note:
-   "Coverage scan skipped — run `/smoke-check sprint` for full coverage
-   analysis."
-
-For each story in scope:
-
-1. Extract the system slug from the story's file path
-   (e.g., `production/epics/combat/story-001.md` → `combat`)
-2. Glob `tests/unit/[system]/` and `tests/integration/[system]/` for files
-   whose name contains the story slug or a closely related term
-3. Check the story file itself for a `Test file:` header field or a
-   "Test Evidence" section
-
-Assign a coverage status to each story:
+Classify automated tests:
 
 | Status | Meaning |
-|--------|---------|
-| **COVERED** | A test file was found matching this story's system and scope |
-| **MANUAL** | Story type is Visual/Feel or UI; a test evidence document was found |
-| **MISSING** | Logic or Integration story with no matching test file |
-| **EXPECTED** | Config/Data story — no test file required; spot-check is sufficient |
-| **UNKNOWN** | Story file missing or unreadable |
+|---|---|
+| `PASS` | Runner or artifact reports no failures. |
+| `FAIL` | Runner or artifact reports one or more failures, crash, or fatal error. |
+| `NOT RUN` | No runner/artifact available or environment lacks engine binary. |
+| `UNKNOWN` | Output exists but cannot be parsed. |
 
-MISSING entries are advisory gaps. They do not cause a FAIL verdict but must
-appear prominently in the report and must be resolved before `/story-done` can
-fully close those stories.
+`NOT RUN` is not automatic failure. It contributes to `PASS WITH WARNINGS` unless manual checks fail.
 
 ---
 
-## Phase 4: Run Manual Smoke Checks
+## 3. Check Evidence Coverage
 
-Draw the smoke test checklist from, in priority order:
-1. The QA plan's "Smoke Test Scope" section (if QA plan was found in Phase 1)
-2. `production/qa/smoke-tests.md` (if it exists)
-3. `tests/smoke/` directory contents (if it exists)
-4. The standard fallback list below (used only when none of the above exist)
+Skip this phase in `quick` mode.
 
-Tailor batches 2 and 3 to the actual systems identified from the sprint or QA
-plan. Replace bracketed placeholders with real mechanic names from the current
-sprint's stories.
+Build story list from:
 
-Use `AskUserQuestion` to batch-verify. Keep to at most 3 calls.
+1. Latest QA plan.
+2. Current sprint file.
+3. Story paths found in `production/session-state/active.md`.
+4. If none, glob `production/epics/**/story-*.md` and include Ready/In Progress/Implemented stories only.
 
-**Batch 1 — Core stability (always run):**
-```
-question: "Smoke check — Batch 1: Core stability. Please verify each:"
-options:
-  - "Game launches to main menu without crash — PASS"
-  - "Game launches to main menu without crash — FAIL"
-  - "New game / session starts successfully — PASS"
-  - "New game / session starts successfully — FAIL"
-  - "Main menu responds to all inputs — PASS"
-  - "Main menu responds to all inputs — FAIL"
-```
+For each story:
 
-**Batch 2 — Sprint mechanic and regression (always run):**
-```
-question: "Smoke check — Batch 2: This sprint's changes and regression check:"
-options:
-  - "[Primary mechanic this sprint] — PASS"
-  - "[Primary mechanic this sprint] — FAIL: [describe what broke]"
-  - "[Second notable change this sprint, if any] — PASS"
-  - "[Second notable change this sprint] — FAIL"
-  - "Previous sprint's features still work (no regressions) — PASS"
-  - "Previous sprint's features — regression found: [brief description]"
-```
+- Read story type.
+- Read required evidence path.
+- Check whether the evidence file exists.
+- For Logic/Integration, check whether test path exists.
+- For Visual/Feel/UI, check whether manual evidence doc exists.
+- For Config/Data, mark smoke evidence expected.
 
-**Batch 3 — Data integrity and performance (run unless `quick` argument):**
-```
-question: "Smoke check — Batch 3: Data integrity and performance:"
-options:
-  - "Save / load completes without data loss — PASS"
-  - "Save / load — FAIL: [describe what broke]"
-  - "Save / load — N/A (save system not yet implemented)"
-  - "No new frame rate drops or hitches observed — PASS"
-  - "Frame rate drops or hitches found — FAIL: [where]"
-  - "Performance — not checked in this session"
-```
+Coverage statuses:
 
-Record each response verbatim for the Phase 5 report.
+| Status | Meaning |
+|---|---|
+| `COVERED` | Required test/evidence file exists. |
+| `MANUAL PENDING` | Manual evidence path declared but not yet filled. |
+| `MISSING` | Required evidence path missing. |
+| `EXPECTED` | Config/Data or smoke-only evidence. |
+| `UNKNOWN` | Story unreadable or evidence requirement absent. |
 
-**Platform Batches** *(run only if `--platform` argument was provided)*:
-
-**PC platform** (`--platform pc` or `--platform all`):
-```
-question: "Smoke check — PC Platform: Verify platform-specific behaviour:"
-options:
-  - "Keyboard controls work correctly across all menus and gameplay — PASS"
-  - "Keyboard controls — FAIL: [describe issue]"
-  - "Mouse input and cursor visibility correct in all states — PASS"
-  - "Mouse input — FAIL: [describe issue]"
-  - "Windowed and fullscreen modes function without graphical issues — PASS"
-  - "Windowed/fullscreen — FAIL: [describe issue]"
-  - "Resolution changes apply correctly — PASS"
-  - "Resolution changes — FAIL: [describe issue]"
-```
-
-**Console platform** (`--platform console` or `--platform all`):
-```
-question: "Smoke check — Console Platform: Verify platform-specific behaviour:"
-options:
-  - "Gamepad input works correctly for all actions — PASS"
-  - "Gamepad input — FAIL: [describe issue]"
-  - "UI fits within TV safe zone margins (no text clipped) — PASS"
-  - "TV safe zone — FAIL: [describe what is clipped]"
-  - "No keyboard/mouse-only fallbacks shown to gamepad user — PASS"
-  - "Input prompt inconsistency — FAIL: [describe]"
-  - "Game boots correctly from cold start (no prior save) — PASS"
-  - "Cold start — FAIL: [describe issue]"
-```
-
-**Mobile platform** (`--platform mobile` or `--platform all`):
-```
-question: "Smoke check — Mobile Platform: Verify platform-specific behaviour:"
-options:
-  - "Touch controls work correctly for all primary actions — PASS"
-  - "Touch controls — FAIL: [describe issue]"
-  - "Game handles orientation change (portrait ↔ landscape) correctly — PASS"
-  - "Orientation change — FAIL: [describe what breaks]"
-  - "Background / foreground transitions (home button) handled gracefully — PASS"
-  - "Background/foreground — FAIL: [describe issue]"
-  - "No visible performance issues on target device (no thermal throttling signs) — PASS"
-  - "Mobile performance — FAIL: [describe issue]"
-```
+Coverage gaps do not automatically fail smoke check unless they affect Batch 1 or Batch 2. They are warnings that must be resolved before `/story-done`.
 
 ---
 
-## Phase 5: Generate Report
+## 4. Manual Smoke Checks
 
-Assemble the full smoke check report:
+Manual checks require user confirmation. Use at most three core batches plus platform batches.
 
-````markdown
-## Smoke Check Report
-**Date**: [date]
-**Sprint**: [sprint name / number, or "Not identified"]
-**Engine**: [engine]
-**QA Plan**: [path, or "Not found — run /qa-plan first"]
-**Argument**: [sprint | quick | blank]
+If a project-specific smoke checklist exists, use it. Otherwise generate fallback checks from the current sprint's stories and the standard batches below.
 
----
+### 4.1 Batch 1 — Core stability
 
-### Automated Tests
+Ask:
 
-**Status**: [PASS ([N] tests, [N] passing) | FAIL ([N] failures) |
-NOT RUN ([reason])]
+```text
+Smoke check — Core stability
 
-[If FAIL, list failing tests:]
-- `[test name]` — [brief failure description from runner output]
+[A] PASS — game launches to main menu without crash
+[B] FAIL — launch/main menu crash or hang
+[C] NOT CHECKED — cannot verify in this environment
+```
 
-[If NOT RUN:]
-"Manual confirmation required: did tests pass in your local IDE or CI? This
-will determine whether the automated test row contributes to a FAIL verdict."
+Then ask for session start/input if not covered by the first response:
 
----
+```text
+Smoke check — Basic interaction
 
-### Test Coverage
+[A] PASS — new session starts and primary input responds
+[B] FAIL — session start or primary input broken
+[C] NOT CHECKED
+```
 
-| Story | Type | Test File | Coverage Status |
-|-------|------|-----------|----------------|
-| [title] | Logic | `tests/unit/[system]/[slug]_test.[ext]` | COVERED |
-| [title] | Visual/Feel | `tests/evidence/[slug]-screenshots.md` | MANUAL |
-| [title] | Logic | — | MISSING ⚠ |
-| [title] | Config/Data | — | EXPECTED |
+### 4.2 Batch 2 — Sprint critical path
 
-**Summary**: [N] covered, [N] manual, [N] missing, [N] expected.
+Derive the top one to three sprint mechanics from the QA plan or story list.
 
----
+Ask a compact batch question:
 
-### Manual Smoke Checks
+```text
+Smoke check — Sprint critical path
 
-- [x] Game launches without crash — PASS
-- [x] New game starts — PASS
-- [x] [Core mechanic] — PASS
-- [ ] [Other check] — FAIL: [user's description]
-- [x] Save / load — PASS
-- [-] Performance — not checked this session
+For each item, report PASS, FAIL, or NOT CHECKED:
+- [mechanic/story 1]
+- [mechanic/story 2]
+- Regression check: previous critical path still works
+```
 
----
+Any explicit FAIL in this batch contributes to overall `FAIL`.
 
-### Missing Test Evidence
+### 4.3 Batch 3 — Persistence/performance
 
-Stories that must have test evidence before they can be marked COMPLETE via
-`/story-done`:
+Skip in `quick` mode.
 
-- **[story title]** (`[path]`) — Logic story has no test file.
-  Expected location: `tests/unit/[system]/[story-slug]_test.[ext]`
+Ask:
 
-[If none:] "All Logic and Integration stories have test coverage."
+```text
+Smoke check — Persistence and performance
 
----
+[A] PASS — save/load and basic performance acceptable
+[B] FAIL — save/load or obvious performance regression found
+[C] PARTIAL — one item not implemented or not checked
+[D] NOT APPLICABLE — no save/performance-sensitive systems yet
+```
 
-### Platform-Specific Results *(only if `--platform` was provided)*
+### 4.4 Platform batches
 
-| Platform | Checks Run | Passed | Failed | Platform Verdict |
-|----------|-----------|--------|--------|-----------------|
-| PC | [N] | [N] | [N] | PASS / FAIL |
-| Console | [N] | [N] | [N] | PASS / FAIL |
-| Mobile | [N] | [N] | [N] | PASS / FAIL |
+Run only for requested platform(s).
 
-**Platform notes**: [any platform-specific observations not captured in pass/fail]
+PC:
 
-Any platform with one or more FAIL checks contributes to the overall FAIL verdict.
+- Keyboard/mouse controls.
+- Controller support if target includes controller.
+- Windowed/fullscreen/resolution handling.
+- Graphics settings persistence, if implemented.
 
----
+Console:
 
-### Verdict: [PASS | PASS WITH WARNINGS | FAIL]
+- Gamepad control path.
+- Safe-zone/UI clipping.
+- Cold boot.
+- Platform prompt consistency.
 
-[Verdict rules — first matching rule wins:]
+Mobile:
 
-**FAIL** if ANY of:
-- Automated test suite ran and reported one or more test failures
-- Any Batch 1 (core stability) check returned FAIL
-- Any Batch 2 (primary sprint mechanic or regression check) returned FAIL
+- Touch controls.
+- Orientation handling.
+- Background/foreground behavior.
+- Obvious battery/thermal/performance issue.
 
-**PASS WITH WARNINGS** if ALL of:
-- Automated tests PASS or NOT RUN (developer has not yet confirmed)
-- All Batch 1 and Batch 2 smoke checks PASS
-- One or more Logic/Integration stories have MISSING test evidence
-
-**PASS** if ALL of:
-- Automated tests PASS
-- All smoke checks in all batches PASS or N/A
-- No MISSING test evidence entries
-````
+Collect PASS/FAIL/NOT CHECKED per platform.
 
 ---
 
-## Phase 6: Write and Gate
+## 5. Determine Verdict
 
-Present the full report in conversation, then ask:
+Use first matching rule:
 
-"May I write this smoke check report to `production/qa/smoke-[date].md`?"
+| Verdict | Rule |
+|---|---|
+| `FAIL` | Automated tests fail, Batch 1 fails, Batch 2 fails, or any requested platform has a critical FAIL. |
+| `PASS WITH WARNINGS` | No failing test/check, but automated tests are NOT RUN/UNKNOWN, coverage is missing, Batch 3 is partial, or manual checks are NOT CHECKED. |
+| `PASS` | Automated tests pass, Batch 1 and Batch 2 pass, requested platform checks pass or N/A, and no required evidence is missing. |
 
-Write only after approval.
-
-After writing, deliver the gate verdict:
-
-**If verdict is FAIL:**
-
-"The smoke check failed. Do not hand off to QA until these failures are
-resolved:
-
-[List each failing automated test or smoke check with a one-line description]
-
-Fix the failures and run `/smoke-check` again to re-gate before QA hand-off."
-
-**If verdict is PASS WITH WARNINGS:**
-
-"Smoke check passed with warnings. The build is ready for manual QA.
-
-Advisory items to resolve before running `/story-done` on affected stories:
-[list MISSING test evidence entries]
-
-QA hand-off: share `production/qa/qa-plan-[sprint].md` with the qa-tester
-agent to begin manual verification."
-
-**If verdict is PASS:**
-
-"Smoke check passed cleanly. The build is ready for manual QA.
-
-QA hand-off: share `production/qa/qa-plan-[sprint].md` with the qa-tester
-agent to begin manual verification."
+Do not downgrade to `FAIL` solely because automated tests could not run in this environment.
 
 ---
 
-## Collaborative Protocol
+## 6. Write Smoke Report
 
-- **Never treat NOT RUN as automatic FAIL** — record it as NOT RUN and let
-  the developer confirm status manually. Unconfirmed NOT RUN contributes to
-  PASS WITH WARNINGS, not FAIL.
-- **Never auto-fix failures** — report them and state what must be resolved.
-  Do not attempt to edit source code or test files.
-- **PASS WITH WARNINGS does not block QA hand-off** — it records advisory
-  gaps for `/story-done` to follow up on.
-- **`quick` argument** skips Phase 3 (coverage scan) and Phase 4 Batch 3.
-  Use it for rapid re-checks after fixing a specific failure.
-- Use `AskUserQuestion` for all manual smoke check verification.
-- **Never write the report without asking** — Phase 6 requires explicit
-  approval before any file is created.
+Report template:
+
+```markdown
+# Smoke Check Report: [scope]
+
+Generated: [YYYY-MM-DD]
+Mode: [sprint | quick]
+Platform: [none | pc | console | mobile | all]
+Verdict: [PASS | PASS WITH WARNINGS | FAIL]
+
+## Environment
+
+| Item | Value |
+|------|-------|
+| Engine | [engine] |
+| QA Plan | [path or Missing] |
+| Current Sprint | [name or Unknown] |
+| Test Setup | [summary] |
+
+## Automated Tests
+
+| Status | Command/Artifact | Summary |
+|--------|------------------|---------|
+| PASS/FAIL/NOT RUN/UNKNOWN | `[command or artifact]` | [counts/failures/reason] |
+
+## Evidence Coverage
+
+| Story | Type | Required Evidence | Status |
+|-------|------|-------------------|--------|
+
+## Manual Smoke Checks
+
+| Check | Result | Notes |
+|-------|--------|-------|
+
+## Platform Checks
+
+[Only if platform flag was supplied.]
+
+## Warnings
+
+- [warning or None]
+
+## Failures
+
+- [failure or None]
+
+## Gate Decision
+
+[Plain-language explanation of verdict and what must happen next.]
+```
+
+If `--dry-run`, show the report in conversation and do not write.
+
+Otherwise write to `production/qa/smoke-[scope]-[YYYYMMDD].md`, using a numbered suffix if needed.
+
+---
+
+## 7. Completion Output
+
+End with:
+
+```text
+Verdict: [PASS | PASS WITH WARNINGS | FAIL | DRY RUN]
+Report: [path or not written]
+Failures: [N]
+Warnings: [N]
+Next best action: [command]
+```
+
+Next actions:
+
+| Verdict | Next action |
+|---|---|
+| `PASS` | `/team-qa sprint` |
+| `PASS WITH WARNINGS` | `/team-qa sprint`, with warnings carried forward. |
+| `FAIL` | Fix listed failures, then rerun `/smoke-check`. |

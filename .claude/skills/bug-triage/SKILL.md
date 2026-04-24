@@ -1,243 +1,131 @@
 ---
 name: bug-triage
 description: "Read all open bugs in production/qa/bugs/, re-evaluate priority vs. severity, assign to sprints, surface systemic trends, and produce a triage report. Run at sprint start or when the bug count grows enough to need re-prioritization."
-argument-hint: "[sprint | full | trend]"
+argument-hint: "[sprint | full | trend] [--dry-run]"
 user-invocable: true
-allowed-tools: Read, Glob, Grep, Write, Edit
+allowed-tools: Read, Glob, Grep, Write, Edit, AskUserQuestion
 ---
 
 # Bug Triage
 
-This skill processes the open bug backlog into a prioritised, sprint-assigned
-action list. It distinguishes between **severity** (how bad is the impact?) and
-**priority** (how urgently must we fix it?), detects systemic trends, and
-ensures no critical bug is lost between sprints.
+Re-evaluate open bug reports for severity, priority, assignment, sprint suitability, duplicate/systemic patterns, and release risk.
 
-**Output:** `production/qa/bug-triage-[date].md`
+## 0. Execution Contract
 
-**When to run:**
-- Sprint start — assign open bugs to the new sprint or backlog
-- After `/team-qa` completes and new bugs have been filed
-- When the bug count crosses 10+ open items
+### 0.1 Invocation and autonomy
 
----
+Supported modes:
 
-## 1. Parse Arguments
+- sprint: triage bugs relevant to the current sprint
+- full: triage all open bugs
+- trend: analyze systemic bug patterns over time
 
-**Modes:**
-- `/bug-triage sprint` — triage against the current sprint; assign fixable bugs
-  to the sprint backlog; defer the rest
-- `/bug-triage full` — full triage of all bugs regardless of sprint scope
-- `/bug-triage trend` — trend analysis only (no assignment); read-only report
-- No argument — run sprint mode if a current sprint exists, else full mode
+The invocation authorizes routine repository-local work for this skill. Operate autonomously after resolving scope; do not ask the user to approve every normal file creation. Ask only for protected operations, destructive ambiguity, or missing source-of-truth decisions that cannot be inferred safely.
 
----
+If `--dry-run` is present, perform discovery and produce the complete proposed result, but do not call `Write` or `Edit`.
 
-## 2. Load Bug Backlog
+### 0.2 Path safety
 
-### Step 2a — Discover bug files
+All user-supplied paths must be repository-relative. Reject absolute paths, paths containing `..`, and paths outside the expected project roots for this skill. Normalize paths before reading or writing.
 
-Glob for bug reports in priority order:
-1. `production/qa/bugs/*.md` — individual bug report files (preferred format)
-2. `production/qa/bugs.md` — single consolidated bug log (fallback)
-3. Any `production/qa/qa-plan-*.md` "Bugs Found" table (last resort)
+### 0.3 Write policy
 
-If no bug files found:
-> "No bug files found in `production/qa/bugs/`. If bugs are tracked in a
-> different location, adjust the glob pattern. If no bugs exist yet, there is
-> nothing to triage."
+Routine writes allowed by invocation:
 
-Stop and report. Do not proceed if no bugs exist.
+- production/qa/triage/bug-triage-[YYYYMMDD].md
 
-### Step 2b — Load sprint context
+Protected operations require explicit confirmation through `AskUserQuestion`:
 
-Read the most recently modified file in `production/sprints/` to understand:
-- Current sprint number / name
-- Stories in scope (for assignment target)
-- Sprint capacity constraints (if noted)
+- Overwriting or deleting an existing file.
+- Editing canonical source-of-truth documents outside the declared outputs.
+- Changing statuses, gates, stage files, sprint state, story state, registry entries, or release readiness.
+- Running commands that modify files, install dependencies, generate builds, publish artifacts, deploy, tag, commit, or push.
+- Applying changes whose scope is broader than the user requested.
 
-If no sprint file exists: note "No sprint plan found — assigning to backlog only."
+Use `Edit` for targeted changes to existing files. Use `Write` for new files or complete replacement only after the replacement scope is safe and approved.
 
-### Step 2c — Load severity reference
+### 0.8 Missing-file behavior
 
-Read `.claude/docs/coding-standards.md` for severity/priority definitions if they
-exist. If they do not exist, use the standard definitions in Step 3.
+| Situation | Behavior |
+|---|---|
+| Primary source missing | Continue only if the skill can infer a narrower safe scope; otherwise stop with the exact missing file/folder. |
+| Referenced artifact missing | Record as a gap or blocker instead of inventing content. |
+| Existing target file present | Do not overwrite. Create a proposed dated file or ask for protected confirmation. |
+| Ambiguous scope | Choose the smallest evidence-backed scope; ask only if two or more scopes are equally plausible. |
+| Contradictory sources | Prefer explicit status/source-of-truth documents over generated reports; list the contradiction in the output. |
 
----
+## 1. Discover Context
 
-## 3. Classify Each Bug
+Read only the sources needed for the requested scope. Start with indexes, manifests, registries, and status files before reading large documents.
 
-For each bug, extract or infer:
+Primary sources:
 
-### Severity (impact of the bug)
+- production/qa/bugs/**/*.md
+- production/sprints/**
+- production/releases/**
+- production/qa/triage/**
+- design/gdd/**
 
-| Severity | Definition |
-|----------|-----------|
-| **S1 — Critical** | Game crashes, data loss, or complete feature failure. Cannot proceed past this point. |
-| **S2 — High** | Major feature broken but game is still playable. Significant wrong behaviour. |
-| **S3 — Medium** | Feature degraded but a workaround exists. Minor wrong behaviour. |
-| **S4 — Low** | Visual glitch, cosmetic issue, typo. No gameplay impact. |
+Discovery rules:
 
-### Priority (urgency of the fix)
+1. Prefer canonical source-of-truth files over generated reports.
+2. Use `Glob` and `Grep` before reading large files.
+3. Keep a source list for the final report or artifact.
+4. When many files match, read the most relevant 5 to 10 first and summarize the rest as candidates.
+5. Treat missing or draft-status dependencies as blockers, not as approval to invent content.
 
-| Priority | Definition |
-|----------|-----------|
-| **P1 — Fix this sprint** | Blocks QA, blocks release, or is regression from last sprint |
-| **P2 — Fix soon** | Should be resolved before the next major milestone |
-| **P3 — Backlog** | Would be good to fix, but no active blocking impact |
-| **P4 — Won't fix / Deferred** | Accepted risk or out of scope for current product scope |
+## 2. Build the Working Model
 
-### Assignment
+Use the discovered evidence to build a concise working model before producing output.
 
-For each P1/P2 bug in `sprint` mode:
-- Identify which story or epic the fix belongs to
-- Check whether the current sprint has remaining capacity
-- If capacity exists: assign to sprint (`Sprint: [current]`)
-- If capacity is full: flag as `Priority overflow — consider pulling from sprint`
+1. Read open bug reports and classify by severity, priority, affected system, reproducibility, owner, and blocking status.
+2. Identify duplicates and systemic trends without deleting or merging bug files automatically.
+3. Recommend sprint assignment and fix ordering based on release impact.
+4. Write a triage report; only edit individual bug files when explicitly confirmed or when a non-destructive triage note is requested.
+5. Keep severity changes explainable and evidence-linked.
 
-For `full` mode: assign all P1 to current sprint, P2 to next sprint estimate,
-P3+ to backlog.
+Classification rules:
 
-### Deviation check
+- **Blocking**: prevents safe implementation, review, release, or downstream skill execution.
+- **High**: likely to cause rework, wrong implementation, invalid QA, or broken traceability.
+- **Medium**: weakens handoff quality but can be resolved during normal follow-up.
+- **Low**: cleanup, clarity, or optional improvement.
 
-Flag bugs that suggest **systematic problems**:
-- 3+ bugs from the same system in the same sprint → "Potential design or
-  implementation quality issue in [system]"
-- 2+ S1/S2 bugs in the same story → "Story may need to be reopened and
-  re-reviewed before shipping"
-- Bug filed against a story marked Complete → "Regression in completed story —
-  story should be re-opened in sprint tracking"
+## 3. Produce the Artifact
 
----
+Canonical outputs for this skill:
 
-## 4. Trend Analysis
+- production/qa/triage/bug-triage-[YYYYMMDD].md
 
-After classifying all bugs, generate trend metrics:
+Artifact requirements:
 
-### Volume trends
-- Total open bugs: [N]
-- Opened this sprint: [N]
-- Closed this sprint: [N]
-- Net change: [+N / -N]
+1. Include scope, date, source list, assumptions, and confidence.
+2. Separate facts from recommendations and inferred conclusions.
+3. Include explicit next actions and the command that should be run next.
+4. Preserve historical information; prefer additive notes over destructive rewrites.
+5. When updating an index or manifest, append or update only the relevant row and preserve unrelated content.
 
-### System hot spots
-- Which system has the most open bugs?
-- Which system has the highest S1/S2 ratio?
+Required report sections:
 
-### Age analysis
-- How many bugs are older than 2 sprints?
-- Are any S1/S2 bugs un-assigned (sprint = none)?
+- Triage summary
+- P0/P1 queue
+- Sprint candidates
+- Duplicates
+- Systemic trends
+- Recommended owner/action
+- Protected updates not applied
 
-### Regression indicator
-- Any bugs filed against previously-completed stories?
-- Count: [N] regression bugs (story reopened implied)
+## 4. Validation
 
----
+1. Check that every conclusion cites or names a repository source.
+2. Check that all blockers have a concrete next action.
+3. Check that proposed writes stay within the declared output paths.
+4. Check that dry-run mode produced no writes.
 
-## 5. Generate Triage Report
+Stop conditions:
 
-```markdown
-# Bug Triage Report
+- No bug directory or open bug files were found.
 
-> **Date**: [date]
-> **Mode**: [sprint | full | trend]
-> **Generated by**: /bug-triage
-> **Open bugs processed**: [N]
-> **Sprint in scope**: [sprint name, or "N/A"]
+## 5. Final Response
 
----
-
-## Triage Summary
-
-| Priority | Count | Notes |
-|----------|-------|-------|
-| P1 — Fix this sprint | [N] | [N] assigned to sprint, [N] overflow |
-| P2 — Fix soon | [N] | Scheduled for next sprint |
-| P3 — Backlog | [N] | Deferred |
-| P4 — Won't fix | [N] | Accepted risk |
-
-**Critical (S1/S2) unfixed count**: [N]
-
----
-
-## P1 Bugs — Fix This Sprint
-
-| ID | System | Severity | Summary | Assigned to | Story |
-|----|--------|----------|---------|-------------|-------|
-| BUG-NNN | [system] | S[1-4] | [one-line description] | [sprint] | [story path] |
-
----
-
-## P2 Bugs — Fix Soon
-
-| ID | System | Severity | Summary | Target Sprint |
-|----|--------|----------|---------|---------------|
-| BUG-NNN | [system] | S[1-4] | [one-line description] | Sprint [N+1] |
-
----
-
-## P3/P4 Bugs — Backlog / Won't Fix
-
-| ID | System | Severity | Summary | Disposition |
-|----|--------|----------|---------|-------------|
-| BUG-NNN | [system] | S4 | [one-line description] | Backlog |
-
----
-
-## Systemic Issues Flagged
-
-[List any patterns from Step 3 deviation check, or "None identified."]
-
----
-
-## Trend Analysis
-
-**Volume**: [N] open / [+N] net change this sprint
-**Hot spot**: [system with most bugs]
-**Regressions**: [N] bugs against completed stories
-**Aged bugs (>2 sprints old)**: [N]
-
-[If N aged S1/S2 bugs > 0:]
-> ⚠️ [N] high-severity bugs have been open for more than 2 sprints without
-> assignment. These represent accepted risk that should be explicitly reviewed.
-
----
-
-## Recommended Actions
-
-1. [Most urgent action — usually "fix P1 bugs before QA hand-off"]
-2. [Second action — usually "investigate [hot spot system] quality"]
-3. [Third action — optional improvement]
-```
-
----
-
-## 6. Write and Gate
-
-Present the report in conversation, then ask:
-
-"May I write this triage report to `production/qa/bug-triage-[date].md`?"
-
-Write only after approval.
-
-After writing:
-- If any S1 bugs are unassigned: "S1 bugs must be assigned before the sprint
-  can be considered healthy. Run `/sprint-status` to see current capacity."
-- If regression bugs exist: "Regressions found — consider re-opening the
-  affected stories in sprint tracking and running `/smoke-check` to re-gate."
-- If no P1 bugs exist: "No P1 bugs — build is in good shape for QA hand-off." Verdict: **COMPLETE** — triage report written.
-
-If user declined write: Verdict: **BLOCKED** — user declined write.
-
----
-
-## Collaborative Protocol
-
-- **Never close or mark bugs Won't Fix without user approval** — surface them
-  as P4 candidates and ask: "Are these acceptable as Won't Fix?"
-- **Never auto-assign to a sprint at capacity** — flag overflow and let the
-  sprint owner decide what to pull
-- **Severity is objective; priority is a team decision** — present severity
-  classifications as recommendations, not mandates
-- **Trend data is informational** — do not block work on trend findings alone;
-  surface them as observations
+End with a concise summary of what was written, what was skipped because it was protected or unsafe, validation results, and the recommended next command. Include file paths for every artifact created or proposed.

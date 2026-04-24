@@ -1,145 +1,150 @@
 ---
 name: team-live-ops
 description: "Orchestrate the live-ops team for post-launch content planning: coordinates live-ops-designer, economy-designer, analytics-engineer, community-manager, writer, and narrative-director to design and plan a season, event, or live content update."
-argument-hint: "[season name or event description]"
+argument-hint: "[season name or event description] [--dry-run]"
 user-invocable: true
 allowed-tools: Read, Glob, Grep, Write, Edit, Bash, Task, AskUserQuestion, TodoWrite
 ---
-**Argument check:** If no season name or event description is provided, output:
-> "Usage: `/team-live-ops [season name or event description]` — Provide the name or description of the season or live event to plan."
-Then stop immediately without spawning any subagents or reading any files.
 
-When this skill is invoked with a valid argument, orchestrate the live-ops team through a structured planning pipeline.
+# Team Live Ops
 
-**Decision Points:** At each phase transition, use `AskUserQuestion` to present
-the user with the subagent's proposals as selectable options. Write the agent's
-full analysis in conversation, then capture the decision with concise labels.
-The user must approve before moving to the next phase.
+Coordinate seasonal/event/live-content planning across economy, analytics, community, writing, and narrative.
 
-## Team Composition
-- **live-ops-designer** — Season structure, event cadence, retention mechanics, battle pass
-- **economy-designer** — Live economy balance, store rotation, currency pricing, pity timers
-- **analytics-engineer** — Success metrics, A/B test design, event tracking, dashboard specs
-- **community-manager** — Player-facing announcements, event descriptions, seasonal messaging
-- **narrative-director** — Seasonal narrative theme, story arc, world event framing
-- **writer** — Event descriptions, reward item names, seasonal flavor text, announcement copy
+## 0. Execution Contract
 
-## How to Delegate
+### 0.1 Invocation and autonomy
 
-Use the Task tool to spawn each team member as a subagent:
-- `subagent_type: live-ops-designer` — Season/event structure and retention mechanics
-- `subagent_type: economy-designer` — Live economy balance and reward pricing
-- `subagent_type: analytics-engineer` — Success metrics, A/B tests, event instrumentation
-- `subagent_type: community-manager` — Player-facing communication and messaging
-- `subagent_type: narrative-director` — Seasonal theme and narrative framing
-- `subagent_type: writer` — All player-facing text: event descriptions, item names, copy
+Supported modes:
 
-Always provide full context in each agent's prompt (game concept path, existing season docs, ethics policy path, current economy state). Launch independent agents in parallel where the pipeline allows it (Phases 3 and 4 can run simultaneously).
+- feature or area description: orchestrate full team workflow
+- --dry-run: produce plan and subagent summaries without writes
 
-## Pipeline
+The invocation authorizes routine repository-local work for this skill. Operate autonomously after resolving scope; do not ask the user to approve every normal file creation. Ask only for protected operations, destructive ambiguity, or missing source-of-truth decisions that cannot be inferred safely.
 
-### Phase 1: Season/Event Scoping
-Delegate to **live-ops-designer**:
-- Define the season or event: type (seasonal, limited-time event, challenge), duration, theme direction
-- Outline the content list: what's new (modes, items, challenges, story beats)
-- Define the retention hook: what brings players back daily/weekly during this season
-- Identify resource budget: how much new content needs to be created vs. reused
-- Output: season brief with scope, content list, and retention mechanic overview
+If `--dry-run` is present, perform discovery and produce the complete proposed result, but do not call `Write` or `Edit`.
 
-### Phase 2: Narrative Theme
-Delegate to **narrative-director**:
-- Read the season brief from Phase 1
-- Design the seasonal narrative theme: how does this event connect to the game world?
-- Define the central story hook players will discover during the event
-- Identify which existing lore threads this season can advance
-- Output: narrative framing document (theme, story hook, lore connections)
+### 0.2 Path safety
 
-### Phase 3: Economy Design (parallel with Phase 2 if theme is clear)
-Delegate to **economy-designer**:
-- Read the season brief and existing economy rules from `design/live-ops/economy-rules.md`
-- Design the reward track: free tier progression, premium tier value proposition
-- Plan the in-season economy: seasonal currency, store rotation, pricing
-- Define pity timer mechanics and bad-luck protection for any random elements
-- Verify no pay-to-win items in premium track
-- Output: economy design doc with reward tables, pricing, and currency flow
+All user-supplied paths must be repository-relative. Reject absolute paths, paths containing `..`, and paths outside the expected project roots for this skill. Normalize paths before reading or writing.
 
-### Phase 4: Analytics and Success Metrics (parallel with Phase 3)
-Delegate to **analytics-engineer**:
-- Read the season brief
-- Define success metrics: participation rate target, retention lift target, battle pass completion rate
-- Design any A/B tests to run during the season (e.g., different reward cadences)
-- Specify new telemetry events needed for this season's content
-- Output: analytics plan with success criteria and instrumentation requirements
+### 0.3 Write policy
 
-### Phase 5: Content Writing (parallel)
-Delegate in parallel:
-- **narrative-director** (if needed): Write any in-game narrative text (cutscene scripts, NPC dialogue, world event descriptions) for the season
-- **writer**: Write all player-facing text — event names, reward item descriptions, challenge objective text, seasonal flavor text
-- Both should read the narrative framing doc from Phase 2
+Routine writes allowed by invocation:
 
-### Phase 6: Player Communication Plan
-Delegate to **community-manager**:
-- Read the season brief, economy design, and narrative framing
-- Draft the season launch announcement (tone, key highlights, platform-specific versions)
-- Plan the communication cadence: pre-launch teaser, launch day post, mid-season reminder, final week FOMO push
-- Draft known-issues section placeholder for day-1 patch notes
-- Output: communication calendar with draft copy for each touchpoint
+- production/team/live-ops/[slug]-live-ops-plan.md
+- production/team/live-ops/[slug]-calendar.md
+- production/qa/evidence/live-ops-[slug]-checklist.md
 
-### Phase 7: Review and Sign-off
-Collect outputs from all phases and present a consolidated season plan:
-- Season brief (Phase 1)
-- Narrative framing (Phase 2)
-- Economy design and reward tables (Phase 3)
-- Analytics plan and success metrics (Phase 4)
-- Written content inventory (Phase 5)
-- Communication calendar (Phase 6)
+Protected operations require explicit confirmation through `AskUserQuestion`:
 
-Present a summary to the user with:
-- **Content scope**: what is being created
-- **Economy health check**: does the reward track feel fair and non-predatory?
-- **Analytics readiness**: are success criteria defined and instrumented?
-- **Ethics review**: check the Phase 3 economy design against `design/live-ops/ethics-policy.md`
-  - If the file does not exist: flag "ETHICS REVIEW SKIPPED: `design/live-ops/ethics-policy.md` not found. Economy design was not reviewed against an ethics policy. Recommend creating one before production begins." Include this flag in the season design output document. Add to next steps: create `design/live-ops/ethics-policy.md`.
-  - If the file exists and a violation is found: flag "ETHICS FLAG: [element] in Phase 3 economy design violates [policy rule]. Approval is blocked until this is resolved." Do NOT issue a COMPLETE verdict or write output documents. Use `AskUserQuestion` with options: revise economy design / override with documented rationale / cancel. If user chooses to revise: re-spawn economy-designer to produce a corrected design, then return to Phase 7 review.
-- **Open questions**: decisions still needed before production begins
+- Overwriting or deleting an existing file.
+- Editing canonical source-of-truth documents outside the declared outputs.
+- Changing statuses, gates, stage files, sprint state, story state, registry entries, or release readiness.
+- Running commands that modify files, install dependencies, generate builds, publish artifacts, deploy, tag, commit, or push.
+- Applying changes whose scope is broader than the user requested.
 
-Ask the user to approve the season plan before delegating to production teams. Issue the COMPLETE verdict only after the user approves and no unresolved ethics violations remain. If an ethics violation is unresolved, end with Verdict: **BLOCKED**.
+Use `Edit` for targeted changes to existing files. Use `Write` for new files or complete replacement only after the replacement scope is safe and approved.
 
-## Output Documents
+### 0.4 Bash safety
 
-All documents save to `design/live-ops/`:
-- `seasons/S[N]_[name].md` — Season design document (from Phase 1-3)
-- `seasons/S[N]_[name]_analytics.md` — Analytics plan (from Phase 4)
-- `seasons/S[N]_[name]_comms.md` — Communication calendar (from Phase 6)
+Bash is limited to diagnostics and read-only discovery unless the user explicitly approved a protected operation. Safe examples include `git status --short`, `git log`, `git diff --name-only`, existing test commands that do not update snapshots, and local grep/listing commands. Never run package installation, clean/reset, rm, deploy, publish, commit, tag, push, or build upload commands from this skill.
 
-## Error Recovery Protocol
+### 0.5 Task delegation
 
-If any spawned agent (via Task) returns BLOCKED, errors, or cannot complete:
+Use Task subagents only when they materially improve the result. Pass bounded context: the request, relevant source paths, current draft/report, and the exact verdict needed. Do not spawn duplicate reviewers. If review mode is available, use `solo` for no subagents, `lean` for only essential specialist review, and `full` for cross-functional or gate review.
 
-1. **Surface immediately**: Report "[AgentName]: BLOCKED — [reason]" to the user before continuing to dependent phases
-2. **Assess dependencies**: Check whether the blocked agent's output is required by subsequent phases. If yes, do not proceed past that dependency point without user input.
-3. **Offer options** via AskUserQuestion with choices:
-   - Skip this agent and note the gap in the final report
-   - Retry with narrower scope
-   - Stop here and resolve the blocker first
-4. **Always produce a partial report** — output whatever was completed. Never discard work because one agent blocked.
+### 0.6 Todo tracking
 
-If a BLOCKED state is unresolvable, end with Verdict: **BLOCKED** instead of COMPLETE.
+Use `TodoWrite` for multi-phase orchestration. Keep todos tied to observable phases, not low-level file operations. Close todos only when evidence exists.
 
-## File Write Protocol
+### 0.8 Missing-file behavior
 
-All file writes (season design docs, analytics plans, communication calendars) are
-delegated to sub-agents spawned via Task. Each sub-agent enforces the
-"May I write to [path]?" protocol. This orchestrator does not write files directly.
+| Situation | Behavior |
+|---|---|
+| Primary source missing | Continue only if the skill can infer a narrower safe scope; otherwise stop with the exact missing file/folder. |
+| Referenced artifact missing | Record as a gap or blocker instead of inventing content. |
+| Existing target file present | Do not overwrite. Create a proposed dated file or ask for protected confirmation. |
+| Ambiguous scope | Choose the smallest evidence-backed scope; ask only if two or more scopes are equally plausible. |
+| Contradictory sources | Prefer explicit status/source-of-truth documents over generated reports; list the contradiction in the output. |
 
-## Output
+## 1. Discover Context
 
-A summary covering: season theme and scope, economy design highlights, success metrics, content list, communication plan, and any open decisions needing user input before production.
+Read only the sources needed for the requested scope. Start with indexes, manifests, registries, and status files before reading large documents.
 
-Verdict: **COMPLETE** — season plan produced and handed off for production.
+Primary sources:
 
-## Next Steps
+- design/gdd/**
+- docs/architecture/**
+- docs/registry/**
+- production/stories/**
+- production/qa/**
+- design/art/**
+- design/ux/**
+- docs/engine-reference/**
 
-- Run `/design-review` on the season design document for consistency validation.
-- Run `/sprint-plan` to schedule content creation work for the season.
-- Run `/team-release` when the season content is ready to deploy.
+Discovery rules:
+
+1. Prefer canonical source-of-truth files over generated reports.
+2. Use `Glob` and `Grep` before reading large files.
+3. Keep a source list for the final report or artifact.
+4. When many files match, read the most relevant 5 to 10 first and summarize the rest as candidates.
+5. Treat missing or draft-status dependencies as blockers, not as approval to invent content.
+
+## 2. Build the Working Model
+
+Use the discovered evidence to build a concise working model before producing output.
+
+1. Define the target feature/area and success criteria from existing docs before spawning specialists.
+2. Use TodoWrite to track orchestration phases: context, specialist briefs, synthesis, artifact plan, QA/evidence handoff, and open blockers.
+3. Spawn only the roles that materially contribute to this request: live-ops-designer, economy-designer, analytics-engineer, community-manager, writer, narrative-director, qa-tester.
+4. Synthesize specialist output into one coherent plan focused on event goals, economy rewards/costs, telemetry, comms, narrative copy, scheduling, rollback, and post-launch monitoring.
+5. Write team artifacts and evidence checklists; do not modify canonical GDDs, ADRs, sprint status, or production code unless the invocation explicitly requests implementation and protected-write confirmation is obtained.
+
+Classification rules:
+
+- **Blocking**: prevents safe implementation, review, release, or downstream skill execution.
+- **High**: likely to cause rework, wrong implementation, invalid QA, or broken traceability.
+- **Medium**: weakens handoff quality but can be resolved during normal follow-up.
+- **Low**: cleanup, clarity, or optional improvement.
+
+## 3. Produce the Artifact
+
+Canonical outputs for this skill:
+
+- production/team/live-ops/[slug]-live-ops-plan.md
+- production/team/live-ops/[slug]-calendar.md
+- production/qa/evidence/live-ops-[slug]-checklist.md
+
+Artifact requirements:
+
+1. Include scope, date, source list, assumptions, and confidence.
+2. Separate facts from recommendations and inferred conclusions.
+3. Include explicit next actions and the command that should be run next.
+4. Preserve historical information; prefer additive notes over destructive rewrites.
+5. When updating an index or manifest, append or update only the relevant row and preserve unrelated content.
+
+Required report sections:
+
+- Team verdict
+- Specialist findings
+- Integrated plan
+- Artifacts/evidence created
+- Open blockers
+- Next command
+
+## 4. Validation
+
+1. Check that every conclusion cites or names a repository source.
+2. Check that all blockers have a concrete next action.
+3. Check that proposed writes stay within the declared output paths.
+4. Check that dry-run mode produced no writes.
+5. List every Bash command run and whether it was read-only or diagnostic.
+6. Summarize any subagent verdicts and unresolved disagreements.
+
+Stop conditions:
+
+- No feature, area, or current story context can be inferred.
+
+## 5. Final Response
+
+End with a concise summary of what was written, what was skipped because it was protected or unsafe, validation results, and the recommended next command. Include file paths for every artifact created or proposed.

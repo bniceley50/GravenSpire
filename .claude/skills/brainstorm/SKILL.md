@@ -1,350 +1,143 @@
 ---
 name: brainstorm
 description: "Guided game concept ideation — from zero idea to a structured game concept document. Uses professional studio ideation techniques, player psychology frameworks, and structured creative exploration."
-argument-hint: "[genre or theme hint, or 'open'] [--review full|lean|solo]"
+argument-hint: "[genre or theme hint, or 'open'] [--review full|lean|solo] [--dry-run]"
 user-invocable: true
-allowed-tools: Read, Glob, Grep, Write, WebSearch, Task, AskUserQuestion
+allowed-tools: Read, Glob, Grep, Write, Edit, WebSearch, Task, AskUserQuestion
 ---
 
-When this skill is invoked:
-
-1. **Parse the argument** for an optional genre/theme hint (e.g., `roguelike`,
-   `space survival`, `cozy farming`). If `open` or no argument, start from
-   scratch. Also resolve the review mode (once, store for all gate spawns this run):
-   1. If `--review [full|lean|solo]` was passed → use that
-   2. Else read `production/review-mode.txt` → use that value
-   3. Else → default to `lean`
-
-   See `.claude/docs/director-gates.md` for the full check pattern.
-
-2. **Check for existing concept work**:
-   - Read `design/gdd/game-concept.md` if it exists (resume, don't restart)
-   - Read `design/gdd/game-pillars.md` if it exists (build on established pillars)
-
-3. **Run through ideation phases** interactively, asking the user questions at
-   each phase. Do NOT generate everything silently — the goal is **collaborative
-   exploration** where the AI acts as a creative facilitator, not a replacement
-   for the human's vision.
-
-   **Use `AskUserQuestion`** at key decision points throughout brainstorming:
-   - Constrained taste questions (genre preferences, scope, team size)
-   - Concept selection ("Which 2-3 concepts resonate?") after presenting options
-   - Direction choices ("Develop further, explore more, or prototype?")
-   - Pillar ranking after concepts are refined
-   Write full creative analysis in conversation text first, then use
-   `AskUserQuestion` to capture the decision with concise labels.
-
-   Professional studio brainstorming principles to follow:
-   - Withhold judgment — no idea is bad during exploration
-   - Encourage unusual ideas — outside-the-box thinking sparks better concepts
-   - Build on each other — "yes, and..." responses, not "but..."
-   - Use constraints as creative fuel — limitations often produce the best ideas
-   - Time-box each phase — keep momentum, don't over-deliberate early
-
----
-
-### Phase 1: Creative Discovery
-
-Start by understanding the person, not the game. Ask these questions
-conversationally (not as a checklist):
-
-**Emotional anchors**:
-- What's a moment in a game that genuinely moved you, thrilled you, or made
-  you lose track of time? What specifically created that feeling?
-- Is there a fantasy or power trip you've always wanted in a game but never
-  quite found?
-
-**Taste profile**:
-- What 3 games have you spent the most time with? What kept you coming back?
-  *(Ask this as plain text — the user must be able to type specific game names freely.
-  Do NOT put this in an AskUserQuestion with preset options.)*
-- Are there genres you love? Genres you avoid? Why?
-- Do you prefer games that challenge you, relax you, tell you stories,
-  or let you express yourself? *(Use `AskUserQuestion` for this — constrained choice.)*
-
-**Practical constraints** (shape the sandbox before brainstorming).
-Bundle these into a single multi-tab `AskUserQuestion` with these exact tab labels:
-- Tab "Experience" — "What kind of experience do you most want players to have?" (Challenge & Mastery / Story & Discovery / Expression & Creativity / Relaxation & Flow)
-- Tab "Timeline" — "What's your realistic development timeline?" (Weeks / Months / 1-2 years / Multi-year)
-- Tab "Dev level" — "Where are you in your dev journey?" (First game / Shipped before / Professional background)
-
-Use exactly these tab names — do not rename or duplicate them.
+# Brainstorm Game Concept
 
-**Synthesize** the answers into a **Creative Brief** — a 3-5 sentence
-summary of the person's emotional goals, taste profile, and constraints.
-Read the brief back and confirm it captures their intent.
-
----
-
-### Phase 2: Concept Generation
-
-Using the creative brief as a foundation, generate **3 distinct concepts**
-that each take a different creative direction. Use these ideation techniques:
-
-**Technique 1: Verb-First Design**
-Start with the core player verb (build, fight, explore, solve, survive,
-create, manage, discover) and build outward from there. The verb IS the game.
-
-**Technique 2: Mashup Method**
-Combine two unexpected elements: [Genre A] + [Theme B]. The tension between
-the two creates the unique hook. (e.g., "farming sim + cosmic horror",
-"roguelike + dating sim", "city builder + real-time combat")
-
-**Technique 3: Experience-First Design (MDA Backward)**
-Start from the desired player emotion (aesthetic goal from MDA framework:
-sensation, fantasy, narrative, challenge, fellowship, discovery, expression,
-submission) and work backward to the dynamics and mechanics that produce it.
-
-For each concept, present:
-- **Working Title**
-- **Elevator Pitch** (1-2 sentences — must pass the "10-second test")
-- **Core Verb** (the single most common player action)
-- **Core Fantasy** (the emotional promise)
-- **Unique Hook** (passes the "and also" test: "Like X, AND ALSO Y")
-- **Primary MDA Aesthetic** (which emotion dominates?)
-- **Estimated Scope** (small / medium / large)
-- **Why It Could Work** (1 sentence on market/audience fit)
-- **Biggest Risk** (1 sentence on the hardest unanswered question)
-
-Present all three. Then use `AskUserQuestion` to capture the selection.
+Guide ideation from a seed, genre, or open prompt into a coherent game concept document with pillars, audience, core loop, differentiators, and next-step design sequence.
 
-**CRITICAL**: This MUST be a plain list call — no tabs, no form fields. Use exactly this structure:
+## 0. Execution Contract
 
-```
-AskUserQuestion(
-  prompt: "Which concept resonates with you? You can pick one, combine elements, or ask for fresh directions.",
-  options: [
-    "Concept 1 — [Title]",
-    "Concept 2 — [Title]",
-    "Concept 3 — [Title]",
-    "Combine elements across concepts",
-    "Generate fresh directions"
-  ]
-)
-```
+### 0.1 Invocation and autonomy
 
-Do NOT use a `tabs` field here. The `tabs` form is for multi-field input only — using it here causes an "Invalid tool parameters" error. This is a plain `prompt` + `options` call.
+Supported modes:
 
-Never pressure toward a choice — let them sit with it.
+- open: no starting constraint
+- genre/theme hint: constrain ideation to the supplied direction
+- refine: improve an existing concept document
 
----
+The invocation authorizes routine repository-local work for this skill. Operate autonomously after resolving scope; do not ask the user to approve every normal file creation. Ask only for protected operations, destructive ambiguity, or missing source-of-truth decisions that cannot be inferred safely.
 
-### Phase 3: Core Loop Design
+If `--dry-run` is present, perform discovery and produce the complete proposed result, but do not call `Write` or `Edit`.
 
-For the chosen concept, use structured questioning to build the core loop.
-The core loop is the beating heart of the game — if it isn't fun in
-isolation, no amount of content or polish will save the game.
+### 0.2 Path safety
 
-**30-Second Loop** (moment-to-moment):
+All user-supplied paths must be repository-relative. Reject absolute paths, paths containing `..`, and paths outside the expected project roots for this skill. Normalize paths before reading or writing.
 
-Ask these as `AskUserQuestion` calls — derive the options from the chosen concept, don't hardcode them:
+### 0.3 Write policy
 
-1. **Core action feel** — prompt: "What's the primary feel of the core action?" Generate 3-4 options that fit the concept's genre and tone, plus a free-text escape (`I'll describe it`).
+Routine writes allowed by invocation:
 
-2. **Key design dimension** — identify the most important design variable for this specific concept (e.g., world reactivity, pacing, player agency) and ask about it. Generate options that match the concept. Always include a free-text escape.
+- design/concept/game-concept.md
+- design/concept/concept-options-[YYYYMMDD].md
 
-After capturing answers, analyze: Is this action intrinsically satisfying? What makes it feel good? (Audio feedback, visual juice, timing satisfaction, tactical depth?)
+Protected operations require explicit confirmation through `AskUserQuestion`:
 
-**5-Minute Loop** (short-term goals):
-- What structures the moment-to-moment play into cycles?
-- Where does "one more turn" / "one more run" psychology kick in?
-- What choices does the player make at this level?
+- Overwriting or deleting an existing file.
+- Editing canonical source-of-truth documents outside the declared outputs.
+- Changing statuses, gates, stage files, sprint state, story state, registry entries, or release readiness.
+- Running commands that modify files, install dependencies, generate builds, publish artifacts, deploy, tag, commit, or push.
+- Applying changes whose scope is broader than the user requested.
 
-**Session Loop** (30-120 minutes):
-- What does a complete session look like?
-- Where are the natural stopping points?
-- What's the "hook" that makes them think about the game when not playing?
+Use `Edit` for targeted changes to existing files. Use `Write` for new files or complete replacement only after the replacement scope is safe and approved.
 
-**Progression Loop** (days/weeks):
-- How does the player grow? (Power? Knowledge? Options? Story?)
-- What's the long-term goal? When is the game "done"?
+### 0.5 Task delegation
 
-**Player Motivation Analysis** (based on Self-Determination Theory):
-- **Autonomy**: How much meaningful choice does the player have?
-- **Competence**: How does the player feel their skill growing?
-- **Relatedness**: How does the player feel connected (to characters,
-  other players, or the world)?
+Use Task subagents only when they materially improve the result. Pass bounded context: the request, relevant source paths, current draft/report, and the exact verdict needed. Do not spawn duplicate reviewers. If review mode is available, use `solo` for no subagents, `lean` for only essential specialist review, and `full` for cross-functional or gate review.
 
----
+### 0.7 Web use
 
-### Phase 4: Pillars and Boundaries
+Use web tools only for current market, platform, engine, or external-reference information that cannot be established from repository sources. Prefer official or primary sources. Do not use web output as a substitute for project source-of-truth documents.
 
-Game pillars are used by real AAA studios (God of War, Hades, The Last of
-Us) to keep hundreds of team members making decisions that all point the
-same direction. Even for solo developers, pillars prevent scope creep and
-keep the vision sharp.
+### 0.8 Missing-file behavior
 
-Collaboratively define **3-5 pillars**:
-- Each pillar has a **name** and **one-sentence definition**
-- Each pillar has a **design test**: "If we're debating between X and Y,
-  this pillar says we choose __"
-- Pillars should feel like they create tension with each other — if all
-  pillars point the same way, they're not doing enough work
+| Situation | Behavior |
+|---|---|
+| Primary source missing | Continue only if the skill can infer a narrower safe scope; otherwise stop with the exact missing file/folder. |
+| Referenced artifact missing | Record as a gap or blocker instead of inventing content. |
+| Existing target file present | Do not overwrite. Create a proposed dated file or ask for protected confirmation. |
+| Ambiguous scope | Choose the smallest evidence-backed scope; ask only if two or more scopes are equally plausible. |
+| Contradictory sources | Prefer explicit status/source-of-truth documents over generated reports; list the contradiction in the output. |
 
-Then define **3+ anti-pillars** (what this game is NOT):
-- Anti-pillars prevent the most common form of scope creep: "wouldn't it
-  be cool if..." features that don't serve the core vision
-- Frame as: "We will NOT do [thing] because it would compromise [pillar]"
+## 1. Discover Context
 
-**Pillar confirmation**: After presenting the full pillar set, use `AskUserQuestion`:
-- Prompt: "Do these pillars feel right for your game?"
-- Options: `[A] Lock these in` / `[B] Rename or reframe one` / `[C] Swap a pillar out` / `[D] Something else`
+Read only the sources needed for the requested scope. Start with indexes, manifests, registries, and status files before reading large documents.
 
-If the user selects B, C, or D, make the revision, then use `AskUserQuestion` again:
-- Prompt: "Pillars updated. Ready to lock these in?"
-- Options: `[A] Lock these in` / `[B] Revise another pillar` / `[C] Something else`
+Primary sources:
 
-Repeat until the user selects [A] Lock these in.
+- design/concept/**
+- design/art/**
+- production/research/**
+- existing README or pitch docs
+- WebSearch only for current market references when useful
 
-**Review mode check** — apply before spawning CD-PILLARS and AD-CONCEPT-VISUAL:
-- `solo` → skip both. Note: "CD-PILLARS skipped — Solo mode. AD-CONCEPT-VISUAL skipped — Solo mode." Proceed to Phase 5.
-- `lean` → skip both (not PHASE-GATEs). Note: "CD-PILLARS skipped — Lean mode. AD-CONCEPT-VISUAL skipped — Lean mode." Proceed to Phase 5.
-- `full` → spawn as normal.
+Discovery rules:
 
-**After pillars and anti-pillars are agreed, spawn BOTH `creative-director` AND `art-director` via Task in parallel before moving to Phase 5. Issue both Task calls simultaneously — do not wait for one before starting the other.**
+1. Prefer canonical source-of-truth files over generated reports.
+2. Use `Glob` and `Grep` before reading large files.
+3. Keep a source list for the final report or artifact.
+4. When many files match, read the most relevant 5 to 10 first and summarize the rest as candidates.
+5. Treat missing or draft-status dependencies as blockers, not as approval to invent content.
 
-- **`creative-director`** — gate **CD-PILLARS** (`.claude/docs/director-gates.md`)
-  Pass: full pillar set with design tests, anti-pillars, core fantasy, unique hook.
+## 2. Build the Working Model
 
-- **`art-director`** — gate **AD-CONCEPT-VISUAL** (`.claude/docs/director-gates.md`)
-  Pass: game concept elevator pitch, full pillar set with design tests, target platform (if known), any reference games or visual touchstones the user mentioned.
+Use the discovered evidence to build a concise working model before producing output.
 
-Collect both verdicts, then present them together using a two-tab `AskUserQuestion`:
-- Tab **"Pillars"**: present creative-director feedback. Options mirror the standard CD-PILLARS handling — `Lock in as-is` / `Revise [specific pillar]` / `Discuss further`.
-- Tab **"Visual anchor"**: present the art-director's 2-3 named visual direction options. Options: each named direction (one per option) + `Combine elements across directions` + `Describe my own direction`.
+1. Collect existing concept context before proposing new ideas.
+2. Generate several distinct concept directions, then converge on one based on feasibility, novelty, scope, and production fit.
+3. Define player fantasy, target audience, design pillars, core loop, session loop, progression, content scope, risks, and prototype tests.
+4. Use WebSearch only for current market or genre-reference checks; do not copy marketing text or copyrighted source material.
+5. Write the selected concept and preserve rejected alternatives for traceability.
 
-The user's selected visual anchor (the named direction or their custom description) is stored as the **Visual Identity Anchor** — it will be written into the game-concept document and becomes the foundation of the art bible.
+Classification rules:
 
-If the creative-director returns CONCERNS or REJECT on pillars, resolve pillar issues before asking for the visual anchor selection — visual direction should flow from confirmed pillars.
+- **Blocking**: prevents safe implementation, review, release, or downstream skill execution.
+- **High**: likely to cause rework, wrong implementation, invalid QA, or broken traceability.
+- **Medium**: weakens handoff quality but can be resolved during normal follow-up.
+- **Low**: cleanup, clarity, or optional improvement.
 
----
+## 3. Produce the Artifact
 
-### Phase 5: Player Type Validation
+Canonical outputs for this skill:
 
-Using the Bartle taxonomy and Quantic Foundry motivation model, validate
-who this game is actually for:
+- design/concept/game-concept.md
+- design/concept/concept-options-[YYYYMMDD].md
 
-- **Primary player type**: Who will LOVE this game? (Achievers, Explorers,
-  Socializers, Competitors, Creators, Storytellers)
-- **Secondary appeal**: Who else might enjoy it?
-- **Who is this NOT for**: Being clear about who won't like this game is as
-  important as knowing who will
-- **Market validation**: Are there successful games that serve a similar
-  player type? What can we learn from their audience size?
+Artifact requirements:
 
----
+1. Include scope, date, source list, assumptions, and confidence.
+2. Separate facts from recommendations and inferred conclusions.
+3. Include explicit next actions and the command that should be run next.
+4. Preserve historical information; prefer additive notes over destructive rewrites.
+5. When updating an index or manifest, append or update only the relevant row and preserve unrelated content.
 
-### Phase 6: Scope and Feasibility
+Required report sections:
 
-Ground the concept in reality:
+- Concept options
+- Selected concept
+- Core loop
+- Pillars
+- Audience
+- Scope and risks
+- Prototype questions
+- Next commands
 
-- **Target platform**: Use `AskUserQuestion` — "What platforms are you targeting for this game?"
-  Options: `PC (Steam / Epic)` / `Mobile (iOS / Android)` / `Console` / `Web / Browser` / `Multiple platforms`
-  Record the answer — it directly shapes the engine recommendation and will be passed to `/setup-engine`.
-  Note platform implications if relevant (e.g., mobile means Unity is strongly preferred; console means Godot has limitations; web means Godot exports cleanly).
+## 4. Validation
 
-- **Engine experience**: Use `AskUserQuestion` — "Do you already have an engine you work in?"
-  Options: `Godot` / `Unity` / `Unreal Engine 5` / `No preference — help me decide`
-  - If they pick an engine → record it as their preference and move on. Do NOT second-guess it.
-  - If "No preference" → tell them: "Run `/setup-engine` after this session — it will walk you through the full decision based on your concept and platform target." Do not make a recommendation here.
-- **Art pipeline**: What's the art style and how labor-intensive is it?
-- **Content scope**: Estimate level/area count, item count, gameplay hours
-- **MVP definition**: What's the absolute minimum build that tests "is the
-  core loop fun?"
-- **Biggest risks**: Technical risks, design risks, market risks
-- **Scope tiers**: What's the full vision vs. what ships if time runs out?
+1. Check that every conclusion cites or names a repository source.
+2. Check that all blockers have a concrete next action.
+3. Check that proposed writes stay within the declared output paths.
+4. Check that dry-run mode produced no writes.
+5. Summarize any subagent verdicts and unresolved disagreements.
 
-**Review mode check** — apply before spawning TD-FEASIBILITY:
-- `solo` → skip. Note: "TD-FEASIBILITY skipped — Solo mode." Proceed directly to scope tier definition.
-- `lean` → skip (not a PHASE-GATE). Note: "TD-FEASIBILITY skipped — Lean mode." Proceed directly to scope tier definition.
-- `full` → spawn as normal.
+Stop conditions:
 
-**After identifying biggest technical risks, spawn `technical-director` via Task using gate TD-FEASIBILITY (`.claude/docs/director-gates.md`) before scope tiers are defined.**
+- No blocking stop condition was encountered.
 
-Pass: core loop description, platform target, engine choice (or "undecided"), list of identified technical risks.
+## 5. Final Response
 
-Present the assessment to the user. If HIGH RISK, offer to revisit scope before finalising. If CONCERNS, note them and continue.
-
-**Review mode check** — apply before spawning PR-SCOPE:
-- `solo` → skip. Note: "PR-SCOPE skipped — Solo mode." Proceed to document generation.
-- `lean` → skip (not a PHASE-GATE). Note: "PR-SCOPE skipped — Lean mode." Proceed to document generation.
-- `full` → spawn as normal.
-
-**After scope tiers are defined, spawn `producer` via Task using gate PR-SCOPE (`.claude/docs/director-gates.md`).**
-
-Pass: full vision scope, MVP definition, timeline estimate, team size.
-
-Present the assessment to the user. If UNREALISTIC, offer to adjust the MVP definition or scope tiers before writing the document.
-
----
-
-4. **Generate the game concept document** using the template at
-   `.claude/docs/templates/game-concept.md`. Fill in ALL sections from the
-   brainstorm conversation, including the MDA analysis, player motivation
-   profile, and flow state design sections.
-
-   **Include a Visual Identity Anchor section** in the game concept document with:
-   - The selected visual direction name
-   - The one-line visual rule
-   - The 2-3 supporting visual principles with their design tests
-   - The color philosophy summary
-
-   This section is the seed of the art bible — it captures the "everything must
-   move" decision before it can be forgotten between sessions.
-
-5. Use `AskUserQuestion` for write approval:
-- Prompt: "Game concept is ready. May I write it to `design/gdd/game-concept.md`?"
-- Options: `[A] Yes — write it` / `[B] Not yet — revise a section first`
-
-If [B]: ask which section to revise using `AskUserQuestion` with options: `Elevator Pitch` / `Core Fantasy & Unique Hook` / `Pillars` / `Core Loop` / `MVP Definition` / `Scope Tiers` / `Risks` / `Something else — I'll describe`
-
-After revising, show the updated section as a diff or clear before/after, then use `AskUserQuestion` — "Ready to write the updated concept document?"
-Options: `[A] Yes — write it` / `[B] Revise another section`
-Repeat until the user selects [A].
-
-If yes, generate the document using the template at `.claude/docs/templates/game-concept.md`, fill in ALL sections from the brainstorm conversation, and write the file, creating directories as needed.
-
-**Scope consistency rule**: The "Estimated Scope" field in the Core Identity table must match the full-vision timeline from the Scope Tiers section — not just say "Large (9+ months)". Write it as "Large (X–Y months, solo)" or "Large (X–Y months, team of N)" so the summary table is accurate.
-
-6. **Suggest next steps** (in this order — this is the professional studio
-   pre-production pipeline). List ALL steps — do not abbreviate or truncate:
-   1. "Run `/setup-engine` to configure the engine and populate version-aware reference docs"
-   2. "Run `/art-bible` to create the visual identity specification — do this BEFORE writing GDDs. The art bible gates asset production and shapes technical architecture decisions (rendering, VFX, UI systems)."
-   3. "Use `/design-review design/gdd/game-concept.md` to validate concept completeness before going downstream"
-   4. "Discuss vision with the `creative-director` agent for pillar refinement"
-   5. "Decompose the concept into individual systems with `/map-systems` — maps dependencies, assigns priorities, and creates the systems index"
-   5. "Author per-system GDDs with `/design-system` — guided, section-by-section GDD writing for each system identified in step 4"
-   6. "Plan the technical architecture with `/create-architecture` — produces the master architecture blueprint and Required ADR list"
-   7. "Record key architectural decisions with `/architecture-decision (×N)` — write one ADR per decision in the Required ADR list from `/create-architecture`"
-   8. "Validate readiness to advance with `/gate-check` — phase gate before committing to production"
-   9. "Prototype the riskiest system with `/prototype [core-mechanic]` — validate the core loop before full implementation"
-   10. "Run `/playtest-report` after the prototype to validate the core hypothesis"
-   11. "If validated, plan the first sprint with `/sprint-plan new`"
-
-7. **Output a summary** with the chosen concept's elevator pitch, pillars,
-   primary player type, engine recommendation, biggest risk, and file path.
-
-Verdict: **COMPLETE** — game concept created and handed off for next steps.
-
----
-
-## Context Window Awareness
-
-This is a multi-phase skill. If context reaches or exceeds 70% during any phase,
-append this notice to the current response before continuing:
-
-> **Context is approaching the limit (≥70%).** The game concept document is saved
-> to `design/gdd/game-concept.md`. Open a fresh Claude Code session to continue
-> if needed — progress is not lost.
-
----
-
-## Recommended Next Steps
-
-After the game concept is written, follow the pre-production pipeline in order:
-1. `/setup-engine` — configure the engine and populate version-aware reference docs
-2. `/art-bible` — establish visual identity before writing any GDDs
-3. `/map-systems` — decompose the concept into individual systems with dependencies
-4. `/design-system [first-system]` — author per-system GDDs in dependency order
-5. `/create-architecture` — produce the master architecture blueprint
-6. `/gate-check pre-production` — validate readiness before committing to production
+End with a concise summary of what was written, what was skipped because it was protected or unsafe, validation results, and the recommended next command. Include file paths for every artifact created or proposed.

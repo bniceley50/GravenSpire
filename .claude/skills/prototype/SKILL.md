@@ -1,157 +1,146 @@
 ---
 name: prototype
 description: "Rapid prototyping workflow. Skips normal standards to quickly validate a game concept or mechanic. Produces throwaway code and a structured prototype report."
-argument-hint: "[concept-description] [--review full|lean|solo]"
+argument-hint: "[concept-description] [--review full|lean|solo] [--dry-run]"
 user-invocable: true
-allowed-tools: Read, Glob, Grep, Write, Edit, Bash, Task
+allowed-tools: Read, Glob, Grep, Write, Edit, Bash, Task, AskUserQuestion
 agent: prototyper
 isolation: worktree
 ---
 
-## Phase 1: Define the Question
+# Prototype
 
-Resolve the review mode (once, store for all gate spawns this run):
-1. If `--review [full|lean|solo]` was passed → use that
-2. Else read `production/review-mode.txt` → use that value
-3. Else → default to `lean`
+Create a constrained prototype plan and optional repo-local prototype artifacts to answer a specific design or technical question quickly without contaminating production architecture.
 
-See `.claude/docs/director-gates.md` for the full check pattern.
+## 0. Execution Contract
 
-Read the concept description from the argument. Identify the core question this prototype must answer. If the concept is vague, state the question explicitly before proceeding — a prototype without a clear question wastes time.
+### 0.1 Invocation and autonomy
 
----
+Supported modes:
 
-## Phase 2: Load Project Context
+- mechanic/feature description
+- --code: create prototype code/artifacts
+- --plan-only: produce plan only
 
-Read `CLAUDE.md` for project context and the current tech stack. Understand what engine, language, and frameworks are in use so the prototype is built with compatible tooling.
+The invocation authorizes routine repository-local work for this skill. Operate autonomously after resolving scope; do not ask the user to approve every normal file creation. Ask only for protected operations, destructive ambiguity, or missing source-of-truth decisions that cannot be inferred safely.
 
----
+If `--dry-run` is present, perform discovery and produce the complete proposed result, but do not call `Write` or `Edit`.
 
-## Phase 3: Plan the Prototype
+### 0.2 Path safety
 
-Define in 3-5 bullet points what the minimum viable prototype looks like:
+All user-supplied paths must be repository-relative. Reject absolute paths, paths containing `..`, and paths outside the expected project roots for this skill. Normalize paths before reading or writing.
 
-- What is the core question?
-- What is the absolute minimum code needed to answer it?
-- What can be skipped (error handling, polish, architecture)?
+### 0.3 Write policy
 
-Present this plan to the user before building. Ask for confirmation if scope seems unclear.
+Routine writes allowed by invocation:
 
----
+- prototypes/[slug]/prototype-plan.md
+- prototypes/[slug]/README.md
+- prototypes/[slug]/notes.md
 
-## Phase 4: Implement
+Protected operations require explicit confirmation through `AskUserQuestion`:
 
-Ask: "May I create the prototype directory at `prototypes/[concept-name]/` and begin implementation?"
+- Overwriting or deleting an existing file.
+- Editing canonical source-of-truth documents outside the declared outputs.
+- Changing statuses, gates, stage files, sprint state, story state, registry entries, or release readiness.
+- Running commands that modify files, install dependencies, generate builds, publish artifacts, deploy, tag, commit, or push.
+- Applying changes whose scope is broader than the user requested.
 
-If yes, create the directory. Every file must begin with:
+Use `Edit` for targeted changes to existing files. Use `Write` for new files or complete replacement only after the replacement scope is safe and approved.
 
-```
-// PROTOTYPE - NOT FOR PRODUCTION
-// Question: [Core question being tested]
-// Date: [Current date]
-```
+### 0.4 Bash safety
 
-Standards are intentionally relaxed:
+Bash is limited to diagnostics and read-only discovery unless the user explicitly approved a protected operation. Safe examples include `git status --short`, `git log`, `git diff --name-only`, existing test commands that do not update snapshots, and local grep/listing commands. Never run package installation, clean/reset, rm, deploy, publish, commit, tag, push, or build upload commands from this skill.
 
-- Hardcode values freely
-- Use placeholder assets
-- Skip error handling
-- Use the simplest approach that works
-- Copy code rather than importing from production
+### 0.5 Task delegation
 
-Run the prototype. Observe behavior. Collect any measurable data (frame times, interaction counts, feel assessments).
+Use Task subagents only when they materially improve the result. Pass bounded context: the request, relevant source paths, current draft/report, and the exact verdict needed. Do not spawn duplicate reviewers. If review mode is available, use `solo` for no subagents, `lean` for only essential specialist review, and `full` for cross-functional or gate review.
 
----
+### 0.8 Missing-file behavior
 
-## Phase 5: Generate Prototype Report
+| Situation | Behavior |
+|---|---|
+| Primary source missing | Continue only if the skill can infer a narrower safe scope; otherwise stop with the exact missing file/folder. |
+| Referenced artifact missing | Record as a gap or blocker instead of inventing content. |
+| Existing target file present | Do not overwrite. Create a proposed dated file or ask for protected confirmation. |
+| Ambiguous scope | Choose the smallest evidence-backed scope; ask only if two or more scopes are equally plausible. |
+| Contradictory sources | Prefer explicit status/source-of-truth documents over generated reports; list the contradiction in the output. |
 
-Draft the report:
+## 1. Discover Context
 
-```markdown
-## Prototype Report: [Concept Name]
+Read only the sources needed for the requested scope. Start with indexes, manifests, registries, and status files before reading large documents.
 
-### Hypothesis
-[What we expected to be true -- the question we set out to answer]
+Primary sources:
 
-### Approach
-[What we built, how long it took, what shortcuts we took]
+- design/concept/**
+- design/gdd/**
+- docs/architecture/**
+- docs/engine-reference/**
+- prototypes/**
 
-### Result
-[What actually happened -- specific observations, not opinions]
+Discovery rules:
 
-### Metrics
-[Any measurable data collected during testing]
-- Frame time: [if relevant]
-- Feel assessment: [subjective but specific -- "response felt sluggish at
-  200ms delay" not "felt bad"]
-- Player action counts: [if relevant]
-- Iteration count: [how many attempts to get it working]
+1. Prefer canonical source-of-truth files over generated reports.
+2. Use `Glob` and `Grep` before reading large files.
+3. Keep a source list for the final report or artifact.
+4. When many files match, read the most relevant 5 to 10 first and summarize the rest as candidates.
+5. Treat missing or draft-status dependencies as blockers, not as approval to invent content.
 
-### Recommendation: [PROCEED / PIVOT / KILL]
+## 2. Build the Working Model
 
-[One paragraph explaining the recommendation with evidence]
+Use the discovered evidence to build a concise working model before producing output.
 
-### If Proceeding
-[What needs to change for a production-quality implementation]
-- Architecture requirements
-- Performance targets
-- Scope adjustments from the original design
-- Estimated production effort
+1. Define the prototype question, success metric, allowed shortcuts, and explicit non-goals.
+2. Create the prototype in a quarantined prototypes/ path only.
+3. Use production code only as reference unless explicit code prototyping is requested.
+4. Run safe smoke commands if a runnable prototype/test command is known.
+5. Write results and a recommendation to discard, iterate, or promote through normal design/ADR/story workflow.
 
-### If Pivoting
-[What alternative direction the results suggest]
+Classification rules:
 
-### If Killing
-[Why this concept does not work and what we should do instead]
+- **Blocking**: prevents safe implementation, review, release, or downstream skill execution.
+- **High**: likely to cause rework, wrong implementation, invalid QA, or broken traceability.
+- **Medium**: weakens handoff quality but can be resolved during normal follow-up.
+- **Low**: cleanup, clarity, or optional improvement.
 
-### Lessons Learned
-[Discoveries that affect other systems or future work]
-```
+## 3. Produce the Artifact
 
-Ask: "May I write this report to `prototypes/[concept-name]/REPORT.md`?"
+Canonical outputs for this skill:
 
-If yes, write the file.
+- prototypes/[slug]/prototype-plan.md
+- prototypes/[slug]/README.md
+- prototypes/[slug]/notes.md
 
----
+Artifact requirements:
 
-## Phase 6: Creative Director Review
+1. Include scope, date, source list, assumptions, and confidence.
+2. Separate facts from recommendations and inferred conclusions.
+3. Include explicit next actions and the command that should be run next.
+4. Preserve historical information; prefer additive notes over destructive rewrites.
+5. When updating an index or manifest, append or update only the relevant row and preserve unrelated content.
 
-**Review mode check** — apply before spawning CD-PLAYTEST:
-- `solo` → skip. Note: "CD-PLAYTEST skipped — Solo mode." Proceed to Phase 7 summary with the prototyper's recommendation as the final verdict.
-- `lean` → skip (not a PHASE-GATE). Note: "CD-PLAYTEST skipped — Lean mode." Proceed to Phase 7 summary with the prototyper's recommendation as the final verdict.
-- `full` → spawn as normal.
+Required report sections:
 
-Spawn `creative-director` via Task using gate **CD-PLAYTEST** (`.claude/docs/director-gates.md`).
+- Prototype question
+- Success criteria
+- Artifacts created
+- Shortcuts taken
+- Results/evidence
+- Promotion path
 
-Pass: the full REPORT.md content, the original design question, game pillars and core fantasy from `design/gdd/game-concept.md` (if it exists).
+## 4. Validation
 
-The creative director evaluates the prototype result against the game's creative vision and pillars, then confirms, modifies, or overrides the prototyper's PROCEED / PIVOT / KILL recommendation. Their verdict is final. Update the REPORT.md `Recommendation` section if the creative director's verdict differs from the prototyper's.
+1. Check that every conclusion cites or names a repository source.
+2. Check that all blockers have a concrete next action.
+3. Check that proposed writes stay within the declared output paths.
+4. Check that dry-run mode produced no writes.
+5. List every Bash command run and whether it was read-only or diagnostic.
+6. Summarize any subagent verdicts and unresolved disagreements.
 
----
+Stop conditions:
 
-## Phase 7: Summary and Next Steps
+- No prototype question or target mechanic can be inferred.
 
-Output a summary to the user: the core question, the result, the prototyper's initial recommendation, and the creative-director's final decision. Link to the full report at `prototypes/[concept-name]/REPORT.md`.
+## 5. Final Response
 
-If **PROCEED**: run `/design-system` to begin the production GDD for this mechanic, or `/architecture-decision` to record key technical decisions before implementation.
-
-If **PIVOT** or **KILL**: no further action needed — the prototype report is the deliverable.
-
-Verdict: **COMPLETE** — prototype finished. Recommendation is PROCEED, PIVOT, or KILL based on findings above.
-
-### Important Constraints
-
-- Prototype code must NEVER import from production source files
-- Production code must NEVER import from prototype directories
-- If the recommendation is PROCEED, the production implementation must be written from scratch — prototype code is not refactored into production
-- Total prototype effort should be timeboxed to 1-3 days equivalent of work
-- If the prototype scope starts growing, stop and reassess whether the question can be simplified
-
----
-
-## Recommended Next Steps
-
-- **If PROCEED**: Run `/design-system [mechanic]` to author the production GDD, or `/architecture-decision` to record key technical decisions before implementation
-- **If PIVOT**: Run `/prototype [revised-concept]` to test the adjusted direction
-- **If KILL**: No further action required — the prototype report is the deliverable
-- Run `/playtest-report` to formally document any playtest sessions conducted during prototyping
+End with a concise summary of what was written, what was skipped because it was protected or unsafe, validation results, and the recommended next command. Include file paths for every artifact created or proposed.

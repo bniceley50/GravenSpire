@@ -7,112 +7,99 @@ allowed-tools: Read, Glob, Grep
 agent: economy-designer
 ---
 
-## Phase 1: Identify Balance Domain
+# Balance Check
 
-Determine the balance domain from `$ARGUMENTS[0]`:
+Analyze balance data, formulas, and design constraints for outliers, degenerate strategies, economy breakpoints, and progression problems.
 
-- **Combat** → weapon/ability DPS, time-to-kill, damage type interactions
-- **Economy** → resource faucets/sinks, acquisition rates, item pricing
-- **Progression** → XP/power curves, dead zones, power spikes
-- **Loot** → rarity distribution, pity timers, inventory pressure
-- **File path given** → load that file directly and infer domain from content
+## 0. Execution Contract
 
-If no argument, ask the user which system to check.
+### 0.1 Invocation and autonomy
 
----
+Supported modes:
 
-## Phase 2: Read Data Files
+- system-name: focus on one balancing domain
+- path-to-data-file: analyze a specific data/config file
+- blank: infer likely balance surfaces
 
-Read relevant files from `assets/data/` and `design/balance/` for the identified domain.
-Note every file read — they will appear in the Data Sources section of the report.
+This is a read-only skill. It may inspect files and run safe read-only diagnostics when Bash is allowed, but it must not create, edit, move, delete, rename, stage, commit, tag, deploy, publish, or update project state.
 
----
+### 0.2 Path safety
 
-## Phase 3: Read Design Document
+All user-supplied paths must be repository-relative. Reject absolute paths, paths containing `..`, and paths outside the expected project roots for this skill. Normalize paths before reading or writing.
 
-Read the GDD for the system from `design/gdd/` to understand intended design targets,
-tuning knobs, and expected value ranges. This is the baseline for "correct" behaviour.
+### 0.8 Missing-file behavior
 
----
+| Situation | Behavior |
+|---|---|
+| Primary source missing | Continue only if the skill can infer a narrower safe scope; otherwise stop with the exact missing file/folder. |
+| Referenced artifact missing | Record as a gap or blocker instead of inventing content. |
+| Existing target file present | Not applicable; this skill does not write. |
+| Ambiguous scope | Choose the smallest evidence-backed scope; ask only if two or more scopes are equally plausible. |
+| Contradictory sources | Prefer explicit status/source-of-truth documents over generated reports; list the contradiction in the output. |
 
-## Phase 4: Perform Analysis
+## 1. Discover Context
 
-Run domain-specific checks:
+Read only the sources needed for the requested scope. Start with indexes, manifests, registries, and status files before reading large documents.
 
-**Combat balance:**
-- Calculate DPS for all weapons/abilities at each power tier
-- Check time-to-kill at each tier
-- Identify any options that dominate all others (strictly better)
-- Check if defensive options can create unkillable states
-- Verify damage type/resistance interactions are balanced
+Primary sources:
 
-**Economy balance:**
-- Map all resource faucets and sinks with flow rates
-- Project resource accumulation over time
-- Check for infinite resource loops
-- Verify gold sinks scale with gold generation
-- Check if any items are never worth purchasing
+- design/gdd/**/*.md
+- data/**
+- config/**
+- assets/data/**
+- docs/architecture/**
+- production/playtests/**
 
-**Progression balance:**
-- Plot the XP curve and power curve
-- Check for dead zones (no meaningful progression for too long)
-- Check for power spikes (sudden jumps in capability)
-- Verify content gates align with expected player power
-- Check if skip/grind strategies break intended pacing
+Discovery rules:
 
-**Loot balance:**
-- Calculate expected time to acquire each rarity tier
-- Check pity timer math
-- Verify no loot is strictly useless at any stage
-- Check inventory pressure vs acquisition rate
+1. Prefer canonical source-of-truth files over generated reports.
+2. Use `Glob` and `Grep` before reading large files.
+3. Keep a source list for the final report or artifact.
+4. When many files match, read the most relevant 5 to 10 first and summarize the rest as candidates.
+5. Treat missing or draft-status dependencies as blockers, not as approval to invent content.
 
----
+## 2. Build the Working Model
 
-## Phase 5: Output the Analysis
+Use the discovered evidence to build a concise working model before producing output.
 
-```
-## Balance Check: [System Name]
+1. Identify formulas, tunable values, progression tables, rewards, costs, timers, damage values, drop rates, and economy sinks/sources.
+2. Compare implementation data against design-stated targets and expected player progression.
+3. Compute qualitative ratios and simple derived metrics directly from visible values; do not invent simulation results.
+4. Flag outliers, dominant strategies, dead choices, exploits, and unsupported difficulty spikes.
+5. Return actionable tuning recommendations with confidence levels.
 
-### Data Sources Analyzed
-- [List of files read]
+Classification rules:
 
-### Health Summary: [HEALTHY / CONCERNS / CRITICAL ISSUES]
+- **Blocking**: prevents safe implementation, review, release, or downstream skill execution.
+- **High**: likely to cause rework, wrong implementation, invalid QA, or broken traceability.
+- **Medium**: weakens handoff quality but can be resolved during normal follow-up.
+- **Low**: cleanup, clarity, or optional improvement.
 
-### Outliers Detected
-| Item/Value | Expected Range | Actual | Issue |
-|-----------|---------------|--------|-------|
+## 3. Produce the Read-Only Report
 
-### Degenerate Strategies Found
-- [Strategy description and why it is problematic]
+Return the report in chat. Do not write files. If a durable report would be useful, recommend the appropriate write-capable skill or command instead of creating it.
 
-### Progression Analysis
-[Graph description or table showing progression curve health]
+Required report sections:
 
-### Recommendations
-| Priority | Issue | Suggested Fix | Impact |
-|----------|-------|--------------|--------|
+- Scope
+- Input files
+- Balance model
+- Outliers
+- Degenerate strategies
+- Economy risks
+- Recommended tuning queue
 
-### Values That Need Attention
-[Specific values with suggested adjustments and rationale]
-```
+## 4. Validation
 
----
+1. Check that every conclusion cites or names a repository source.
+2. Check that all blockers have a concrete next action.
+3. Check that proposed writes stay within the declared output paths.
+4. Check that no writes or state changes were performed.
 
-## Phase 6: Fix & Verify Cycle
+Stop conditions:
 
-After presenting the report, ask:
+- No blocking stop condition was encountered.
 
-> "Would you like to fix any of these balance issues now?"
+## 5. Final Response
 
-If yes:
-- Ask which issue to address first (refer to the Recommendations table by priority row)
-- Guide the user to update the relevant data file in `assets/data/` or formula in `design/balance/`
-- After each fix, offer to re-run the relevant balance checks to verify no new outliers were introduced
-- If the fix changes a tuning knob defined in a GDD or referenced by an ADR, remind the user:
-  > "This value is defined in a design document. Run `/propagate-design-change [path]` on the affected GDD to find downstream impacts before committing."
-
-If no:
-- Summarize open issues and suggest saving the report to `design/balance/balance-check-[system]-[date].md` for later
-
-End with:
-> "Re-run `/balance-check` after fixes to verify."
+End with a concise verdict, prioritized findings, evidence sources, and recommended next command. Do not imply that any files were changed.

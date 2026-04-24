@@ -1,262 +1,141 @@
 ---
 name: reverse-document
 description: "Generate design or architecture documents from existing implementation. Works backwards from code/prototypes to create missing planning docs."
-argument-hint: "<type> <path> (e.g., 'design src/gameplay/combat' or 'architecture src/core')"
+argument-hint: "<type> <path> (e.g., 'design src/gameplay/combat' or 'architecture src/core') [--dry-run]"
 user-invocable: true
-allowed-tools: Read, Glob, Grep, Write, Edit, Bash
-# Read-only diagnostic skill — no specialist agent delegation needed
+allowed-tools: Read, Glob, Grep, Write, Edit, Bash, AskUserQuestion
 ---
 
-# Reverse Documentation
-
-This skill analyzes existing implementation (code, prototypes, systems) and generates
-appropriate design or architecture documentation. Use this when:
-- You built a feature without writing a design doc first
-- You inherited a codebase without documentation
-- You prototyped a mechanic and need to formalize it
-- You need to document "why" behind existing code
-
----
-
-## Workflow
+# Reverse Document
 
-## Phase 1: Parse Arguments
+Generate design, architecture, or implementation documentation from existing code and assets while clearly marking inferred behavior and uncertainty.
 
-**Format**: `/reverse-document <type> <path>`
+## 0. Execution Contract
 
-**Type options**:
-- `design` → Generate a game design document (GDD section)
-- `architecture` → Generate an Architecture Decision Record (ADR)
-- `concept` → Generate a concept document from prototype
-
-**Path**: Directory or file to analyze
-- `src/gameplay/combat/` → All combat-related code
-- `src/core/event-system.cpp` → Specific file
-- `prototypes/stealth-mech/` → Prototype directory
-
-**Examples**:
-```bash
-/reverse-document design src/gameplay/magic-system
-/reverse-document architecture src/core/entity-component
-/reverse-document concept prototypes/vehicle-combat
-```
+### 0.1 Invocation and autonomy
 
-## Phase 2: Analyze Implementation
+Supported modes:
 
-**Read and understand the code/prototype**:
-
-**For design docs (GDD):**
-- Identify mechanics, rules, formulas
-- Extract gameplay values (damage, cooldowns, ranges)
-- Find state machines, ability systems, progression
-- Detect edge cases handled in code
-- Map dependencies (what systems interact?)
+- code path: document a subsystem
+- architecture: infer architecture from implementation
+- gdd: infer design behavior from code/data
+- all: bounded high-level reverse docs
 
-**For architecture docs (ADR):**
-- Identify patterns (ECS, singleton, observer, etc.)
-- Understand technical decisions (threading, serialization, etc.)
-- Map dependencies and coupling
-- Assess performance characteristics
-- Find constraints and trade-offs
+The invocation authorizes routine repository-local work for this skill. Operate autonomously after resolving scope; do not ask the user to approve every normal file creation. Ask only for protected operations, destructive ambiguity, or missing source-of-truth decisions that cannot be inferred safely.
 
-**For concept docs (prototype analysis):**
-- Identify core mechanic
-- Extract emergent gameplay patterns
-- Note what worked vs what didn't
-- Find technical feasibility insights
-- Document player fantasy / feel
+If `--dry-run` is present, perform discovery and produce the complete proposed result, but do not call `Write` or `Edit`.
 
-## Phase 3: Ask Clarifying Questions
+### 0.2 Path safety
 
-**DO NOT** just describe the code. **ASK** about intent:
+All user-supplied paths must be repository-relative. Reject absolute paths, paths containing `..`, and paths outside the expected project roots for this skill. Normalize paths before reading or writing.
 
-**Design questions**:
-- "I see a [resource] system that depletes during [activity]. Was this for:
-  - Pacing (prevent spam)?
-  - Resource management (strategic depth)?
-  - Or something else?"
-- "The [mechanic] seems central. Is this a core pillar, or supporting feature?"
-- "[Value] scales exponentially with [factor]. Intentional design, or needs rebalancing?"
+### 0.3 Write policy
 
-**Architecture questions**:
-- "You're using a service locator pattern. Was this chosen for:
-  - Testability (mock dependencies)?
-  - Decoupling (reduce hard references)?
-  - Or inherited from existing code?"
-- "I see manual memory management instead of smart pointers. Performance requirement, or legacy?"
+Routine writes allowed by invocation:
 
-**Concept questions**:
-- "The prototype emphasizes stealth over combat. Is that the intended pillar?"
-- "Players seem to exploit the grappling hook for speed. Feature or bug?"
+- docs/reverse/[slug]-reverse-doc.md
+- docs/reverse/[slug]-open-questions.md
 
-## Phase 4: Present Findings
+Protected operations require explicit confirmation through `AskUserQuestion`:
 
-Before drafting, show what you discovered:
+- Overwriting or deleting an existing file.
+- Editing canonical source-of-truth documents outside the declared outputs.
+- Changing statuses, gates, stage files, sprint state, story state, registry entries, or release readiness.
+- Running commands that modify files, install dependencies, generate builds, publish artifacts, deploy, tag, commit, or push.
+- Applying changes whose scope is broader than the user requested.
 
-```
-I've analyzed [path]/. Here's what I found:
+Use `Edit` for targeted changes to existing files. Use `Write` for new files or complete replacement only after the replacement scope is safe and approved.
 
-MECHANICS IMPLEMENTED:
-- [mechanic-a] with [property] (e.g. timing windows, cooldowns)
-- [mechanic-b] (e.g. interaction between two states)
-- [resource] system (depletes on [action], regens on [condition])
-- [state] system (builds up, triggers [effect])
+### 0.4 Bash safety
 
-FORMULAS DISCOVERED:
-- [Output] = [formula using discovered variables]
-- [Secondary output] = [formula]
+Bash is limited to diagnostics and read-only discovery unless the user explicitly approved a protected operation. Safe examples include `git status --short`, `git log`, `git diff --name-only`, existing test commands that do not update snapshots, and local grep/listing commands. Never run package installation, clean/reset, rm, deploy, publish, commit, tag, push, or build upload commands from this skill.
 
-UNCLEAR INTENT AREAS:
-1. [Resource] system — pacing or resource management?
-2. [Mechanic] — core pillar or supporting feature?
-3. [Value] scaling — intentional design or needs tuning?
+### 0.8 Missing-file behavior
 
-Before I draft the design doc, could you clarify these points?
-```
+| Situation | Behavior |
+|---|---|
+| Primary source missing | Continue only if the skill can infer a narrower safe scope; otherwise stop with the exact missing file/folder. |
+| Referenced artifact missing | Record as a gap or blocker instead of inventing content. |
+| Existing target file present | Do not overwrite. Create a proposed dated file or ask for protected confirmation. |
+| Ambiguous scope | Choose the smallest evidence-backed scope; ask only if two or more scopes are equally plausible. |
+| Contradictory sources | Prefer explicit status/source-of-truth documents over generated reports; list the contradiction in the output. |
 
-Wait for user to clarify intent before drafting.
+## 1. Discover Context
 
-## Phase 5: Draft Document Using Template
+Read only the sources needed for the requested scope. Start with indexes, manifests, registries, and status files before reading large documents.
 
-Based on type, use appropriate template:
+Primary sources:
 
-| Type | Template | Output Path |
-|------|----------|-------------|
-| `design` | `templates/design-doc-from-implementation.md` | `design/gdd/[system-name].md` |
-| `architecture` | `templates/architecture-doc-from-code.md` | `docs/architecture/[decision-name].md` |
-| `concept` | `templates/concept-doc-from-prototype.md` | `prototypes/[name]/CONCEPT.md` or `design/concepts/[name].md` |
+- requested code/assets path
+- src/**
+- scripts/**
+- scenes/**
+- data/**
+- tests/**
+- docs/architecture/**
+- design/gdd/**
 
-**Draft structure**:
-- Capture **what exists** (mechanics, patterns, implementation)
-- Document **why it exists** (intent clarified with user)
-- Identify **what's missing** (edge cases not handled, gaps in design)
-- Flag **follow-up work** (balance tuning, missing features)
+Discovery rules:
 
-## Phase 6: Show Draft and Request Approval
+1. Prefer canonical source-of-truth files over generated reports.
+2. Use `Glob` and `Grep` before reading large files.
+3. Keep a source list for the final report or artifact.
+4. When many files match, read the most relevant 5 to 10 first and summarize the rest as candidates.
+5. Treat missing or draft-status dependencies as blockers, not as approval to invent content.
 
-**Collaborative protocol**:
-```
-I've drafted the [system-name] design doc based on your code and clarifications.
+## 2. Build the Working Model
 
-[Show key sections: Overview, Mechanics, Formulas, Design Intent]
+Use the discovered evidence to build a concise working model before producing output.
 
-ADDITIONS I MADE:
-- Documented [mechanic] as "[intent]" per your clarification
-- Added edge cases not in code (e.g., what if [resource] hits 0 mid-[action]?)
-- Flagged balance concern: [scaling type] scaling at [boundary condition]
+1. Normalize requested paths and inspect only relevant code/data/assets.
+2. Separate observed facts from inferences and guesses.
+3. Document responsibilities, data flow, public interfaces, state ownership, dependencies, and test coverage.
+4. Use Bash only for safe file listing or read-only grep-like diagnostics.
+5. Do not replace canonical GDDs or ADRs; output reverse docs as reviewable drafts.
 
-SECTIONS MARKED AS INCOMPLETE:
-- "[System] interaction with [other-system]" (not fully implemented yet)
-- "[Variant or feature]" (only [subset] implemented so far)
+Classification rules:
 
-May I write this to design/gdd/[system-name].md?
-```
+- **Blocking**: prevents safe implementation, review, release, or downstream skill execution.
+- **High**: likely to cause rework, wrong implementation, invalid QA, or broken traceability.
+- **Medium**: weakens handoff quality but can be resolved during normal follow-up.
+- **Low**: cleanup, clarity, or optional improvement.
 
-Wait for approval. User may request changes before writing.
+## 3. Produce the Artifact
 
-## Phase 7: Write Document with Metadata
+Canonical outputs for this skill:
 
-When approved, write the file with special markers:
+- docs/reverse/[slug]-reverse-doc.md
+- docs/reverse/[slug]-open-questions.md
 
-```markdown
----
-status: reverse-documented
-source: [path/]
-date: [today]
-verified-by: [User name]
----
+Artifact requirements:
 
-# [System Name] Design
+1. Include scope, date, source list, assumptions, and confidence.
+2. Separate facts from recommendations and inferred conclusions.
+3. Include explicit next actions and the command that should be run next.
+4. Preserve historical information; prefer additive notes over destructive rewrites.
+5. When updating an index or manifest, append or update only the relevant row and preserve unrelated content.
 
-> **Note**: This document was reverse-engineered from the existing implementation.
-> It captures current behavior and clarified design intent. Some sections may be
-> incomplete where implementation is partial or intent was unclear.
+Required report sections:
 
-[Rest of document...]
-```
+- Documented scope
+- Observed behavior
+- Inferred design
+- Architecture notes
+- Unknowns
+- Recommended canonical updates
 
-## Phase 8: Flag Follow-Up Work
+## 4. Validation
 
-After writing, suggest next steps:
+1. Check that every conclusion cites or names a repository source.
+2. Check that all blockers have a concrete next action.
+3. Check that proposed writes stay within the declared output paths.
+4. Check that dry-run mode produced no writes.
+5. List every Bash command run and whether it was read-only or diagnostic.
 
-```
-✅ Written to design/gdd/combat-system.md
+Stop conditions:
 
-FOLLOW-UP RECOMMENDED:
-1. Run /balance-check on combat formulas (exponential scaling concern)
-2. Create ADR for stamina system architecture decision
-3. Implement missing edge cases:
-   - Stamina depletion mid-combo behavior
-   - Stagger state during dodge
-4. Extend design doc when weapon variety is implemented
+- No path or target document type can be inferred.
 
-Would you like me to tackle any of these now?
-```
+## 5. Final Response
 
----
-
-## Template Selection Logic
-
-| If analyzing... | Use template... | Because... |
-|----------------|-----------------|------------|
-| `src/gameplay/*` | design-doc-from-implementation.md | Gameplay mechanics → GDD |
-| `src/core/*`, `src/ai/*` | architecture-doc-from-code.md | Core systems → ADR |
-| `prototypes/*` | concept-doc-from-prototype.md | Experiments → concept doc |
-| `src/networking/*` | architecture-doc-from-code.md | Technical systems → ADR |
-| `src/ui/*` | design-doc-from-implementation.md | UI/UX → design spec |
-
----
-
-## Example Session: Reverse-Document a System
-
-```
-User: /reverse-document design src/gameplay/[system]
-
-Agent: I'll analyze your [system] implementation to create a design doc.
-       [Reads code, discovers mechanics, formulas]
-
-Agent: I've analyzed src/gameplay/[system]/. Here's what I found:
-       [Shows mechanics, formulas, unclear areas]
-
-       Before drafting, could you clarify:
-       1. [Resource] system intent?
-       2. Is [mechanic] a core pillar?
-       3. [Value] scaling — intentional or needs tuning?
-
-User: 1. [Resource] is for pacing, prevent [unwanted behavior]
-      2. [Mechanic] is core — I want [design intent]
-      3. Yeah, exponential is too much, should be linear
-
-Agent: Perfect, that clarifies the vision. Let me draft the design doc.
-       [Shows draft with clarified intent]
-
-       May I write this to design/gdd/[system-name].md?
-
-User: Yes, write it.
-
-Agent: ✅ Written to design/gdd/[system-name].md
-       ✅ Marked as [REVERSE-DOCUMENTED]
-       ✅ Flagged [value] scaling for rebalancing
-
-       Next steps:
-       - Update [formula] to [corrected scaling]
-       - Run /balance-check to validate [curve]
-       - Document [mechanic] as core pillar in game-pillars.md
-```
-
----
-
-## Collaborative Protocol
-
-This skill follows the collaborative design principle:
-
-1. **Analyze First**: Read code, understand implementation
-2. **Question Intent**: Ask about "why", not just "what"
-3. **Present Findings**: Show discoveries, highlight unclear areas
-4. **User Clarifies**: Separate intent from accidents
-5. **Draft Document**: Create doc based on reality + intent
-6. **Show Draft**: Display key sections, explain additions
-7. **Get Approval**: "May I write to [filepath]?" On approval: Verdict: **COMPLETE** — document generated. On decline: Verdict: **BLOCKED** — user declined write.
-8. **Flag Follow-Up**: Suggest related work, don't auto-execute
-
-**Never assume intent. Always ask before documenting "why".**
+End with a concise summary of what was written, what was skipped because it was protected or unsafe, validation results, and the recommended next command. Include file paths for every artifact created or proposed.

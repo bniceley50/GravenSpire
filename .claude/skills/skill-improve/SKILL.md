@@ -1,144 +1,135 @@
 ---
 name: skill-improve
 description: "Improve a skill using a test-fix-retest loop. Runs static checks, proposes targeted fixes, rewrites the skill, re-tests, and keeps or reverts based on score change."
-argument-hint: "[skill-name]"
+argument-hint: "[skill-name] [--dry-run]"
 user-invocable: true
-allowed-tools: Read, Glob, Grep, Write, Bash
+allowed-tools: Read, Glob, Grep, Write, Edit, Bash, AskUserQuestion
 ---
 
 # Skill Improve
 
-Runs an improvement loop on a single skill:
-test → fix → retest → keep or revert.
+Improve one skill file through lint, tool-contract analysis, safety review, patch proposal, and optional targeted rewrite without damaging the skill library.
 
----
+## 0. Execution Contract
 
-## Phase 1: Parse Argument
+### 0.1 Invocation and autonomy
 
-Read the skill name from the first argument. If missing, output usage and stop:
+Supported modes:
 
-```
-Usage: /skill-improve [skill-name]
-Example: /skill-improve tech-debt
-```
+- skill-name: improve one skill
+- all --dry-run: audit all skills without writes
+- patch <skill>: produce patch only
 
-Verify `.claude/skills/[name]/SKILL.md` exists. If not, stop with:
-"Skill '[name]' not found."
+The invocation authorizes routine repository-local work for this skill. Operate autonomously after resolving scope; do not ask the user to approve every normal file creation. Ask only for protected operations, destructive ambiguity, or missing source-of-truth decisions that cannot be inferred safely.
 
----
+If `--dry-run` is present, perform discovery and produce the complete proposed result, but do not call `Write` or `Edit`.
 
-## Phase 2: Baseline Test
+### 0.2 Path safety
 
-Run `/skill-test static [name]` and record the baseline score:
-- Count of FAILs
-- Count of WARNs
-- Which specific checks failed (Check 1–7)
+All user-supplied paths must be repository-relative. Reject absolute paths, paths containing `..`, and paths outside the expected project roots for this skill. Normalize paths before reading or writing.
 
-Display to the user:
-```
-Static baseline:   [N] failures, [M] warnings
-Failing: Check 4 (no ask-before-write), Check 5 (no handoff)
-```
+### 0.3 Write policy
 
-If baseline is 0 FAILs and 0 WARNs, note it and proceed to Phase 2b.
+Routine writes allowed by invocation:
 
-### Phase 2b: Category Baseline
+- skills/[skill-name]/SKILL.md
+- skills/reviews/skill-improve-[skill-name]-[YYYYMMDD].md
 
-Look up the skill's `category:` field in `CCGS Skill Testing Framework/catalog.yaml`.
+Protected operations require explicit confirmation through `AskUserQuestion`:
 
-If no `category:` field is found, display:
-"Category: not yet assigned — skipping category checks."
-and skip to Phase 3.
+- Overwriting or deleting an existing file.
+- Editing canonical source-of-truth documents outside the declared outputs.
+- Changing statuses, gates, stage files, sprint state, story state, registry entries, or release readiness.
+- Running commands that modify files, install dependencies, generate builds, publish artifacts, deploy, tag, commit, or push.
+- Applying changes whose scope is broader than the user requested.
 
-If category is found, run `/skill-test category [name]` and record the category baseline:
-- Count of FAILs
-- Count of WARNs
-- Which specific category rubric metrics failed
+Use `Edit` for targeted changes to existing files. Use `Write` for new files or complete replacement only after the replacement scope is safe and approved.
 
-Display to the user:
-```
-Category baseline: [N] failures, [M] warnings  ([category] rubric)
-```
+### 0.4 Bash safety
 
-If BOTH static and category baselines are 0 FAILs and 0 WARNs, stop:
-"This skill already passes all static and category checks. No improvements needed."
+Bash is limited to diagnostics and read-only discovery unless the user explicitly approved a protected operation. Safe examples include `git status --short`, `git log`, `git diff --name-only`, existing test commands that do not update snapshots, and local grep/listing commands. Never run package installation, clean/reset, rm, deploy, publish, commit, tag, push, or build upload commands from this skill.
 
----
+### 0.8 Missing-file behavior
 
-## Phase 3: Diagnose
+| Situation | Behavior |
+|---|---|
+| Primary source missing | Continue only if the skill can infer a narrower safe scope; otherwise stop with the exact missing file/folder. |
+| Referenced artifact missing | Record as a gap or blocker instead of inventing content. |
+| Existing target file present | Do not overwrite. Create a proposed dated file or ask for protected confirmation. |
+| Ambiguous scope | Choose the smallest evidence-backed scope; ask only if two or more scopes are equally plausible. |
+| Contradictory sources | Prefer explicit status/source-of-truth documents over generated reports; list the contradiction in the output. |
 
-Read the full skill file at `.claude/skills/[name]/SKILL.md`.
+## 1. Discover Context
 
-For each failing or warning **static** check, identify the exact gap:
+Read only the sources needed for the requested scope. Start with indexes, manifests, registries, and status files before reading large documents.
 
-- **Check 1 fail** → which frontmatter field is missing
-- **Check 2 fail** → how many phases found vs. minimum required
-- **Check 3 fail** → no verdict keywords anywhere in the skill body
-- **Check 4 fail** → Write or Edit in allowed-tools but no ask-before-write language
-- **Check 5 warn** → no follow-up or next-step section at the end
-- **Check 6 warn** → `context: fork` set but fewer than 5 phases found
-- **Check 7 warn** → argument-hint is empty or doesn't match documented modes
+Primary sources:
 
-For each failing or warning **category** check (if category was assigned in Phase 2b),
-identify the exact gap in the skill's text. For example:
-- If G2 fails (gate mode, full directors not spawned): skill body never references all 4
-  PHASE-GATE director prompts
-- If A2 fails (authoring, no per-section May-I-write): skill asks once at the end, not
-  before each section write
-- If T3 fails (team, BLOCKED not surfaced): skill doesn't halt dependent work on blocked agent
+- skills/**/SKILL.md
+- .claude/docs/**
+- previous skill-test reports
 
-Show the full combined diagnosis to the user before proposing any changes.
+Discovery rules:
 
----
+1. Prefer canonical source-of-truth files over generated reports.
+2. Use `Glob` and `Grep` before reading large files.
+3. Keep a source list for the final report or artifact.
+4. When many files match, read the most relevant 5 to 10 first and summarize the rest as candidates.
+5. Treat missing or draft-status dependencies as blockers, not as approval to invent content.
 
-## Phase 4: Propose Fix
+## 2. Build the Working Model
 
-Write a targeted fix for each failure and warning. Show the proposed changes
-as clearly marked before/after blocks. Only change what is failing — do not
-rewrite sections that are passing.
+Use the discovered evidence to build a concise working model before producing output.
 
-Ask: "May I write this improved version to `.claude/skills/[name]/SKILL.md`?"
+1. Normalize the target skill path and reject unsafe paths.
+2. Run static checks for frontmatter, allowed-tool mismatch, write-safety gaps, path-safety gaps, missing fallbacks, and ambiguous review modes.
+3. Create a proposed patch first and show what changes before applying.
+4. Only modify one explicitly named skill unless all mode is dry-run.
+5. Use Edit for targeted fixes and Write only for full replacement after explicit confirmation.
 
-If the user says no, stop here.
+Classification rules:
 
----
+- **Blocking**: prevents safe implementation, review, release, or downstream skill execution.
+- **High**: likely to cause rework, wrong implementation, invalid QA, or broken traceability.
+- **Medium**: weakens handoff quality but can be resolved during normal follow-up.
+- **Low**: cleanup, clarity, or optional improvement.
 
-## Phase 5: Write and Retest
+## 3. Produce the Artifact
 
-Record the current content of the skill file (for revert if needed).
+Canonical outputs for this skill:
 
-Write the improved skill to `.claude/skills/[name]/SKILL.md`.
+- skills/[skill-name]/SKILL.md
+- skills/reviews/skill-improve-[skill-name]-[YYYYMMDD].md
 
-Re-run `/skill-test static [name]` and record the new static score.
-If a category was assigned, also re-run `/skill-test category [name]` and record the new category score.
+Artifact requirements:
 
-Display the comparison:
-```
-Static:   Before [N] failures, [M] warnings  →  After [N'] failures, [M'] warnings
-Category: Before [N] failures, [M] warnings  →  After [N'] failures, [M'] warnings  (if applicable)
-Combined change: improved / no change / worse
-```
+1. Include scope, date, source list, assumptions, and confidence.
+2. Separate facts from recommendations and inferred conclusions.
+3. Include explicit next actions and the command that should be run next.
+4. Preserve historical information; prefer additive notes over destructive rewrites.
+5. When updating an index or manifest, append or update only the relevant row and preserve unrelated content.
 
----
+Required report sections:
 
-## Phase 6: Verdict
+- Skill reviewed
+- Issues found
+- Patch summary
+- Risk reduction
+- Tests run
+- Unapplied recommendations
 
-Count the combined failure total: static FAILs + category FAILs + static WARNs + category WARNs.
+## 4. Validation
 
-**If combined score improved (combined failure count is lower than baseline):**
-Report: "Score improved. Changes kept."
-Show a summary of what was fixed in each dimension.
+1. Check that every conclusion cites or names a repository source.
+2. Check that all blockers have a concrete next action.
+3. Check that proposed writes stay within the declared output paths.
+4. Check that dry-run mode produced no writes.
+5. List every Bash command run and whether it was read-only or diagnostic.
 
-**If combined score is the same or worse:**
-Report: "Combined score did not improve."
-Show what changed and why it may not have helped.
-Ask: "May I revert `.claude/skills/[name]/SKILL.md` using git checkout?"
-If yes: run `git checkout -- .claude/skills/[name]/SKILL.md`
+Stop conditions:
 
----
+- No skill target was supplied unless audit/dry-run mode is explicit.
 
-## Phase 7: Next Steps
+## 5. Final Response
 
-- Run `/skill-test static all` to find the next skill with failures.
-- Run `/skill-improve [next-name]` to continue the loop on another skill.
-- Run `/skill-test audit` to see overall coverage progress.
+End with a concise summary of what was written, what was skipped because it was protected or unsafe, validation results, and the recommended next command. Include file paths for every artifact created or proposed.

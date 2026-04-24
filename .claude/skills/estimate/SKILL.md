@@ -6,126 +6,99 @@ user-invocable: true
 allowed-tools: Read, Glob, Grep
 ---
 
-## Phase 1: Understand the Task
+# Estimate
 
-Read the task description from the argument. If the description is too vague to estimate meaningfully, ask for clarification before proceeding.
+Estimate effort, risk, and sequencing for a task, story, feature, sprint, or production request using repository evidence.
 
-Read CLAUDE.md for project context: tech stack, coding standards, architectural patterns, and any estimation guidelines.
+## 0. Execution Contract
 
-Read relevant design documents from `design/gdd/` if the task relates to a documented feature or system.
+### 0.1 Invocation and autonomy
 
----
+Supported modes:
 
-## Phase 2: Scan Affected Code
+- story path: estimate one story
+- feature name: estimate a feature scope
+- sprint/milestone: estimate aggregate work
+- blank: infer current planning target
 
-Identify files and modules that would need to change:
+This is a read-only skill. It may inspect files and run safe read-only diagnostics when Bash is allowed, but it must not create, edit, move, delete, rename, stage, commit, tag, deploy, publish, or update project state.
 
-- Assess complexity (size, dependency count, cyclomatic complexity)
-- Identify integration points with other systems
-- Check for existing test coverage in the affected areas
-- Read past sprint data from `production/sprints/` for similar completed tasks and historical velocity
+### 0.2 Path safety
 
----
+All user-supplied paths must be repository-relative. Reject absolute paths, paths containing `..`, and paths outside the expected project roots for this skill. Normalize paths before reading or writing.
 
-## Phase 3: Analyze Complexity Factors
+### 0.8 Missing-file behavior
 
-**Code Complexity:**
-- Lines of code in affected files
-- Number of dependencies and coupling level
-- Whether this touches core/engine code vs leaf/feature code
-- Whether existing patterns can be followed or new patterns are needed
+| Situation | Behavior |
+|---|---|
+| Primary source missing | Continue only if the skill can infer a narrower safe scope; otherwise stop with the exact missing file/folder. |
+| Referenced artifact missing | Record as a gap or blocker instead of inventing content. |
+| Existing target file present | Not applicable; this skill does not write. |
+| Ambiguous scope | Choose the smallest evidence-backed scope; ask only if two or more scopes are equally plausible. |
+| Contradictory sources | Prefer explicit status/source-of-truth documents over generated reports; list the contradiction in the output. |
 
-**Scope:**
-- Number of systems touched
-- New code vs modification of existing code
-- Amount of new test coverage required
-- Data migration or configuration changes needed
+## 1. Discover Context
 
-**Risk:**
-- New technology or unfamiliar libraries
-- Unclear or ambiguous requirements
-- Dependencies on unfinished work
-- Cross-system integration complexity
-- Performance sensitivity
+Read only the sources needed for the requested scope. Start with indexes, manifests, registries, and status files before reading large documents.
 
----
+Primary sources:
 
-## Phase 4: Generate the Estimate
+- production/stories/**
+- production/epics/**
+- production/sprints/**
+- design/gdd/**
+- docs/architecture/**
+- production/qa/**
 
-```markdown
-## Task Estimate: [Task Name]
-Generated: [Date]
+Discovery rules:
 
-### Task Description
-[Restate the task clearly in 1-2 sentences]
+1. Prefer canonical source-of-truth files over generated reports.
+2. Use `Glob` and `Grep` before reading large files.
+3. Keep a source list for the final report or artifact.
+4. When many files match, read the most relevant 5 to 10 first and summarize the rest as candidates.
+5. Treat missing or draft-status dependencies as blockers, not as approval to invent content.
 
-### Complexity Assessment
+## 2. Build the Working Model
 
-| Factor | Assessment | Notes |
-|--------|-----------|-------|
-| Systems affected | [List] | [Core, gameplay, UI, etc.] |
-| Files likely modified | [Count] | [Key files listed below] |
-| New code vs modification | [Ratio] | |
-| Integration points | [Count] | [Which systems interact] |
-| Test coverage needed | [Low / Medium / High] | |
-| Existing patterns available | [Yes / Partial / No] | |
+Use the discovered evidence to build a concise working model before producing output.
 
-**Key files likely affected:**
-- `[path/to/file1]` -- [what changes here]
+1. Identify the work item and its acceptance criteria, dependencies, required assets/tests, and architectural blockers.
+2. Estimate separately for design, implementation, content, QA, integration, and risk buffer where applicable.
+3. Use relative complexity buckets rather than false precision when evidence is thin.
+4. Flag assumptions and missing prerequisites.
+5. Return sequencing advice and confidence.
 
-### Effort Estimate
+Classification rules:
 
-| Scenario | Days | Assumption |
-|----------|------|------------|
-| Optimistic | [X] | Everything goes right, no surprises |
-| Expected | [Y] | Normal pace, minor issues, one round of review |
-| Pessimistic | [Z] | Significant unknowns surface, blocked for a day |
+- **Blocking**: prevents safe implementation, review, release, or downstream skill execution.
+- **High**: likely to cause rework, wrong implementation, invalid QA, or broken traceability.
+- **Medium**: weakens handoff quality but can be resolved during normal follow-up.
+- **Low**: cleanup, clarity, or optional improvement.
 
-**Recommended budget: [Y days]**
+## 3. Produce the Read-Only Report
 
-### Confidence: [High / Medium / Low]
+Return the report in chat. Do not write files. If a durable report would be useful, recommend the appropriate write-capable skill or command instead of creating it.
 
-[Explain which factors drive the confidence level for this specific task.]
+Required report sections:
 
-### Risk Factors
+- Estimate summary
+- Work breakdown
+- Risk multipliers
+- Dependencies
+- Confidence
+- Recommended next step
 
-| Risk | Likelihood | Impact | Mitigation |
-|------|-----------|--------|------------|
+## 4. Validation
 
-### Dependencies
+1. Check that every conclusion cites or names a repository source.
+2. Check that all blockers have a concrete next action.
+3. Check that proposed writes stay within the declared output paths.
+4. Check that no writes or state changes were performed.
 
-| Dependency | Status | Impact if Delayed |
-|-----------|--------|-------------------|
+Stop conditions:
 
-### Suggested Breakdown
+- No blocking stop condition was encountered.
 
-| # | Sub-task | Estimate | Notes |
-|---|----------|----------|-------|
-| 1 | [Research / spike] | [X days] | |
-| 2 | [Core implementation] | [X days] | |
-| 3 | [Testing and validation] | [X days] | |
-| | **Total** | **[Y days]** | |
+## 5. Final Response
 
-### Notes and Assumptions
-- [Key assumption that affects the estimate]
-- [Any caveats about scope boundaries]
-```
-
-Output the estimate with a brief summary: recommended budget, confidence level, and the single biggest risk factor.
-
-This skill is read-only — no files are written. Verdict: **COMPLETE** — estimate generated.
-
----
-
-## Phase 5: Next Steps
-
-- If confidence is Low: recommend a time-boxed spike (`/prototype`) before committing.
-- If the task is > 10 days: recommend breaking it into smaller stories via `/create-stories`.
-- To schedule the task: run `/sprint-plan update` to add it to the next sprint.
-
-### Guidelines
-
-- Always give a range (optimistic / expected / pessimistic), never a single number
-- The recommended budget should be the expected estimate, not the optimistic one
-- Round to half-day increments — estimating in hours implies false precision for tasks longer than a day
-- Do not pad estimates silently — call out risk explicitly so the team can decide
+End with a concise verdict, prioritized findings, evidence sources, and recommended next command. Do not imply that any files were changed.

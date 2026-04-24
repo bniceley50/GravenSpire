@@ -1,274 +1,129 @@
 ---
 name: quick-design
 description: "Lightweight design spec for small changes — tuning adjustments, minor mechanics, balance tweaks. Skips full GDD authoring when a system GDD already exists or the change is too small to warrant one. Produces a Quick Design Spec that embeds directly into story files."
-argument-hint: "[brief description of the change]"
+argument-hint: "[brief description of the change] [--dry-run]"
 user-invocable: true
-allowed-tools: Read, Glob, Grep, Write, Edit
+allowed-tools: Read, Glob, Grep, Write, Edit, AskUserQuestion
 ---
 
 # Quick Design
 
-This is the **lightweight design path** for changes that don't need a full GDD.
-Full GDD authoring via `/design-system` is the heavyweight path. Use this skill
-for work under approximately 4 hours of implementation — tuning adjustments,
-minor behavioral tweaks, small additions to existing systems, or standalone
-features too small to warrant a full document.
+Create a lightweight design spec for small, bounded changes such as tuning, minor mechanics, copy tweaks, or local balance adjustments without invoking the full GDD workflow.
 
-**Output:** `design/quick-specs/[name]-[date].md`
+## 0. Execution Contract
 
-**When to run:** Anytime a change is too small for `/design-system` but too
-meaningful to implement without a written rationale.
+### 0.1 Invocation and autonomy
 
----
+Supported modes:
 
-## 1. Classify the Change
+- free-text change description
+- path/to/context: use a specific source document
+- --promote: recommend conversion to full GDD if scope grows
 
-First, read the argument and determine which category this change falls into:
+The invocation authorizes routine repository-local work for this skill. Operate autonomously after resolving scope; do not ask the user to approve every normal file creation. Ask only for protected operations, destructive ambiguity, or missing source-of-truth decisions that cannot be inferred safely.
 
-- **Tuning** — changing numbers or balance values in an existing system with no
-  behavioral change (most minimal path). Example: "increase jump height from 5
-  to 6 units", "reduce enemy patrol speed by 10%".
-- **Tweak** — a small behavioral change to an existing system that introduces no
-  new states, branches, or systems. Example: "make dash invincible on frame 1",
-  "allow combo to cancel into roll".
-- **Addition** — adding a small mechanic to an existing system that may introduce
-  1-2 new states or interactions. Example: "add a parry window to the block
-  mechanic", "add a charge variant to the basic attack".
-- **New Small System** — a standalone feature small enough that it has no
-  existing GDD and is under approximately one week of implementation work.
-  Example: "achievement popup system", "simple day/night visual cycle".
+If `--dry-run` is present, perform discovery and produce the complete proposed result, but do not call `Write` or `Edit`.
 
-If the change does NOT fit these categories — it introduces a new system with
-significant cross-system dependencies, requires more than one week of
-implementation, or fundamentally alters an existing system's core rules — stop
-and redirect to `/design-system` instead.
+### 0.2 Path safety
 
-Present the classification to the user and confirm it is correct before
-proceeding. If there is no argument, ask the user to describe the change.
+All user-supplied paths must be repository-relative. Reject absolute paths, paths containing `..`, and paths outside the expected project roots for this skill. Normalize paths before reading or writing.
 
----
+### 0.3 Write policy
 
-## 2. Context Scan
+Routine writes allowed by invocation:
 
-Before drafting anything, read the relevant context:
+- design/quick/quick-design-[slug].md
 
-- Search `design/gdd/` for the GDD most relevant to this change. Read the
-  sections that this change would affect.
-- Check whether `design/gdd/systems-index.md` exists. If it does, read it to
-  understand where this system sits in the dependency graph and what tier it
-  belongs to. If it does not exist, note "No systems index found — skipping
-  dependency tier check." and continue.
-- Check `design/quick-specs/` for any prior quick specs that touched this
-  system — avoid contradicting them.
-- If this is a Tuning change, also check `assets/data/` for the data file that
-  holds the relevant values.
+Protected operations require explicit confirmation through `AskUserQuestion`:
 
-Report what was found: "Found GDD at [path]. Relevant section: [section name].
-No conflicting quick specs found." (or note any conflicts found.)
+- Overwriting or deleting an existing file.
+- Editing canonical source-of-truth documents outside the declared outputs.
+- Changing statuses, gates, stage files, sprint state, story state, registry entries, or release readiness.
+- Running commands that modify files, install dependencies, generate builds, publish artifacts, deploy, tag, commit, or push.
+- Applying changes whose scope is broader than the user requested.
 
----
+Use `Edit` for targeted changes to existing files. Use `Write` for new files or complete replacement only after the replacement scope is safe and approved.
 
-## 3. Draft the Quick Design Spec
+### 0.8 Missing-file behavior
 
-Use the appropriate spec format for the change category.
+| Situation | Behavior |
+|---|---|
+| Primary source missing | Continue only if the skill can infer a narrower safe scope; otherwise stop with the exact missing file/folder. |
+| Referenced artifact missing | Record as a gap or blocker instead of inventing content. |
+| Existing target file present | Do not overwrite. Create a proposed dated file or ask for protected confirmation. |
+| Ambiguous scope | Choose the smallest evidence-backed scope; ask only if two or more scopes are equally plausible. |
+| Contradictory sources | Prefer explicit status/source-of-truth documents over generated reports; list the contradiction in the output. |
 
-### For Tuning changes
+## 1. Discover Context
 
-Produce a single table:
+Read only the sources needed for the requested scope. Start with indexes, manifests, registries, and status files before reading large documents.
 
-```markdown
-# Quick Design Spec: [Title]
+Primary sources:
 
-**Type**: Tuning
-**System**: [System name]
-**GDD Reference**: `design/gdd/[filename].md` — Tuning Knobs section
-**Date**: [today]
+- design/gdd/**
+- docs/architecture/**
+- production/sprints/**
+- production/qa/bugs/**
+- data/**
 
-## Change
+Discovery rules:
 
-| Parameter | Old Value | New Value | Rationale |
-|-----------|-----------|-----------|-----------|
-| [param]   | [old]     | [new]     | [why]     |
+1. Prefer canonical source-of-truth files over generated reports.
+2. Use `Glob` and `Grep` before reading large files.
+3. Keep a source list for the final report or artifact.
+4. When many files match, read the most relevant 5 to 10 first and summarize the rest as candidates.
+5. Treat missing or draft-status dependencies as blockers, not as approval to invent content.
 
-## Tuning Knob Mapping
+## 2. Build the Working Model
 
-Maps to GDD Tuning Knob: [knob name and its documented range].
-New value is [within / at the edge of / outside] the documented range.
-[If outside: explain why the range should be extended.]
+Use the discovered evidence to build a concise working model before producing output.
 
-## Acceptance Criteria
+1. Confirm the change is truly small and does not create new systems, new architecture, or cross-system contracts.
+2. Extract current source-of-truth rules and affected acceptance criteria.
+3. Write concise intent, exact change, constraints, affected files/systems, QA checks, rollback criteria, and promotion trigger.
+4. If the change exceeds quick-design scope, stop and recommend /design-system or /architecture-decision.
+5. Do not edit canonical GDDs automatically.
 
-- [ ] [Parameter] reads [new value] from `assets/data/[file]`
-- [ ] Behavior difference is observable in [specific context]
-- [ ] No regression in [related behavior]
-```
+Classification rules:
 
-### For Tweak and Addition changes
+- **Blocking**: prevents safe implementation, review, release, or downstream skill execution.
+- **High**: likely to cause rework, wrong implementation, invalid QA, or broken traceability.
+- **Medium**: weakens handoff quality but can be resolved during normal follow-up.
+- **Low**: cleanup, clarity, or optional improvement.
 
-```markdown
-# Quick Design Spec: [Title]
+## 3. Produce the Artifact
 
-**Type**: [Tweak / Addition]
-**System**: [System name]
-**GDD Reference**: `design/gdd/[filename].md`
-**Date**: [today]
+Canonical outputs for this skill:
 
-## Change Summary
+- design/quick/quick-design-[slug].md
 
-[1-2 sentences describing what changes and why.]
+Artifact requirements:
 
-## Motivation
+1. Include scope, date, source list, assumptions, and confidence.
+2. Separate facts from recommendations and inferred conclusions.
+3. Include explicit next actions and the command that should be run next.
+4. Preserve historical information; prefer additive notes over destructive rewrites.
+5. When updating an index or manifest, append or update only the relevant row and preserve unrelated content.
 
-[Why is this change needed? What player experience problem does it solve?
-Reference the relevant MDA aesthetic or player feedback if applicable.]
+Required report sections:
 
-## Design Delta
+- Spec path
+- Change summary
+- Affected systems
+- QA checks
+- Promotion warning if any
 
-Current GDD says (quoting `design/gdd/[filename].md`, [section]):
+## 4. Validation
 
-> [exact quote of the relevant rule or description]
+1. Check that every conclusion cites or names a repository source.
+2. Check that all blockers have a concrete next action.
+3. Check that proposed writes stay within the declared output paths.
+4. Check that dry-run mode produced no writes.
 
-This spec changes that to:
+Stop conditions:
 
-[New rule or description, written with the same precision as a GDD Detailed
-Rules section. A programmer should be able to implement from this text alone.]
+- No blocking stop condition was encountered.
 
-## New Rules / Values
+## 5. Final Response
 
-[Full unambiguous statement of the replacement content. If this introduces
-new states, list them. If it introduces new parameters, define their ranges.]
-
-## Affected Systems
-
-| System | Impact | Action Required |
-|--------|--------|-----------------|
-| [system] | [how it is affected] | [update GDD / update data file / no action] |
-
-## Acceptance Criteria
-
-- [ ] [Specific, testable criterion 1]
-- [ ] [Specific, testable criterion 2]
-- [ ] [Specific, testable criterion 3]
-- [ ] No regression: [the original behavior this must not break]
-
-## GDD Update Required?
-
-[Yes / No]
-[If yes: which file, which section, and what the update should say.]
-```
-
-### For New Small System changes
-
-Use a trimmed GDD structure. Include only the sections that are directly
-necessary — skip Player Fantasy, full Formulas, and Edge Cases unless the
-system specifically requires them.
-
-```markdown
-# Quick Design Spec: [Title]
-
-**Type**: New Small System
-**Scope**: [1-2 sentence description of what this system does and doesn't do]
-**Date**: [today]
-**Estimated Implementation**: [hours]
-
-## Overview
-
-[One paragraph a new team member could understand. What does this system do,
-when does it activate, and what does it produce?]
-
-## Core Rules
-
-[Unambiguous rules for the system. Use numbered lists for sequential behavior
-and bullet lists for conditions. Be precise enough that a programmer can
-implement without asking questions.]
-
-## Tuning Knobs
-
-| Knob | Default | Range | Category | Rationale |
-|------|---------|-------|----------|-----------|
-| [name] | [value] | [min–max] | [feel/curve/gate] | [why this default] |
-
-All values must live in `assets/data/[appropriate-file].json`, not hardcoded.
-
-## Acceptance Criteria
-
-- [ ] [Functional criterion: does the right thing]
-- [ ] [Functional criterion: handles the edge case]
-- [ ] [Experiential criterion: feels right — what a playtest validates]
-- [ ] [Regression criterion: does not break adjacent system]
-
-## Systems Index
-
-This system is not currently in `design/gdd/systems-index.md`.
-[If it should be added: suggest which layer and priority tier.]
-[If it is too small to track: state "This system is below systems-index
-tracking threshold — quick spec is sufficient."]
-```
-
----
-
-## 4. Approval and Filing
-
-Present the draft to the user in full. Then ask:
-
-"May I write this Quick Design Spec to
-`design/quick-specs/[kebab-case-title]-[YYYY-MM-DD].md`?"
-
-Use today's date in the filename. The title should be a kebab-case description
-of the change (e.g., `jump-height-tuning-2026-03-10`,
-`parry-window-addition-2026-03-10`).
-
-If yes, create the `design/quick-specs/` directory if it does not exist, then
-write the file.
-
-If a GDD update is required (flagged in the spec), ask separately after
-writing the quick spec:
-
-"This spec modifies rules in [System Name]. May I update
-`design/gdd/[filename].md` — specifically the [section name] section?"
-
-Show the exact text that would be changed (old vs. new) before asking. Do not
-make GDD edits without explicit approval.
-
----
-
-## 5. Handoff
-
-After writing the file, output:
-
-```
-Quick Design Spec written to: design/quick-specs/[filename].md
-Type: [Tuning / Tweak / Addition / New Small System]
-System: [system name]
-GDD update: [Required — pending approval / Applied / Not required]
-
-Next step: This spec is ready for `/story-readiness` validation before
-implementation. Reference this spec in the story's GDD Reference field.
-```
-
-### Pipeline Notes
-
-Verdict: **COMPLETE** — quick design spec written and ready for implementation.
-
-Quick Design Specs **bypass** `/design-review` and `/review-all-gdds` by
-design. They are for small, low-risk, well-scoped changes where the cost of
-the full review pipeline exceeds the risk of the change itself.
-
-Redirect to the full pipeline if any of the following are true:
-- The change adds a new system that belongs in the systems index
-- The change significantly alters cross-system behavior or a system's
-  contracts with other systems
-- The change introduces new player-facing mechanics that affect the
-  game's MDA aesthetic balance
-- Implementation is likely to exceed one week of work
-
-In those cases: "This change has grown beyond quick-spec scope. I recommend
-using `/design-system` to author a full GDD for this."
-
----
-
-## Recommended Next Steps
-
-- Run `/story-readiness [story-path]` to validate the story before implementation begins — reference this spec in the story's GDD Reference field
-- Run `/dev-story [story-path]` to implement once the story passes readiness checks
-- If the change is larger than expected, run `/design-system [system-name]` to author a full GDD instead
+End with a concise summary of what was written, what was skipped because it was protected or unsafe, validation results, and the recommended next command. Include file paths for every artifact created or proposed.

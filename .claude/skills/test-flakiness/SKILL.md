@@ -1,210 +1,138 @@
 ---
 name: test-flakiness
 description: "Detect non-deterministic (flaky) tests by reading CI run logs or test result history. Aggregates pass rates per test, identifies intermittent failures, recommends quarantine or fix, and maintains a flaky test registry. Best run during Polish phase or after multiple CI runs."
-argument-hint: "[ci-log-path | scan | registry]"
+argument-hint: "[ci-log-path | scan | registry] [--dry-run]"
 user-invocable: true
-allowed-tools: Read, Glob, Grep, Write, Edit, Bash
+allowed-tools: Read, Glob, Grep, Write, Edit, Bash, AskUserQuestion
 ---
 
-# Test Flakiness Detection
+# Test Flakiness
 
-A flaky test is one that sometimes passes and sometimes fails without any code
-change. Flaky tests are worse than no tests in some ways — they train the team
-to ignore red CI runs, masking genuine failures. This skill identifies them,
-explains likely causes, and recommends whether to quarantine or fix each one.
+Detect intermittent tests from CI logs, local result history, and repeated failures, then maintain a reviewable flaky-test registry.
 
-**Output:** Updated `tests/regression-suite.md` quarantine section + optional
-`production/qa/flakiness-report-[date].md`
+## 0. Execution Contract
 
-**When to run:**
-- Polish phase (tests have had many runs; statistical signal is reliable)
-- When developers start dismissing CI failures as "probably flaky"
-- After `/regression-suite` identifies quarantined tests that need diagnosis
+### 0.1 Invocation and autonomy
 
----
+Supported modes:
 
-## 1. Parse Arguments
+- ci-log-path: analyze one log
+- scan: scan known logs/results
+- registry: summarize/update flaky registry
 
-**Modes:**
-- `/test-flakiness [ci-log-path]` — analyse a specific CI run log file
-- `/test-flakiness scan` — scan all available CI logs in `.github/` or
-  standard log output directories
-- `/test-flakiness registry` — read existing regression-suite.md quarantine
-  section and provide remediation guidance for already-known flaky tests
-- No argument — auto-detect: run `scan` if CI logs are accessible, else
-  `registry`
+The invocation authorizes routine repository-local work for this skill. Operate autonomously after resolving scope; do not ask the user to approve every normal file creation. Ask only for protected operations, destructive ambiguity, or missing source-of-truth decisions that cannot be inferred safely.
 
----
+If `--dry-run` is present, perform discovery and produce the complete proposed result, but do not call `Write` or `Edit`.
 
-## 2. Locate CI Log Data
+### 0.2 Path safety
 
-### Option A — GitHub Actions (preferred)
+All user-supplied paths must be repository-relative. Reject absolute paths, paths containing `..`, and paths outside the expected project roots for this skill. Normalize paths before reading or writing.
 
-Check for test result artifacts:
-```bash
-ls -t .github/ 2>/dev/null
-ls -t test-results/ 2>/dev/null
-```
+### 0.3 Write policy
 
-For Godot projects: GdUnit4 outputs XML results compatible with JUnit format.
-Check `test-results/` for `.xml` files.
+Routine writes allowed by invocation:
 
-For Unity projects: game-ci test runner outputs NUnit XML to `test-results/`
-by default.
+- production/qa/flaky-tests.md
+- production/qa/flakiness-report-[YYYYMMDD].md
 
-For Unreal projects: automation logs go to `Saved/Logs/`. Grep for
-`Result: Success` and `Result: Fail` patterns.
+Protected operations require explicit confirmation through `AskUserQuestion`:
 
-### Option B — Local log files
+- Overwriting or deleting an existing file.
+- Editing canonical source-of-truth documents outside the declared outputs.
+- Changing statuses, gates, stage files, sprint state, story state, registry entries, or release readiness.
+- Running commands that modify files, install dependencies, generate builds, publish artifacts, deploy, tag, commit, or push.
+- Applying changes whose scope is broader than the user requested.
 
-If a path argument is provided, read that file directly.
+Use `Edit` for targeted changes to existing files. Use `Write` for new files or complete replacement only after the replacement scope is safe and approved.
 
-### Option C — No log data available
+### 0.4 Bash safety
 
-If no logs found:
-> "No CI log data found. To detect flaky tests, this skill needs test result
-> history from multiple runs. Options:
-> 1. Run the test suite at least 3 times and collect the output logs
-> 2. Check CI pipeline output and save a log to `test-results/`
-> 3. Run `/test-flakiness registry` to review tests already flagged as flaky
->    in `tests/regression-suite.md`"
+Bash is limited to diagnostics and read-only discovery unless the user explicitly approved a protected operation. Safe examples include `git status --short`, `git log`, `git diff --name-only`, existing test commands that do not update snapshots, and local grep/listing commands. Never run package installation, clean/reset, rm, deploy, publish, commit, tag, push, or build upload commands from this skill.
 
-Stop and ask the user which option to pursue.
+### 0.8 Missing-file behavior
 
----
+| Situation | Behavior |
+|---|---|
+| Primary source missing | Continue only if the skill can infer a narrower safe scope; otherwise stop with the exact missing file/folder. |
+| Referenced artifact missing | Record as a gap or blocker instead of inventing content. |
+| Existing target file present | Do not overwrite. Create a proposed dated file or ask for protected confirmation. |
+| Ambiguous scope | Choose the smallest evidence-backed scope; ask only if two or more scopes are equally plausible. |
+| Contradictory sources | Prefer explicit status/source-of-truth documents over generated reports; list the contradiction in the output. |
 
-## 3. Parse Test Results
+## 1. Discover Context
 
-For each CI log or result file found, parse:
+Read only the sources needed for the requested scope. Start with indexes, manifests, registries, and status files before reading large documents.
 
-**JUnit XML format** (GdUnit4 / Unity):
-- Grep for `<testcase name=` to get test names
-- Grep for `<failure` or `<error` to identify failures
-- Parse `classname` and `name` attributes for full test identifiers
+Primary sources:
 
-**Plain text logs**:
-- Grep for pass/fail patterns:
-  - Godot: `PASSED` / `FAILED` adjacent to test names
-  - Unreal: `Result: Success` / `Result: Fail`
-  - Unity: `Test passed` / `Test failed`
+- ci/**
+- logs/**
+- test-results/**
+- production/qa/**
+- tests/**
+- production/qa/flaky-tests.md
 
-Build a table: `test_id → [run1_result, run2_result, run3_result, ...]`
+Discovery rules:
 
----
+1. Prefer canonical source-of-truth files over generated reports.
+2. Use `Glob` and `Grep` before reading large files.
+3. Keep a source list for the final report or artifact.
+4. When many files match, read the most relevant 5 to 10 first and summarize the rest as candidates.
+5. Treat missing or draft-status dependencies as blockers, not as approval to invent content.
 
-## 4. Identify Flaky Tests
+## 2. Build the Working Model
 
-A test is **flaky** if it appears in the result history with both PASS and
-FAIL outcomes across runs with no code changes between them.
+Use the discovered evidence to build a concise working model before producing output.
 
-Flakiness thresholds:
-- **High flakiness**: Fails in >25% of runs — quarantine immediately
-- **Moderate flakiness**: Fails in 5–25% of runs — investigate and fix soon
-- **Low/suspected flakiness**: Fails in 1–5% of runs — monitor; may be
-  genuinely rare failure
+1. Use safe read-only commands to inspect logs and test result files.
+2. Aggregate pass/fail patterns by test name and failure signature.
+3. Distinguish product failures from nondeterministic test behavior when evidence supports it.
+4. Update the registry with candidates, confidence, quarantine recommendation, and fix owner only after protected confirmation when changing existing registry state.
+5. Do not disable, quarantine, or rewrite tests automatically.
 
-For each flaky test, classify the likely cause:
+Classification rules:
 
-### Cause classification
+- **Blocking**: prevents safe implementation, review, release, or downstream skill execution.
+- **High**: likely to cause rework, wrong implementation, invalid QA, or broken traceability.
+- **Medium**: weakens handoff quality but can be resolved during normal follow-up.
+- **Low**: cleanup, clarity, or optional improvement.
 
-| Cause | Symptoms | Fix direction |
-|-------|----------|---------------|
-| **Timing / async** | Fails after awaiting signals or timers; pass rate correlates with system load | Add explicit await/synchronisation; avoid time-based delays |
-| **Order dependency** | Fails when run after specific other tests; passes in isolation | Add proper setup/teardown; ensure test isolation |
-| **Random seed** | Fails intermittently with no pattern; involves RNG | Pass explicit seed; don't use `randf()` in tests |
-| **Resource leak** | Fails more often later in a test run | Fix cleanup in teardown; check orphan nodes (Godot) or object disposal (Unity) |
-| **External state** | Fails when a file, scene, or global exists from a prior test | Isolate test from file system; use in-memory mocks |
-| **Floating point** | Fails on comparisons like `== 0.5` | Use epsilon comparison (`is_equal_approx`, `Assert.AreApproximately`) |
-| **Scene/prefab load race** | Fails when scenes are not yet ready | Await one frame after instantiation; use `await get_tree().process_frame` |
+## 3. Produce the Artifact
 
-Use Grep to check the test file for timing calls, randf, global state access,
-or equality comparisons on floats to narrow down the cause.
+Canonical outputs for this skill:
 
----
+- production/qa/flaky-tests.md
+- production/qa/flakiness-report-[YYYYMMDD].md
 
-## 5. Recommend Action
+Artifact requirements:
 
-For each flaky test:
+1. Include scope, date, source list, assumptions, and confidence.
+2. Separate facts from recommendations and inferred conclusions.
+3. Include explicit next actions and the command that should be run next.
+4. Preserve historical information; prefer additive notes over destructive rewrites.
+5. When updating an index or manifest, append or update only the relevant row and preserve unrelated content.
 
-**Quarantine (High flakiness):**
-> "Quarantine this test immediately. Disable it in CI by adding
-> `@pytest.mark.skip` / `[Ignore]` / `GdUnitSkip` annotation. Log it in
-> `tests/regression-suite.md` quarantine section. The test is now opt-in only.
-> Fix the root cause before removing quarantine."
+Required report sections:
 
-**Investigate and fix soon (Moderate):**
-> "This test is intermittently unreliable. Root cause appears to be [cause].
-> Suggested fix: [specific fix based on cause classification]. Do not quarantine
-> yet — fix the test directly."
+- Flaky candidates
+- Evidence counts
+- Failure signatures
+- Confidence
+- Registry updates/proposals
+- Recommended fixes
 
-**Monitor (Low/suspected):**
-> "This test shows suspected flakiness. Collect more run data before
-> quarantining. Note it as 'suspected' in the regression suite."
+## 4. Validation
 
----
+1. Check that every conclusion cites or names a repository source.
+2. Check that all blockers have a concrete next action.
+3. Check that proposed writes stay within the declared output paths.
+4. Check that dry-run mode produced no writes.
+5. List every Bash command run and whether it was read-only or diagnostic.
 
-## 6. Generate Reports
+Stop conditions:
 
-### In-conversation summary
+- No blocking stop condition was encountered.
 
-```
-## Flakiness Detection Results
+## 5. Final Response
 
-**Runs analysed**: [N]
-**Tests tracked**: [N]
-
-### Flaky Tests Found
-
-| Test | System | Fail Rate | Likely Cause | Recommendation |
-|------|--------|-----------|--------------|----------------|
-| [test_name] | [system] | [N]% | Timing | Quarantine + fix async |
-| [test_name] | [system] | [N]% | Float comparison | Fix: use epsilon compare |
-| [test_name] | [system] | [N]% | Order dependency | Investigate teardown |
-
-### Clean Tests (no flakiness detected)
-
-[N] tests ran across [N] runs with consistent results — no flakiness detected.
-
-### Data Limitations
-
-[Note if fewer than 5 runs were available — fewer runs = less statistical confidence]
-```
-
----
-
-## 7. Update Regression Suite + Optional Report File
-
-Ask: "May I update the quarantine section of `tests/regression-suite.md`
-with the flaky tests found?"
-
-If yes: use `Edit` to append entries to the Quarantined Tests table.
-Never remove existing quarantine entries — only add new ones.
-
-Ask (separately): "May I write a full flakiness report to
-`production/qa/flakiness-report-[date].md`?"
-
-The full report includes per-test analysis with cause details and
-engine-specific fix snippets.
-
-After writing:
-
-- For each quarantined test: "Add the engine-specific skip annotation to
-  disable this test in CI. Re-enable after the root cause is fixed."
-- For fix-eligible tests: "The fix for [test] is straightforward —
-  change the equality comparison on line [N] to use `is_equal_approx`."
-- Summary: "Once all quarantine annotations are applied, CI should run green.
-  Schedule fix work for the [N] quarantined tests before the release gate."
-
----
-
-## Collaborative Protocol
-
-- **Never delete test files** — quarantine means annotate + list, not remove
-- **Statistical confidence matters** — with < 3 runs, flag findings as
-  "suspected" not "confirmed"; ask if more run data is available
-- **Fix is always the goal** — quarantine is temporary; surface the fix
-  direction even when recommending quarantine
-- **Ask before writing** — both the regression-suite update and the report
-  file require explicit approval. On write: Verdict: **COMPLETE** — flakiness report written. On decline: Verdict: **BLOCKED** — user declined write.
-- **Flakiness in CI is a team problem** — surface the list and recommended
-  actions clearly; do not just silently quarantine without the team knowing
+End with a concise summary of what was written, what was skipped because it was protected or unsafe, validation results, and the recommended next command. Include file paths for every artifact created or proposed.

@@ -3,123 +3,109 @@ name: perf-profile
 description: "Structured performance profiling workflow. Identifies bottlenecks, measures against budgets, and generates optimization recommendations with priority rankings."
 argument-hint: "[system-name or 'full']"
 user-invocable: true
-agent: performance-analyst
 allowed-tools: Read, Glob, Grep, Bash
+agent: performance-analyst
 ---
 
-## Phase 1: Determine Scope
+# Performance Profile
 
-Read the argument:
+Review performance-sensitive code, data, profiling logs, and budgets to identify likely bottlenecks and measurement gaps without changing files.
 
-- System name → focus profiling on that specific system
-- `full` → run a comprehensive profile across all systems
+## 0. Execution Contract
 
----
+### 0.1 Invocation and autonomy
 
-## Phase 2: Load Performance Budgets
+Supported modes:
 
-Check for existing performance targets in design docs or CLAUDE.md:
+- path: profile/review one system or file
+- logs: analyze profiling output
+- blank: inspect known performance evidence
 
-- Target FPS (e.g., 60fps = 16.67ms frame budget)
-- Memory budget (total and per-system)
-- Load time targets
-- Draw call budgets
-- Network bandwidth limits (if multiplayer)
+This is a read-only skill. It may inspect files and run safe read-only diagnostics when Bash is allowed, but it must not create, edit, move, delete, rename, stage, commit, tag, deploy, publish, or update project state.
 
----
+### 0.2 Path safety
 
-## Phase 3: Analyze Codebase
+All user-supplied paths must be repository-relative. Reject absolute paths, paths containing `..`, and paths outside the expected project roots for this skill. Normalize paths before reading or writing.
 
-**CPU Profiling Targets:**
-- `_process()` / `Update()` / `Tick()` functions — list all and estimate cost
-- Nested loops over large collections
-- String operations in hot paths
-- Allocation patterns in per-frame code
-- Unoptimized search/sort over game entities
-- Expensive physics queries (raycasts, overlaps) every frame
+### 0.4 Bash safety
 
-**Memory Profiling Targets:**
-- Large data structures and their growth patterns
-- Texture/asset memory footprint estimates
-- Object pool vs instantiate/destroy patterns
-- Leaked references (objects that should be freed but aren't)
-- Cache sizes and eviction policies
+Bash is limited to diagnostics and read-only discovery unless the user explicitly approved a protected operation. Safe examples include `git status --short`, `git log`, `git diff --name-only`, existing test commands that do not update snapshots, and local grep/listing commands. Never run package installation, clean/reset, rm, deploy, publish, commit, tag, push, or build upload commands from this skill.
 
-**Rendering Targets (if applicable):**
-- Draw call estimates
-- Overdraw from overlapping transparent objects
-- Shader complexity
-- Unoptimized particle systems
-- Missing LODs or occlusion culling
+### 0.8 Missing-file behavior
 
-**I/O Targets:**
-- Save/load performance
-- Asset loading patterns (sync vs async)
-- Network message frequency and size
+| Situation | Behavior |
+|---|---|
+| Primary source missing | Continue only if the skill can infer a narrower safe scope; otherwise stop with the exact missing file/folder. |
+| Referenced artifact missing | Record as a gap or blocker instead of inventing content. |
+| Existing target file present | Not applicable; this skill does not write. |
+| Ambiguous scope | Choose the smallest evidence-backed scope; ask only if two or more scopes are equally plausible. |
+| Contradictory sources | Prefer explicit status/source-of-truth documents over generated reports; list the contradiction in the output. |
 
----
+## 1. Discover Context
 
-## Phase 4: Generate Profiling Report
+Read only the sources needed for the requested scope. Start with indexes, manifests, registries, and status files before reading large documents.
 
-```markdown
-## Performance Profile: [System or Full]
-Generated: [Date]
+Primary sources:
 
-### Performance Budgets
-| Metric | Budget | Estimated Current | Status |
-|--------|--------|-------------------|--------|
-| Frame time | [16.67ms] | [estimate] | [OK/WARNING/OVER] |
-| Memory | [target] | [estimate] | [OK/WARNING/OVER] |
-| Load time | [target] | [estimate] | [OK/WARNING/OVER] |
-| Draw calls | [target] | [estimate] | [OK/WARNING/OVER] |
+- docs/architecture/**
+- design/gdd/**
+- performance/**
+- profiles/**
+- logs/**
+- src/**
+- tests/**
 
-### Hotspots Identified
-| # | Location | Issue | Estimated Impact | Fix Effort |
-|---|----------|-------|------------------|------------|
+Discovery rules:
 
-### Optimization Recommendations (Priority Order)
-1. **[Title]** — [Description]
-   - Location: [file:line]
-   - Expected gain: [estimate]
-   - Risk: [Low/Med/High]
-   - Approach: [How to implement]
+1. Prefer canonical source-of-truth files over generated reports.
+2. Use `Glob` and `Grep` before reading large files.
+3. Keep a source list for the final report or artifact.
+4. When many files match, read the most relevant 5 to 10 first and summarize the rest as candidates.
+5. Treat missing or draft-status dependencies as blockers, not as approval to invent content.
 
-### Quick Wins (< 1 hour each)
-- [Simple optimization 1]
+## 2. Build the Working Model
 
-### Requires Investigation
-- [Area that needs actual runtime profiling to confirm impact]
-```
+Use the discovered evidence to build a concise working model before producing output.
 
-Output the report with a summary: top 3 hotspots, estimated headroom vs budget, and recommended next action.
+1. Locate stated performance budgets and relevant evidence.
+2. Run only safe read-only diagnostics and never launch long-running soak/profile sessions unless the command is explicitly provided and safe.
+3. Identify CPU, memory, loading, allocation, rendering, audio, and network risk depending on domain.
+4. Distinguish measured bottlenecks from hypothesized risks.
+5. Return prioritized profiling and optimization recommendations.
 
----
+Classification rules:
 
-## Phase 5: Scope and Timeline Decision
+- **Blocking**: prevents safe implementation, review, release, or downstream skill execution.
+- **High**: likely to cause rework, wrong implementation, invalid QA, or broken traceability.
+- **Medium**: weakens handoff quality but can be resolved during normal follow-up.
+- **Low**: cleanup, clarity, or optional improvement.
 
-Activate this phase only if any hotspot has Fix Effort rated M or L.
+## 3. Produce the Read-Only Report
 
-Present significant-effort items and ask the user to choose for each:
+Return the report in chat. Do not write files. If a durable report would be useful, recommend the appropriate write-capable skill or command instead of creating it.
 
-- **A) Implement the optimization** (proceed with fix now or schedule it)
-- **B) Reduce feature scope** (run `/scope-check [feature]` to analyze trade-offs)
-- **C) Accept the performance hit and defer to Polish phase** (log as known issue)
-- **D) Escalate to technical-director for an architectural decision** (run `/architecture-decision`)
+Required report sections:
 
-If multiple items are deferred to Polish (choice C), record them under `### Deferred to Polish`.
+- Scope
+- Budgets
+- Evidence reviewed
+- Measured issues
+- Likely bottlenecks
+- Measurement gaps
+- Recommended next tests
 
-This skill is read-only — no files are written. Verdict: **COMPLETE** — performance profile generated.
+## 4. Validation
 
----
+1. Check that every conclusion cites or names a repository source.
+2. Check that all blockers have a concrete next action.
+3. Check that proposed writes stay within the declared output paths.
+4. Check that no writes or state changes were performed.
+5. List every Bash command run and whether it was read-only or diagnostic.
 
-## Phase 6: Next Steps
+Stop conditions:
 
-- If bottlenecks require architectural change: run `/architecture-decision`.
-- If scope reduction is needed: run `/scope-check [feature]`.
-- To schedule optimizations: run `/sprint-plan update`.
+- No blocking stop condition was encountered.
 
-### Rules
-- Never optimize without measuring first — gut feelings about performance are unreliable
-- Recommendations must include estimated impact — "make it faster" is not actionable
-- Profile on target hardware, not just development machines
-- Static analysis (this skill) identifies candidates; runtime profiling confirms
+## 5. Final Response
+
+End with a concise verdict, prioritized findings, evidence sources, and recommended next command. Do not imply that any files were changed.

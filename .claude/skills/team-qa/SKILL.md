@@ -1,222 +1,436 @@
 ---
 name: team-qa
-description: "Orchestrate the QA team through a full testing cycle. Coordinates qa-lead (strategy + test plan) and qa-tester (test case writing + bug reporting) to produce a complete QA package for a sprint or feature. Covers: test plan generation, test case writing, smoke check gate, manual QA execution, and sign-off report."
-argument-hint: "[sprint | feature: system-name]"
+description: "Orchestrate a full QA cycle for a sprint or feature. Produces a QA plan, manual test cases, bug reports, and QA sign-off using qa-lead and qa-tester subagents where useful."
+argument-hint: "[sprint | sprint:<name> | feature:<system-name>] [--dry-run] [--manual-only]"
 user-invocable: true
 allowed-tools: Read, Glob, Grep, Write, Task, AskUserQuestion
 agent: qa-lead
 ---
 
-When this skill is invoked, orchestrate the QA team through a structured testing cycle.
+# Team QA
 
-**Decision Points:** At each phase transition, use `AskUserQuestion` to present
-the user with the subagent's proposals as selectable options. Write the agent's
-full analysis in conversation, then capture the decision with concise labels.
-The user must approve before moving to the next phase.
+Run a structured QA cycle for a sprint or feature. This skill coordinates QA planning, test case preparation, manual result collection, bug report creation, and sign-off. It does not advance project stage, close stories, deploy builds, or modify source code.
 
-## Team Composition
+The user's invocation authorizes routine QA artifact writes. Ask only for missing scope, manual QA results, bug severity confirmation, or protected actions.
 
-- **qa-lead** — QA strategy, test plan generation, story classification, sign-off report
-- **qa-tester** — Test case writing, bug report writing, manual QA documentation
+Routine outputs:
 
-## How to Delegate
-
-Use the Task tool to spawn each team member as a subagent:
-- `subagent_type: qa-lead` — Strategy, planning, classification, sign-off
-- `subagent_type: qa-tester` — Test case writing and bug report writing
-
-Always provide full context in each agent's prompt (story file paths, QA plan path, scope constraints). Launch independent qa-tester tasks in parallel where possible (e.g., multiple stories in Phase 5 can be scaffolded simultaneously).
-
-## Pipeline
-
-### Phase 1: Load Context
-
-Before doing anything else, gather the full scope:
-
-1. Detect the current sprint or feature scope from the argument:
-   - If argument is a sprint identifier (e.g., `sprint-03`): read all story files in `production/sprints/[sprint]/`
-   - If argument is `feature: [system-name]`: glob story files tagged for that system
-   - If no argument: read `production/session-state/active.md` and `production/sprint-status.yaml` (if present) to infer the active sprint
-
-2. Read `production/stage.txt` to confirm the current project phase.
-
-3. Count stories found and report to the user:
-   > "QA cycle starting for [sprint/feature]. Found [N] stories. Current stage: [stage]. Ready to begin QA strategy?"
-
-### Phase 2: QA Strategy (qa-lead)
-
-Spawn `qa-lead` via Task to review all in-scope stories and produce a QA strategy.
-
-Prompt the qa-lead to:
-- Read each story file
-- Classify each story by type: **Logic** / **Integration** / **Visual/Feel** / **UI** / **Config/Data**
-- Identify which stories require automated test evidence vs. manual QA
-- Flag any stories with missing acceptance criteria or missing test evidence that would block QA
-- Estimate manual QA effort (number of test sessions needed)
-- Check `tests/smoke/` for smoke test scenarios; for each, assess whether it can be verified given the current build. Produce a smoke check verdict: **PASS** / **PASS WITH WARNINGS [list]** / **FAIL [list of failures]**
-- Produce a strategy summary table and smoke check result:
-
-  | Story | Type | Automated Required | Manual Required | Blocker? |
-  |-------|------|--------------------|-----------------|----------|
-
-  **Smoke Check**: [PASS / PASS WITH WARNINGS / FAIL] — [details if not PASS]
-
-If the smoke check result is **FAIL**, the qa-lead must list the failures prominently. QA cannot proceed past the strategy phase with a failed smoke check.
-
-Present the qa-lead's full strategy to the user, then use `AskUserQuestion`:
-
-```
-question: "QA Strategy Review"
-options:
-  - "Looks good — proceed to test plan"
-  - "Adjust story types before proceeding"
-  - "Skip blocked stories and proceed with the rest"
-  - "Smoke check failed — fix issues and re-run /team-qa"
-  - "Cancel — resolve blockers first"
+```text
+production/qa/qa-plan-[scope]-[date].md
+production/qa/test-cases/[scope]-[date].md
+production/qa/bugs/BUG-[NNN]-[slug].md
+production/qa/qa-signoff-[scope]-[date].md
 ```
 
-If smoke check **FAIL**: do not proceed to Phase 3. Surface the failures and stop. The user must fix them and re-run `/team-qa`.
-If smoke check **PASS WITH WARNINGS**: note the warnings for the sign-off report and continue.
-If blockers are present: list them explicitly. The user may choose to skip blocked stories or cancel the cycle.
+---
 
-### Phase 3: Test Plan Generation
+## 0. Execution Contract
 
-Using the strategy from Phase 2, produce a structured test plan document.
+### 0.1 Parse invocation
 
-The test plan should cover:
-- **Scope**: sprint/feature name, story count, dates
-- **Story Classification Table**: from Phase 2 strategy
-- **Automated Test Requirements**: which stories need test files, expected paths in `tests/`
-- **Manual QA Scope**: which stories need manual walkthrough and what to validate
-- **Out of Scope**: what is explicitly not being tested this cycle and why
-- **Entry Criteria**: what must be true before QA can begin (smoke check pass, build stable)
-- **Exit Criteria**: what constitutes a completed QA cycle (all stories PASS or FAIL with bugs filed)
+Supported scopes:
 
-Ask: "May I write the QA plan to `production/qa/qa-plan-[sprint]-[date].md`?"
+| Invocation | Scope |
+|---|---|
+| `/team-qa sprint` | Current sprint. |
+| `/team-qa sprint:sprint-03` | Named sprint. |
+| `/team-qa feature:combat` | Stories for one feature/system. |
+| No argument | Infer current sprint; ask only if no current sprint can be found. |
 
-Write only after receiving approval.
+Flags:
 
-### Phase 4: Test Case Writing (qa-tester)
+- `--dry-run`: generate plan and report in conversation only; do not write QA artifacts or bug reports.
+- `--manual-only`: skip QA plan regeneration and use the latest existing QA plan/test cases.
 
-> **Smoke check** is performed as part of Phase 2 (QA Strategy). If the smoke check returned FAIL in Phase 2, the cycle was stopped there. This phase only runs when the Phase 2 smoke check was PASS or PASS WITH WARNINGS.
+### 0.2 Path safety
 
-For each story requiring manual QA (Visual/Feel, UI, Integration without automated tests):
+Reject absolute paths and paths containing `..`.
 
-Spawn `qa-tester` via Task for each story (run in parallel where possible), providing:
-- The story file path
-- The relevant section of the QA plan for that story
-- The GDD acceptance criteria for the system being tested (if available)
-- Instructions to write detailed test cases covering all acceptance criteria
+Allowed write locations:
 
-Each test case set should include:
-- **Preconditions**: game state required before testing begins
-- **Steps**: numbered, unambiguous actions
-- **Expected Result**: what should happen
-- **Actual Result**: field left blank for the tester to fill in
-- **Pass/Fail**: field left blank
-
-Present the test cases to the user for review before execution. Group by story.
-
-Use `AskUserQuestion` per story group (batched 3-4 at a time):
-
-```
-question: "Test cases ready for [Story Group]. Review before manual QA begins?"
-options:
-  - "Approved — begin manual QA for these stories"
-  - "Revise test cases for [story name]"
-  - "Skip manual QA for [story name] — not ready"
+```text
+production/qa/
 ```
 
-### Phase 6: Manual QA Execution
+Do not modify story files, source files, test files, release files, stage files, or registry files.
 
-Walk through each story in the approved manual QA list.
+### 0.3 Write policy
 
-Batch stories into groups of 3-4 and use `AskUserQuestion` for each:
+Routine QA writes are authorized by invocation:
 
+- QA plan.
+- Test case document.
+- Bug reports.
+- QA sign-off report.
+
+Protected writes requiring explicit confirmation:
+
+- Changing story status.
+- Changing sprint status.
+- Editing release/stage files.
+- Overwriting an existing QA sign-off report.
+- Any write outside `production/qa/`.
+
+If an output path exists, create a numbered alternative rather than overwriting unless the user confirms.
+
+### 0.4 Task policy
+
+Use Task subagents for bounded QA analysis:
+
+| Agent | Use |
+|---|---|
+| `qa-lead` | Strategy, risk assessment, sign-off verdict. |
+| `qa-tester` | Test case drafting and bug report drafting. |
+
+Do not delegate open-ended repository exploration. Pass story paths, relevant excerpts, required output format, and verdict rules.
+
+---
+
+## 1. Resolve Scope
+
+Determine the in-scope stories.
+
+For current sprint:
+
+1. Read `production/session-state/active.md`, if present.
+2. Glob `production/sprints/*.md` and `production/sprints/*.yaml`.
+3. Use the active or most recently modified sprint file.
+4. Extract story paths and priority tiers.
+
+For named sprint:
+
+- Read matching file under `production/sprints/`.
+
+For feature:
+
+- Glob `production/epics/[feature]/story-*.md`.
+- If no exact epic slug exists, grep `production/epics/**/*.md` for the feature name.
+
+Read each story and extract:
+
+- Path and title.
+- Status.
+- Type.
+- Acceptance criteria.
+- Test evidence requirement.
+- Existing evidence path.
+- Priority, if from sprint.
+- Governing ADRs and blockers.
+
+Also read if present:
+
+- Latest `production/qa/qa-plan-*.md`.
+- Latest `production/qa/smoke-*.md`.
+- Existing `production/qa/bugs/*.md`.
+- `production/stage.txt`.
+
+If no stories are found, stop with the exact scope searched.
+
+---
+
+## 2. Entry Gate
+
+Before QA execution, classify entry readiness:
+
+| Check | Pass condition |
+|---|---|
+| Stories exist | At least one in-scope story. |
+| Story closure state | Stories are implemented or ready for QA; not Draft/Blocked. |
+| Smoke check | Latest smoke report is `PASS` or `PASS WITH WARNINGS`, or user accepts manual fallback. |
+| Evidence paths | Each story has a declared evidence path. |
+| Critical blockers | No unresolved S1/S2 open bugs in current scope unless retest is specifically requested. |
+
+If latest smoke report is `FAIL`, stop. Do not proceed to manual QA until `/smoke-check` passes.
+
+If no smoke report exists, continue only after asking:
+
+```text
+No smoke check report was found for this scope.
+
+[A] Continue with QA and record smoke check as missing
+[B] Stop and run /smoke-check first
 ```
-question: "Manual QA — [Story Title]\n[brief description of what to test]"
-options:
-  - "PASS — all acceptance criteria verified"
-  - "PASS WITH NOTES — minor issues found (describe after)"
-  - "FAIL — criteria not met (describe after)"
-  - "BLOCKED — cannot test yet (reason)"
-```
 
-After each FAIL result: use `AskUserQuestion` to collect the failure description, then spawn `qa-tester` via Task to write a formal bug report in `production/qa/bugs/`.
+---
 
-Bug report naming: `BUG-[NNN]-[short-slug].md` (increment NNN from existing bugs in the directory).
+## 3. QA Strategy
 
-After collecting all results, summarize:
-- Stories PASS: [count]
-- Stories PASS WITH NOTES: [count]
-- Stories FAIL: [count] — bugs filed: [IDs]
-- Stories BLOCKED: [count]
+Spawn `qa-lead` unless the scope is very small and the strategy is obvious.
 
-### Phase 7: QA Sign-Off Report
+Provide:
 
-Spawn `qa-lead` via Task to produce the sign-off report using all results from Phases 4–6.
+- Story list and statuses.
+- Story types.
+- Acceptance criteria counts.
+- Evidence requirements.
+- Existing smoke result.
+- Open bugs.
+- Stage and sprint context.
 
-The sign-off report format:
+Ask for:
+
+1. QA risk classification per story.
+2. Automated versus manual coverage needs.
+3. Retest needs for open bugs.
+4. Recommended manual test batches.
+5. Sign-off risk.
+
+Produce a strategy table:
 
 ```markdown
-## QA Sign-Off Report: [Sprint/Feature]
-**Date**: [date]
-**QA Lead sign-off**: [pending]
-
-### Test Coverage Summary
-| Story | Type | Auto Test | Manual QA | Result |
-|-------|------|-----------|-----------|--------|
-| [title] | Logic | PASS | — | PASS |
-| [title] | Visual | — | PASS | PASS |
-
-### Bugs Found
-| ID | Story | Severity | Status |
-|----|-------|----------|--------|
-| BUG-001 | [story] | S2 | Open |
-
-### Verdict: APPROVED / APPROVED WITH CONDITIONS / NOT APPROVED
-
-**Conditions** (if any): [list what must be fixed before the build advances]
-
-### Next Step
-[guidance based on verdict]
+| Story | Type | Priority | Auto Evidence | Manual QA | Risk | Notes |
+|-------|------|----------|---------------|-----------|------|-------|
 ```
 
+If the strategy identifies a critical blocker, stop and report it unless the user explicitly chose a retest-only QA run.
+
+---
+
+## 4. Generate QA Plan
+
+Skip this phase only when `--manual-only` is set and a recent QA plan exists.
+
+QA plan format:
+
+```markdown
+# QA Plan: [scope]
+
+Generated: [YYYY-MM-DD]
+Stage: [stage or Unknown]
+Smoke Check: [PASS | PASS WITH WARNINGS | FAIL | Missing]
+
+## Scope
+
+- [story path] — [title]
+
+## Entry Criteria
+
+- [criterion]
+
+## Story Coverage
+
+| Story | Type | Acceptance Criteria | Required Evidence | Manual QA Needed |
+|-------|------|---------------------|-------------------|------------------|
+
+## Manual Test Batches
+
+### Batch 1: Critical Path
+
+- [story/check]
+
+### Batch 2: Regression and Edge Cases
+
+- [story/check]
+
+## Out of Scope
+
+- [excluded story/system and reason]
+
+## Exit Criteria
+
+- All critical-path checks pass.
+- No open S1/S2 bugs.
+- Any S3/S4 deferrals are documented.
+```
+
+Write to `production/qa/qa-plan-[scope]-[YYYYMMDD].md` unless `--dry-run`.
+
+---
+
+## 5. Generate Test Cases
+
+For each story requiring manual QA, spawn `qa-tester` in bounded batches. Pass:
+
+- Story path and content.
+- Acceptance criteria.
+- Required evidence path.
+- Relevant QA strategy notes.
+
+Require output:
+
+```markdown
+## [Story title]
+
+### Test Case [N]: [criterion]
+
+- Preconditions:
+- Steps:
+  1. [step]
+  2. [step]
+- Expected Result:
+- Actual Result: [blank]
+- Result: [PASS / FAIL / BLOCKED]
+- Notes:
+```
+
+For automated-only Logic stories, include an evidence verification row instead of manual steps:
+
+```markdown
+## Automated Evidence Verification
+
+| Story | Expected Test | Current Status | Retest Needed |
+|-------|---------------|----------------|---------------|
+```
+
+Write test cases to `production/qa/test-cases/[scope]-[YYYYMMDD].md` unless `--dry-run`.
+
+---
+
+## 6. Collect Manual QA Results
+
+Manual execution requires user input. Batch checks in groups of no more than four stories.
+
+For each batch, ask:
+
+```text
+Manual QA batch: [batch name]
+
+For each story, choose result:
+[A] PASS all checks
+[B] PASS WITH NOTES
+[C] FAIL
+[D] BLOCKED / could not test
+```
+
+When a story fails or is blocked, collect:
+
+- Failure description.
+- Repro steps.
+- Expected result.
+- Actual result.
+- Severity estimate: S1, S2, S3, S4.
+- Whether the bug blocks sign-off.
+
+If the user gives incomplete bug detail, ask only for the missing fields necessary to write a useful bug report.
+
+---
+
+## 7. Write Bug Reports
+
+For every FAIL result, create a bug report unless `--dry-run`.
+
+Numbering:
+
+1. Glob `production/qa/bugs/BUG-*.md`.
+2. Use the next available `BUG-[NNN]`.
+3. Slug from story title or failure summary.
+
+Template:
+
+```markdown
+# BUG-[NNN]: [Short title]
+
+> **Severity**: [S1 | S2 | S3 | S4]
+> **Status**: Open
+> **Found In**: [scope]
+> **Story**: `[story path]`
+> **Reported**: [YYYY-MM-DD]
+
+## Summary
+
+[one paragraph]
+
+## Reproduction Steps
+
+1. [step]
+
+## Expected Result
+
+[expected]
+
+## Actual Result
+
+[actual]
+
+## Evidence
+
+- [screenshot/video/log path or "Not provided"]
+
+## Sign-Off Impact
+
+[Blocks sign-off / Does not block sign-off / Unknown]
+```
+
+Do not change story status or sprint status when filing bugs.
+
+---
+
+## 8. Produce Sign-Off Verdict
+
+Spawn `qa-lead` with final results if available. Otherwise compute directly using the rules below.
+
 Verdict rules:
-- **APPROVED**: All stories PASS or PASS WITH NOTES; no S1/S2 bugs open
-- **APPROVED WITH CONDITIONS**: S3/S4 bugs open, or PASS WITH NOTES issues documented; no S1/S2 bugs
-- **NOT APPROVED**: Any S1/S2 bugs open; or stories FAIL without documented workaround
 
-Next step guidance by verdict:
-- APPROVED: "Build is ready for the next phase. Run `/gate-check` to validate advancement."
-- APPROVED WITH CONDITIONS: "Resolve conditions before advancing. S3/S4 bugs may be deferred to polish."
-- NOT APPROVED: "Resolve S1/S2 bugs and re-run `/team-qa` or targeted manual QA before advancing."
+| Verdict | Conditions |
+|---|---|
+| `APPROVED` | All required manual checks pass, automated evidence is present or confirmed, and no open S1/S2 bugs. |
+| `APPROVED WITH CONDITIONS` | Only S3/S4 bugs, PASS WITH NOTES items, missing non-critical evidence, or accepted smoke warnings remain. |
+| `NOT APPROVED` | Any open S1/S2 bug, failed critical-path story, blocked manual QA item, or failed smoke check. |
 
-Ask: "May I write this QA sign-off report to `production/qa/qa-signoff-[sprint]-[date].md`?"
+Sign-off report:
 
-Write only after receiving approval.
+```markdown
+# QA Sign-Off Report: [scope]
 
-## Error Recovery Protocol
+Generated: [YYYY-MM-DD]
+Verdict: [APPROVED | APPROVED WITH CONDITIONS | NOT APPROVED]
 
-If any spawned agent (via Task) returns BLOCKED, errors, or cannot complete:
+## Scope Summary
 
-1. **Surface immediately**: Report "[AgentName]: BLOCKED — [reason]" to the user before continuing to dependent phases
-2. **Assess dependencies**: Check whether the blocked agent's output is required by subsequent phases. If yes, do not proceed past that dependency point without user input.
-3. **Offer options** via AskUserQuestion with choices:
-   - Skip this agent and note the gap in the final report
-   - Retry with narrower scope
-   - Stop here and resolve the blocker first
-4. **Always produce a partial report** — output whatever was completed. Never discard work because one agent blocked.
+| Story | Type | Result | Evidence | Bugs |
+|-------|------|--------|----------|------|
 
-Common blockers:
-- Input file missing (story not found, GDD absent) → redirect to the skill that creates it
-- ADR status is Proposed → do not implement; run `/architecture-decision` first
-- Scope too large → split into two stories via `/create-stories`
-- Conflicting instructions between ADR and story → surface the conflict, do not guess
+## Smoke Check
 
-## Output
+[latest smoke result]
 
-A summary covering: stories in scope, smoke check result, manual QA results, bugs filed (with IDs and severities), and the final APPROVED / APPROVED WITH CONDITIONS / NOT APPROVED verdict.
+## Bugs Found
 
-Verdict: **COMPLETE** — QA cycle finished.
-Verdict: **BLOCKED** — smoke check failed or critical blocker prevented cycle completion; partial report produced.
+| Bug | Severity | Story | Status | Sign-Off Impact |
+|-----|----------|-------|--------|-----------------|
+
+## Conditions
+
+- [condition or None]
+
+## Rationale
+
+[why the verdict was assigned]
+
+## Next Step
+
+[gate-check, bug fixing, targeted retest, or rerun team-qa]
+```
+
+Write to `production/qa/qa-signoff-[scope]-[YYYYMMDD].md` unless `--dry-run`.
+
+---
+
+## 9. Completion Output
+
+End with:
+
+```text
+Verdict: [APPROVED | APPROVED WITH CONDITIONS | NOT APPROVED | BLOCKED | DRY RUN]
+
+QA artifacts:
+- [path]
+
+Bugs filed:
+- BUG-[NNN] — [severity] — [summary]
+
+Blocking issues:
+- [issue or None]
+
+Next best action:
+- [command]
+```
+
+Recommended next actions:
+
+| Verdict | Next action |
+|---|---|
+| `APPROVED` | `/gate-check` for formal stage or release gate validation. |
+| `APPROVED WITH CONDITIONS` | Resolve listed conditions or document deferrals before gate-check. |
+| `NOT APPROVED` | Fix S1/S2 or critical-path failures, then rerun `/smoke-check` and `/team-qa`. |
+| `BLOCKED` | Resolve entry gate blocker first. |

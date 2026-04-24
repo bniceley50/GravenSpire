@@ -1,96 +1,131 @@
 ---
 name: onboard
 description: "Generates a contextual onboarding document for a new contributor or agent joining the project. Summarizes project state, architecture, conventions, and current priorities relevant to the specified role or area."
-argument-hint: "[role|area]"
+argument-hint: "[role|area] [--dry-run]"
 user-invocable: true
-allowed-tools: Read, Glob, Grep, Write
+allowed-tools: Read, Glob, Grep, Write, Edit, AskUserQuestion
 model: haiku
 ---
 
-## Phase 1: Load Project Context
+# Onboard Contributor
 
-Read CLAUDE.md for project overview and standards.
+Generate a contextual onboarding document for a contributor, agent, or role using current project sources and workflow expectations.
 
-Read the relevant agent definition from `.claude/agents/` if a specific role is specified.
+## 0. Execution Contract
 
----
+### 0.1 Invocation and autonomy
 
-## Phase 2: Scan Relevant Area
+Supported modes:
 
-- For programmers: scan `src/` for architecture, patterns, key files
-- For designers: scan `design/` for existing design documents
-- For narrative: scan `design/narrative/` for world-building and story docs
-- For QA: scan `tests/` for existing test coverage
-- For production: scan `production/` for current sprint and milestone
+- role name: tailor onboarding to a discipline
+- blank: general onboarding
 
-Read recent changes (git log if available) to understand current momentum.
+The invocation authorizes routine repository-local work for this skill. Operate autonomously after resolving scope; do not ask the user to approve every normal file creation. Ask only for protected operations, destructive ambiguity, or missing source-of-truth decisions that cannot be inferred safely.
 
----
+If `--dry-run` is present, perform discovery and produce the complete proposed result, but do not call `Write` or `Edit`.
 
-## Phase 3: Generate Onboarding Document
+### 0.2 Path safety
 
-```markdown
-# Onboarding: [Role/Area]
+All user-supplied paths must be repository-relative. Reject absolute paths, paths containing `..`, and paths outside the expected project roots for this skill. Normalize paths before reading or writing.
 
-## Project Summary
-[2-3 sentence summary of what this game is and its current state]
+### 0.3 Write policy
 
-## Your Role
-[What this role does on this project, key responsibilities, who you report to]
+Routine writes allowed by invocation:
 
-## Project Architecture
-[Relevant architectural overview for this role]
+- docs/onboarding/onboarding-[role-or-general].md
 
-### Key Directories
-| Directory | Contents | Your Interaction |
-|-----------|----------|-----------------|
+Protected operations require explicit confirmation through `AskUserQuestion`:
 
-### Key Files
-| File | Purpose | Read Priority |
-|------|---------|--------------|
+- Overwriting or deleting an existing file.
+- Editing canonical source-of-truth documents outside the declared outputs.
+- Changing statuses, gates, stage files, sprint state, story state, registry entries, or release readiness.
+- Running commands that modify files, install dependencies, generate builds, publish artifacts, deploy, tag, commit, or push.
+- Applying changes whose scope is broader than the user requested.
 
-## Current Standards and Conventions
-[Summary of conventions relevant to this role from CLAUDE.md and agent definition]
+Use `Edit` for targeted changes to existing files. Use `Write` for new files or complete replacement only after the replacement scope is safe and approved.
 
-## Current State of Your Area
-[What has been built, what is in progress, what is planned next]
+### 0.8 Missing-file behavior
 
-## Current Sprint Context
-[What the team is working on now and what is expected of this role]
+| Situation | Behavior |
+|---|---|
+| Primary source missing | Continue only if the skill can infer a narrower safe scope; otherwise stop with the exact missing file/folder. |
+| Referenced artifact missing | Record as a gap or blocker instead of inventing content. |
+| Existing target file present | Do not overwrite. Create a proposed dated file or ask for protected confirmation. |
+| Ambiguous scope | Choose the smallest evidence-backed scope; ask only if two or more scopes are equally plausible. |
+| Contradictory sources | Prefer explicit status/source-of-truth documents over generated reports; list the contradiction in the output. |
 
-## Key Dependencies
-[What other roles/systems this role interacts with most]
+## 1. Discover Context
 
-## Common Pitfalls
-[Things that trip up new contributors in this area]
+Read only the sources needed for the requested scope. Start with indexes, manifests, registries, and status files before reading large documents.
 
-## First Tasks
-[Suggested first tasks to get oriented and productive]
+Primary sources:
 
-1. [Read these documents first]
-2. [Review this code/content]
-3. [Start with this small task]
+- README.md
+- AGENTS.md
+- .claude/docs/**
+- design/concept/**
+- design/gdd/**
+- docs/architecture/**
+- production/sprints/**
 
-## Questions to Ask
-[Questions the new contributor should ask to get fully oriented]
-```
+Discovery rules:
 
----
+1. Prefer canonical source-of-truth files over generated reports.
+2. Use `Glob` and `Grep` before reading large files.
+3. Keep a source list for the final report or artifact.
+4. When many files match, read the most relevant 5 to 10 first and summarize the rest as candidates.
+5. Treat missing or draft-status dependencies as blockers, not as approval to invent content.
 
-## Phase 4: Save Document
+## 2. Build the Working Model
 
-Present the onboarding document to the user.
+Use the discovered evidence to build a concise working model before producing output.
 
-Ask: "May I write this to `production/onboarding/onboard-[role]-[date].md`?"
+1. Infer project state, current stage, key source-of-truth documents, workflows, and active risks.
+2. Tailor the document to the role when supplied.
+3. Include what to read first, what not to change, active standards, current sprint/milestone context, and how to ask for review.
+4. Do not assign work or change project status.
+5. Write the onboarding document with source references.
 
-If yes, write the file, creating the directory if needed.
+Classification rules:
 
----
+- **Blocking**: prevents safe implementation, review, release, or downstream skill execution.
+- **High**: likely to cause rework, wrong implementation, invalid QA, or broken traceability.
+- **Medium**: weakens handoff quality but can be resolved during normal follow-up.
+- **Low**: cleanup, clarity, or optional improvement.
 
-## Phase 5: Next Steps
+## 3. Produce the Artifact
 
-Verdict: **COMPLETE** — onboarding document generated.
+Canonical outputs for this skill:
 
-- Share the onboarding doc with the new contributor before their first session.
-- Run `/sprint-status` to show the new contributor current progress.
-- Run `/help` if the contributor needs guidance on what to work on next.
+- docs/onboarding/onboarding-[role-or-general].md
+
+Artifact requirements:
+
+1. Include scope, date, source list, assumptions, and confidence.
+2. Separate facts from recommendations and inferred conclusions.
+3. Include explicit next actions and the command that should be run next.
+4. Preserve historical information; prefer additive notes over destructive rewrites.
+5. When updating an index or manifest, append or update only the relevant row and preserve unrelated content.
+
+Required report sections:
+
+- Onboarding path
+- Role focus
+- Primary reading list
+- Immediate warnings
+- Recommended first task
+
+## 4. Validation
+
+1. Check that every conclusion cites or names a repository source.
+2. Check that all blockers have a concrete next action.
+3. Check that proposed writes stay within the declared output paths.
+4. Check that dry-run mode produced no writes.
+
+Stop conditions:
+
+- No blocking stop condition was encountered.
+
+## 5. Final Response
+
+End with a concise summary of what was written, what was skipped because it was protected or unsafe, validation results, and the recommended next command. Include file paths for every artifact created or proposed.

@@ -1,238 +1,145 @@
 ---
 name: propagate-design-change
 description: "When a GDD is revised, scans all ADRs and the traceability index to identify which architectural decisions are now potentially stale. Produces a change impact report and guides the user through resolution."
-argument-hint: "[path/to/changed-gdd.md]"
+argument-hint: "[path/to/changed-gdd.md] [--dry-run]"
 user-invocable: true
-allowed-tools: Read, Glob, Grep, Write, Bash, Task
+allowed-tools: Read, Glob, Grep, Write, Edit, Bash, Task, AskUserQuestion
 agent: technical-director
 ---
 
 # Propagate Design Change
 
-When a GDD changes, architectural decisions written against it may no longer be
-valid. This skill finds every affected ADR, compares what the ADR assumed against
-what the GDD now says, and guides the user through resolution.
+Analyze a changed GDD or design decision and determine which ADRs, registries, epics, stories, QA plans, and implementation artifacts must be updated.
 
-**Usage:** `/propagate-design-change design/gdd/combat-system.md`
+## 0. Execution Contract
 
----
+### 0.1 Invocation and autonomy
 
-## 1. Validate Argument
+Supported modes:
 
-A GDD path argument is **required**. If missing, fail with:
-> "Usage: `/propagate-design-change design/gdd/[system].md`
-> Provide the path to the GDD that was changed."
+- gdd path: analyze one changed document
+- entity:<name>: analyze one concept/entity change
+- full: audit all recent design changes
 
-Verify the file exists. If not, fail with:
-> "[path] not found. Check the path and try again."
+The invocation authorizes routine repository-local work for this skill. Operate autonomously after resolving scope; do not ask the user to approve every normal file creation. Ask only for protected operations, destructive ambiguity, or missing source-of-truth decisions that cannot be inferred safely.
 
----
+If `--dry-run` is present, perform discovery and produce the complete proposed result, but do not call `Write` or `Edit`.
 
-## 2. Read the Changed GDD
+### 0.2 Path safety
 
-Read the current GDD in full.
+All user-supplied paths must be repository-relative. Reject absolute paths, paths containing `..`, and paths outside the expected project roots for this skill. Normalize paths before reading or writing.
 
----
+### 0.3 Write policy
 
-## 3. Read the Previous Version
+Routine writes allowed by invocation:
 
-Run git to get the previous committed version:
+- design/change-impact/change-impact-[YYYYMMDD]-[slug].md
 
-```bash
-git show HEAD:design/gdd/[filename].md
-```
+Protected operations require explicit confirmation through `AskUserQuestion`:
 
-If the file has no git history (new file), report:
-> "No previous version in git — this appears to be a new GDD, not a revision.
-> Nothing to propagate."
+- Overwriting or deleting an existing file.
+- Editing canonical source-of-truth documents outside the declared outputs.
+- Changing statuses, gates, stage files, sprint state, story state, registry entries, or release readiness.
+- Running commands that modify files, install dependencies, generate builds, publish artifacts, deploy, tag, commit, or push.
+- Applying changes whose scope is broader than the user requested.
 
-If git returns the previous version, do a conceptual diff:
-- Identify sections that changed (new rules, removed rules, modified formulas,
-  changed acceptance criteria, changed tuning knobs)
-- Identify sections that are unchanged
-- Produce a change summary:
+Use `Edit` for targeted changes to existing files. Use `Write` for new files or complete replacement only after the replacement scope is safe and approved.
 
-```
-## Change Summary: [GDD filename]
-Date of revision: [today]
+### 0.4 Bash safety
 
-Changed sections:
-- [Section name]: [what changed — new rule, removed rule, formula modified, etc.]
+Bash is limited to diagnostics and read-only discovery unless the user explicitly approved a protected operation. Safe examples include `git status --short`, `git log`, `git diff --name-only`, existing test commands that do not update snapshots, and local grep/listing commands. Never run package installation, clean/reset, rm, deploy, publish, commit, tag, push, or build upload commands from this skill.
 
-Unchanged sections:
-- [Section name]
+### 0.5 Task delegation
 
-Key changes affecting architecture:
-- [Change 1 — likely to affect ADRs]
-- [Change 2]
-```
+Use Task subagents only when they materially improve the result. Pass bounded context: the request, relevant source paths, current draft/report, and the exact verdict needed. Do not spawn duplicate reviewers. If review mode is available, use `solo` for no subagents, `lean` for only essential specialist review, and `full` for cross-functional or gate review.
 
----
+### 0.8 Missing-file behavior
 
-## 4. Load Architecture Inputs
+| Situation | Behavior |
+|---|---|
+| Primary source missing | Continue only if the skill can infer a narrower safe scope; otherwise stop with the exact missing file/folder. |
+| Referenced artifact missing | Record as a gap or blocker instead of inventing content. |
+| Existing target file present | Do not overwrite. Create a proposed dated file or ask for protected confirmation. |
+| Ambiguous scope | Choose the smallest evidence-backed scope; ask only if two or more scopes are equally plausible. |
+| Contradictory sources | Prefer explicit status/source-of-truth documents over generated reports; list the contradiction in the output. |
 
-Read all ADRs in `docs/architecture/`:
-- For each ADR, read the full file
-- Extract the "GDD Requirements Addressed" table
-- Note which GDD documents and requirement IDs each ADR references
+## 1. Discover Context
 
-Read `docs/architecture/architecture-traceability.md` if it exists.
+Read only the sources needed for the requested scope. Start with indexes, manifests, registries, and status files before reading large documents.
 
-Report: "Loaded [N] ADRs. [M] reference [gdd filename]."
+Primary sources:
 
----
+- changed GDD/design doc
+- docs/architecture/adr-*.md
+- docs/registry/**
+- production/epics/**
+- production/stories/**
+- production/sprints/**
+- production/qa/**
+- git diff output when full/recent mode is used
 
-## 5. Impact Analysis
+Discovery rules:
 
-For each ADR that references the changed GDD:
+1. Prefer canonical source-of-truth files over generated reports.
+2. Use `Glob` and `Grep` before reading large files.
+3. Keep a source list for the final report or artifact.
+4. When many files match, read the most relevant 5 to 10 first and summarize the rest as candidates.
+5. Treat missing or draft-status dependencies as blockers, not as approval to invent content.
 
-Compare the ADR's "GDD Requirements Addressed" entries against the changed sections
-of the GDD. For each referenced requirement:
+## 2. Build the Working Model
 
-1. **Locate the requirement** in the current GDD — does it still exist?
-2. **Compare**: What did the GDD say when the ADR was written vs. what it says now?
-3. **Assess the ADR decision**: Is the architectural decision still valid?
+Use the discovered evidence to build a concise working model before producing output.
 
-Classify each affected ADR as one of:
+1. Normalize the changed source path and compare current content to existing architecture/planning references.
+2. Identify impacted interfaces, state ownership, formulas, content counts, acceptance criteria, tests, and QA plans.
+3. Classify each affected artifact as Must Update, Should Review, No Action, or Unknown.
+4. Write an impact report and proposed update order.
+5. Do not modify ADRs, GDDs, registries, stories, or sprint status without explicit confirmation.
 
-| Status | Meaning |
-|--------|---------|
-| ✅ **Still Valid** | The GDD change doesn't affect what this ADR decided |
-| ⚠️ **Needs Review** | The GDD change may affect this ADR — human judgment needed |
-| 🔴 **Likely Superseded** | The GDD change directly contradicts what this ADR assumed |
+Classification rules:
 
-For each affected ADR, produce an impact entry:
+- **Blocking**: prevents safe implementation, review, release, or downstream skill execution.
+- **High**: likely to cause rework, wrong implementation, invalid QA, or broken traceability.
+- **Medium**: weakens handoff quality but can be resolved during normal follow-up.
+- **Low**: cleanup, clarity, or optional improvement.
 
-```
-### ADR-NNNN: [title]
-Status: [Still Valid / Needs Review / Likely Superseded]
+## 3. Produce the Artifact
 
-What the ADR assumed about this GDD:
-  "[relevant quote from the ADR's GDD Requirements Addressed section]"
+Canonical outputs for this skill:
 
-What the GDD now says:
-  "[relevant quote from the current GDD]"
+- design/change-impact/change-impact-[YYYYMMDD]-[slug].md
 
-Assessment:
-  [Explanation of whether the ADR decision is still valid, and why]
+Artifact requirements:
 
-Recommended action:
-  [Keep as-is | Review and update | Mark Superseded and write new ADR]
-```
+1. Include scope, date, source list, assumptions, and confidence.
+2. Separate facts from recommendations and inferred conclusions.
+3. Include explicit next actions and the command that should be run next.
+4. Preserve historical information; prefer additive notes over destructive rewrites.
+5. When updating an index or manifest, append or update only the relevant row and preserve unrelated content.
 
----
+Required report sections:
 
-## 6. Present Impact Report
+- Change summary
+- Impacted artifacts
+- Required ADR updates
+- Story/epic impact
+- QA/test impact
+- Safe update order
+- Protected edits not applied
 
-Present the full impact report to the user before asking for any action. Format:
+## 4. Validation
 
-```
-## Design Change Impact Report
-GDD: [filename]
-Date: [today]
-Changes detected: [N sections changed]
-ADRs referencing this GDD: [M]
+1. Check that every conclusion cites or names a repository source.
+2. Check that all blockers have a concrete next action.
+3. Check that proposed writes stay within the declared output paths.
+4. Check that dry-run mode produced no writes.
+5. List every Bash command run and whether it was read-only or diagnostic.
+6. Summarize any subagent verdicts and unresolved disagreements.
 
-### Not Affected
-[ADRs referencing this GDD whose decisions remain valid]
+Stop conditions:
 
-### Needs Review ([count])
-[ADRs that may need updating]
+- No changed design source was supplied or inferable.
 
-### Likely Superseded ([count])
-[ADRs whose assumptions are now contradicted]
-```
+## 5. Final Response
 
----
-
-## 6b. Director Gate — Technical Impact Review
-
-**Review mode check** — apply before spawning TD-CHANGE-IMPACT:
-- `solo` → skip. Note: "TD-CHANGE-IMPACT skipped — Solo mode." Proceed to Phase 7.
-- `lean` → skip. Note: "TD-CHANGE-IMPACT skipped — Lean mode." Proceed to Phase 7.
-- `full` → spawn as normal.
-
-Spawn `technical-director` via Task using gate **TD-CHANGE-IMPACT** (`.claude/docs/director-gates.md`).
-
-Pass: the full Design Change Impact Report from Phase 6 (change summary, all affected ADRs with their Still Valid / Needs Review / Likely Superseded classifications, and recommended actions).
-
-The technical-director reviews whether:
-- The impact classifications are correct (no ADRs under-classified)
-- The recommended actions are architecturally sound
-- Any cascading effects on other ADRs or systems were missed
-
-Apply the verdict:
-- **APPROVE** → proceed to Phase 7 resolution workflow
-- **CONCERNS** → surface the specific ADRs or recommendations flagged; use `AskUserQuestion` with options: `Revise the impact assessment` / `Accept with noted concerns` / `Discuss further`
-- **REJECT** → do not proceed to resolution; re-analyze the impact before continuing
-
----
-
-## 7. Resolution Workflow
-
-For each ADR marked "Needs Review" or "Likely Superseded", ask the user what to do:
-
-Ask for each ADR in turn:
-> "ADR-NNNN ([title]) — [status]. What would you like to do?"
-> Options:
-> - "Mark Superseded (I'll write a new ADR)" — updates ADR status line to `Superseded by: [pending]`
-> - "Update in place (minor revision)" — opens the ADR for editing; note what to revise
-> - "Keep as-is (the change doesn't actually affect this decision)"
-> - "Skip for now (revisit later)"
-
-For ADRs marked **Superseded**:
-- Update the ADR's Status field: `Superseded by ADR-[next number] (pending — see change-impact-[date]-[system].md)`
-- Ask: "May I update the status in [ADR filename]?"
-
----
-
-## 8. Update Traceability Index
-
-If `docs/architecture/architecture-traceability.md` exists:
-- Add the changed GDD requirements to the "Superseded Requirements" table:
-
-```markdown
-## Superseded Requirements
-| Date | GDD | Requirement | Changed To | ADRs Affected | Resolution |
-|------|-----|-------------|------------|---------------|------------|
-| [date] | [gdd] | [old requirement text] | [new requirement text] | ADR-NNNN | [Superseded/Updated/Valid] |
-```
-
-Ask: "May I update the traceability index?"
-
----
-
-## 9. Output Change Impact Document
-
-Ask: "May I write the change impact report to `docs/architecture/change-impact-[date]-[system-slug].md`?"
-
-The document contains:
-- The change summary from step 3
-- The full impact analysis from step 5
-- Resolution decisions made in step 7
-- List of ADRs that need to be written or updated
-
-If user approved: Verdict: **COMPLETE** — change impact report saved.
-If user declined: Verdict: **BLOCKED** — user declined write.
-
----
-
-## 10. Follow-Up Actions
-
-Based on the resolution decisions, suggest:
-
-- **ADRs marked Superseded**: "Run `/architecture-decision [title]` to write the
-  replacement ADR. Then re-run `/propagate-design-change` to verify coverage."
-- **ADRs to update in place**: List the specific fields to update in each ADR
-- **If many ADRs affected**: "Run `/architecture-review` after all ADRs are updated
-  to verify the full traceability matrix is still coherent."
-
----
-
-## Collaborative Protocol
-
-1. **Read silently** — compute the full impact before presenting anything
-2. **Show the full report first** — let the user see the scope before asking for action
-3. **Ask per-ADR** — don't batch decisions; each affected ADR may need different treatment
-4. **Ask before writing** — always confirm before modifying any file
-5. **Non-destructive** — never delete ADR content; only add "Superseded by" notes
+End with a concise summary of what was written, what was skipped because it was protected or unsafe, validation results, and the recommended next command. Include file paths for every artifact created or proposed.

@@ -1,283 +1,131 @@
 ---
 name: soak-test
 description: "Generate a soak test protocol for extended play sessions. Defines what to observe, measure, and log during long play sessions to surface slow leaks, fatigue effects, and edge cases that only appear after sustained play. Primarily used in Polish and Release phases."
-argument-hint: "[duration: 30m | 1h | 2h | 4h] [focus: memory | stability | balance | all]"
+argument-hint: "[duration: 30m | 1h | 2h | 4h] [focus: memory | stability | balance | all] [--dry-run]"
 user-invocable: true
-allowed-tools: Read, Glob, Grep, Write
+allowed-tools: Read, Glob, Grep, Write, Edit, AskUserQuestion
 ---
 
-# Soak Test
-
-A soak test (also called an endurance test) is an extended play session run
-with specific observation goals. Unlike a smoke check (broad critical path,
-~10 min) or a single-feature playtest (~30 min), a soak test runs for **30
-minutes to several hours** to surface:
-
-- **Memory leaks** — gradual heap growth that only appears after scene transitions
-- **Performance drift** — frame time degradation that worsens over time
-- **State accumulation bugs** — issues that only appear after N repetitions
-  of a mechanic (inventory full, score overflow, AI state corruption)
-- **Fun fatigue** — mechanics that feel good in a first session but grow
-  repetitive over extended play
-- **Content exhaustion** — the point where players run out of novel content
-
-**This skill generates the observation protocol and analysis harness — the
-human does the actual playing.**
-
-**Output:** `production/qa/soak-test-[date]-[duration].md`
-
-**When to run:**
-- Polish phase — before `/gate-check release`
-- After fixing a memory or stability issue (regression soak)
-- When extended play has not been formally tracked
-
----
-
-## 1. Parse Arguments
-
-**Duration** (default: `1h`):
-- `30m` — short soak; suitable for testing a single mechanic or scene
-- `1h` — standard soak; covers most common leak categories
-- `2h` — extended soak; recommended for first full Polish soak
-- `4h` — deep soak; required for games with long session design (RPGs, sims)
-
-**Focus** (default: `all`):
-- `memory` — focus on heap size, object count, leak patterns
-- `stability` — focus on crash/freeze/hang detection
-- `balance` — focus on fun fatigue, content exhaustion, difficulty perception
-- `all` — all of the above
-
----
-
-## 2. Load Context
-
-Read:
-- `.claude/docs/technical-preferences.md` — engine (for engine-specific memory
-  monitoring guidance), performance budgets (memory ceiling, target FPS)
-- `design/gdd/game-concept.md` — intended session length (for comparison against
-  soak duration), core loop description
-- Most recent file in `production/playtests/` — prior playtest findings
-  (to avoid re-documenting known issues)
-- Most recent file in `production/qa/qa-plan-*.md` — current sprint test coverage
-  (to understand what has been formally tested vs. what the soak covers)
-
-Note any performance budget targets from technical-preferences.md:
-- Memory ceiling: [N MB, or "not set"]
-- Target FPS: [N, or "not set"]
-- Frame budget: [N ms, or "not set"]
-
----
-
-## 3. Define Observation Checkpoints
-
-Based on duration, generate timed checkpoints:
-
-**30m soak**: T+0, T+10, T+20, T+30
-**1h soak**: T+0, T+15, T+30, T+45, T+60
-**2h soak**: T+0, T+20, T+40, T+60, T+80, T+100, T+120
-**4h soak**: T+0, T+30, T+60, T+90, T+120, T+180, T+240
-
-At each checkpoint, the observer records the observation items defined in
-Phase 4.
-
----
-
-## 4. Generate the Soak Test Protocol
-
-### Memory / Stability observation items (if focus = memory or all)
-
-Engine-specific monitoring guidance:
-
-**Godot 4:**
-- Open Debugger → Monitors tab; track `Memory → Static Memory` and
-  `Object Count → Objects` across checkpoints
-- Record: Static Memory (KB), Object Count, Orphan Nodes count
-- Alert threshold: Memory growth > 20% from T+0 after the first 15 minutes
-  (some growth on load is expected; sustained growth indicates a leak)
-- Note: `Performance.get_monitor(Performance.MEMORY_STATIC)` returns bytes
-  in Godot 4.6
-
-**Unity:**
-- Open Memory Profiler (Window → Analysis → Memory Profiler)
-- Record: Total Reserved Memory (MB), GC Allocated (MB), Object Count at each checkpoint
-- Alert threshold: GC Allocated growing monotonically across 3+ checkpoints
-
-**Unreal Engine:**
-- Use `stat memory` console command at each checkpoint
-- Record: Physical Memory Used (MB), Physical Memory Available
-- Alert threshold: Physical Memory Used growth > 50MB over the full soak
-
-### Stability observation items (if focus = stability or all)
-
-At each checkpoint, note:
-- [ ] No crash, hang, or freeze occurred since last checkpoint
-- [ ] Frame rate still within target budget ([target FPS] fps)
-- [ ] Audio still playing correctly (no desync or silence)
-- [ ] All HUD elements still rendering correctly
-- [ ] Input responding as expected (no input loss or lag spike)
-
-### Balance / fatigue observation items (if focus = balance or all)
-
-Collect subjective observations at each checkpoint:
-- [ ] Core mechanic still feels rewarding (Y/N)
-- [ ] Perceived difficulty level: [too easy / appropriate / too hard]
-- [ ] Any "I've seen this before" moments since last checkpoint? (novel content exhaustion)
-- [ ] Any moment of frustration since last checkpoint? Note cause.
-- [ ] Any moment of peak engagement since last checkpoint? Note cause.
-
----
-
-## 5. Generate the Protocol Document
-
-```markdown
 # Soak Test Protocol
 
-> **Date**: [date]
-> **Duration**: [duration]
-> **Focus**: [memory | stability | balance | all]
-> **Engine**: [engine]
-> **Generated by**: /soak-test
+Generate an extended-play protocol for stability, memory, performance, balance fatigue, save/load durability, and long-session edge cases.
 
----
+## 0. Execution Contract
 
-## Pre-Session Setup
+### 0.1 Invocation and autonomy
 
-Before starting the soak:
+Supported modes:
 
-- [ ] Game is running from a **fresh launch** (not resumed from a prior session)
-- [ ] All background applications closed (minimise OS memory interference)
-- [ ] Performance monitoring tool open and recording:
-  - **Godot**: Debugger → Monitors tab → Memory section visible
-  - **Unity**: Memory Profiler window open
-  - **Unreal**: `stat memory` ready in console
-- [ ] Soak target confirmed: [session design intent from game concept]
-- [ ] Prior known issues to watch for: [from most recent playtest / qa-plan]
+- duration: 30m, 1h, 2h, 4h
+- focus: memory, stability, balance, all
+- blank: default 1h all-focus protocol
 
----
+The invocation authorizes routine repository-local work for this skill. Operate autonomously after resolving scope; do not ask the user to approve every normal file creation. Ask only for protected operations, destructive ambiguity, or missing source-of-truth decisions that cannot be inferred safely.
 
-## Baseline (T+0) — Record Before Playing
+If `--dry-run` is present, perform discovery and produce the complete proposed result, but do not call `Write` or `Edit`.
 
-| Metric | Baseline Value |
-|--------|---------------|
-| Memory / Heap | [record before first frame of gameplay] |
-| Object Count | [record] |
-| FPS (first 30 seconds) | [record] |
-| [Engine-specific metric] | [record] |
+### 0.2 Path safety
 
----
+All user-supplied paths must be repository-relative. Reject absolute paths, paths containing `..`, and paths outside the expected project roots for this skill. Normalize paths before reading or writing.
 
-## Checkpoint Log
+### 0.3 Write policy
 
-### T+[N] minutes
+Routine writes allowed by invocation:
 
-**Memory / Stability** *(if applicable)*:
+- production/qa/soak/soak-test-protocol-[YYYYMMDD].md
 
-| Metric | Value | Δ from Baseline | Alert? |
-|--------|-------|-----------------|--------|
-| Memory / Heap | | | |
-| Object Count | | | |
-| FPS | | | |
-| Crashes / Hangs | | | |
+Protected operations require explicit confirmation through `AskUserQuestion`:
 
-**Stability checks**:
-- [ ] No crash or hang since last checkpoint
-- [ ] Frame rate within budget ([N] fps target)
-- [ ] Audio correct
-- [ ] HUD rendering correctly
-- [ ] Input responding correctly
+- Overwriting or deleting an existing file.
+- Editing canonical source-of-truth documents outside the declared outputs.
+- Changing statuses, gates, stage files, sprint state, story state, registry entries, or release readiness.
+- Running commands that modify files, install dependencies, generate builds, publish artifacts, deploy, tag, commit, or push.
+- Applying changes whose scope is broader than the user requested.
 
-**Balance / Fatigue** *(if applicable)*:
-- Core mechanic still rewarding: Y / N
-- Difficulty perception: too easy / appropriate / too hard
-- Notable moments: [note any peak engagement or frustration]
-- Content exhaustion signs: Y / N — [describe]
+Use `Edit` for targeted changes to existing files. Use `Write` for new files or complete replacement only after the replacement scope is safe and approved.
 
-**Free observations**:
-*(Note anything unexpected observed since the last checkpoint)*
+### 0.8 Missing-file behavior
 
----
+| Situation | Behavior |
+|---|---|
+| Primary source missing | Continue only if the skill can infer a narrower safe scope; otherwise stop with the exact missing file/folder. |
+| Referenced artifact missing | Record as a gap or blocker instead of inventing content. |
+| Existing target file present | Do not overwrite. Create a proposed dated file or ask for protected confirmation. |
+| Ambiguous scope | Choose the smallest evidence-backed scope; ask only if two or more scopes are equally plausible. |
+| Contradictory sources | Prefer explicit status/source-of-truth documents over generated reports; list the contradiction in the output. |
 
-[Repeat Checkpoint Log section for each timed checkpoint]
+## 1. Discover Context
 
----
+Read only the sources needed for the requested scope. Start with indexes, manifests, registries, and status files before reading large documents.
 
-## Post-Session Analysis
+Primary sources:
 
-### Memory Trend
+- production/qa/plans/**
+- production/qa/evidence/**
+- docs/architecture/**
+- design/gdd/**
+- performance budgets
+- known bug reports
 
-| Checkpoint | Memory | Δ/hr extrapolated |
-|------------|--------|-------------------|
-| T+0 | | |
-| [T+N] | | |
+Discovery rules:
 
-**Leak detected?** Y / N
-**Estimated time to OOM at current rate**: [N hours / not applicable]
+1. Prefer canonical source-of-truth files over generated reports.
+2. Use `Glob` and `Grep` before reading large files.
+3. Keep a source list for the final report or artifact.
+4. When many files match, read the most relevant 5 to 10 first and summarize the rest as candidates.
+5. Treat missing or draft-status dependencies as blockers, not as approval to invent content.
 
-### Stability Summary
+## 2. Build the Working Model
 
-Total crashes: [N]
-Total hangs: [N]
-Worst FPS observed: [N] fps at [checkpoint]
-Performance degradation: stable / mild / severe
+Use the discovered evidence to build a concise working model before producing output.
 
-### Balance / Fatigue Summary
+1. Resolve duration and focus.
+2. Identify critical paths, long-session risks, telemetry/logging needs, reset/rollback instructions, and failure definitions.
+3. Create timed test script with checkpoints and evidence requirements.
+4. Do not run the soak test; this skill writes the protocol.
+5. Include escalation rules for crashes, memory growth, progression stalls, or save corruption.
 
-Fun curve: [engaged throughout / fatigue onset at T+N / repetitive from start]
-Content exhaustion point: [never / at T+N / early]
-Difficulty arc: [appropriate / too easy throughout / difficulty spike at T+N]
+Classification rules:
 
-### Issues Found
+- **Blocking**: prevents safe implementation, review, release, or downstream skill execution.
+- **High**: likely to cause rework, wrong implementation, invalid QA, or broken traceability.
+- **Medium**: weakens handoff quality but can be resolved during normal follow-up.
+- **Low**: cleanup, clarity, or optional improvement.
 
-| ID | Severity | Checkpoint | Description |
-|----|----------|------------|-------------|
-| SOAK-001 | S[1-4] | T+[N] | [description] |
+## 3. Produce the Artifact
 
----
+Canonical outputs for this skill:
 
-## Verdict: PASS / PASS WITH CONCERNS / FAIL
+- production/qa/soak/soak-test-protocol-[YYYYMMDD].md
 
-**PASS**: No leaks detected, stability maintained, fun factor consistent
-**PASS WITH CONCERNS**: Minor drift or fatigue noted; addressable in Polish
-**FAIL**: Memory leak confirmed, stability breach, or severe fun fatigue
+Artifact requirements:
 
----
+1. Include scope, date, source list, assumptions, and confidence.
+2. Separate facts from recommendations and inferred conclusions.
+3. Include explicit next actions and the command that should be run next.
+4. Preserve historical information; prefer additive notes over destructive rewrites.
+5. When updating an index or manifest, append or update only the relevant row and preserve unrelated content.
 
-## Sign-Off
+Required report sections:
 
-- **Tester**: [name] — [date]
-- **QA Lead review**: [name] — [date]
-```
+- Protocol path
+- Duration/focus
+- Test script
+- Evidence requirements
+- Failure thresholds
+- Escalation rules
 
----
+## 4. Validation
 
-## 6. Write Output
+1. Check that every conclusion cites or names a repository source.
+2. Check that all blockers have a concrete next action.
+3. Check that proposed writes stay within the declared output paths.
+4. Check that dry-run mode produced no writes.
 
-Present the protocol summary in conversation, then ask:
+Stop conditions:
 
-"May I write this soak test protocol to
-`production/qa/soak-test-[date]-[duration].md`?"
+- No blocking stop condition was encountered.
 
-Write only after approval.
+## 5. Final Response
 
-After writing:
-
-"Protocol written. To run the soak:
-1. Open the file and follow the Pre-Session Setup checklist
-2. Record each checkpoint as you play
-3. Complete the Post-Session Analysis section when done
-4. File bugs from 'Issues Found' to `production/qa/bugs/`
-5. Run `/bug-triage sprint` after the session to integrate any S1/S2 issues
-
-If the verdict is FAIL, run `/smoke-check` again after fixing the issues."
-
----
-
-## Collaborative Protocol
-
-- **This skill generates a protocol — humans run it** — never attempt to
-  run a soak test automatically. The observations require a human observer.
-- **Duration should match the game's session design** — a 5-minute game
-  doesn't need a 4h soak; a city-builder might. Use judgment and ask if unclear.
-- **First soak should be `all` focus** — narrow focus (memory-only) is for
-  regression soaks after a specific fix, not the first pass
-- **Ask before writing** — always confirm before creating the protocol file
+End with a concise summary of what was written, what was skipped because it was protected or unsafe, validation results, and the recommended next command. Include file paths for every artifact created or proposed.

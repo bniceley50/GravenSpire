@@ -1,210 +1,132 @@
 ---
 name: retrospective
 description: "Generates a sprint or milestone retrospective by analyzing completed work, velocity, blockers, and patterns. Produces actionable insights for the next iteration."
-argument-hint: "[sprint-N|milestone-name]"
+argument-hint: "[sprint-N|milestone-name] [--dry-run]"
 user-invocable: true
-allowed-tools: Read, Glob, Grep, Write
-context: |
-  !git log --oneline --since="2 weeks ago" 2>/dev/null
+allowed-tools: Read, Glob, Grep, Write, Edit, AskUserQuestion
 ---
 
-## Phase 1: Parse Arguments
+# Retrospective
 
-Determine whether this is a sprint retrospective (`sprint-N`) or a milestone retrospective (`milestone-name`).
+Generate a sprint or milestone retrospective from completed work, blockers, quality evidence, velocity, decisions, and team/process outcomes.
 
----
+## 0. Execution Contract
 
-## Phase 1b: Check for Existing Retrospective
+### 0.1 Invocation and autonomy
 
-Before loading any data, glob for an existing retrospective file:
+Supported modes:
 
-- For sprint retrospectives: `production/retrospectives/retro-[sprint-slug]-*.md`
-  (also check `production/sprints/sprint-[N]-retrospective.md` as an alternate location)
-- For milestone retrospectives: `production/retrospectives/retro-[milestone-name]-*.md`
+- sprint:<name>: sprint retro
+- milestone:<name>: milestone retro
+- blank: infer current completed period
 
-If a matching file is found, present the user with:
+The invocation authorizes routine repository-local work for this skill. Operate autonomously after resolving scope; do not ask the user to approve every normal file creation. Ask only for protected operations, destructive ambiguity, or missing source-of-truth decisions that cannot be inferred safely.
 
-```
-An existing retrospective was found: [filename]
+If `--dry-run` is present, perform discovery and produce the complete proposed result, but do not call `Write` or `Edit`.
 
-[A] Update existing retrospective — load it and add/revise sections
-[B] Start fresh — generate a new retrospective, archiving the old one
-```
+### 0.2 Path safety
 
-Wait for user selection before continuing. If updating, read the existing file and
-carry its content forward into the generation phase, revising sections with new data.
+All user-supplied paths must be repository-relative. Reject absolute paths, paths containing `..`, and paths outside the expected project roots for this skill. Normalize paths before reading or writing.
 
----
+### 0.3 Write policy
 
-## Phase 2: Load Sprint or Milestone Data
+Routine writes allowed by invocation:
 
-Read the sprint or milestone plan from the appropriate location:
+- production/retrospectives/retro-[scope]-[YYYYMMDD].md
 
-- Sprint plans: `production/sprints/`
-- Milestone definitions: `production/milestones/`
+Protected operations require explicit confirmation through `AskUserQuestion`:
 
-**If the file does not exist or is empty**, output:
+- Overwriting or deleting an existing file.
+- Editing canonical source-of-truth documents outside the declared outputs.
+- Changing statuses, gates, stage files, sprint state, story state, registry entries, or release readiness.
+- Running commands that modify files, install dependencies, generate builds, publish artifacts, deploy, tag, commit, or push.
+- Applying changes whose scope is broader than the user requested.
 
-> "No sprint data found for [sprint/milestone]. Run `/sprint-status` to generate
-> sprint data first, or provide the sprint details manually."
+Use `Edit` for targeted changes to existing files. Use `Write` for new files or complete replacement only after the replacement scope is safe and approved.
 
-Then use `AskUserQuestion` to present two options:
+### 0.8 Missing-file behavior
 
-- **[A] Provide data manually** — ask the user to paste or describe the sprint
-  tasks, dates, and outcomes; use that as the source of truth for the retrospective.
-- **[B] Stop** — abort the skill. Verdict: **BLOCKED** — no sprint data available.
+| Situation | Behavior |
+|---|---|
+| Primary source missing | Continue only if the skill can infer a narrower safe scope; otherwise stop with the exact missing file/folder. |
+| Referenced artifact missing | Record as a gap or blocker instead of inventing content. |
+| Existing target file present | Do not overwrite. Create a proposed dated file or ask for protected confirmation. |
+| Ambiguous scope | Choose the smallest evidence-backed scope; ask only if two or more scopes are equally plausible. |
+| Contradictory sources | Prefer explicit status/source-of-truth documents over generated reports; list the contradiction in the output. |
 
-If the user chooses [A], collect the data and continue to Phase 3 using what they provide.
-If the user chooses [B], stop here.
+## 1. Discover Context
 
-Extract: planned tasks, estimated effort, owners, and goals.
+Read only the sources needed for the requested scope. Start with indexes, manifests, registries, and status files before reading large documents.
 
-Read the git log for the period covered by the sprint or milestone to understand what was actually committed and when.
+Primary sources:
 
----
+- production/sprints/**
+- production/milestones/**
+- production/stories/**
+- production/qa/**
+- production/retrospectives/**
+- changelog/release docs
 
-## Phase 3: Analyze Completion and Trends
+Discovery rules:
 
-Scan for completed and incomplete tasks by comparing the plan against actual deliverables. Check for:
+1. Prefer canonical source-of-truth files over generated reports.
+2. Use `Glob` and `Grep` before reading large files.
+3. Keep a source list for the final report or artifact.
+4. When many files match, read the most relevant 5 to 10 first and summarize the rest as candidates.
+5. Treat missing or draft-status dependencies as blockers, not as approval to invent content.
 
-- Tasks completed as planned
-- Tasks completed but modified from the plan
-- Tasks carried over (not completed)
-- Tasks added mid-sprint (unplanned work)
-- Tasks removed or descoped
+## 2. Build the Working Model
 
-Scan the codebase for TODO/FIXME trends:
+Use the discovered evidence to build a concise working model before producing output.
 
-- Count current TODO/FIXME/HACK comments
-- Compare to previous sprint counts if available (check previous retrospectives)
-- Note whether technical debt is growing or shrinking
+1. Identify the completed period and goals.
+2. Compare planned vs completed work and summarize blockers, rework, QA outcomes, velocity, and decision churn.
+3. Generate Start/Stop/Continue and action items with owners when available.
+4. Ask only for missing qualitative team context that cannot be inferred.
+5. Write the retrospective; do not change future sprint plans automatically.
 
-Read previous retrospectives (if any) from `production/sprints/` or `production/milestones/` to check:
+Classification rules:
 
-- Were previous action items addressed?
-- Are the same problems recurring?
-- How has velocity trended?
+- **Blocking**: prevents safe implementation, review, release, or downstream skill execution.
+- **High**: likely to cause rework, wrong implementation, invalid QA, or broken traceability.
+- **Medium**: weakens handoff quality but can be resolved during normal follow-up.
+- **Low**: cleanup, clarity, or optional improvement.
 
----
+## 3. Produce the Artifact
 
-## Phase 4: Generate the Retrospective
+Canonical outputs for this skill:
 
-```markdown
-## Retrospective: [Sprint N / Milestone Name]
-Period: [Start Date] -- [End Date]
-Generated: [Date]
+- production/retrospectives/retro-[scope]-[YYYYMMDD].md
 
-### Metrics
+Artifact requirements:
 
-| Metric | Planned | Actual | Delta |
-|--------|---------|--------|-------|
-| Tasks | [X] | [Y] | [+/- Z] |
-| Completion Rate | -- | [Z%] | -- |
-| Story Points / Effort Days | [X] | [Y] | [+/- Z] |
-| Bugs Found | -- | [N] | -- |
-| Bugs Fixed | -- | [N] | -- |
-| Unplanned Tasks Added | -- | [N] | -- |
-| Commits | -- | [N] | -- |
+1. Include scope, date, source list, assumptions, and confidence.
+2. Separate facts from recommendations and inferred conclusions.
+3. Include explicit next actions and the command that should be run next.
+4. Preserve historical information; prefer additive notes over destructive rewrites.
+5. When updating an index or manifest, append or update only the relevant row and preserve unrelated content.
 
-### Velocity Trend
+Required report sections:
 
-| Sprint | Planned | Completed | Rate |
-|--------|---------|-----------|------|
-| [N-2] | [X] | [Y] | [Z%] |
-| [N-1] | [X] | [Y] | [Z%] |
-| [N] (current) | [X] | [Y] | [Z%] |
+- Period summary
+- What went well
+- What did not
+- Metrics
+- Root causes
+- Action items
+- Carryover risks
 
-**Trend**: [Increasing / Stable / Decreasing]
-[One sentence explaining the trend]
+## 4. Validation
 
-### What Went Well
-- [Observation backed by specific data or examples]
-- [Another positive observation]
-- [Recognize specific contributions or decisions that paid off]
+1. Check that every conclusion cites or names a repository source.
+2. Check that all blockers have a concrete next action.
+3. Check that proposed writes stay within the declared output paths.
+4. Check that dry-run mode produced no writes.
 
-### What Went Poorly
-- [Specific issue with measurable impact -- e.g., "Feature X took 5 days
-  instead of estimated 2, blocking tasks Y and Z"]
-- [Another issue with impact]
-- [Do not assign blame -- focus on systemic causes]
+Stop conditions:
 
-### Blockers Encountered
+- No blocking stop condition was encountered.
 
-| Blocker | Duration | Resolution | Prevention |
-|---------|----------|------------|------------|
-| [What blocked progress] | [How long] | [How it was resolved] | [How to prevent recurrence] |
+## 5. Final Response
 
-### Estimation Accuracy
-
-| Task | Estimated | Actual | Variance | Likely Cause |
-|------|-----------|--------|----------|--------------|
-| [Most overestimated task] | [X] | [Y] | [+Z] | [Why] |
-| [Most underestimated task] | [X] | [Y] | [-Z] | [Why] |
-
-**Overall estimation accuracy**: [X%] of tasks within +/- 20% of estimate
-
-[Analysis: Are we consistently over- or under-estimating? For which types of
-tasks? What adjustment should we apply?]
-
-### Carryover Analysis
-
-| Task | Original Sprint | Times Carried | Reason | Action |
-|------|----------------|---------------|--------|--------|
-| [Task that was not completed] | [Sprint N-X] | [N] | [Why] | [Complete / Descope / Redesign] |
-
-### Technical Debt Status
-- Current TODO count: [N] (previous: [N])
-- Current FIXME count: [N] (previous: [N])
-- Current HACK count: [N] (previous: [N])
-- Trend: [Growing / Stable / Shrinking]
-- [Note any areas of concern]
-
-### Previous Action Items Follow-Up
-
-| Action Item (from Sprint N-1) | Status | Notes |
-|-------------------------------|--------|-------|
-| [Previous action] | [Done / In Progress / Not Started] | [Context] |
-
-### Action Items for Next Iteration
-
-| # | Action | Owner | Priority | Deadline |
-|---|--------|-------|----------|----------|
-| 1 | [Specific, measurable action] | [Who] | [High/Med/Low] | [When] |
-| 2 | [Another action] | [Who] | [Priority] | [When] |
-
-### Process Improvements
-- [Specific change to how we work, with expected benefit]
-- [Another improvement -- keep it to 2-3 actionable items, not a wish list]
-
-### Summary
-[2-3 sentence overall assessment: Was this a good sprint/milestone? What is
-the single most important thing to change going forward?]
-```
-
----
-
-## Phase 5: Save Retrospective
-
-Present the retrospective and top findings to the user (completion rate, velocity trend, top blocker, most important action item).
-
-Ask: "May I write this to `production/sprints/sprint-[N]-retrospective.md`?" (or the milestone path if applicable)
-
-If yes, write the file, creating the directory if needed. Verdict: **COMPLETE** — retrospective saved.
-
-If no, stop here. Verdict: **BLOCKED** — user declined write.
-
----
-
-## Phase 6: Next Steps
-
-- Run `/sprint-plan` to incorporate the action items and velocity data into the next sprint.
-- If this was a milestone retrospective, run `/gate-check` to formally assess readiness for the next phase.
-
-### Guidelines
-
-- Be honest and specific. Vague retrospectives ("communication could be better") produce vague improvements. Use data and examples.
-- Focus on systemic issues, not individual blame.
-- Limit action items to 3-5. More than that dilutes focus.
-- Every action item must have an owner and a deadline.
-- Check whether previous action items were completed. Recurring unaddressed items are a process smell.
-- If this is a milestone retrospective, also evaluate whether the milestone goals were achieved and what that means for the overall project timeline.
+End with a concise summary of what was written, what was skipped because it was protected or unsafe, validation results, and the recommended next command. Include file paths for every artifact created or proposed.

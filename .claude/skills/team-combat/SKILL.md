@@ -1,120 +1,150 @@
 ---
 name: team-combat
 description: "Orchestrate the combat team: coordinates game-designer, gameplay-programmer, ai-programmer, technical-artist, sound-designer, and qa-tester to design, implement, and validate a combat feature end-to-end."
-argument-hint: "[combat feature description]"
+argument-hint: "[combat feature description] [--dry-run]"
 user-invocable: true
 allowed-tools: Read, Glob, Grep, Write, Edit, Bash, Task, AskUserQuestion, TodoWrite
 ---
-**Argument check:** If no combat feature description is provided, output:
-> "Usage: `/team-combat [combat feature description]` — Provide a description of the combat feature to design and implement (e.g., `melee parry system`, `ranged weapon spread`)."
-Then stop immediately without spawning any subagents or reading any files.
 
-When this skill is invoked with a valid argument, orchestrate the combat team through a structured pipeline.
+# Team Combat
 
-**Decision Points:** At each phase transition, use `AskUserQuestion` to present
-the user with the subagent's proposals as selectable options. Write the agent's
-full analysis in conversation, then capture the decision with concise labels.
-The user must approve before moving to the next phase.
+Coordinate combat design, implementation, AI, technical art, audio, and QA for a combat feature end to end.
 
-## Team Composition
-- **game-designer** — Design the mechanic, define formulas and edge cases
-- **gameplay-programmer** — Implement the core gameplay code
-- **ai-programmer** — Implement NPC/enemy AI behavior for the feature
-- **technical-artist** — Create VFX, shader effects, and visual feedback
-- **sound-designer** — Define audio events, impact sounds, and ambient combat audio
-- **engine specialist** (primary) — Validate architecture and implementation patterns are idiomatic for the engine (read from `.claude/docs/technical-preferences.md` Engine Specialists section)
-- **qa-tester** — Write test cases and validate the implementation
+## 0. Execution Contract
 
-## How to Delegate
+### 0.1 Invocation and autonomy
 
-Use the Task tool to spawn each team member as a subagent:
-- `subagent_type: game-designer` — Design the mechanic, define formulas and edge cases
-- `subagent_type: gameplay-programmer` — Implement the core gameplay code
-- `subagent_type: ai-programmer` — Implement NPC/enemy AI behavior
-- `subagent_type: technical-artist` — Create VFX, shader effects, visual feedback
-- `subagent_type: sound-designer` — Define audio events, impact sounds, ambient audio
-- `subagent_type: [primary engine specialist]` — Engine idiom validation for architecture and implementation
-- `subagent_type: qa-tester` — Write test cases and validate implementation
+Supported modes:
 
-Always provide full context in each agent's prompt (design doc path, relevant code files, constraints). Launch independent agents in parallel where the pipeline allows it (e.g., Phase 3 agents can run simultaneously).
+- feature or area description: orchestrate full team workflow
+- --dry-run: produce plan and subagent summaries without writes
 
-## Pipeline
+The invocation authorizes routine repository-local work for this skill. Operate autonomously after resolving scope; do not ask the user to approve every normal file creation. Ask only for protected operations, destructive ambiguity, or missing source-of-truth decisions that cannot be inferred safely.
 
-### Phase 1: Design
-Delegate to **game-designer**:
-- Create or update the design document in `design/gdd/` covering: mechanic overview, player fantasy, detailed rules, formulas with variable definitions, edge cases, dependencies, tuning knobs with safe ranges, and acceptance criteria
-- Output: completed design document
+If `--dry-run` is present, perform discovery and produce the complete proposed result, but do not call `Write` or `Edit`.
 
-### Phase 2: Architecture
-Delegate to **gameplay-programmer** (with **ai-programmer** if AI is involved):
-- Review the design document
-- Design the code architecture: class structure, interfaces, data flow
-- Identify integration points with existing systems
-- Output: architecture sketch with file list and interface definitions
+### 0.2 Path safety
 
-Then spawn the **primary engine specialist** to validate the proposed architecture:
-- Is the class/node/component structure idiomatic for the pinned engine? (e.g., Godot node hierarchy, Unity MonoBehaviour vs DOTS, Unreal Actor/Component design)
-- Are there engine-native systems that should be used instead of custom implementations?
-- Any proposed APIs that are deprecated or changed in the pinned engine version?
-- Output: engine architecture notes — incorporate into the architecture before Phase 3 begins
+All user-supplied paths must be repository-relative. Reject absolute paths, paths containing `..`, and paths outside the expected project roots for this skill. Normalize paths before reading or writing.
 
-### Phase 3: Implementation (parallel where possible)
-Delegate in parallel:
-- **gameplay-programmer**: Implement core combat mechanic code
-- **ai-programmer**: Implement AI behaviors (if the feature involves NPC reactions)
-- **technical-artist**: Create VFX and shader effects
-- **sound-designer**: Define audio event list and mixing notes
+### 0.3 Write policy
 
-### Phase 4: Integration
-- Wire together gameplay code, AI, VFX, and audio
-- Ensure all tuning knobs are exposed and data-driven
-- Verify the feature works with existing combat systems
+Routine writes allowed by invocation:
 
-### Phase 5: Validation
-Delegate to **qa-tester**:
-- Write test cases from the acceptance criteria
-- Test all edge cases documented in the design
-- Verify performance impact is within budget
-- File bug reports for any issues found
+- production/team/combat/[slug]-combat-plan.md
+- production/team/combat/[slug]-implementation-plan.md
+- production/qa/evidence/combat-[slug]-checklist.md
 
-### Phase 6: Sign-off
-- Collect results from all team members
-- Report feature status: COMPLETE / NEEDS WORK / BLOCKED
-- List any outstanding issues and their assigned owners
+Protected operations require explicit confirmation through `AskUserQuestion`:
 
-## Error Recovery Protocol
+- Overwriting or deleting an existing file.
+- Editing canonical source-of-truth documents outside the declared outputs.
+- Changing statuses, gates, stage files, sprint state, story state, registry entries, or release readiness.
+- Running commands that modify files, install dependencies, generate builds, publish artifacts, deploy, tag, commit, or push.
+- Applying changes whose scope is broader than the user requested.
 
-If any spawned agent (via Task) returns BLOCKED, errors, or cannot complete:
+Use `Edit` for targeted changes to existing files. Use `Write` for new files or complete replacement only after the replacement scope is safe and approved.
 
-1. **Surface immediately**: Report "[AgentName]: BLOCKED — [reason]" to the user before continuing to dependent phases
-2. **Assess dependencies**: Check whether the blocked agent's output is required by subsequent phases. If yes, do not proceed past that dependency point without user input.
-3. **Offer options** via AskUserQuestion with choices:
-   - Skip this agent and note the gap in the final report
-   - Retry with narrower scope
-   - Stop here and resolve the blocker first
-4. **Always produce a partial report** — output whatever was completed. Never discard work because one agent blocked.
+### 0.4 Bash safety
 
-Common blockers:
-- Input file missing (story not found, GDD absent) → redirect to the skill that creates it
-- ADR status is Proposed → do not implement; run `/architecture-decision` first
-- Scope too large → split into two stories via `/create-stories`
-- Conflicting instructions between ADR and story → surface the conflict, do not guess
+Bash is limited to diagnostics and read-only discovery unless the user explicitly approved a protected operation. Safe examples include `git status --short`, `git log`, `git diff --name-only`, existing test commands that do not update snapshots, and local grep/listing commands. Never run package installation, clean/reset, rm, deploy, publish, commit, tag, push, or build upload commands from this skill.
 
-## File Write Protocol
+### 0.5 Task delegation
 
-All file writes (design documents, implementation files, test cases) are
-delegated to sub-agents spawned via Task. Each sub-agent enforces the
-"May I write to [path]?" protocol. This orchestrator does not write files directly.
+Use Task subagents only when they materially improve the result. Pass bounded context: the request, relevant source paths, current draft/report, and the exact verdict needed. Do not spawn duplicate reviewers. If review mode is available, use `solo` for no subagents, `lean` for only essential specialist review, and `full` for cross-functional or gate review.
 
-## Output
+### 0.6 Todo tracking
 
-A summary report covering: design completion status, implementation status per team member, test results, and any open issues.
+Use `TodoWrite` for multi-phase orchestration. Keep todos tied to observable phases, not low-level file operations. Close todos only when evidence exists.
 
-Verdict: **COMPLETE** — combat feature designed, implemented, and validated.
-Verdict: **BLOCKED** — one or more phases could not complete; partial report produced with unresolved items listed.
+### 0.8 Missing-file behavior
 
-## Next Steps
+| Situation | Behavior |
+|---|---|
+| Primary source missing | Continue only if the skill can infer a narrower safe scope; otherwise stop with the exact missing file/folder. |
+| Referenced artifact missing | Record as a gap or blocker instead of inventing content. |
+| Existing target file present | Do not overwrite. Create a proposed dated file or ask for protected confirmation. |
+| Ambiguous scope | Choose the smallest evidence-backed scope; ask only if two or more scopes are equally plausible. |
+| Contradictory sources | Prefer explicit status/source-of-truth documents over generated reports; list the contradiction in the output. |
 
-- Run `/code-review` on the implemented combat code before closing stories.
-- Run `/balance-check` to validate combat formulas and tuning values.
-- Run `/team-polish` if VFX, audio, or performance polish is needed.
+## 1. Discover Context
+
+Read only the sources needed for the requested scope. Start with indexes, manifests, registries, and status files before reading large documents.
+
+Primary sources:
+
+- design/gdd/**
+- docs/architecture/**
+- docs/registry/**
+- production/stories/**
+- production/qa/**
+- design/art/**
+- design/ux/**
+- docs/engine-reference/**
+
+Discovery rules:
+
+1. Prefer canonical source-of-truth files over generated reports.
+2. Use `Glob` and `Grep` before reading large files.
+3. Keep a source list for the final report or artifact.
+4. When many files match, read the most relevant 5 to 10 first and summarize the rest as candidates.
+5. Treat missing or draft-status dependencies as blockers, not as approval to invent content.
+
+## 2. Build the Working Model
+
+Use the discovered evidence to build a concise working model before producing output.
+
+1. Define the target feature/area and success criteria from existing docs before spawning specialists.
+2. Use TodoWrite to track orchestration phases: context, specialist briefs, synthesis, artifact plan, QA/evidence handoff, and open blockers.
+3. Spawn only the roles that materially contribute to this request: game-designer, gameplay-programmer, ai-programmer, technical-artist, sound-designer, qa-tester.
+4. Synthesize specialist output into one coherent plan focused on rules, combat feel, state machines, hit reactions, AI behavior, VFX/audio feedback, tuning, tests, and QA scenarios.
+5. Write team artifacts and evidence checklists; do not modify canonical GDDs, ADRs, sprint status, or production code unless the invocation explicitly requests implementation and protected-write confirmation is obtained.
+
+Classification rules:
+
+- **Blocking**: prevents safe implementation, review, release, or downstream skill execution.
+- **High**: likely to cause rework, wrong implementation, invalid QA, or broken traceability.
+- **Medium**: weakens handoff quality but can be resolved during normal follow-up.
+- **Low**: cleanup, clarity, or optional improvement.
+
+## 3. Produce the Artifact
+
+Canonical outputs for this skill:
+
+- production/team/combat/[slug]-combat-plan.md
+- production/team/combat/[slug]-implementation-plan.md
+- production/qa/evidence/combat-[slug]-checklist.md
+
+Artifact requirements:
+
+1. Include scope, date, source list, assumptions, and confidence.
+2. Separate facts from recommendations and inferred conclusions.
+3. Include explicit next actions and the command that should be run next.
+4. Preserve historical information; prefer additive notes over destructive rewrites.
+5. When updating an index or manifest, append or update only the relevant row and preserve unrelated content.
+
+Required report sections:
+
+- Team verdict
+- Specialist findings
+- Integrated plan
+- Artifacts/evidence created
+- Open blockers
+- Next command
+
+## 4. Validation
+
+1. Check that every conclusion cites or names a repository source.
+2. Check that all blockers have a concrete next action.
+3. Check that proposed writes stay within the declared output paths.
+4. Check that dry-run mode produced no writes.
+5. List every Bash command run and whether it was read-only or diagnostic.
+6. Summarize any subagent verdicts and unresolved disagreements.
+
+Stop conditions:
+
+- No feature, area, or current story context can be inferred.
+
+## 5. Final Response
+
+End with a concise summary of what was written, what was skipped because it was protected or unsafe, validation results, and the recommended next command. Include file paths for every artifact created or proposed.

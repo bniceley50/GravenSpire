@@ -7,160 +7,109 @@ allowed-tools: Read, Glob, Grep, Bash, Task
 agent: lead-programmer
 ---
 
-## Phase 1: Load Target Files
+# Code Review
 
-Read the target file(s) in full. Read CLAUDE.md for project coding standards.
+Perform a repository-local code review for correctness, architecture conformance, maintainability, performance, testability, and implementation risk without modifying files.
 
----
+## 0. Execution Contract
 
-## Phase 2: Identify Engine Specialists
+### 0.1 Invocation and autonomy
 
-Read `.claude/docs/technical-preferences.md`, section `## Engine Specialists`. Note:
+Supported modes:
 
-- The **Primary** specialist (used for architecture and broad engine concerns)
-- The **Language/Code Specialist** (used when reviewing the project's primary language files)
-- The **Shader Specialist** (used when reviewing shader files)
-- The **UI Specialist** (used when reviewing UI code)
+- path-to-file: review one file
+- path-to-directory: review bounded files under a directory
+- blank: stop and request a path
 
-If the section reads `[TO BE CONFIGURED]`, no engine is pinned — skip engine specialist steps.
+This is a read-only skill. It may inspect files and run safe read-only diagnostics when Bash is allowed, but it must not create, edit, move, delete, rename, stage, commit, tag, deploy, publish, or update project state.
 
----
+### 0.2 Path safety
 
-## Phase 3: ADR Compliance Check
+All user-supplied paths must be repository-relative. Reject absolute paths, paths containing `..`, and paths outside the expected project roots for this skill. Normalize paths before reading or writing.
 
-Search for ADR references in the story file, commit messages, and header comments. Look for patterns like `ADR-NNN` or `docs/architecture/ADR-`.
+### 0.4 Bash safety
 
-If no ADR references found, note: "No ADR references found — skipping ADR compliance check."
+Bash is limited to diagnostics and read-only discovery unless the user explicitly approved a protected operation. Safe examples include `git status --short`, `git log`, `git diff --name-only`, existing test commands that do not update snapshots, and local grep/listing commands. Never run package installation, clean/reset, rm, deploy, publish, commit, tag, push, or build upload commands from this skill.
 
-For each referenced ADR: read the file, extract the **Decision** and **Consequences** sections, then classify any deviation:
+### 0.5 Task delegation
 
-- **ARCHITECTURAL VIOLATION** (BLOCKING): Uses a pattern explicitly rejected in the ADR
-- **ADR DRIFT** (WARNING): Meaningfully diverges from the chosen approach without using a forbidden pattern
-- **MINOR DEVIATION** (INFO): Small difference from ADR guidance that doesn't affect overall architecture
+Use Task subagents only when they materially improve the result. Pass bounded context: the request, relevant source paths, current draft/report, and the exact verdict needed. Do not spawn duplicate reviewers. If review mode is available, use `solo` for no subagents, `lean` for only essential specialist review, and `full` for cross-functional or gate review.
 
----
+### 0.8 Missing-file behavior
 
-## Phase 4: Standards Compliance
+| Situation | Behavior |
+|---|---|
+| Primary source missing | Continue only if the skill can infer a narrower safe scope; otherwise stop with the exact missing file/folder. |
+| Referenced artifact missing | Record as a gap or blocker instead of inventing content. |
+| Existing target file present | Not applicable; this skill does not write. |
+| Ambiguous scope | Choose the smallest evidence-backed scope; ask only if two or more scopes are equally plausible. |
+| Contradictory sources | Prefer explicit status/source-of-truth documents over generated reports; list the contradiction in the output. |
 
-Identify the system category (engine, gameplay, AI, networking, UI, tools) and evaluate:
+## 1. Discover Context
 
-- [ ] Public methods and classes have doc comments
-- [ ] Cyclomatic complexity under 10 per method
-- [ ] No method exceeds 40 lines (excluding data declarations)
-- [ ] Dependencies are injected (no static singletons for game state)
-- [ ] Configuration values loaded from data files
-- [ ] Systems expose interfaces (not concrete class dependencies)
+Read only the sources needed for the requested scope. Start with indexes, manifests, registries, and status files before reading large documents.
 
----
+Primary sources:
 
-## Phase 5: Architecture and SOLID
+- requested path
+- neighboring files needed to understand imports/contracts
+- docs/architecture/control-manifest.md
+- docs/architecture/adr-*.md
+- design/gdd/**
+- tests/**
 
-**Architecture:**
-- [ ] Correct dependency direction (engine <- gameplay, not reverse)
-- [ ] No circular dependencies between modules
-- [ ] Proper layer separation (UI does not own game state)
-- [ ] Events/signals used for cross-system communication
-- [ ] Consistent with established patterns in the codebase
+Discovery rules:
 
-**SOLID:**
-- [ ] Single Responsibility: Each class has one reason to change
-- [ ] Open/Closed: Extendable without modification
-- [ ] Liskov Substitution: Subtypes substitutable for base types
-- [ ] Interface Segregation: No fat interfaces
-- [ ] Dependency Inversion: Depends on abstractions, not concretions
+1. Prefer canonical source-of-truth files over generated reports.
+2. Use `Glob` and `Grep` before reading large files.
+3. Keep a source list for the final report or artifact.
+4. When many files match, read the most relevant 5 to 10 first and summarize the rest as candidates.
+5. Treat missing or draft-status dependencies as blockers, not as approval to invent content.
 
----
+## 2. Build the Working Model
 
-## Phase 6: Game-Specific Concerns
+Use the discovered evidence to build a concise working model before producing output.
 
-- [ ] Frame-rate independence (delta time usage)
-- [ ] No allocations in hot paths (update loops)
-- [ ] Proper null/empty state handling
-- [ ] Thread safety where required
-- [ ] Resource cleanup (no leaks)
+1. Normalize the requested path and reject paths outside the repository.
+2. Read the smallest necessary set of files to understand behavior and contracts.
+3. Run safe diagnostics only when obvious and local, such as existing lint/test commands that do not modify files.
+4. Check for contract violations, hidden coupling, untested branches, error handling gaps, performance traps, and maintainability issues.
+5. Use Task only for specialist review when the code domain clearly benefits from a configured specialist.
 
----
+Classification rules:
 
-## Phase 7: Specialist Reviews (Parallel)
+- **Blocking**: prevents safe implementation, review, release, or downstream skill execution.
+- **High**: likely to cause rework, wrong implementation, invalid QA, or broken traceability.
+- **Medium**: weakens handoff quality but can be resolved during normal follow-up.
+- **Low**: cleanup, clarity, or optional improvement.
 
-Spawn all applicable specialists simultaneously via Task — do not wait for one before starting the next.
+## 3. Produce the Read-Only Report
 
-### Engine Specialists
+Return the report in chat. Do not write files. If a durable report would be useful, recommend the appropriate write-capable skill or command instead of creating it.
 
-If an engine is configured, determine which specialist applies to each file and spawn in parallel:
+Required report sections:
 
-- Primary language files (`.gd`, `.cs`, `.cpp`) → Language/Code Specialist
-- Shader files (`.gdshader`, `.hlsl`, shader graph) → Shader Specialist
-- UI screen/widget code → UI Specialist
-- Cross-cutting or unclear → Primary Specialist
+- Verdict
+- Blocking issues
+- High-priority issues
+- Medium/low issues
+- Tests reviewed/run
+- Architecture/GDD compliance
+- Recommended patch direction
 
-Also spawn the **Primary Specialist** for any file touching engine architecture (scene structure, node hierarchy, lifecycle hooks).
+## 4. Validation
 
-### QA Testability Review
+1. Check that every conclusion cites or names a repository source.
+2. Check that all blockers have a concrete next action.
+3. Check that proposed writes stay within the declared output paths.
+4. Check that no writes or state changes were performed.
+5. List every Bash command run and whether it was read-only or diagnostic.
+6. Summarize any subagent verdicts and unresolved disagreements.
 
-For Logic and Integration stories, also spawn `qa-tester` via Task in parallel with the engine specialists. Pass:
-- The implementation files being reviewed
-- The story's `## QA Test Cases` section (the pre-written test specs from qa-lead)
-- The story's `## Acceptance Criteria`
+Stop conditions:
 
-Ask the qa-tester to evaluate:
-- [ ] Are all test hooks and interfaces exposed (not hidden behind private/internal access)?
-- [ ] Do the QA test cases from the story's `## QA Test Cases` section map to testable code paths?
-- [ ] Are any acceptance criteria untestable as implemented (e.g., hardcoded values, no seam for injection)?
-- [ ] Does the implementation introduce any new edge cases not covered by the existing QA test cases?
-- [ ] Are there any observable side effects that should have a test but don't?
+- No path was provided.
 
-For Visual/Feel and UI stories: qa-tester reviews whether the manual verification steps in `## QA Test Cases` are achievable with the implementation as written — e.g., "is the state the manual checker needs to reach actually reachable?"
+## 5. Final Response
 
-Collect all specialist findings before producing output.
-
----
-
-## Phase 8: Output Review
-
-```
-## Code Review: [File/System Name]
-
-### Engine Specialist Findings: [N/A — no engine configured / CLEAN / ISSUES FOUND]
-[Findings from engine specialist(s), or "No engine configured." if skipped]
-
-### Testability: [N/A — Visual/Feel or Config story / TESTABLE / GAPS / BLOCKING]
-[qa-tester findings: test hooks, coverage gaps, untestable paths, new edge cases]
-[If BLOCKING: implementation must expose [X] before tests in ## QA Test Cases can run]
-
-### ADR Compliance: [NO ADRS FOUND / COMPLIANT / DRIFT / VIOLATION]
-[List each ADR checked, result, and any deviations with severity]
-
-### Standards Compliance: [X/6 passing]
-[List failures with line references]
-
-### Architecture: [CLEAN / MINOR ISSUES / VIOLATIONS FOUND]
-[List specific architectural concerns]
-
-### SOLID: [COMPLIANT / ISSUES FOUND]
-[List specific violations]
-
-### Game-Specific Concerns
-[List game development specific issues]
-
-### Positive Observations
-[What is done well -- always include this section]
-
-### Required Changes
-[Must-fix items before approval — ARCHITECTURAL VIOLATIONs always appear here]
-
-### Suggestions
-[Nice-to-have improvements]
-
-### Verdict: [APPROVED / APPROVED WITH SUGGESTIONS / CHANGES REQUIRED]
-```
-
-This skill is read-only — no files are written.
-
----
-
-## Phase 9: Next Steps
-
-- If verdict is APPROVED: run `/story-done [story-path]` to close the story.
-- If verdict is CHANGES REQUIRED: fix the issues and re-run `/code-review`.
-- If an ARCHITECTURAL VIOLATION is found: run `/architecture-decision` to record the correct approach.
+End with a concise verdict, prioritized findings, evidence sources, and recommended next command. Do not imply that any files were changed.

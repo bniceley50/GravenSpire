@@ -1,129 +1,150 @@
 ---
 name: team-audio
 description: "Orchestrate audio team: audio-director + sound-designer + technical-artist + gameplay-programmer for full audio pipeline from direction to implementation."
-argument-hint: "[feature or area to design audio for]"
+argument-hint: "[feature or area to design audio for] [--dry-run]"
 user-invocable: true
 allowed-tools: Read, Glob, Grep, Write, Edit, Bash, Task, AskUserQuestion, TodoWrite
 ---
 
-If no argument is provided, output usage guidance and exit without spawning any agents:
-> Usage: `/team-audio [feature or area]` — specify the feature or area to design audio for (e.g., `combat`, `main menu`, `forest biome`, `boss encounter`). Do not use `AskUserQuestion` here; output the guidance directly.
+# Team Audio
 
-When this skill is invoked with an argument, orchestrate the audio team through a structured pipeline.
+Orchestrate audio direction, sound design, implementation support, and QA evidence for a feature or area.
 
-**Decision Points:** At each step transition, use `AskUserQuestion` to present
-the user with the subagent's proposals as selectable options. Write the agent's
-full analysis in conversation, then capture the decision with concise labels.
-The user must approve before moving to the next step.
+## 0. Execution Contract
 
-1. **Read the argument** for the target feature or area (e.g., `combat`,
-   `main menu`, `forest biome`, `boss encounter`).
+### 0.1 Invocation and autonomy
 
-2. **Gather context**:
-   - Read relevant design docs in `design/gdd/` for the feature
-   - Read the sound bible at `design/gdd/sound-bible.md` if it exists
-   - Read existing audio asset lists in `assets/audio/`
-   - Read any existing sound design docs for this area
+Supported modes:
 
-## How to Delegate
+- feature or area description: orchestrate full team workflow
+- --dry-run: produce plan and subagent summaries without writes
 
-Use the Task tool to spawn each team member as a subagent:
-- `subagent_type: audio-director` — Sonic identity, emotional tone, audio palette
-- `subagent_type: sound-designer` — SFX specifications, audio events, mixing groups
-- `subagent_type: technical-artist` — Audio middleware, bus structure, memory budgets
-- `subagent_type: [primary engine specialist]` — Validate audio integration patterns for the engine
-- `subagent_type: gameplay-programmer` — Audio manager, gameplay triggers, adaptive music
+The invocation authorizes routine repository-local work for this skill. Operate autonomously after resolving scope; do not ask the user to approve every normal file creation. Ask only for protected operations, destructive ambiguity, or missing source-of-truth decisions that cannot be inferred safely.
 
-Always provide full context in each agent's prompt (feature description, existing audio assets, design doc references).
+If `--dry-run` is present, perform discovery and produce the complete proposed result, but do not call `Write` or `Edit`.
 
-3. **Orchestrate the audio team** in sequence:
+### 0.2 Path safety
 
-### Step 1: Audio Direction (audio-director)
-Spawn the `audio-director` agent to:
-- Define the sonic identity for this feature/area
-- Specify the emotional tone and audio palette
-- Set music direction (adaptive layers, stems, transitions)
-- Define audio priorities and mix targets
-- Establish any adaptive audio rules (combat intensity, exploration, tension)
+All user-supplied paths must be repository-relative. Reject absolute paths, paths containing `..`, and paths outside the expected project roots for this skill. Normalize paths before reading or writing.
 
-### Step 2: Sound Design and Audio Accessibility (parallel)
-Spawn the `sound-designer` agent to:
-- Create detailed SFX specifications for every audio event
-- Define sound categories (ambient, UI, gameplay, music, dialogue)
-- Specify per-sound parameters (volume range, pitch variation, attenuation)
-- Plan audio event list with trigger conditions
-- Define mixing groups and ducking rules
+### 0.3 Write policy
 
-Spawn the `accessibility-specialist` agent in parallel to:
-- Identify which audio events carry critical gameplay information (damage received, enemy nearby, objective complete) and require visual alternatives for hearing-impaired players
-- Specify subtitle requirements: which audio events need captions, what text format, on-screen duration
-- Check that no gameplay state is communicated by audio alone (all must have a visual fallback)
-- Review the audio event list for any that could cause issues for players with auditory sensitivities (high-frequency alerts, sudden loud events)
-- Output: audio accessibility requirements list integrated into the audio event spec
+Routine writes allowed by invocation:
 
-### Step 3: Technical Implementation (parallel)
-Spawn the `technical-artist` agent to:
-- Design the audio middleware integration (Wwise/FMOD/native)
-- Define audio bus structure and routing
-- Specify memory budgets for audio assets per platform
-- Plan streaming vs preloaded asset strategy
-- Design any audio-reactive visual effects
+- production/team/audio/[slug]-audio-plan.md
+- production/team/audio/[slug]-implementation-notes.md
+- production/qa/evidence/audio-[slug]-checklist.md
 
-Spawn the **primary engine specialist** in parallel (from `.claude/docs/technical-preferences.md` Engine Specialists) to validate the integration approach:
-- Is the proposed audio middleware integration idiomatic for the engine? (e.g., Godot's built-in AudioStreamPlayer vs FMOD, Unity's Audio Mixer vs Wwise, Unreal's MetaSounds vs FMOD)
-- Any engine-specific audio node/component patterns that should be used?
-- Known audio system changes in the pinned engine version that affect the integration plan?
-- Output: engine audio integration notes to merge with the technical-artist's plan
+Protected operations require explicit confirmation through `AskUserQuestion`:
 
-If no engine is configured, skip the specialist spawn.
+- Overwriting or deleting an existing file.
+- Editing canonical source-of-truth documents outside the declared outputs.
+- Changing statuses, gates, stage files, sprint state, story state, registry entries, or release readiness.
+- Running commands that modify files, install dependencies, generate builds, publish artifacts, deploy, tag, commit, or push.
+- Applying changes whose scope is broader than the user requested.
 
-### Step 4: Code Integration (gameplay-programmer)
-Spawn the `gameplay-programmer` agent to:
-- Implement audio manager system or review existing
-- Wire up audio events to gameplay triggers
-- Implement adaptive music system (if specified)
-- Set up audio occlusion/reverb zones
-- Write unit tests for audio event triggers
+Use `Edit` for targeted changes to existing files. Use `Write` for new files or complete replacement only after the replacement scope is safe and approved.
 
-4. **Compile the audio design document** combining all team outputs.
+### 0.4 Bash safety
 
-5. **Save to** `design/gdd/audio-[feature].md`.
+Bash is limited to diagnostics and read-only discovery unless the user explicitly approved a protected operation. Safe examples include `git status --short`, `git log`, `git diff --name-only`, existing test commands that do not update snapshots, and local grep/listing commands. Never run package installation, clean/reset, rm, deploy, publish, commit, tag, push, or build upload commands from this skill.
 
-6. **Output a summary** with: audio event count, estimated asset count,
-   implementation tasks, and any open questions between team members.
+### 0.5 Task delegation
 
-Verdict: **COMPLETE** — audio design document produced and team pipeline finished.
+Use Task subagents only when they materially improve the result. Pass bounded context: the request, relevant source paths, current draft/report, and the exact verdict needed. Do not spawn duplicate reviewers. If review mode is available, use `solo` for no subagents, `lean` for only essential specialist review, and `full` for cross-functional or gate review.
 
-If the pipeline stops because a dependency is unresolved (e.g., critical accessibility gap or missing GDD not resolved by the user):
+### 0.6 Todo tracking
 
-Verdict: **BLOCKED** — [reason]
+Use `TodoWrite` for multi-phase orchestration. Keep todos tied to observable phases, not low-level file operations. Close todos only when evidence exists.
 
-## File Write Protocol
+### 0.8 Missing-file behavior
 
-All file writes (audio design docs, SFX specs, implementation files) are delegated
-to sub-agents spawned via Task. Each sub-agent enforces the "May I write to [path]?"
-protocol. This orchestrator does not write files directly.
+| Situation | Behavior |
+|---|---|
+| Primary source missing | Continue only if the skill can infer a narrower safe scope; otherwise stop with the exact missing file/folder. |
+| Referenced artifact missing | Record as a gap or blocker instead of inventing content. |
+| Existing target file present | Do not overwrite. Create a proposed dated file or ask for protected confirmation. |
+| Ambiguous scope | Choose the smallest evidence-backed scope; ask only if two or more scopes are equally plausible. |
+| Contradictory sources | Prefer explicit status/source-of-truth documents over generated reports; list the contradiction in the output. |
 
-## Next Steps
+## 1. Discover Context
 
-- Review the audio design doc with the audio-director before implementation begins.
-- Use `/dev-story` to implement the audio manager and event system once the design is approved.
-- Run `/asset-audit` after audio assets are created to verify naming and format compliance.
+Read only the sources needed for the requested scope. Start with indexes, manifests, registries, and status files before reading large documents.
 
-## Error Recovery Protocol
+Primary sources:
 
-If any spawned agent (via Task) returns BLOCKED, errors, or cannot complete:
+- design/gdd/**
+- docs/architecture/**
+- docs/registry/**
+- production/stories/**
+- production/qa/**
+- design/art/**
+- design/ux/**
+- docs/engine-reference/**
 
-1. **Surface immediately**: Report "[AgentName]: BLOCKED — [reason]" to the user before continuing to dependent phases
-2. **Assess dependencies**: Check whether the blocked agent's output is required by subsequent phases. If yes, do not proceed past that dependency point without user input.
-3. **Offer options** via AskUserQuestion with choices:
-   - Skip this agent and note the gap in the final report
-   - Retry with narrower scope
-   - Stop here and resolve the blocker first
-4. **Always produce a partial report** — output whatever was completed. Never discard work because one agent blocked.
+Discovery rules:
 
-Common blockers:
-- Input file missing (story not found, GDD absent) → redirect to the skill that creates it
-- ADR status is Proposed → do not implement; run `/architecture-decision` first
-- Scope too large → split into two stories via `/create-stories`
-- Conflicting instructions between ADR and story → surface the conflict, do not guess
+1. Prefer canonical source-of-truth files over generated reports.
+2. Use `Glob` and `Grep` before reading large files.
+3. Keep a source list for the final report or artifact.
+4. When many files match, read the most relevant 5 to 10 first and summarize the rest as candidates.
+5. Treat missing or draft-status dependencies as blockers, not as approval to invent content.
+
+## 2. Build the Working Model
+
+Use the discovered evidence to build a concise working model before producing output.
+
+1. Define the target feature/area and success criteria from existing docs before spawning specialists.
+2. Use TodoWrite to track orchestration phases: context, specialist briefs, synthesis, artifact plan, QA/evidence handoff, and open blockers.
+3. Spawn only the roles that materially contribute to this request: audio-director, sound-designer, technical-artist, gameplay-programmer, qa-tester.
+4. Synthesize specialist output into one coherent plan focused on audio pillars, asset list, implementation hooks, mix/readability constraints, accessibility, and QA playback checks.
+5. Write team artifacts and evidence checklists; do not modify canonical GDDs, ADRs, sprint status, or production code unless the invocation explicitly requests implementation and protected-write confirmation is obtained.
+
+Classification rules:
+
+- **Blocking**: prevents safe implementation, review, release, or downstream skill execution.
+- **High**: likely to cause rework, wrong implementation, invalid QA, or broken traceability.
+- **Medium**: weakens handoff quality but can be resolved during normal follow-up.
+- **Low**: cleanup, clarity, or optional improvement.
+
+## 3. Produce the Artifact
+
+Canonical outputs for this skill:
+
+- production/team/audio/[slug]-audio-plan.md
+- production/team/audio/[slug]-implementation-notes.md
+- production/qa/evidence/audio-[slug]-checklist.md
+
+Artifact requirements:
+
+1. Include scope, date, source list, assumptions, and confidence.
+2. Separate facts from recommendations and inferred conclusions.
+3. Include explicit next actions and the command that should be run next.
+4. Preserve historical information; prefer additive notes over destructive rewrites.
+5. When updating an index or manifest, append or update only the relevant row and preserve unrelated content.
+
+Required report sections:
+
+- Team verdict
+- Specialist findings
+- Integrated plan
+- Artifacts/evidence created
+- Open blockers
+- Next command
+
+## 4. Validation
+
+1. Check that every conclusion cites or names a repository source.
+2. Check that all blockers have a concrete next action.
+3. Check that proposed writes stay within the declared output paths.
+4. Check that dry-run mode produced no writes.
+5. List every Bash command run and whether it was read-only or diagnostic.
+6. Summarize any subagent verdicts and unresolved disagreements.
+
+Stop conditions:
+
+- No feature, area, or current story context can be inferred.
+
+## 5. Final Response
+
+End with a concise summary of what was written, what was skipped because it was protected or unsafe, validation results, and the recommended next command. Include file paths for every artifact created or proposed.
