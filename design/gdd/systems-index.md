@@ -2,7 +2,7 @@
 
 > **Status**: Draft
 > **Created**: 2026-04-22
-> **Last Updated**: 2026-04-22
+> **Last Updated**: 2026-04-24
 > **Source Concept**: [design/gdd/game-concept.md](game-concept.md)
 > **Governing Art Bible**: [design/art/art-bible.md](../art/art-bible.md)
 
@@ -26,13 +26,13 @@ Systems marked **E** are explicit in the game concept's Core Mechanics or Techni
 
 | # | System | Category | Priority | Status | Design Doc | Depends On |
 |---|---|---|---|---|---|---|
-| 1 | World Structure (I) | Core | **MVP** | Designed | [world-structure.md](world-structure.md) | — |
-| 2 | Save / Load & Persistence (I) | Persistence | **MVP** | Not Started | — | — |
-| 3 | Menus & Settings (I) | UI | **MVP** | Not Started | — | — |
-| 4 | NPC System (I) | Core | **MVP** | Not Started | — | World Structure |
-| 5 | Day/Night Cycle (I) | Core | **MVP** | Not Started | — | World Structure |
-| 6 | Character Creation (I) | Core | **MVP** | Not Started | — | Save/Load |
-| 7 | Combat Core (E) | Gameplay | **MVP** | Not Started | — | World Structure, NPC System, Save/Load |
+| 1 | World Structure (I) | Core | **MVP** | APPROVED 2026-04-23 (re-entry #5) | [world-structure.md](world-structure.md) | — |
+| 2 | Save / Load & Persistence (I) | Persistence | **MVP** | APPROVED 2026-04-23 | [save-load-persistence.md](save-load-persistence.md) | — |
+| 3 | Menus & Settings (I) | UI | **MVP** | APPROVED 2026-04-24 (re-entry #1) | [menus-settings.md](menus-settings.md) | World Structure, Save/Load |
+| 4 | NPC System (I) | Core | **MVP** | APPROVED 2026-04-24 (re-entry #2) | [npc-system.md](npc-system.md) | World Structure, Save/Load |
+| 5 | Day/Night Cycle (I) | Core | **MVP** | APPROVED 2026-04-24 (re-entry #1) | [day-night-cycle.md](day-night-cycle.md) | World Structure |
+| 6 | Character Creation (I) | Core | **MVP** | APPROVED 2026-04-24 | [character-creation.md](character-creation.md) | Save/Load |
+| 7 | Combat Core (E) | Gameplay | **MVP** | APPROVED 2026-04-25 (re-review #3) | [combat-core.md](combat-core.md) | World Structure, NPC System, Save/Load |
 | 8 | Character Progression (I) | Progression | **MVP** | Not Started | — | Character Creation, Save/Load |
 | 9 | Inventory & Item Economy (I) | Economy | **MVP** | Not Started | — | Save/Load, Character Creation |
 | 10 | Class Design (I) | Gameplay | **MVP** (Cleric) / **T2** (Warrior, Enchanter) | Not Started | — | Combat Core, Character Progression |
@@ -43,12 +43,12 @@ Systems marked **E** are explicit in the game concept's Core Mechanics or Techni
 | 15 | Faction State Simulation (E) | Gameplay | **MVP** (1 faction reactive) / **T3** (3 factions) / **T4** (6 factions autonomous) | Not Started | — | World Structure, NPC System, Save/Load |
 | 16 | Faction Reputation (E) | Progression | **MVP** (1 faction) | Not Started | — | Faction State Simulation, Save/Load, Character Progression |
 | 17 | Zone Control (I) | Gameplay | **MVP** (1 zone) | Not Started | — | Faction State Simulation, Combat Core |
-| 18 | Faction Events (I) | Narrative | **MVP** (templated, 1 faction) | Not Started | — | Faction State Simulation, NPC System |
+| 18 | Faction Events (I) | Narrative | **MVP** (templated, 1 faction) | Not Started | — | World Structure, Faction State Simulation, NPC System |
 | 19 | Named AI Companion Core (E) | Gameplay | **MVP** (Elara only) / **T2** (expanded roster) | Not Started | — | NPC System, Combat Core, Class Design, Enemy AI (patterns) |
 | 20 | Hiring Hall (I) | Gameplay | **Tier 2** | Not Started | — | Named AI Companion Core, Faction State Simulation |
 | 21 | Companion Relationships (I) | Gameplay | **Tier 2** | Not Started | — | Named AI Companion Core, Save/Load |
 | 22 | Sister Elara Mentor (I) | Meta | **MVP** | Not Started | — | Named AI Companion Core |
-| 23 | Dialogue System (E) | Narrative | **MVP** (templated) / **T3** (LLM for key NPCs) | Not Started | — | NPC System, Faction State Simulation |
+| 23 | Dialogue System (E) | Narrative | **MVP** (templated) / **T3** (LLM for key NPCs) | Not Started | — | World Structure, NPC System, Faction State Simulation |
 | 24 | Moderation & Safety (I) | Meta | **Tier 3** | Not Started | — | Dialogue System |
 | 25 | Layer 1 HUD (I) | UI | **MVP** | Not Started | — | Combat Core, Status Effects |
 | 26 | Dialogue UI Panel (I) | UI | **MVP** | Not Started | — | Dialogue System |
@@ -100,13 +100,13 @@ Systems sorted by dependency order. Design and build from top (Foundation) to bo
 ### Layer 1 — Foundation *(no dependencies on other game systems)*
 
 1. **World Structure** — zone architecture, Addressables streaming groups, zone transition mechanics
-2. **Save / Load & Persistence** — character data, world state, faction state; SQLite Tier 1, scales later
+2. **Save / Load & Persistence** — character data, world state, faction state. GDD defines persistence contracts (save triggers, HMAC integrity, version stamp + forward-only migration, fail-loud failure handling) independent of concrete backend; storage backend (SQLite / JSON / binary / hybrid) is ADR-deferred per save-load-persistence.md §Overview non-negotiable #3.
 3. **Menus & Settings** — pause, options, input remapping, accessibility controls framework
 
 ### Layer 2 — Core *(depend only on Foundation)*
 
-4. **NPC System** — depends on: World Structure. ⚠ **Bottleneck — 6 downstream systems depend on this.** Ambient + named behavioral framework, occupation postures, idle loops.
-5. **Day/Night Cycle** — depends on: World Structure. Court hours vs. inn hours; world state shifts per art bible S2.
+4. **NPC System** — depends on: World Structure, Save/Load. ⚠ **Bottleneck — 6 downstream systems depend on this.** Ambient + named behavioral framework, occupation postures, idle loops.
+5. **Day/Night Cycle** — depends on: World Structure. Approved: [day-night-cycle.md](day-night-cycle.md). UTC-derived local world clock; no Save/Load dependency or persisted clock field. Court hours vs. inn hours; world state shifts per art bible S2.
 6. **Character Creation** — depends on: Save/Load. Class selection, starting faction-neutral state.
 7. **Combat Core** — depends on: World Structure, NPC System, Save/Load. ⚠ **Bottleneck — 9 downstream systems.** The core hypothesis.
 8. **Character Progression** — depends on: Character Creation, Save/Load. EQ-native XP, levels, spell unlocks.
@@ -125,7 +125,7 @@ Systems sorted by dependency order. Design and build from top (Foundation) to bo
 15. **Faction State Simulation** — depends on: World Structure, NPC System, Save/Load. ⚠ **Bottleneck — 4 downstream systems.** Autonomous faction AI; reactive at MVP, autonomous at Tier 4.
 16. **Faction Reputation** — depends on: Faction State Simulation, Save/Load, Character Progression. Per-player per-faction rep, 5-tier progression.
 17. **Zone Control** — depends on: Faction State Simulation, Combat Core. **The load-bearing bridge** — kills shift faction camp ownership.
-18. **Faction Events** — depends on: Faction State Simulation, NPC System. Assassinations, wars, leader changes.
+18. **Faction Events** — depends on: World Structure (Soft at T1, Hard at T2+ when authored — `SessionResumeEvent` for between-session event-queue catch-up), Faction State Simulation, NPC System. Assassinations, wars, leader changes.
 
 ### Layer 5 — AI Companions
 
@@ -136,7 +136,7 @@ Systems sorted by dependency order. Design and build from top (Foundation) to bo
 
 ### Layer 6 — Dialogue
 
-23. **Dialogue System** — depends on: NPC System, Faction State Simulation. Templated (Tier 1-2) → LLM (Tier 3+).
+23. **Dialogue System** — depends on: World Structure (Soft at T1–T2, Hard at T3 per D004 — `SessionResumeEvent` for between-session dialogue-memory advance when LLM dialogue with NPC memory lands), NPC System, Faction State Simulation. Templated (Tier 1-2) → LLM (Tier 3+).
 24. **Moderation & Safety** — depends on: Dialogue System. LLM output filtering.
 
 ### Layer 7 — Presentation (UI)
@@ -169,10 +169,10 @@ Combining dependency sort + priority tier. **Write the GDDs in this order.** Ind
 | Order | System | Priority | Layer | Primary Agent | Est. Effort | Notes |
 |---|---|---|---|---|---|---|
 | 1 | World Structure | MVP | Foundation | game-designer + engine-programmer | M | Foundation for everything. Scoped to 1 zone + 1 hub at MVP. |
-| 2 | Save / Load & Persistence | MVP | Foundation | engine-programmer | M | SQLite schema + character/world state serialization. |
+| 2 | Save / Load & Persistence | MVP | Foundation | engine-programmer | M | Save/load contract: triggers (Transition / Manual / Autosave / Session-Exit), HMAC integrity, version stamp + migration, hydration / session-resume ordering (last_exit_timestamp_utc pre-ZoneActiveEvent), fail-loud failure handling, save_autosave_interval tuning. Storage backend ADR-deferred. |
 | 3 | Menus & Settings | MVP | Foundation | ui-programmer + ux-designer | S | Input remapping is MMO-critical per technical-preferences. |
 | 4 | NPC System | MVP | Core | ai-programmer + game-designer | L | **Bottleneck — high-quality design critical.** |
-| 5 | Day/Night Cycle | MVP | Core | game-designer | S | Coupled with World Structure scene state. |
+| 5 | Day/Night Cycle | MVP | Core | game-designer | S | UTC-derived local clock coupled with World Structure `SessionResumeEvent` / `ZoneActiveEvent` ordering. |
 | 6 | Character Creation | MVP | Core | game-designer + systems-designer | S | Single class at MVP (Cleric) — scope is small. |
 | 7 | **Combat Core** | MVP | Core | **game-designer + systems-designer** | **L** | **THE core hypothesis. Prototype this earliest.** |
 | 8 | Character Progression | MVP | Progression | systems-designer | M | EQ-native XP curves; formula-heavy. |
@@ -247,10 +247,10 @@ Systems flagged for early prototyping regardless of priority tier — get these 
 | Metric | Count |
 |---|---|
 | Total systems identified | 33 |
-| Design docs started | 1 |
-| Design docs reviewed | 0 |
-| Design docs approved | 0 |
-| MVP systems designed | 1 / 26 |
+| Design docs started | 7 |
+| Design docs reviewed | 7 |
+| Design docs approved | 7 |
+| MVP systems designed | 7 / 26 |
 | Tier 2 systems designed | 0 / 7 |
 | Tier 3 systems designed | 0 / 5 |
 | Tier 4 systems designed | 0 / — |
@@ -259,7 +259,7 @@ Systems flagged for early prototyping regardless of priority tier — get these 
 
 ## Next Steps
 
-- [ ] Start with **Combat Core** as the MVP hypothesis system, but design the Foundation layer first (World Structure → Save/Load → NPC System). Run `/design-system [system-name]` to begin.
+- [ ] Start `/design-system Character Progression` in a fresh session; Character Progression is the next MVP system in dependency order.
 - [ ] Run `/map-systems next` to always pick the highest-priority undesigned system automatically.
 - [ ] Run `/design-review design/gdd/[system].md` in a fresh session after each GDD is authored.
 - [ ] **Prototype Combat Core + Zone Control early** — the concept's core hypothesis cannot be validated in design docs alone. Run `/prototype combat-feel` after enough GDDs are written to inform the prototype.

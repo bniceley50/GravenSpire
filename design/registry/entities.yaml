@@ -37,7 +37,7 @@
 #   Each entry: name, status, source, referenced_by[], attributes{}, added, revised
 
 version: 1
-last_updated: 2026-04-22
+last_updated: 2026-04-24
 
 # ─── ENTITIES ────────────────────────────────────────────────────────────────
 # Named game-world objects: enemies, NPCs, characters, factions, bosses.
@@ -112,60 +112,120 @@ formulas:
     source: design/gdd/world-structure.md
     referenced_by:
       - design/gdd/world-structure.md
-    variables: [R_always, R_active, R_transient]
+    variables: [R_always, R_active_current, R_active_outgoing, R_active_incoming]
     output_range: [0, 350]   # MB; must satisfy <= 350 per art-bible §8.9 hard cap
-    expression: "R_peak = R_always + R_active + R_transient"
-    notes: "F1 constraint equation. Build-blocking if violated. Informs CI memory smoke check (H-F1)."
+    expression: "R_steady = R_always + R_active_current; R_peak = R_always + R_active_outgoing + R_active_incoming"
+    notes: "F1 constraint equation, two-part form (revised 2026-04-23; note-sync 2026-04-23 round-5 consistency-check — wording aligned with Rule 3, AC IDs updated for H-F1 round-3 split). Steady-state: only one zone's texture resources (the active zone's logical group-set, per Rule 1) are fully resident. Peak: mid-transition stream-ahead sub-phase with both outgoing and incoming texture groups resident. Both R_steady and R_peak must be <= 350 MB at authoring time. Build-blocking if violated. Validator must check peak form, not steady-state only. Informs H-F1-steady (Dev-build smoke, steady-state PlayMode Memory Profiler snapshot — T1-blocking) and H-F1-peak (Dev-build smoke, peak-seam snapshot per ADR-tba-4(i) resolution — ADR-gated until ADR-tba-4(i) names the prototype-defined peak observable)."
     added: 2026-04-22
-    revised: ""
+    revised: 2026-04-23
 
   - name: zone_art_budget_ceiling
     status: active
     source: design/gdd/world-structure.md
     referenced_by:
       - design/gdd/world-structure.md
-    variables: [R_cap, R_always, R_transient_max]
-    output_range: [0, 305]   # MB
-    expression: "R_zone_max = R_cap - R_always - R_transient_max"
-    notes: "F1.1 corollary. At MVP: 350 - 45 - 140 = 165 MB per zone."
+    variables: [R_cap, R_always, R_zone_peer_max]
+    output_range: [0, 165]   # MB; MVP binding ceiling — revised 2026-04-23 from prior [0, 305] validator false-pass trap. T4 ceiling tightens as R_always grows with ZoneIdle count.
+    expression: "R_zone_max = R_cap - R_always - R_zone_peer_max"
+    notes: "F1.1 corollary to F1's peak form (revised 2026-04-23; T4 drift note + H-F1.1 test-type correction added 2026-04-23 round-2 per Blocker 11 + Blocker 1; AC IDs updated 2026-04-23 round-5 consistency-check — H-F1.1 split into H-F1.1a + H-F1.1b in round-3, with pre-specified Form L/Form U fallbacks in round-4). R_zone_peer_max is the largest OTHER zone in the manifest, not the zone being ceiling-computed. General constraint: sum of the two largest zone texture footprints <= R_cap - R_always_at_current_tier (305 MB at MVP; ~297 MB at T4). At MVP (two zones): HauntMansion ceiling = 350 - 45 - 125 = 180 MB; CityHub ceiling = 350 - 45 - 140 = 165 MB. Output_range max = 165 MB (MVP binding ceiling); previous [0, 305] was a validator false-pass trap because 305 is only reachable when the peer zone is 0 MB. T4 SCALABILITY DRIFT (Blocker 11, performance-analyst P1 HIGH): R_always is NOT fixed across tiers. Under D1 metadata-only ZoneIdle each ZoneIdle entry adds <=2 MB (manifest + optional NavMeshData ref) to AlwaysLoaded baseline. At T4 (4 idle + 1 active), R_always ~= 53 MB and peer-sum ceiling tightens to ~297 MB. Art-team budgets inherited from T1 will silently produce build-blocking F1 violations at T4 if not re-evaluated when new zones are added to the manifest. Informs H-F1.1a (local per-zone budget) and H-F1.1b (global pairwise invariant) — both Dev-build smoke, PlayMode Memory Profiler with Texture2D filter by zone bundle label as primary method, OR Fallback Form L (load-side delta: post-ZoneActive minus pre-ZoneLoading baseline) if per-label isolation is unavailable at Unity 6.3 per ADR-tba-4(d). Note: Addressable bundle size on disk is NOT the gate — the gate is resident texture memory. Reclassified 2026-04-23 round-2 per Blocker 1: the prior Editor-validation classification was incorrect because Memory Profiler requires a running PlayMode session."
     added: 2026-04-22
-    revised: ""
+    revised: 2026-04-23
 
   - name: stream_ahead_trigger_distance
     status: active
     source: design/gdd/world-structure.md
     referenced_by:
       - design/gdd/world-structure.md
-    variables: [V_max, T_load, D_margin]
-    output_range: [0, 40]    # meters (soft ceiling; >40 indicates zone-split needed)
-    expression: "D_trigger = V_max * T_load + D_margin"
-    notes: "F2 level-design constraint. MVP example: 5 m/s * 3 s + 2 m = 17 m."
+    variables: [V_max, T_load_s, D_margin]
+    output_range: [0, 40]    # meters (ADVISORY only, not enforced; >40 indicates zone-split recommended per F2 extreme-behavior note)
+    expression: "D_trigger = V_max * T_load_s + D_margin"
+    notes: "F2 level-design constraint (variable renamed 2026-04-23 — T_load split into T_load_s (seconds, F2) and T_load_ms (milliseconds, F3) to resolve Blocker 4 unit collision). MVP example: 5 m/s * 3 s + 2 m = 17 m. The 40 m upper bound is advisory only, not enforced — it signals a zone-split is recommended. Values <5 m are a design smell. Informs H-F2 Editor-validation (level-validator Editor menu script)."
     added: 2026-04-22
-    revised: ""
+    revised: 2026-04-23
 
   - name: zone_transition_total_time_budget
     status: active
     source: design/gdd/world-structure.md
     referenced_by:
       - design/gdd/world-structure.md
-    variables: [T_save, T_load, T_activate, T_unload_async]
-    output_range: [0, 0]     # accountability identity, no fixed output range
-    expression: "T_transition = T_save + T_load + T_activate + T_unload_async"
-    notes: "F3 time-budget identity. Felt latency (player-locked) = T_save + T_load + T_activate; target <5000 ms on min-spec."
+    variables: [T_save, T_load_ms, T_activate, T_unload_async]
+    output_range: [0, 5000]   # ms; felt + stream-ahead bound (T_save + T_load_ms + T_activate < zone_overrun_window_seconds * 1000). T_unload_async is post-felt and unbounded.
+    expression: "T_transition = T_save + T_load_ms + T_activate + T_unload_async"
+    notes: "F3 time-budget accountability identity (revised 2026-04-23 — variable renamed to T_load_ms; output_range was [0, 0] which was validator-unparseable; now [0, 5000] bounds the felt + stream-ahead portion). Per Rule 5 two-phase split: T_save + T_load_ms occur during stream-ahead sub-phase (player free); only T_activate is felt as position-lock (<=100 ms commit). T_unload_async is post-felt and unbounded. Stream-ahead target < zone_overrun_window_seconds * 1000 (default 5000 ms). Informs H-F3 Profiled playtest (min-spec manual run)."
     added: 2026-04-22
-    revised: ""
+    revised: 2026-04-23
 
   - name: corpse_run_zone_retention_memory_cost
-    status: active
+    status: deprecated
     source: design/gdd/world-structure.md
     referenced_by:
       - design/gdd/world-structure.md
     variables: [R_cap, R_always, R_corpse_zone]
-    output_range: [0, 305]   # MB
+    output_range: [0, 305]   # MB (historical)
     expression: "R_available_active = R_cap - R_always - R_corpse_zone"
-    notes: "F4 tradeoff lever via corpse_run_zone_retention_seconds tuning knob."
+    notes: "DEPRECATED 2026-04-23 under D1 metadata-only ZoneIdle. R_corpse_zone is now always 0 — corpse retention became timestamp-only via CorpseRecord (zoneId + Vector3 position + expiry_timestamp_utc persisted in save state; no texture retention). See world-structure.md §Corpse Retention Model (replaces F4 formula). AC IDs updated 2026-04-23 round-5 consistency-check: the original H-F4 criterion was split across rounds 2 and 3 into four corpse-retention ACs — H-F4a (texture release, Dev-build smoke with Form U unload-side delta fallback), H-F4b-schema (CorpseRecord schema, Unit), H-F4b-cadence (independent countdown cadence, Integration PlayMode with programmatic service-field access), H-F4c (re-entry path integrity, Integration PlayMode event-log assertion). The replacement set validates metadata/timestamp behavior rather than this deprecated memory formula. Preserved here with status=deprecated per registry rule (never delete entries)."
     added: 2026-04-22
+    revised: 2026-04-23
+
+  - name: npc_schedule_catchup_steps
+    status: active
+    source: design/gdd/npc-system.md
+    referenced_by:
+      - design/gdd/npc-system.md
+    variables: [real_elapsed_seconds, session_catchup_max_real_seconds_default, npc_catchup_step_seconds]
+    output_range: [0, 20160]   # steps at 30s safe-range minimum quantum and 7-day World Structure clamp
+    expression: "floor(clamp(real_elapsed_seconds, 0, session_catchup_max_real_seconds_default) / npc_catchup_step_seconds)"
+    notes: "T1 NPC System deterministic SessionResumeEvent handler formula. NPC System evaluates final schedule state in data only; it does not simulate visible per-step movement while zones are idle. Pairs with World Structure Rule 13 and the session_catchup_max_real_seconds_default constant. Output max is 20160 at the 30s safe-range minimum quantum; default 60s quantum produces 10080 steps."
+    added: 2026-04-24
     revised: ""
+
+  - name: world_time_seconds_derivation
+    status: active
+    source: design/gdd/day-night-cycle.md
+    referenced_by:
+      - design/gdd/day-night-cycle.md
+    variables: [now_utc_seconds, PROJECT_WORLD_EPOCH_UTC_seconds, time_scale_world, world_clock_offset_seconds, day_length_seconds]
+    output_range: [0, 14400]   # seconds; max follows day_length_seconds safe-range maximum, exclusive at runtime
+    expression: "((now_utc_seconds - PROJECT_WORLD_EPOCH_UTC_seconds) * time_scale_world + world_clock_offset_seconds) mod day_length_seconds"
+    notes: "T1 Day/Night canonical local world-clock derivation. Used for first-run bootstrap, active-play derivation, and SessionResumeEvent handling. Output is always in [0, day_length_seconds). Default project epoch is 2026-01-01T00:00:00Z (1767225600). No persisted Day/Night clock field is used."
+    added: 2026-04-24
+    revised: ""
+
+  - name: world_clock_advance
+    status: deprecated
+    source: design/gdd/day-night-cycle.md
+    referenced_by:
+      - design/gdd/day-night-cycle.md
+    variables: [world_time_seconds_current, delta_real_seconds, time_scale_world, day_length_seconds]
+    output_range: [0, 14400]
+    expression: "(world_time_seconds_current + (delta_real_seconds * time_scale_world)) mod day_length_seconds"
+    notes: "Deprecated 2026-04-24 after Day/Night Option B clock bootstrap decision. Replaced by world_time_seconds_derivation so Day/Night derives from UTC + fixed project epoch instead of accumulating frame/resume deltas."
+    added: 2026-04-24
+    revised: 2026-04-24
+
+  - name: phase_from_world_time
+    status: active
+    source: design/gdd/day-night-cycle.md
+    referenced_by:
+      - design/gdd/day-night-cycle.md
+    variables: [world_time_seconds, phase_start_seconds, phase_end_seconds, phase_id]
+    output_range: [0, 3]   # enum ordinal for DawnTransition, InnHours, DuskTransition, CourtHours
+    expression: "phase_id = first phase where phase_start_seconds <= world_time_seconds < phase_end_seconds"
+    notes: "T1 Day/Night phase resolution formula. Authored phase ranges must cover the full day exactly once with no gaps or overlaps. Default enum order: 0 DawnTransition, 1 InnHours, 2 DuskTransition, 3 CourtHours."
+    added: 2026-04-24
+    revised: ""
+
+  - name: resume_clock_advance
+    status: deprecated
+    source: design/gdd/day-night-cycle.md
+    referenced_by:
+      - design/gdd/day-night-cycle.md
+    variables: [real_elapsed_seconds, session_catchup_max_real_seconds_default, time_scale_world, world_time_seconds_before_resume]
+    output_range: [0, 14400]   # seconds; world_time_seconds_after_resume range follows day_length_seconds safe-range maximum, exclusive at runtime
+    expression: "resume_delta_seconds = clamp(real_elapsed_seconds, 0, session_catchup_max_real_seconds_default); world_time_seconds_after_resume = (world_time_seconds_before_resume + (resume_delta_seconds * time_scale_world)) mod day_length_seconds"
+    notes: "Deprecated 2026-04-24 after Day/Night Option B clock bootstrap decision. Day/Night no longer adds clamped elapsed time to a prior persisted or in-memory clock; SessionResumeEvent now triggers world_time_seconds_derivation from UTC + fixed project epoch."
+    added: 2026-04-24
+    revised: 2026-04-24
 
 # Example:
 #
@@ -216,21 +276,253 @@ constants:
     source: design/gdd/world-structure.md
     referenced_by:
       - design/gdd/world-structure.md
+      - design/gdd/save-load-persistence.md
     value: 300
     unit: seconds
-    notes: "Initial pin from Section G tuning knob. Revisit at T1 playtest against 75th-percentile observed corpse-run durations."
+    notes: "Initial pin from Section G tuning knob. Revisit at T1 playtest against 75th-percentile observed corpse-run durations. Under D1 metadata-only ZoneIdle (revised 2026-04-23), this knob is a pure gameplay/UX lever — it controls CorpseRecord.expiry_timestamp_utc only. No memory cost (see deprecated corpse_run_zone_retention_memory_cost entry)."
     added: 2026-04-22
-    revised: ""
+    revised: 2026-04-23
 
   - name: save_mutex_max_ms
     status: active
     source: design/gdd/world-structure.md   # Rule 12 + Section G
     referenced_by:
       - design/gdd/world-structure.md
+      - design/gdd/save-load-persistence.md
     value: 150
     unit: milliseconds
-    notes: "Hard timeout for SaveCheckpointing per Rule 12 (SaveTimedOutEvent fires on elapse). Save/Load GDD will reference once authored — add to referenced_by at that time."
+    notes: "Hard timeout for SaveCheckpointing per world-structure.md Rule 12 (SaveTimedOutEvent fires on elapse). Reproduced (not redesigned) by save-load-persistence.md per §Overview non-negotiable #3, Rule 5 (Transition Save trigger only — other save paths bounded by caller UX, not Rule 12), Rule 8 (SaveWriteConfirmed must dispatch synchronously same-frame to fit within this window), and §Edge Cases A4 (late SaveWriteConfirmed after deadline elapse → WS routes to ZoneError; on-disk write may still succeed). Save/Load AC H-SL-R8 verifies same-frame dispatch behavior; H-SL-CS-WS-SavePath verifies end-to-end Min-Spec performance against this window."
     added: 2026-04-22
+    revised: 2026-04-23
+
+  - name: zone_overrun_window_seconds
+    status: active
+    source: design/gdd/world-structure.md   # Section G tuning knob + F1 R_peak overrun window
+    referenced_by:
+      - design/gdd/world-structure.md
+      - design/gdd/menus-settings.md
+    value: 5
+    unit: seconds
+    notes: "Max allowed F1 R_peak transient-overlap duration during ZoneLoading stream-ahead sub-phase. ZoneLoadOverrunEvent fires on elapse for Menus & Settings (non-blocking UI indicator). Menus & Settings consumes this for the Zone Overrun Visibility Gate. Save/Load GDD (approved 2026-04-23) does not reference this constant; no Save/Load reverse-listing needed. Registered 2026-04-22 design review (#6) to pre-empt downstream cross-GDD drift."
+    added: 2026-04-22
+    revised: 2026-04-24
+
+  - name: session_catchup_max_real_seconds_default
+    status: active
+    source: design/gdd/world-structure.md   # Rule 13 + Section G tuning knob
+    referenced_by:
+      - design/gdd/world-structure.md
+      - design/gdd/save-load-persistence.md
+      - design/gdd/npc-system.md
+    value: 604800
+    unit: seconds
+    notes: "Rule 13 elapsed-time clamp for SessionResumeEvent (added 2026-04-23 per D3 + creative-director binding). 604800 s = 7 days, aligned with game-concept.md unique-hook 'log off for a week'. Safe range 3600 s (1 hour) – 2592000 s (30 days). Negative deltas (clock skew) clamp to 0. Handler-absent-default is no-catch-up (not partial). NPC System references this for npc_schedule_catchup_steps. Day/Night no longer references this constant after the 2026-04-24 UTC-derivation decision; its handler uses SessionResumeEvent for ordering only. Faction Sim / Faction Events / Dialogue GDDs will reference once authored — add to referenced_by at that time. DECISIONS.md D007 follow-up entry planned after WS re-review passes per D6."
+    added: 2026-04-23
+    revised: 2026-04-24
+
+  - name: PROJECT_WORLD_EPOCH_UTC_seconds
+    status: active
+    source: design/gdd/day-night-cycle.md
+    referenced_by:
+      - design/gdd/day-night-cycle.md
+    value: 1767225600
+    unit: seconds
+    notes: "Fixed project epoch for UTC-derived Day/Night world clock: 2026-01-01T00:00:00Z. Used by world_time_seconds_derivation. Not save state and not player-specific."
+    added: 2026-04-24
+    revised: ""
+
+  - name: day_length_seconds
+    status: active
+    source: design/gdd/day-night-cycle.md
+    referenced_by:
+      - design/gdd/day-night-cycle.md
+    value: 7200
+    unit: seconds
+    notes: "T1 Day/Night default full in-game day length at time_scale_world = 1.0. Safe range 1800-14400 s. Initial value makes one full day equal 2 real hours, matching 60-180 minute session pacing without fast theme-park cycling."
+    added: 2026-04-24
+    revised: ""
+
+  - name: time_scale_world
+    status: active
+    source: design/gdd/day-night-cycle.md
+    referenced_by:
+      - design/gdd/day-night-cycle.md
+    value: 1.0
+    unit: multiplier
+    notes: "T1 Day/Night multiplier converting UTC seconds since project epoch to world-clock seconds. Safe range 0.0-8.0. Value 0 is reserved for test harnesses or simulation-paused states."
+    added: 2026-04-24
+    revised: ""
+
+  - name: world_clock_offset_seconds
+    status: active
+    source: design/gdd/day-night-cycle.md
+    referenced_by:
+      - design/gdd/day-night-cycle.md
+    value: 0
+    unit: seconds
+    notes: "Authored phase offset for the UTC-derived Day/Night world clock. Safe range -7200 to 7200 seconds. Default 0. Not persisted save state; changing it deliberately re-phases the whole world."
+    added: 2026-04-24
+    revised: ""
+
+  - name: dawn_transition_seconds
+    status: active
+    source: design/gdd/day-night-cycle.md
+    referenced_by:
+      - design/gdd/day-night-cycle.md
+    value: 600
+    unit: seconds
+    notes: "T1 Day/Night dawn transition band. Safe range 120-1200 s. Expresses gradual practical-source and sky/ambient changes, not a dramatic event."
+    added: 2026-04-24
+    revised: ""
+
+  - name: dusk_transition_seconds
+    status: active
+    source: design/gdd/day-night-cycle.md
+    referenced_by:
+      - design/gdd/day-night-cycle.md
+    value: 600
+    unit: seconds
+    notes: "T1 Day/Night dusk transition band. Safe range 120-1200 s. Expresses gradual practical-source and sky/ambient changes, not a dramatic event."
+    added: 2026-04-24
+    revised: ""
+
+  - name: phase_application_max_ms
+    status: active
+    source: design/gdd/day-night-cycle.md
+    referenced_by:
+      - design/gdd/day-night-cycle.md
+    value: 16
+    unit: milliseconds
+    notes: "T1 Day/Night active-zone phase application budget after ZoneActiveEvent. Safe range 1-33 ms. Phase application must not trigger Addressables loads, new texture residency, or idle-zone activation."
+    added: 2026-04-24
+    revised: ""
+
+  - name: daynight_resume_max_ms
+    status: active
+    source: design/gdd/day-night-cycle.md
+    referenced_by:
+      - design/gdd/day-night-cycle.md
+    value: 5
+    unit: milliseconds
+    notes: "T1 Day/Night SessionResumeEvent handler budget. Safe range 1-20 ms. Handler is UTC derivation plus event logging and must not allocate or load assets proportional to elapsed time."
+    added: 2026-04-24
+    revised: ""
+
+  - name: npc_catchup_step_seconds
+    status: active
+    source: design/gdd/npc-system.md   # §Tuning Knobs + npc_schedule_catchup_steps
+    referenced_by:
+      - design/gdd/npc-system.md
+    value: 60
+    unit: seconds
+    notes: "NPC-owned quantization step for deterministic schedule catch-up after SessionResumeEvent. Safe range 30–300 s. Lower values increase catch-up precision and evaluation work; higher values coarsen schedule resolution."
+    added: 2026-04-24
+    revised: ""
+
+  - name: npc_schedule_tick_interval_seconds
+    status: active
+    source: design/gdd/npc-system.md   # §Tuning Knobs
+    referenced_by:
+      - design/gdd/npc-system.md
+    value: 10
+    unit: seconds
+    notes: "NPC active-zone schedule tick cadence. Ticks are gated by ZoneActiveEvent and must not run for ZoneIdle scene instances. Safe range 5–30 s. Future Day/Night, Faction Events, Creature AI, and Audio GDDs may reference this when they consume NPC schedule state."
+    added: 2026-04-24
+    revised: ""
+
+  - name: save_autosave_interval
+    status: active
+    source: design/gdd/save-load-persistence.md   # §Tuning Knobs
+    referenced_by:
+      - design/gdd/save-load-persistence.md
+    value: 300
+    unit: seconds
+    notes: "Save/Load-owned autosave cadence per save-load-persistence.md §Tuning Knobs. Governs Rule 5 Autosave Tick frequency under Rule 15 (autosave clock resets on any SaveWriteConfirmed — Transition / Manual / Autosave / Session-Exit). Safe range 60–600 s. Initial value 300 s splits the safe range cleanly and bounds worst-case crash window to ≤5 minutes; anchored to EQ-classic 60–180 min session length per game-concept.md. T1 playtest revisit flag: re-evaluate once session cadence and crash-window tolerance are observed (per save-load-persistence.md §Open Questions — T1 follow-up entry)."
+    added: 2026-04-23
+    revised: ""
+
+  - name: character_name_min_length
+    status: active
+    source: design/gdd/character-creation.md   # §Formulas + §Tuning Knobs
+    referenced_by:
+      - design/gdd/character-creation.md
+      - design/gdd/save-load-persistence.md
+    value: 3
+    unit: characters
+    notes: "Minimum canonical Character Creation name length after sanitization. Feeds valid_character_name and Save/Load player-authored string fixture expectations."
+    added: 2026-04-24
+    revised: ""
+
+  - name: character_name_max_length
+    status: active
+    source: design/gdd/character-creation.md   # §Formulas + §Tuning Knobs
+    referenced_by:
+      - design/gdd/character-creation.md
+      - design/gdd/save-load-persistence.md
+    value: 24
+    unit: characters
+    notes: "Maximum canonical Character Creation name length after sanitization. Feeds valid_character_name and Save/Load player-authored string fixture expectations."
+    added: 2026-04-24
+    revised: ""
+
+  - name: character_name_allowed_chars_regex
+    status: active
+    source: design/gdd/character-creation.md   # §Formulas + §Tuning Knobs
+    referenced_by:
+      - design/gdd/character-creation.md
+      - design/gdd/save-load-persistence.md
+    value: "^[A-Za-z0-9 '-]+$"
+    unit: regex
+    notes: "Allowed canonical Character Creation name characters at T1: ASCII letters, numbers, spaces, hyphen, and apostrophe; valid_character_name also requires at least one ASCII letter or digit."
+    added: 2026-04-24
+    revised: ""
+
+  - name: cityhub_innroom_start_anchor_id
+    status: active
+    source: design/gdd/character-creation.md
+    referenced_by:
+      - design/gdd/character-creation.md
+      - design/gdd/save-load-persistence.md
+    value: CityHub_InnRoom_StartAnchor
+    unit: id
+    notes: "Fixed T1 Character Creation start anchor. Resolves to PlayerZoneMembership with zoneType CityHubZone before first save."
+    added: 2026-04-24
+    revised: ""
+
+  - name: starting_class_id_cleric
+    status: active
+    source: design/gdd/character-creation.md
+    referenced_by:
+      - design/gdd/character-creation.md
+      - design/gdd/save-load-persistence.md
+    value: Cleric
+    unit: id
+    notes: "Only visible and valid T1 Character Creation class id. This is a mechanical seed, not faction, faith, or ordination state."
+    added: 2026-04-24
+    revised: ""
+
+  - name: cleric_starting_equipment_template_id
+    status: active
+    source: design/gdd/character-creation.md
+    referenced_by:
+      - design/gdd/character-creation.md
+      - design/gdd/save-load-persistence.md
+    value: ClericStartingEquipment_T1
+    unit: id
+    notes: "Starting equipment template reference emitted by Character Creation. Inventory & Item Economy owns later item materialization, slots, and validation."
+    added: 2026-04-24
+    revised: ""
+
+  - name: faction_reputation_baseline_neutral_all_factions
+    status: active
+    source: design/gdd/character-creation.md
+    referenced_by:
+      - design/gdd/character-creation.md
+      - design/gdd/save-load-persistence.md
+    value: NeutralAllFactions
+    unit: id
+    notes: "Neutral starting faction-reputation baseline emitted by Character Creation. Faction Reputation owns later numeric values, labels, mutation, and display."
+    added: 2026-04-24
     revised: ""
 
 # Example:

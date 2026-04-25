@@ -1,0 +1,20 @@
+# Menus & Settings Review Log
+
+## Review — 2026-04-24 (re-review, same day) — Verdict: APPROVED
+Scope signal: M
+Specialists: none (single-session independent re-review)
+Blocking items: 0 | Recommended: 0 | Nice-to-have: 0
+Summary: Both prior findings resolved. (P1) Title-flow save-record gating closed by new Core Rule 16 at menus-settings.md:59 covering all four save-record cases — existing-record Continue → normal load path; no-record Continue → disabled or first-run collapse with no `LoadRejected`; existing-record New Game → blocking destructive-overwrite confirmation; no-record New Game → first-run path — with TitleMenu state row updated at :65, two new edge-case rows at :162-163, Interactions table Save/Load row expanded with save-record-existence query at :84, two new cross-reference rows for Save/Load Rule 2 + Rule 14 at :270-271, and two new ACs H-MS-SL-10 + H-MS-SL-11 at :327-333. (P2) H-MS-SL-03 rewritten at :299-301 as a conditional-binary AC — testable when implementation surfaces a timestamp, vacuously satisfied otherwise; summary-table Covers column renamed at :451 and totals line synced at :487. Summary table total updated 35 → 37 criteria (36 T1-blocking, 1 advisory). Completeness 8/8 sections. Contract check clean: Save/Load Rule 2 single-record constraint + Rule 14 first-run/missing-file distinction + Rule 13 Session-Exit Retry/Quit-Without-Saving + engine-level fallback all correctly reflected; World Structure silent `SessionResumeEvent` + invisible routine `ZoneLoading` + terminal `ZoneError` all aligned. Registry + systems-index reverse-listings stand.
+Prior verdict resolved: Yes — both P1 (title-flow gate, blocking) and P2 (H-MS-SL-03 testability, minor) addressed in the same-day revision before re-review.
+Watch items: H-MS-SL-01 and H-MS-WS-02 retain permissive "may" language in the THEN clause because the source contracts make those indicators optional (Save/Load Rule 6 treats the save-in-progress indicator as optional; WS treats the overrun indicator as non-blocking advisory per world-structure.md:397). The ACs still constrain the important observables — no blocking, no focus steal, no success theater. Not a finding; flagged only so a future review round is informed.
+Cosmetic follow-up (non-blocking): menus-settings.md:6 "Last Verified" header still reads "Phase 5 self-check readback" and is stale post P1/P2 revision. Touch-up whenever convenient.
+
+## Review — 2026-04-24 (first review, same day) — Verdict: NEEDS REVISION
+Scope signal: M
+Specialists: none (single-session independent review)
+Blocking items: 1 | Recommended: 1
+Summary: 8/8 sections present; upstream contracts mostly preserved. Two findings:
+(P1) TitleMenu exit-condition row at menus-settings.md:63 assumed Continue and New Game map cleanly to Save/Load's load path and first-run path, but under Save/Load Rule 2 at save-load-persistence.md:65 (T1 single active local character record) and Rule 14 at save-load-persistence.md:95-97 (first-run vs missing-file distinction), four cases exist — two of which were unspecified. Existing-record + New Game created a silent destructive-overwrite risk violating Pillar 5. No-record + Continue was ambiguous between triggering the Rule 14 first-run path (which is not a failure) and emitting `LoadRejected(SaveMissing)` (which would incorrectly classify expected bootstrap as data loss).
+(P2) H-MS-SL-03 used permissive "may update" phrasing in the THEN clause, making the advisory AC non-testable (both updating and not-updating passed). The summary-table promotion criterion was already in place (advisory-at-T1; promotes to T1-blocking when timestamp is surfaced), so the AC body needed rewriting to match — binary-testable when triggered, vacuous when not.
+Prior verdict resolved: N/A — first review.
+Next steps: Apply P1 + P2 patch in the same session before re-review. Files in scope: menus-settings.md only. Expected edits: new Core Rule 16 + 2 edge-case rows + 2 new ACs + H-MS-SL-03 rewrite + summary-table resync (35 → 37 criteria) + Interactions table Save/Load row update + 2 cross-reference rows.
