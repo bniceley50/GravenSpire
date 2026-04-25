@@ -21,6 +21,38 @@ Promote repeating lessons to `CLAUDE-patterns.md` (cross-cutting) or a
 
 ## Entries (newest first)
 
+### 2026-04-25 — [GLOBAL] Approved work hoarding without prompt protocol
+
+**Context:** Across multiple sessions of the Pre-Production design pass,
+~5,000 lines of `/design-review`-APPROVED design work (7 GDDs + 7 review
+logs + systems-index updates + entities.yaml registry sync) accumulated
+uncommitted in the working tree. The discipline "no commit without user
+instruction" was honored, but no complementary discipline forced the agent
+to *prompt* for commit at the moment of approval. The accumulation was
+recovered by a single catch-up commit `f1df1c5` (2026-04-25), but a worktree
+corruption or hard reset before the catch-up would have lost weeks of work.
+
+**Lesson:** "No commits without user instruction" is necessary but
+insufficient. It must be paired with an agent prompting obligation at every
+approval checkpoint (`/design-review APPROVED`, `EDIT_OK` + verified batch,
+test-passing implementation milestone, end-of-session). Approved work that
+sits uncommitted across session boundaries is forgotten work and lost work
+waiting to happen. The fix is structural protocol, not vigilance — quiet
+competence reliably forgets the commit question; explicit prompts at
+approval moments do not.
+
+**Evidence:** `AGENTS.md` §14 (Commit & Push Cadence, added 2026-04-25);
+`CLAUDE.md` Collaboration Protocol cross-reference; commit `f1df1c5`
+(catch-up batch); commit `32e13a6` (the prior commit before the
+accumulation, showing the gap window).
+
+**Promotion status:** open — promote to universal system prompt
+(`docs/brian-system-prompt-v4-6.md`) when that placeholder is populated;
+this failure mode is universal across all Brian projects, not Gravenspire-
+specific. Tag remains `[GLOBAL]` for that propagation pathway.
+
+---
+
 ### 2026-04-21 — [GLOBAL][CI] Pre-build/pre-deploy config verification is not automatic
 
 **Context:** Inherited lesson from clinic-notes-ai 2026-04-10. A production

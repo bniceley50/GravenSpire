@@ -15,8 +15,9 @@ Before any task, read these in order — they define behavior, decisions, and st
 tech-spec source of truth. `AGENTS.md` governs **behavior**; technical-preferences
 governs **tech choices**.
 
-See `AGENTS.md` §4 for conflict resolution when sources disagree, and §14 for
-AGENTS.md vs system-prompt precedence.
+See `AGENTS.md` §4 for conflict resolution when sources disagree, §14 for
+the agent's commit & push prompting obligation, and §15 for AGENTS.md vs
+system-prompt precedence.
 
 ---
 
@@ -59,6 +60,7 @@ Every task follows: **Question -> Options -> Decision -> Draft -> Approval**
 - Agents MUST show drafts or summaries before requesting approval
 - Multi-file changes require explicit approval for the full changeset
 - No commits without user instruction
+- See `AGENTS.md` §14 for the agent's prompting obligation at approval checkpoints
 
 See `docs/COLLABORATIVE-DESIGN-PRINCIPLE.md` for full protocol and examples.
 

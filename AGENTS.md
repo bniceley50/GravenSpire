@@ -235,7 +235,42 @@ This file does not override it — just names the approval token (`EDIT_OK`).
 
 ---
 
-## 14. When AGENTS.md and System Prompt Conflict
+## 14. Commit & Push Cadence
+
+CLAUDE.md's "No commits without user instruction" prevents speculative
+auto-commits. This rule prevents the inverse failure: approved work
+accumulating uncommitted.
+
+**At every approval checkpoint, the agent must prompt for commit + push:**
+
+- `/design-review APPROVED` verdict on a GDD
+- `EDIT_OK` + post-edit verification on a substantive batch
+- Test-passing implementation milestone (T1 = local gate per §6)
+- Session about to end with approved work uncommitted
+
+**Default cadence: per-approval.** One approval = one commit + push, scoped
+to that approval's files (GDD + review log + row updates + registry deltas).
+Batch commits only when the user explicitly says "batch these N items" or
+when the work is a coordinated cross-doc change.
+
+**The agent never commits without explicit user go.** This rule shifts only
+the agent's *prompting obligation*, not commit authority.
+
+**Forbidden patterns:**
+
+- Approved work crossing a `/clear` or session boundary uncommitted
+- Silent deferral of the commit question after approval
+- Force push to `main` (already Bash-tool-guarded)
+
+**Failure mode this prevents:**
+
+2026-04-25 catch-up — ~5,000 lines of approved design work accumulated
+across multiple sessions because no protocol forced the commit question
+at approval moments. Recovered via single catch-up commit `f1df1c5`.
+
+---
+
+## 15. When AGENTS.md and System Prompt Conflict
 
 **System prompt wins. Always.** File a lesson tagged `[GLOBAL]` so the conflict
 propagates up to the universal prompt if the system-prompt rule is wrong for
