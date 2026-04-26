@@ -21,6 +21,34 @@ Promote repeating lessons to `CLAUDE-patterns.md` (cross-cutting) or a
 
 ## Entries (newest first)
 
+### 2026-04-26 — [GLOBAL][SCOPE] Repair contract drift, park implementation detail
+
+**Context:** Inventory & Item Economy full design review found six legitimate
+blocker groups after authoring was complete. Only one blocker created active
+cross-document drift: Inventory claimed Save/Load invoked
+`InventoryFirstSaveMaterializer`, while Save/Load did not reverse-list it.
+The remaining blockers were implementation-pre-spec work (schema identity,
+partial-stack math, currency/vendor transaction closure, UI result handoff,
+and future-system fixture gating). We repaired the Save/Load drift and parked
+Inventory behind `INV-OQ-05` instead of running another large design round
+before validating combat feel.
+
+**Lesson:** When review uncovers many valid issues, separate false committed
+claims from honest future work. Fix real cross-document drift immediately; do
+not let broad implementation detail pull the project into over-design before
+the current strategic risk is validated. A parked pre-spec entry is better
+than pretending a system is approved, and better than burning a prototype
+window on non-blocking precision.
+
+**Evidence:** Commit `294a365` (Save/Load reverse-listing repair + Inventory
+park); `design/gdd/inventory-item-economy.md` `INV-OQ-05`;
+`production/session-state/active.md` prototype pivot entry.
+
+**Promotion status:** open — promote to universal system prompt once repeated
+across another project or another major Gravenspire review cycle.
+
+---
+
 ### 2026-04-25 — [GLOBAL] Approved work hoarding without prompt protocol
 
 **Context:** Across multiple sessions of the Pre-Production design pass,
