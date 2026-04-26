@@ -1,11 +1,11 @@
 # Active Session State
 
-**Last Updated:** 2026-04-22
+**Last Updated:** 2026-04-26
 **Project Stage:** Pre-Production — Design
 
 ## Current Task
 
-Author **World Structure GDD** (first MVP Foundation system). Skeleton created; Phase 4 Section A (Overview) next.
+Design **Inventory & Item Economy GDD** via `/design-system Inventory & Item Economy`.
 
 ## Status
 
@@ -17,16 +17,35 @@ Author **World Structure GDD** (first MVP Foundation system). Skeleton created; 
 - ✓ D006 committed — Codex onboarded as parallel implementer (commit `fae8c8c`)
 - ✓ Codex onboarding brief delivered; Codex has completed read-only onboarding and surfaced 4 clarifying questions (all answered)
 - ✓ Codex Assignment #1 drafted — `dotnet format` setup on branch `codex/dotnet-format-setup`
-- ✅ World Structure GDD — **complete.** All 8 required sections + 4 optional sections populated. Section C amended mid-process (Rule 12 save-timeout after Section E edge A4; Day/Night named event after Section H qa-lead flag). 26 acceptance criteria (23 T1-blocking, 3 advisory). Entity registry updated (5 formulas + 3 constants). Systems-index flipped to Designed (1/26 MVP).
+- ⚠️ World Structure GDD — **NEEDS REVISION.** Full `/design-review design/gdd/world-structure.md` completed 2026-04-23 with verdict **MAJOR REVISION NEEDED** and scope signal **XL**. Six blocker groups: (1) transition contract contradiction, (2) memory residency model contradiction, (3) save/zone identity contradiction, (4) formula/registry validator-safety issues, (5) acceptance criteria not T1-gateable, (6) T1 offline "world kept moving" bridge underspecified. Review log created at [design/gdd/reviews/world-structure-review-log.md](../../design/gdd/reviews/world-structure-review-log.md).
 - ✅ Commit `4801d8a` on `main` (GDD + registry + systems-index + active.md bundle; rebased onto PR #1 merge).
-- Next: run `/design-review design/gdd/world-structure.md` in a **fresh session** for independent validation; then `/consistency-check` before next GDD; then Save/Load & Persistence (next in Foundation order).
-- 🔄 Codex PR #1 (`codex/dotnet-format-setup` → `main`): Claude Code review posted as COMMENTED (GitHub blocks request-changes on self-owned PRs). 3 polish items requested before merge: (1) expand traversal exclusions for Unity paths, (2) attribute-decorated field regex fix, (3) document fallback rules in README. Awaiting Codex revisions.
+- ✅ Character Progression GDD skeleton created 2026-04-25 at [design/gdd/character-progression.md](../../design/gdd/character-progression.md).
+- ✅ Character Progression Overview section written 2026-04-25.
+- ✅ Character Progression Player Fantasy section written 2026-04-25.
+- ✅ Character Progression Detailed Design section written 2026-04-25.
+- ✅ Character Progression Formulas section written 2026-04-25.
+- ✅ Character Progression Edge Cases section written 2026-04-25.
+- ✅ Character Progression Dependencies section written 2026-04-25.
+- ✅ Character Progression Tuning Knobs section written 2026-04-25.
+- ✅ Character Progression Visual/Audio Requirements section written 2026-04-25.
+- ✅ Character Progression UI Requirements section written 2026-04-25.
+- ✅ Character Progression Acceptance Criteria section written and count-verified 2026-04-25 (`44` criteria; `42` ordinary T1-blocking, `2` fixture-gated T1-blocking, `0` advisory-at-T1).
+- ✅ Character Progression full review reached **APPROVED** after ADR-alignment and specialist blocker fixes; landed in commit `6459ceb`.
+- ✅ Character Progression metadata/review-log follow-up landed in commit `557fa3e`.
+- ✅ Inventory & Item Economy GDD skeleton created 2026-04-26 at [design/gdd/inventory-item-economy.md](../../design/gdd/inventory-item-economy.md).
+- ✅ Inventory & Item Economy Overview section written 2026-04-26.
+- ✅ Inventory & Item Economy Player Fantasy section written 2026-04-26.
+- ✅ Inventory & Item Economy Detailed Rules section written 2026-04-26.
+- Next: author Inventory & Item Economy Formulas section.
+- ✅ Codex PR #1 (`codex/dotnet-format-setup` → `main`) merged into `main`; follow-up cleanup commit `ce634c3` recorded.
 
 ## Files Being Worked On
 
-- **Active:** [design/gdd/world-structure.md](../../design/gdd/world-structure.md) — skeleton; Section A next
+- **Active:** [design/gdd/inventory-item-economy.md](../../design/gdd/inventory-item-economy.md) — in design; Overview, Player Fantasy, and Detailed Rules complete; next action Formulas section
+- Character Progression: [design/gdd/character-progression.md](../../design/gdd/character-progression.md) — APPROVED 2026-04-26; commits `6459ceb` and `557fa3e`
+- World Structure: [design/gdd/world-structure.md](../../design/gdd/world-structure.md)
 - Game concept: [design/gdd/game-concept.md](../../design/gdd/game-concept.md)
-- Art bible: [design/art/art-bible.md](../../design/art/art-bible.md) — hard constraints for this GDD (§8.7 zone=Addressable group, §8.9 ≤350MB, §4.4 no zone-boundary LUT, §6.2 ≤3-4 unique 2K surfaces/group)
+- Art bible: [design/art/art-bible.md](../../design/art/art-bible.md) — hard constraints for this GDD (§8.7 zone=Addressable group, §8.9 ≤350MB, §4.5 no zone-boundary LUT, §6.2 ≤3-4 unique 2K surfaces/group)
 - Systems index: [design/gdd/systems-index.md](../../design/gdd/systems-index.md)
 - CLAUDE.md (Technology Stack + Engine Version Reference)
 - .claude/docs/technical-preferences.md (Unity 6.3 LTS + C# + URP + full specialist routing)
@@ -53,6 +72,6 @@ Author **World Structure GDD** (first MVP Foundation system). Skeleton created; 
 
 ## Next Skill to Run
 
-- **Continue `/design-system world-structure`** — Phase 4 Section A (Overview). Skeleton is at [design/gdd/world-structure.md](../../design/gdd/world-structure.md). Feasibility brief already delivered in-session; jump straight to the Section A framing widget (Framing / ADR ref / Fantasy tabs).
-- After World Structure: Save/Load & Persistence → Menus & Settings → NPC System → Combat Core.
-- Codex in parallel: [Assignment #1 dotnet format setup] — waiting for brian to relay.
+- **Continue `/design-system Inventory & Item Economy`** — Overview, Player Fantasy, and Detailed Rules are complete; next section is Formulas.
+- After Inventory & Item Economy sections are complete: run `/design-review design/gdd/inventory-item-economy.md` in a fresh session.
+- Codex PR #1 is merged; no Codex follow-up pending in this active state file.
