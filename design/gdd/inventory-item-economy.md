@@ -642,3 +642,12 @@ Total: 51 criteria.
 Ordinary T1-blocking: 47.
 Fixture-gated T1-blocking: 4.
 Advisory-at-T1: 0.
+
+## Open Questions
+
+| ID | Question | Owner | Required Before |
+|---|---|---|---|
+| `INV-OQ-01` | If T2+ introduces stat-bearing equipment, Save/Load hydration order must change to Character Progression -> Inventory -> Combat, and a new ADR must define the `EquipmentCombatStatSnapshot` contract with Combat reverse-listing. T1 equipment remains stat-flat. | Combat Core + Inventory + ADR | Stat-bearing equipment implementation (T2+) |
+| `INV-OQ-02` | The Combat -> Inventory loot eligibility contract must be designed before any kill-credited loot drops. The likely shape is `InventoryLootEligibilityRequest(local_character_id, defeated_source_ref, zoneId, loot_context_id)` plus Inventory-owned `LootSourceRefLookup_T1`, separate from `ProgressionXpSourceRefLookup_T1`. T1 can ship authored placements such as fixed pickups/chests before this is resolved. | Combat Core + Inventory | Kill-credited loot drops |
+| `INV-OQ-03` | Death & Corpse Recovery must own death timing and the call into `InventoryCorpseSnapshot(death_context_id)` before corpse-run item recovery can ship. If D&CR introduces multi-frame inventory transfer, this GDD must be amended to declare an ADR-0002 `InventorySaveBarrier` grouped with corpse state under `inventory_corpse_consistency`. | Death & Corpse Recovery + Inventory + ADR-0002 | Corpse-run item recovery implementation |
+| `INV-OQ-04` | Authored data location and asset format are not locked for `ClericStartingEquipment_T1`, item definitions, `T1_CityHubVendorBuyTable_T1`, salvage value bands, or `CurrencyContainer` value bands. Likely path is ScriptableObjects under `assets/data/inventory/` per project structure, but asset format and Addressables grouping are implementation decisions. | gameplay-programmer + unity-addressables-specialist | Inventory implementation start |
