@@ -293,3 +293,43 @@ written.
 `docs/architecture/adr-0003-progression-baseline-snapshot-contract.md`;
 `design/gdd/character-creation.md`; `design/gdd/character-progression.md`;
 `design/gdd/save-load-persistence.md`; `design/gdd/systems-index.md`.
+
+---
+
+## D011 — ADR-0005 Progression Pacing Fixture Contracts
+
+**Date:** 2026-04-26
+**Status:** Proposed
+**Context:** Character Progression pacing criteria need deterministic fixture
+evidence for XP/hour, kills/level, camp-session ding cadence, and anti-farming
+claims. Round-4 review also exposed that event-order edge cases can become
+mathematically impossible if every fixture is forced through legal kill-credit
+caps, while pacing claims become invalid if they use synthetic direct-XP
+transactions.
+**Decision:** Create
+`docs/architecture/adr-0005-progression-pacing-fixture-contracts.md`. The ADR
+proposes explicit fixture kinds: `LegalKillCreditRoute` for pacing evidence,
+`FormulaOnly` for pure formula checks, `SyntheticEventTransaction` for event
+ordering and cap edge cases, `InvalidDataValidation` for validator failures,
+and `ProfileRunSpec` for QA profile instructions. Pacing signoff requires a
+passing `PacingMathPreflight` from legal kill-credit fixtures before profiled
+playtest evidence can count.
+**Consequences:**
+- Character Progression GDD should reference ADR-0005 for pacing fixture kinds,
+  deterministic preflight, and profiled playtest evidence rules.
+- Synthetic event fixtures may test multi-level event ordering, but cannot prove
+  XP/hour, kills/level, time-to-ding, camp cadence, or earned progression
+  fantasy.
+- Legal pacing fixtures must resolve against ADR-0001 lookup rows, Combat Core
+  fixture ids, expected `kill_weight_seed`, repeatability class, lifecycle
+  policy, and cadence models.
+- This completes the five-ADR architecture set needed before the final
+  Character Progression GDD revision pass.
+**See also:**
+`docs/architecture/adr-0005-progression-pacing-fixture-contracts.md`;
+`docs/architecture/adr-0001-xp-source-lifecycle-registry.md`;
+`docs/architecture/adr-0002-save-stability-barrier-protocol.md`;
+`docs/architecture/adr-0003-progression-baseline-snapshot-contract.md`;
+`docs/architecture/adr-0004-first-save-materialization-and-character-identity.md`;
+`design/gdd/character-progression.md`; `design/gdd/combat-core.md`;
+`design/gdd/npc-system.md`; `design/gdd/systems-index.md`.

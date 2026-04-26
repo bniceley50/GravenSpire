@@ -145,6 +145,34 @@ state_ownership:
     added: 2026-04-26
     revised: ""
 
+  - state: progression_pacing_fixture_set_t1
+    status: proposed
+    owner_system: Character Progression
+    adr: docs/architecture/adr-0005-progression-pacing-fixture-contracts.md
+    interface: "ProgressionPacingFixtureSet_T1 with explicit fixture_kind rows and references to Combat fixtures plus ADR-0001 lookup data"
+    write_access: Character-Progression-test-data-owner
+    referenced_by:
+      - docs/architecture/adr-0005-progression-pacing-fixture-contracts.md
+      - docs/architecture/adr-0001-xp-source-lifecycle-registry.md
+      - design/gdd/character-progression.md
+      - design/gdd/combat-core.md
+      - design/gdd/npc-system.md
+    added: 2026-04-26
+    revised: ""
+
+  - state: progression_pacing_preflight_output
+    status: proposed
+    owner_system: Character Progression
+    adr: docs/architecture/adr-0005-progression-pacing-fixture-contracts.md
+    interface: "PacingMathPreflight output for legal route fixtures: xp_per_qualifying_kill, kills_to_level, projected_xp_per_hour, projected_time_to_ding_seconds, feasibility_status"
+    write_access: Character-Progression-validator-only
+    referenced_by:
+      - docs/architecture/adr-0005-progression-pacing-fixture-contracts.md
+      - design/gdd/character-progression.md
+      - design/gdd/combat-core.md
+    added: 2026-04-26
+    revised: ""
+
 # Example:
 #
 # state_ownership:
@@ -311,6 +339,58 @@ interfaces:
       - design/gdd/character-progression.md
       - design/gdd/save-load-persistence.md
       - design/gdd/character-creation.md
+    added: 2026-04-26
+    revised: ""
+
+  - contract: progression_pacing_fixture_loader
+    status: proposed
+    pattern: direct_call
+    producer: Character Progression
+    consumers:
+      - Character Progression validators
+      - QA profile harness
+      - Combat Core fixture validators
+    adr: docs/architecture/adr-0005-progression-pacing-fixture-contracts.md
+    method_signature: "LoadProgressionPacingFixtureSet_T1(fixture_set_id, schema_version) -> ProgressionPacingFixtureSet_T1"
+    notes: "Loads explicit fixture-kind rows only; ambiguous fixture_kind values fail validation and cannot be used for pacing, formula, event, invalid-data, or profile evidence."
+    referenced_by:
+      - docs/architecture/adr-0005-progression-pacing-fixture-contracts.md
+      - design/gdd/character-progression.md
+      - design/gdd/combat-core.md
+    added: 2026-04-26
+    revised: ""
+
+  - contract: pacing_math_preflight_validator
+    status: proposed
+    pattern: direct_call
+    producer: Character Progression
+    consumers:
+      - QA profile harness
+      - systems-designer validation workflow
+    adr: docs/architecture/adr-0005-progression-pacing-fixture-contracts.md
+    method_signature: "RunPacingMathPreflight(legal_route_fixture_id) -> PacingMathPreflight"
+    notes: "Computes XP per qualifying kill, kills-to-level, projected XP/hour, projected time-to-ding, and feasibility before profiled pacing evidence can count."
+    referenced_by:
+      - docs/architecture/adr-0005-progression-pacing-fixture-contracts.md
+      - docs/architecture/adr-0001-xp-source-lifecycle-registry.md
+      - design/gdd/character-progression.md
+    added: 2026-04-26
+    revised: ""
+
+  - contract: profiled_pacing_run_spec_contract
+    status: proposed
+    pattern: direct_call
+    producer: Character Progression
+    consumers:
+      - QA profile harness
+      - game-designer
+      - systems-designer
+    adr: docs/architecture/adr-0005-progression-pacing-fixture-contracts.md
+    method_signature: "ProfiledPacingRunSpec(legal_route_fixture_id, required_preflight_status = Feasible, measured_fields) -> QA pacing report"
+    notes: "Profiled runs must cite fixture set version and preflight output; profile specs may reference only LegalKillCreditRoute fixtures."
+    referenced_by:
+      - docs/architecture/adr-0005-progression-pacing-fixture-contracts.md
+      - design/gdd/character-progression.md
     added: 2026-04-26
     revised: ""
 
@@ -566,6 +646,60 @@ forbidden_patterns:
       - docs/architecture/adr-0004-first-save-materialization-and-character-identity.md
       - design/gdd/character-creation.md
       - design/gdd/save-load-persistence.md
+      - design/gdd/character-progression.md
+    added: 2026-04-26
+
+  - pattern: synthetic_fixture_as_pacing_evidence
+    status: proposed
+    description: "SyntheticEventTransaction, FormulaOnly, and InvalidDataValidation fixtures must not be used as evidence for XP/hour, kills/level, time-to-ding, camp-session cadence, or pacing fantasy acceptance."
+    why: "ADR-0005 allows synthetic fixtures for event/formula edge cases only; pacing evidence must come from LegalKillCreditRoute fixtures."
+    adr: docs/architecture/adr-0005-progression-pacing-fixture-contracts.md
+    referenced_by:
+      - docs/architecture/adr-0005-progression-pacing-fixture-contracts.md
+      - design/gdd/character-progression.md
+    added: 2026-04-26
+
+  - pattern: profiled_pacing_without_preflight
+    status: proposed
+    description: "A profiled pacing run must not count as T1-blocking pacing evidence unless its referenced LegalKillCreditRoute has a passing PacingMathPreflight."
+    why: "ADR-0005 requires deterministic feasibility before profiled playtest; profile runs cannot legalize mathematically impossible or illegal fixture routes."
+    adr: docs/architecture/adr-0005-progression-pacing-fixture-contracts.md
+    referenced_by:
+      - docs/architecture/adr-0005-progression-pacing-fixture-contracts.md
+      - design/gdd/character-progression.md
+    added: 2026-04-26
+
+  - pattern: legal_pacing_fixture_without_adr0001_lookup
+    status: proposed
+    description: "LegalKillCreditRoute fixtures must not bypass ADR-0001 source lookup rows, expected Combat kill weight matching, lifecycle policy, repeatability class, or XP eligibility."
+    why: "Pacing claims must use the same legal kill-credit source enrichment architecture that gameplay XP uses."
+    adr: docs/architecture/adr-0005-progression-pacing-fixture-contracts.md
+    referenced_by:
+      - docs/architecture/adr-0005-progression-pacing-fixture-contracts.md
+      - docs/architecture/adr-0001-xp-source-lifecycle-registry.md
+      - design/gdd/character-progression.md
+      - design/gdd/combat-core.md
+    added: 2026-04-26
+
+  - pattern: lockout_route_projected_as_repeatable
+    status: proposed
+    description: "RespawnLockout, named, camp, or future first-kill routes must not be projected as continuous repeatable XP/hour routes unless the projection explicitly includes lockout and one-time limits."
+    why: "ADR-0005 and ADR-0001 require pacing projections to include repeatability and lifecycle timing so lockout routes cannot masquerade as trash farming."
+    adr: docs/architecture/adr-0005-progression-pacing-fixture-contracts.md
+    referenced_by:
+      - docs/architecture/adr-0005-progression-pacing-fixture-contracts.md
+      - docs/architecture/adr-0001-xp-source-lifecycle-registry.md
+      - design/gdd/character-progression.md
+      - design/gdd/npc-system.md
+    added: 2026-04-26
+
+  - pattern: pacing_fixture_with_ambiguous_kind
+    status: proposed
+    description: "Every ProgressionPacingFixtureSet_T1 row must declare exactly one legal fixture_kind; ambiguous or missing fixture_kind rows are invalid."
+    why: "ADR-0005 depends on fixture-kind separation to prevent synthetic, invalid, formula-only, and legal pacing fixtures from being misused."
+    adr: docs/architecture/adr-0005-progression-pacing-fixture-contracts.md
+    referenced_by:
+      - docs/architecture/adr-0005-progression-pacing-fixture-contracts.md
       - design/gdd/character-progression.md
     added: 2026-04-26
 
