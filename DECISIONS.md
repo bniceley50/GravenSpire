@@ -185,3 +185,34 @@ remains unchanged.
 **See also:** `docs/architecture/adr-0001-xp-source-lifecycle-registry.md`;
 `design/gdd/character-progression.md`; `design/gdd/npc-system.md`;
 `design/gdd/save-load-persistence.md`; `design/gdd/combat-core.md`.
+
+---
+
+## D008 — ADR-0002 Save Stability Barrier Protocol
+
+**Date:** 2026-04-26
+**Status:** Proposed
+**Context:** Character Progression and Save/Load round-4 review exposed that
+same-frame kill/save races need one architecture-level save-readiness protocol,
+not per-GDD prose. `ProgressionSaveBarrier` and
+`NpcSourceLifecycleSaveBarrier` were named, but their shared request/result
+shape, deadline behavior, grouped consistency semantics, and failure behavior
+needed a project-level lock.
+**Decision:** Create `docs/architecture/adr-0002-save-stability-barrier-protocol.md`.
+The ADR proposes a declared, bounded, synchronous save-stability barrier
+protocol. Save/Load invokes declared downstream barriers before reading guarded
+payloads; downstream owners return stable read views or unresolved/failed
+results; grouped barriers must all be stable before any member payload is
+serialized; unresolved barriers fail the write loudly with
+`SaveFailedEvent(DownstreamSaveBarrierUnresolved)` and no bytes written.
+**Consequences:**
+- Save/Load GDD should reference ADR-0002 for Rule 8a downstream barriers,
+  grouped barrier semantics, and the `DownstreamSaveBarrierUnresolved` failure.
+- Character Progression and NPC System should reference ADR-0002 for
+  `ProgressionSaveBarrier` and `NpcSourceLifecycleSaveBarrier`.
+- Follow-up ADRs remain needed for progression baseline snapshots,
+  first-save identity/materialization, and pacing fixtures.
+**See also:** `docs/architecture/adr-0002-save-stability-barrier-protocol.md`;
+`docs/architecture/adr-0001-xp-source-lifecycle-registry.md`;
+`design/gdd/save-load-persistence.md`; `design/gdd/character-progression.md`;
+`design/gdd/npc-system.md`; `design/gdd/world-structure.md`.

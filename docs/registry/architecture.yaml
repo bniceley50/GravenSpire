@@ -115,6 +115,44 @@ interfaces:
     added: 2026-04-26
     revised: ""
 
+  - contract: save_stability_barrier_protocol
+    status: proposed
+    pattern: direct_call
+    producer: "Save / Load & Persistence"
+    consumers:
+      - Character Progression
+      - NPC System
+      - Future downstream save clients with transient save-unsafe state
+    adr: docs/architecture/adr-0002-save-stability-barrier-protocol.md
+    method_signature: "SaveStabilityBarrier(request: SaveStabilityBarrierRequest) -> SaveStabilityBarrierResult"
+    notes: "Save/Load invokes declared downstream barriers before reading guarded payloads; Stable returns a scoped read_token, while Unresolved/Failed causes no bytes to be written."
+    referenced_by:
+      - docs/architecture/adr-0002-save-stability-barrier-protocol.md
+      - design/gdd/save-load-persistence.md
+      - design/gdd/character-progression.md
+      - design/gdd/npc-system.md
+    added: 2026-04-26
+    revised: ""
+
+  - contract: xp_source_lifecycle_consistency_barrier_group
+    status: proposed
+    pattern: direct_call
+    producer: "Save / Load & Persistence"
+    consumers:
+      - Character Progression
+      - NPC System
+    adr: docs/architecture/adr-0002-save-stability-barrier-protocol.md
+    method_signature: "ProgressionSaveBarrier(request) + NpcSourceLifecycleSaveBarrier(request) must both return Stable before either guarded payload serializes."
+    notes: "Post-award XP and defeated-source lifecycle state are serialized together or not at all."
+    referenced_by:
+      - docs/architecture/adr-0002-save-stability-barrier-protocol.md
+      - docs/architecture/adr-0001-xp-source-lifecycle-registry.md
+      - design/gdd/save-load-persistence.md
+      - design/gdd/character-progression.md
+      - design/gdd/npc-system.md
+    added: 2026-04-26
+    revised: ""
+
 # Example:
 #
 # interfaces:
@@ -230,6 +268,42 @@ forbidden_patterns:
     referenced_by:
       - docs/architecture/adr-0001-xp-source-lifecycle-registry.md
       - design/gdd/character-progression.md
+    added: 2026-04-26
+
+  - pattern: direct_save_read_of_transient_downstream_state
+    status: proposed
+    description: "Save/Load must not read guarded downstream payloads directly while the owner can be in a transient save-unsafe state."
+    why: "Downstream owners must settle or reject pending transactions through declared save-stability barriers before Save/Load reads their payloads."
+    adr: docs/architecture/adr-0002-save-stability-barrier-protocol.md
+    referenced_by:
+      - docs/architecture/adr-0002-save-stability-barrier-protocol.md
+      - design/gdd/save-load-persistence.md
+      - design/gdd/character-progression.md
+      - design/gdd/npc-system.md
+    added: 2026-04-26
+
+  - pattern: unbounded_downstream_save_wait
+    status: proposed
+    description: "Save/Load and downstream barrier owners must not wait indefinitely for a save-stability barrier to settle."
+    why: "Every barrier request needs an effective monotonic deadline; unresolved barriers fail loudly so transition saves do not hang or consume World Structure's save_mutex_max_ms window."
+    adr: docs/architecture/adr-0002-save-stability-barrier-protocol.md
+    referenced_by:
+      - docs/architecture/adr-0002-save-stability-barrier-protocol.md
+      - design/gdd/save-load-persistence.md
+      - design/gdd/world-structure.md
+    added: 2026-04-26
+
+  - pattern: partial_group_payload_serialization
+    status: proposed
+    description: "When a declared barrier group guards cross-system consistency, Save/Load must not serialize any member payload unless every member barrier returns Stable."
+    why: "Partial serialization can persist post-award XP without matching source lifecycle state, or source lifecycle death without matching progression state."
+    adr: docs/architecture/adr-0002-save-stability-barrier-protocol.md
+    referenced_by:
+      - docs/architecture/adr-0002-save-stability-barrier-protocol.md
+      - docs/architecture/adr-0001-xp-source-lifecycle-registry.md
+      - design/gdd/save-load-persistence.md
+      - design/gdd/character-progression.md
+      - design/gdd/npc-system.md
     added: 2026-04-26
 
 # Example:
