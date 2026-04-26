@@ -2,7 +2,7 @@
 
 > **Status**: Designed (pending review)
 > **Author**: Codex (session with brian, 2026-04-24)
-> **Last Updated**: 2026-04-24
+> **Last Updated**: 2026-04-26
 > **Last Verified**: 2026-04-24 - Phase 5 self-check readback
 > **Implements Pillar**: Primary — **P3 Reputation Is The Progression**. Supports — **P1 The World Is Not Your Story** and **P5 Stakes Are Honest**.
 
@@ -14,7 +14,7 @@ These inputs are authoritative for the Character Creation GDD. This GDD reproduc
 
 2. **Direct dependency lock** — Character Creation has exactly one direct upstream dependency: [save-load-persistence.md](save-load-persistence.md). Menus & Settings invokes the flow, World Structure provides the eventual start-zone contract, and future systems consume the seed data, but they are boundary contracts or downstream consumers, not additional direct dependencies.
 
-3. **Save/Load contract** — Save/Load Rule 1 persists Player State, including character identity, class, appearance tokens, and Player-Authored Strings. Rule 2 exposes one active local character record at T1. Rule 12 requires player-authored strings to be length-capped and sanitized before downstream consumption. Rule 14 distinguishes expected first-run no-save bootstrap from missing-file data loss. Save/Load owns persistence, integrity, versioning, and load rejection; Character Creation owns the initial character-record schema.
+3. **Save/Load contract** — Save/Load Rule 1 persists Player State, including ADR-0004 `local_character_id`, character identity, class, appearance tokens, and Player-Authored Strings. Rule 2 exposes one active local character record at T1. Rule 12 requires player-authored strings to be length-capped and sanitized before downstream consumption. Rule 14 distinguishes expected first-run no-save bootstrap from missing-file data loss. Save/Load owns persistence, active-record identity context, integrity, versioning, first-save materializer orchestration, and load rejection; Character Creation owns initial character-record schema and `local_character_id` generation/validation.
 
 4. **Menus title-flow contract** — Menus & Settings Rule 16 owns title-menu gating. New Game with no existing record enters the first-run path. New Game with an existing record requires Menus' destructive-overwrite confirmation naming the existing character. Continue with no record must not emit `LoadRejected`. Character Creation owns the creation flow after Menus has routed the player into it.
 
@@ -24,7 +24,7 @@ These inputs are authoritative for the Character Creation GDD. This GDD reproduc
 
 ## Summary
 
-Character Creation is the T1 first-run flow that turns Menus & Settings' New Game route into a valid initial Player State payload for Save/Load. It is deliberately small: the player enters a required sanitized character name, confirms the single T1 class (`Cleric`), accepts the pre-faction visual baseline, and starts from the fixed `CityHub_InnRoom_StartAnchor`. The system does not manage save slots, accounts, portraits, backstory, class balance, faction reputation progression, inventory rules, or Sister Elara's onboarding scene. Its job is to produce one trustworthy initial character record: name, class, minimum appearance tokens, neutral faction baseline seed, authored Cleric starting-equipment template reference, empty carried inventory, onboarding eligibility flag, and start-zone membership data for the first save. Menus owns title routing and loading presentation; Save/Load owns persistence and integrity; Character Creation owns validation and the shape of the initial character record.
+Character Creation is the T1 first-run flow that turns Menus & Settings' New Game route into a valid initial Player State payload for Save/Load. It is deliberately small: the player enters a required sanitized character name, confirms the single T1 class (`Cleric`), accepts the pre-faction visual baseline, and starts from the fixed `CityHub_InnRoom_StartAnchor`. The system does not manage save slots, accounts, portraits, backstory, class balance, faction reputation progression, inventory rules, or Sister Elara's onboarding scene. Its job is to produce one trustworthy initial character record: opaque `local_character_id`, name, class, minimum appearance tokens, neutral faction baseline seed, authored Cleric starting-equipment template reference, empty carried inventory, onboarding eligibility flag, and start-zone membership data for the first save. Menus owns title routing and loading presentation; Save/Load owns persistence and first-save materializer orchestration; Character Creation owns validation and the shape of the initial character record.
 
 ## Overview
 
@@ -32,7 +32,7 @@ Character Creation is the narrow bridge between "no local save exists" and "one 
 
 The design is intentionally not a broad RPG creator. Players do not pick a backstory, origin, faction, portrait, server account, save slot, or class roster. They choose a name that can survive Save/Load's player-authored string rules, confirm the Cleric baseline, and enter the city as a pre-faction resident. That restraint supports Pillar 3: reputation is earned in play, not pre-authored on a biography screen. It also supports Pillar 1: the character arrives as one person in an older city, not as the protagonist of the world.
 
-The initial payload is a cross-system seed, so its boundaries are strict. Character Creation defines the character-record schema fields it owns, including name validation, class identity, minimum appearance tokens, starting location id, neutral faction baseline seed, starting equipment template reference, empty carried inventory, and onboarding eligibility. Save/Load serializes and validates persistence integrity. Menus presents the route and loading surface. Future Inventory, Faction Reputation, Character Progression, and Sister Elara Mentor GDDs consume the seed data when authored; they do not become direct dependencies of Character Creation at T1.
+The initial payload is a cross-system seed, so its boundaries are strict. Character Creation defines the character-record schema fields it owns, including ADR-0004 `local_character_id`, name validation, class identity, minimum appearance tokens, starting location id, neutral faction baseline seed, starting equipment template reference, empty carried inventory, and onboarding eligibility. Save/Load serializes the seed, exposes active-record identity context, and invokes required first-save materializers. Menus presents the route and loading surface. Inventory, Faction Reputation, Character Progression, and Sister Elara Mentor consume seed data only through their own approved materialization or hydration contracts; they do not become direct dependencies of Character Creation at T1.
 
 ## Player Fantasy
 
@@ -78,7 +78,7 @@ Municipal and ecclesiastical rather than heroic: the city ledger, the parish boo
 
 7. **Resident test for appearance tokens.** Every T1 appearance token must pass the resident test: if the same token were applied to an ambient pre-faction NPC in the CityHub inn room, it would not make that NPC read as special, heroic, faction-aligned, wealthy, magical, or narratively selected. Faction-primary color coverage target is 0% at creation and must never exceed the art-bible 5% ceiling.
 
-8. **Initial character record schema.** Character Creation owns this initial payload shape:
+8. **Initial character record schema.** Character Creation owns this initial payload shape. Per ADR-0004, `local_character_id` is generated exactly once per submitted `InitialCharacterRecord`, is opaque, immutable, non-player-authored, and is not derived from `character_name`, save path, save-slot label, account id, device username, Combat runtime ids, or any raw player input:
 
    ```yaml
    InitialCharacterRecord:
@@ -112,13 +112,13 @@ Municipal and ecclesiastical rather than heroic: the city ledger, the parish boo
 
 12. **Onboarding eligibility is only a seed.** Character Creation sets `onboarding_eligible = true` and `onboarding_intro_state = pending`. It does not author Sister Elara's introduction, dialogue, staging, behavior, motivations, companion state, relationship state, or departure. Sister Elara Mentor owns those beats when authored.
 
-13. **Validation precedes first save.** The payload must pass validation before handoff to Save/Load: name valid, class exactly `Cleric`, appearance tokens whitelisted, start anchor resolvable, zone membership resolved, equipment template id present, carried inventory empty, and faction baseline complete for all authored factions.
+13. **Validation precedes first save.** The payload must pass validation before handoff to Save/Load: `local_character_id` present and opaque, name valid, class exactly `Cleric`, appearance tokens whitelisted, start anchor resolvable, zone membership resolved, equipment template id present, carried inventory empty, and faction baseline complete for all authored factions.
 
-14. **Creation validation failures are local.** `NameTooShort`, `NameTooLong`, `NameDisallowedChars`, `ClassUnavailable`, `AppearanceTokenInvalid`, `StartAnchorUnresolved`, `StartingEquipmentTemplateMissing`, and `FactionBaselineIncomplete` block submission inside Character Creation. They are not Save/Load failures and must not emit `LoadRejected`.
+14. **Creation validation failures are local.** `IdentityInvalid`, `NameTooShort`, `NameTooLong`, `NameDisallowedChars`, `ClassUnavailable`, `AppearanceTokenInvalid`, `StartAnchorUnresolved`, `StartingEquipmentTemplateMissing`, and `FactionBaselineIncomplete` block submission inside Character Creation. They are not Save/Load failures and must not emit `LoadRejected`.
 
-15. **First save gates gameplay.** After payload validation, Character Creation hands the initial record to Save/Load and returns control to Menus' loading surface. Gameplay cannot begin until the first save succeeds and the start zone reaches playable activation. If the first save fails, Save/Load emits `SaveFailedEvent` and Menus owns the fail-loud surface.
+15. **First save gates gameplay.** After payload validation, Character Creation hands the initial record to Save/Load and returns control to Menus' loading surface. Per ADR-0004, Save/Load must run required first-save materializers, including Character Progression's T1 materializer, before the first successful write. Gameplay cannot begin until the first save succeeds and the start zone reaches playable activation. If the first save or required materialization fails, Save/Load emits the appropriate `SaveFailedEvent` and Menus owns the fail-loud surface.
 
-16. **Save/Load ownership boundary.** Character Creation owns schema and validation of the initial record. Save/Load owns serialization, HMAC/versioning, first-run vs missing-file distinction, write failure handling, and later hydration of Player State. Character Creation never writes storage directly.
+16. **Save/Load ownership boundary.** Character Creation owns schema, validation, and `local_character_id` generation for the initial record. Save/Load owns serialization, HMAC/versioning, active-record identity context, first-save materializer orchestration, first-run vs missing-file distinction, write failure handling, and later hydration of Player State. Character Creation never writes storage directly and never regenerates an id for an initialized record.
 
 17. **Tier discipline.** T1 Character Creation contains no networking authority, replicated identity, account binding, server character list, multi-slot flow, live LLM prompt seed, generated backstory, character deletion, portrait system, or cosmetic unlock system.
 
@@ -133,7 +133,7 @@ Municipal and ecclesiastical rather than heroic: the city ledger, the parish boo
 | `ClericConfirmed` | `starting_class_id = Cleric` confirmed | Appearance baseline confirmed -> `AppearanceBaselineConfirmed` | No alternate class ids are visible or stored. |
 | `AppearanceBaselineConfirmed` | T1 pre-faction Cleric tokens accepted | Payload validation requested -> `PayloadValidated` | Uses whitelisted appearance tokens only. No cosmetic sliders or faction choices. |
 | `PayloadValidated` | All schema fields pass validation | Submit -> `FirstSavePending`; validation failure -> relevant local rejection state | Builds `InitialCharacterRecord`; resolves `CityHub_InnRoom_StartAnchor` to `PlayerZoneMembership`. |
-| `FirstSavePending` | Valid payload handed to Save/Load | `SaveWriteConfirmed` -> `ZoneActivationPending`; `SaveFailedEvent` -> `FirstSaveFailed` | Menus loading surface owns presentation. Character Creation does not enter gameplay. |
+| `FirstSavePending` | Valid payload handed to Save/Load | `SaveWriteConfirmed` after required materializers -> `ZoneActivationPending`; `SaveFailedEvent` -> `FirstSaveFailed` | Menus loading surface owns presentation. Character Creation does not enter gameplay. Save/Load owns ADR-0004 materializer invocation. |
 | `FirstSaveFailed` | Save/Load reports first save failure | Menus handles failure acknowledgement / retry policy | No playable session starts from an unsaved initial payload. |
 | `ZoneActivationPending` | First save confirmed; start zone activation in progress | Start zone playable -> `CompletePlayable`; zone failure -> Menus / World Structure failure surface | Waits for normal start-zone activation ordering. |
 | `CompletePlayable` | First save confirmed and start zone playable | Gameplay owns control | Character Creation is complete for this record. |
@@ -143,12 +143,12 @@ Municipal and ecclesiastical rather than heroic: the city ledger, the parish boo
 
 | System | Inputs Consumed by Character Creation | Outputs Published by Character Creation | Ownership Boundary | Dependency |
 |---|---|---|---|---|
-| **Save / Load & Persistence** | First-run availability via Menus route; `SaveWriteConfirmed`; `SaveFailedEvent`; later hydrated Player State is Save/Load-owned | Valid `InitialCharacterRecord` for first save | Character Creation owns initial schema and validation. Save/Load owns persistence, integrity, versioning, first-run/missing-file distinction, and failure classes. | **Hard direct dependency** |
+| **Save / Load & Persistence** | First-run availability via Menus route; `SaveWriteConfirmed`; `SaveFailedEvent`; later hydrated Player State is Save/Load-owned | Valid ADR-0004 `InitialCharacterRecord` for first save | Character Creation owns initial schema, validation, and `local_character_id` generation. Save/Load owns persistence, active-record identity context, first-save materializer orchestration, integrity, versioning, first-run/missing-file distinction, and failure classes. | **Hard direct dependency** |
 | **Menus & Settings** | New Game routing; existing-record overwrite confirmation already completed; loading/failure surfaces | Creation-complete handoff; local validation status for presentation | Menus owns title gating, destructive-overwrite confirmation, loading surface, and player-facing failure modals. Character Creation owns the flow after route entry. | **Boundary contract; not direct dependency** |
 | **World Structure** | No direct event dependency in this GDD | `player_zone_membership` resolved from `CityHub_InnRoom_StartAnchor` for Save/Load payload | World Structure owns zone ids, zone type, anchor validity, and zone activation. Character Creation owns selecting the fixed start anchor id. | **Boundary contract via Save/Load payload** |
 | **Inventory & Item Economy** | None in T1 | `starting_equipment_template_id = ClericStartingEquipment_T1`; `carried_inventory = []` | Inventory owns item schema, equipment slots, item materialization, and validation. Character Creation only seeds the template reference. | **Future downstream consumer** |
 | **Faction Reputation** | None in T1 | `starting_faction_reputation_baseline = NeutralAllFactions` | Faction Reputation owns numeric values, tiers, labels, and reputation mutation. Character Creation only seeds neutral baseline. | **Future downstream consumer** |
-| **Character Progression** | None in T1 | `starting_class_id = Cleric`; optional future level/XP seed only if Character Progression requires it | Character Progression owns XP, level, spells, and progression rules. Character Creation owns starting class identity. | **Future downstream consumer** |
+| **Character Progression** | None directly in T1 | ADR-0004 `local_character_id` plus `starting_class_id = Cleric` through Save/Load first-save materialization context | Character Progression owns XP, level, spell eligibility, and `CharacterProgressionSaveState` materialization. Character Creation owns local identity generation and starting class seed. | **Hard downstream materializer via Save/Load** |
 | **Sister Elara Mentor** | None in T1 | `onboarding_eligible = true`; `onboarding_intro_state = pending` | Sister Elara Mentor owns intro scene, behavior teaching, dialogue, companion state, and departure timing. Character Creation only seeds eligibility. | **Future downstream consumer** |
 | **Dialogue System** | None | No dialogue seed, LLM prompt seed, origin text, or backstory field | Dialogue owns templated dialogue and any future LLM behavior. Character Creation must not create dialogue memory or prompt material. | **Future downstream consumer** |
 | **Art Bible / Visual Implementation** | T1 pre-faction Cleric constraints | Appearance token ids only | Art bible owns visual rules; implementation owns models/materials. Character Creation owns only token selection/validation. | **Source-of-truth contract** |
@@ -195,10 +195,10 @@ The `valid_character_name` predicate is defined as:
 - **If `CityHub_InnRoom_StartAnchor` is missing, disabled, belongs to the wrong zone, or cannot resolve to `zoneId`, world-space `Vector3`, and `zoneType`**: reject as `StartAnchorUnresolved`; block first save.
 - **If `ClericStartingEquipment_T1` is missing from authored data**: reject as `StartingEquipmentTemplateMissing`; do not create fallback items.
 - **If `NeutralAllFactions` does not cover every currently authored faction baseline**: reject as `FactionBaselineIncomplete`; do not infer missing faction rows.
-- **If payload validation succeeds but the first save write fails**: Save/Load emits `SaveFailedEvent`; Menus owns the fail-loud surface; gameplay must not start.
+- **If payload validation succeeds but first-save write or required materialization fails**: Save/Load emits `SaveFailedEvent`, including `FirstSaveMaterializationFailed` when an ADR-0004 required materializer fails; Menus owns the fail-loud surface; gameplay must not start; the pending `local_character_id` remains stable while the creation flow stays locked for retry.
 - **If first save succeeds but start-zone activation fails**: remain non-playable and route to the Menus / World Structure failure surface. Character Creation does not implement zone retry or relocation.
 - **If the player cancels or backs out before first save submission**: discard transient raw name, canonical name, and hidden creation state; return to title with no save mutation.
-- **If downstream systems later consume Character Creation seed data**: they must treat it as seed data only. Inventory must not assume materialized item instances; Faction Reputation must not infer allegiance; Character Progression must not infer XP/level schema beyond `Cleric`; Sister Elara Mentor must not assume relationship state; Dialogue must not infer backstory or LLM memory.
+- **If downstream systems later consume Character Creation seed data**: they must treat it as seed data only. Inventory must not assume materialized item instances; Faction Reputation must not infer allegiance; Character Progression must materialize its own `CharacterProgressionSaveState` through ADR-0004 rather than treating `starting_class_id` as a persisted progression payload; Sister Elara Mentor must not assume relationship state; Dialogue must not infer backstory or LLM memory.
 
 ## Dependencies
 
@@ -208,7 +208,7 @@ Character Creation's dependency graph is intentionally narrow. The only direct u
 
 | System | Direction | Nature / Data Interface | Hard/Soft | Interface Owner |
 |---|---|---|---|---|
-| **Save / Load & Persistence** | Character Creation depends on | Save/Load provides the first-run path, one-active-local-record constraint, player-authored string sanitation contract, first-save write outcome, and later Player State hydration. Character Creation provides the validated `InitialCharacterRecord` for first save. | **Hard** | Character Creation owns initial schema + validation. Save/Load owns persistence, integrity, versioning, first-run/missing-file distinction, write failures, and load rejection. |
+| **Save / Load & Persistence** | Character Creation depends on | Save/Load provides the first-run path, one-active-local-record constraint, player-authored string sanitation contract, first-save materializer orchestration, first-save write outcome, and later Player State hydration. Character Creation provides the validated ADR-0004 `InitialCharacterRecord` for first save. | **Hard** | Character Creation owns initial schema, validation, and `local_character_id` generation. Save/Load owns persistence, active-record identity context, integrity, versioning, first-run/missing-file distinction, write failures, and load rejection. |
 
 ### Boundary contracts, not direct dependencies
 
@@ -222,7 +222,7 @@ Character Creation's dependency graph is intentionally narrow. The only direct u
 
 | Future System | Character Creation Seed Consumed | Reverse-Listing Obligation |
 |---|---|---|
-| **Character Progression** | `starting_class_id = Cleric`; optional future level/XP seed if required. | Must list Character Creation as seed-provider when authored. |
+| **Character Progression** | ADR-0004 `local_character_id` and `starting_class_id = Cleric` through Save/Load first-save materialization context; no Character Creation level/XP seed. | Must list Character Creation as identity/class seed owner and Save/Load as materializer orchestrator. |
 | **Inventory & Item Economy** | `starting_equipment_template_id = ClericStartingEquipment_T1`; `carried_inventory = []`. | Must own item materialization, equipment slots, item schema, and starting-template validation. |
 | **Faction Reputation** | `starting_faction_reputation_baseline = NeutralAllFactions`. | Must own numeric baseline values, tiers, labels, mutation rules, and reverse-list Character Creation as baseline seed-provider. |
 | **Sister Elara Mentor** | `onboarding_eligible = true`; `onboarding_intro_state = pending`. | Must own introduction beat, behavior teaching, dialogue, companion state, relationship state, and departure timing. |
@@ -230,7 +230,7 @@ Character Creation's dependency graph is intentionally narrow. The only direct u
 
 ### Scoped follow-up amendments
 
-Character Creation introduces seed fields that should be reflected in Save/Load Rule 1 before implementation: `local_character_id`, nested `creation_schema_version`, `starting_class_id`, appearance token ids, `onboarding_eligible`, `onboarding_intro_state`, `starting_equipment_template_id`, empty carried-inventory state, and `starting_faction_reputation_baseline`. `PlayerZoneMembership` remains under Save/Load's World State category, resolved from `CityHub_InnRoom_StartAnchor` before first save. This is a scope-guarded Save/Load amendment, not an expansion of Character Creation's direct dependency graph.
+Character Creation introduces seed fields reflected in Save/Load Rule 1 and ADR-0004: `local_character_id`, nested `creation_schema_version`, `starting_class_id`, appearance token ids, `onboarding_eligible`, `onboarding_intro_state`, `starting_equipment_template_id`, empty carried-inventory state, and `starting_faction_reputation_baseline`. `PlayerZoneMembership` remains under Save/Load's World State category, resolved from `CityHub_InnRoom_StartAnchor` before first save. This is a scope-guarded Save/Load amendment, not an expansion of Character Creation's direct dependency graph.
 
 ## Cross-References
 
@@ -327,8 +327,12 @@ All Character Creation acceptance criteria use the project QA taxonomy: Unit, In
 *Integration | ui-programmer + qa-tester | T1-blocking*
 
 **H-CC-09 - InitialCharacterRecord required fields**
-**GIVEN** a valid name and default T1 creation state, **WHEN** Character Creation builds `InitialCharacterRecord`, **THEN** the payload includes non-default or explicitly defined values for `local_character_id`, `creation_schema_version = 1`, canonical `character_name`, `starting_class_id = Cleric`, appearance tokens, `start_anchor_id`, resolved `player_zone_membership`, `onboarding_eligible = true`, `onboarding_intro_state = pending`, `starting_equipment_template_id = ClericStartingEquipment_T1`, `carried_inventory = []`, and `starting_faction_reputation_baseline = NeutralAllFactions`.
+**GIVEN** a valid name and default T1 creation state, **WHEN** Character Creation builds `InitialCharacterRecord`, **THEN** the payload includes non-default or explicitly defined values for opaque ADR-0004 `local_character_id`, `creation_schema_version = 1`, canonical `character_name`, `starting_class_id = Cleric`, appearance tokens, `start_anchor_id`, resolved `player_zone_membership`, `onboarding_eligible = true`, `onboarding_intro_state = pending`, `starting_equipment_template_id = ClericStartingEquipment_T1`, `carried_inventory = []`, and `starting_faction_reputation_baseline = NeutralAllFactions`.
 *Integration | gameplay-programmer + qa-tester | T1-blocking*
+
+**H-CC-09a - local_character_id ownership and opacity**
+**GIVEN** Character Creation submits an `InitialCharacterRecord`, **WHEN** the id is inspected across validation, failed first-save retry, successful first save, and subsequent load, **THEN** `local_character_id` is generated by Character Creation exactly once for the submitted record, remains stable while the creation flow is locked for retry, is non-empty and non-player-authored, and is not derived from `character_name`, raw player input, save path, save-slot label, account id, device username, or Combat runtime ids.
+*Unit + Integration | gameplay-programmer + qa-tester | T1-blocking*
 
 **H-CC-10 - InitialCharacterRecord excludes forbidden fields**
 **GIVEN** a valid `InitialCharacterRecord`, **WHEN** the outgoing first-save payload is inspected before persistence, **THEN** raw name input, bio/backstory text, origin, homeland, patron id, faction choice, account id, save-slot label, portrait id, cosmetic freeform fields, runtime handles, Addressable handles, scene object references, dialogue memory, and live LLM prompt seed are absent.
@@ -355,7 +359,7 @@ All Character Creation acceptance criteria use the project QA taxonomy: Unit, In
 *Editor-validation | gameplay-programmer + qa-tester | T1-blocking*
 
 **H-CC-16 - Validation precedes first save**
-**GIVEN** any invalid field among name, class, appearance tokens, start anchor, zone membership, equipment template, carried inventory, or faction baseline, **WHEN** Character Creation attempts to submit, **THEN** validation blocks before Save/Load handoff and returns the relevant local failure class (`NameTooShort`, `NameTooLong`, `NameDisallowedChars`, `ClassUnavailable`, `AppearanceTokenInvalid`, `StartAnchorUnresolved`, `StartingEquipmentTemplateMissing`, or `FactionBaselineIncomplete`).
+**GIVEN** any invalid field among `local_character_id`, name, class, appearance tokens, start anchor, zone membership, equipment template, carried inventory, or faction baseline, **WHEN** Character Creation attempts to submit, **THEN** validation blocks before Save/Load handoff and returns the relevant local failure class (`IdentityInvalid`, `NameTooShort`, `NameTooLong`, `NameDisallowedChars`, `ClassUnavailable`, `AppearanceTokenInvalid`, `StartAnchorUnresolved`, `StartingEquipmentTemplateMissing`, or `FactionBaselineIncomplete`).
 *Unit | gameplay-programmer | T1-blocking*
 
 **H-CC-17 - Valid Create locks editing and hands off presentation**
@@ -363,7 +367,7 @@ All Character Creation acceptance criteria use the project QA taxonomy: Unit, In
 *Integration | ui-programmer + qa-tester | T1-blocking*
 
 **H-CC-18 - Save/Load owns persistence and first-save failure**
-**GIVEN** a valid payload has been handed to Save/Load, **WHEN** Save/Load emits `SaveWriteConfirmed` or `SaveFailedEvent`, **THEN** Character Creation does not write storage, compute HMAC/version fields, classify load failures, or show first-save failure UI; `SaveFailedEvent` leaves the player non-playable and routes to the Menus / Save/Load fail-loud surface.
+**GIVEN** a valid payload has been handed to Save/Load, **WHEN** Save/Load invokes required ADR-0004 materializers and then emits `SaveWriteConfirmed` or `SaveFailedEvent`, **THEN** Character Creation does not write storage, compute HMAC/version fields, classify load failures, invoke materializers, or show first-save failure UI; `SaveFailedEvent`, including `FirstSaveMaterializationFailed`, leaves the player non-playable and routes to the Menus / Save/Load fail-loud surface.
 *Integration | gameplay-programmer + qa-tester | T1-blocking*
 
 **H-CC-19 - Gameplay waits for first save and zone activation**
@@ -375,7 +379,7 @@ All Character Creation acceptance criteria use the project QA taxonomy: Unit, In
 *Integration | ui-programmer + qa-tester | T1-blocking*
 
 **H-CC-21 - End-to-end first-save hydration smoke**
-**GIVEN** a valid character is created in a dev build, **WHEN** the first save succeeds, the app returns to title, and Continue loads the saved record, **THEN** the hydrated Player State matches the submitted seed for `character_name`, `starting_class_id`, appearance tokens, `PlayerZoneMembership`, `starting_equipment_template_id`, empty carried inventory, neutral faction baseline, and onboarding seed fields.
+**GIVEN** a valid character is created in a dev build, **WHEN** the first save succeeds, the app returns to title, and Continue loads the saved record, **THEN** the hydrated Player State matches the submitted seed for `local_character_id`, `character_name`, `starting_class_id`, appearance tokens, `PlayerZoneMembership`, `starting_equipment_template_id`, empty carried inventory, neutral faction baseline, and onboarding seed fields, and the required Character Progression payload exists because first-save materialization ran before the first write.
 *Dev-build smoke | gameplay-programmer + qa-tester | T1-blocking*
 
 **H-CC-22 - Creation input/navigation profiling**
@@ -395,6 +399,7 @@ All Character Creation acceptance criteria use the project QA taxonomy: Unit, In
 | H-CC-07 | Rule 3 no silent repair | Unit | gameplay-programmer | Yes |
 | H-CC-08 | Rule 14 invalid-name UI block | Integration | ui-programmer, qa-tester | Yes |
 | H-CC-09 | Rule 8 required schema fields | Integration | gameplay-programmer, qa-tester | Yes |
+| H-CC-09a | ADR-0004 local identity ownership | Unit + Integration | gameplay-programmer, qa-tester | Yes |
 | H-CC-10 | Rule 4 + Rule 8 forbidden schema fields | Unit | gameplay-programmer | Yes |
 | H-CC-11 | Rule 5 Cleric-only validation | Unit | gameplay-programmer | Yes |
 | H-CC-12 | Rule 5 no future-class UI promise | Integration | ui-programmer, qa-tester | Yes |
@@ -409,7 +414,7 @@ All Character Creation acceptance criteria use the project QA taxonomy: Unit, In
 | H-CC-21 | End-to-end first-save hydration smoke | Dev-build smoke | gameplay-programmer, qa-tester | Yes |
 | H-CC-22 | Input/navigation profiling | Profiled playtest | ui-programmer, qa-tester | advisory-at-T1 |
 
-**Total: 22 criteria. 21 T1-blocking, 1 advisory-at-T1 (H-CC-22 - promotes to T1-blocking if input/navigation regressions appear in the first playable build).**
+**Total: 23 criteria. 22 T1-blocking, 1 advisory-at-T1 (H-CC-22 - promotes to T1-blocking if input/navigation regressions appear in the first playable build).**
 
 ## Non-Goals
 
@@ -421,7 +426,7 @@ It records only the approved T1 seed data: canonical name, `Cleric`, pre-faction
 
 | Question | Owner | Deadline | Status |
 |---|---|---|---|
-| Where is opaque `local_character_id` generation specified? It must be immutable, non-player-authored, and stable after first save. | `gameplay-programmer` + `engine-programmer` | Before T1 Character Creation implementation | Open |
+| Where is opaque `local_character_id` generation specified? | `gameplay-programmer` + `engine-programmer` | Before T1 Character Creation implementation | Closed by ADR-0004; Character Creation owns generation/validation, Save/Load owns persistence and active-record context. |
 | Do appearance tokens stay split into `appearance_profile_id`, `palette_id`, and `class_visual_baseline_id`, or collapse to `appearance_profile_id` only if the visual pipeline does not need separate ids? | `technical-artist` + `gameplay-programmer` | Before T1 Character Creation implementation | Open |
 | What authored-data file owns `ClericStartingEquipment_T1` until Inventory & Item Economy is designed? Character Creation can reference the id, but Inventory must later own item materialization and validation. | `game-designer` + `economy-designer` | Before first playable T1 creation flow | Open |
 | What authored-data file owns `NeutralAllFactions` until Faction Reputation is designed? Character Creation can require complete neutral coverage for currently authored factions, but Faction Reputation owns numeric values and labels. | `systems-designer` + `game-designer` | Before first playable T1 creation flow | Open |

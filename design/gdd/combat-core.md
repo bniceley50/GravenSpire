@@ -2,7 +2,7 @@
 
 > **Status**: Designed (second blocker revision; pending re-review)
 > **Author**: Codex (session with Brian, 2026-04-24)
-> **Last Updated**: 2026-04-25
+> **Last Updated**: 2026-04-26
 > **Last Verified**: 2026-04-25 - second blocker revision pass
 > **Implements Pillar**: Primary - **P2 The Silence Is Sacred**. Supports - **P5 Stakes Are Honest**, plus future-facing hooks for **P4 Every Companion Is A Person** and **P3 Reputation Is The Progression**.
 
@@ -149,7 +149,7 @@ The Cleric is not a solo power fantasy. In T1, the Cleric survives trash by disc
 
 15. **Recovery state.** After a successful cast or interrupted cast, the caster enters `Recovery` for `recovery_seconds`. During recovery, new casts are blocked, auto-attack may resume only if the spell permits melee overlap, and movement is allowed unless the spell profile says otherwise. T1 uses recovery to maintain slow spell cadence until Spell Memorization owns spell-slot behavior.
 
-16. **Resource model.** Combat Core owns current/max health and current/max mana at runtime. Character Progression later owns level scaling and permanent max values. Class Design later owns class-specific resource values. Combat Core provides formulas and default T1 prototype baselines sufficient for prototype fixtures.
+16. **Resource model.** Combat Core owns current health/mana, runtime resource validation, regeneration, spend, clamp/reject behavior, and all combat formula use of actor level. ADR-0003 names Character Progression as the owner of `CombatProgressionBaselineSnapshot`, which provides `combat_actor_level = current_level`, `permanent_max_health`, and `permanent_max_mana` for the player actor. Class Design later owns class-specific content tables. Combat Core provides formulas and default T1 prototype baselines sufficient for prototype fixtures until hydrated progression baselines are available.
 
 17. **T1 Cleric soloability envelope.** A same-level Cleric with baseline T1 equipment can defeat one even-con trash enemy when starting above 80% health and 60% mana, using appropriate casting and med breaks. The same Cleric should usually lose or be forced to flee against two even-con trash enemies, one named enemy, or a sustained camp without recovery. Encounter content enforces this envelope through enemy stats, social-link placement, and explicit encounter-role metadata:
 
@@ -183,7 +183,7 @@ The Cleric is not a solo power fantasy. In T1, the Cleric survives trash by disc
 
    `death_context_id` is created by Combat Core exactly once at the lethal transition, before event emission, using a locally unique ID provider. Tests must inject a deterministic provider so `PlayerDeathEvent` and corpse-run handoff are fixture-verifiable. The id is a correlation key, not actor identity: it exists to dedupe "death emitted once" handling across Combat Core, World Structure, Save/Load, and later Death & Corpse Recovery. It persists only while `combat_life_state = DeadPendingCorpseRunHandoff` or while downstream corpse-run state still needs to correlate this death episode; after World Structure has entered `CorpseRunActive` and Death & Corpse Recovery owns the corpse-run state, Combat Core drops it. World Structure consumes the payload in the same Combat Simulation Tick, transitions to `CorpseRunActive`, and uses `death_context_id` to reject duplicate death events for the same episode while creating the normal `CorpseRecord` (`zoneId`, position, expiry timestamp) that World Structure already owns. For T1, `killer_source_ref` identifies an NPC stable `source_npc_id`, stable spawn reference, or environmental source only; it never names a runtime combat actor id, player, account, server identity, or PvP source. Death & Corpse Recovery owns XP loss, corpse probe, resurrection, and recovery penalties later.
 
-22. **NPC death and kill event ownership.** When an NPC combat actor reaches zero health, Combat Core emits `CombatActorDeathEvent(combat_actor_id, defeated_source_ref, zoneId)` for immediate runtime subscribers and, if the player contributed qualifying threat or damage, `PlayerKillCreditEvent(defeated_source_ref, zoneId, faction_id, kill_weight_seed)` exactly once. `combat_actor_id` is transient and cannot be persisted; `defeated_source_ref` is `source_npc_id` for persistent NPC records or `source_spawn_ref` for non-persistent creature/ambient spawns. Character Progression consumes XP-relevant data, Inventory consumes loot hooks later, Zone Control consumes kill-weight data, and NPC System receives release/death outcome for identity persistence.
+22. **NPC death and kill event ownership.** When an NPC combat actor reaches zero health, Combat Core owns a same-tick `CombatKillResolutionPhase` for that defeated source. It emits `CombatActorDeathEvent(combat_actor_id, defeated_source_ref, zoneId)` for immediate runtime subscribers and, if the player contributed qualifying threat or damage, `PlayerKillCreditEvent(defeated_source_ref, zoneId, faction_id, kill_weight_seed)` exactly once. `combat_actor_id` is transient and cannot be persisted; `defeated_source_ref` is `source_npc_id` for persistent NPC records or `source_spawn_ref` for non-persistent creature/ambient spawns. Combat Core does not add XP metadata or inspect progression state, but it must hold source cleanup/despawn and respawn-token rotation until NPC System has recorded the source lifecycle outcome and Character Progression has either captured or rejected its same-dispatch award snapshot. Missing same-tick acknowledgements log `KillResolutionPhaseAckMissing`, keep the source in a kill-resolution hold, and surface through the ADR-0002 save-barrier failure path if Save/Load requests serialization before the phase resolves. Character Progression consumes XP-relevant data, Inventory consumes loot hooks later, Zone Control consumes kill-weight data, and NPC System receives release/death outcome for identity persistence.
 
 23. **Zone transition cleanup.** On `ZoneTransitionBeginEvent`, Combat Core cancels player casting, disables auto-attack, clears transient projectiles/hit windows owned by Combat Core, and resolves hostile actors according to active zone rules. No damage-over-time, projectile, cast, or melee tick may cross from outgoing zone into incoming zone unless a future GDD explicitly defines cross-zone persistence. T1 default is strip/cancel at transition boundary.
 
@@ -250,7 +250,7 @@ This order prevents post-death casts, cross-zone hits, and swing/cast double-res
 | **NPC System** | Combat-eligible actor seeds, `npcId`, faction/social flags, spawn/active state | Combat claim/release, actor death outcome, hostile targetability state | NPC owns identity, schedule, spawn, and non-combat state. Combat owns hostility, hate, damage, death, and combat actor state. | **Hard upstream/downstream boundary** |
 | **Save / Load & Persistence** | Hydrated player current health/mana if present; load/session state | Explicit combat-persisted values only: player current health, current mana, alive/dead flag, death handoff state if required | Save/Load owns serialization/integrity. Combat owns what combat values are real state. | **Hard** |
 | **Character Creation** | `starting_class_id = Cleric`, starting equipment template id as later materialized by Inventory | No direct output | Character Creation seeds class identity; Combat does not validate creator UI. | **Seed consumer** |
-| **Character Progression** | Level and stat baselines once authored | XP/kill-credit event context, death context | Progression owns XP curves, levels, max stat growth, spell unlocks. Combat owns runtime damage/death. | **Future hard downstream** |
+| **Character Progression** | ADR-0003 `CombatProgressionBaselineSnapshot` with `combat_actor_level`, `permanent_max_health`, and `permanent_max_mana` for player actor hydration/build | XP/kill-credit event context, death context | Progression owns XP curves, levels, permanent max-resource baselines, spell eligibility, and XP-source lookup. Combat owns runtime current resources, combat formulas, damage, threat, casting, regen, and death. | **Hard downstream/same-tier boundary** |
 | **Class Design** | Class-authored base stats, weapon delays, spell profiles, role rules once authored | Combat actor interface, cast framework, auto-attack and threat hooks | Class Design owns Cleric/Warrior/Enchanter content. Combat owns shared mechanics. | **Future hard downstream** |
 | **Spell Memorization** | Memorized spell availability once authored | Cast request/resolve/interrupt/recovery event framework | Spell Memorization owns spellbook slots and memorized spell management. Combat owns cast execution state. | **Future hard downstream** |
 | **Status Effects & Buffs** | Buff/debuff modifiers once authored | Damage, interrupt, threat, regen, and state hooks | Status Effects owns effect definitions and stacking. Combat owns base hooks and application timing. | **Future hard downstream** |
@@ -408,11 +408,11 @@ Combat Core owns this temporary fixture set only for combat-feel prototyping. Cl
 
 ### Encounter fixtures
 
-| Fixture | Composition | Required Outcome |
-|---|---|---|
-| `SoloTrash_EvenCon_T1` | Cleric fixture vs. same-level Trash fixture | Cleric wins 55-85% of seeded trials from >80% HP and >60% mana. |
-| `TwoTrash_Overpull_T1` | Cleric fixture vs. two same-level Trash fixtures entering hate within 5s | Normal two-trash farming is not viable. |
-| `NamedSoloBlock_T1` | `Cleric_Top_T1` vs. `Named_Top_T1` | Named has `solo_block_profile_id` with at least health/mana wall plus interrupt pressure. Any baseline solo kill is a tuning defect unless marked exploit-under-investigation. |
+| Fixture | Composition | T1 `kill_weight_seed` | Source-ref aliases available to downstream fixtures | Required Outcome |
+|---|---|---:|---|---|
+| `SoloTrash_EvenCon_T1` | Cleric fixture vs. same-level Trash fixture | `1.25` | `source_spawn_ref:Trash_Early_L2_T1`, `source_spawn_ref:SoloTrash_EvenCon_T1`, `source_spawn_ref:Trash_Level7_T1`, `source_spawn_ref:Trash_Late_L9_T1`, `source_spawn_ref:SoloTrash_SoftUndercon_T1`, `source_spawn_ref:SoloTrash_Trivial_T1`, `source_spawn_ref:DenseCamp_Trash_T1` | Cleric wins 55-85% of seeded trials from >80% HP and >60% mana. |
+| `TwoTrash_Overpull_T1` | Cleric fixture vs. two same-level Trash fixtures entering hate within 5s | `1.25` per defeated trash source | `source_spawn_ref:TwoTrash_A_T1`, `source_spawn_ref:TwoTrash_B_T1` | Normal two-trash farming is not viable. |
+| `NamedSoloBlock_T1` | `Cleric_Top_T1` vs. `Named_Top_T1` | `1.25` | `source_npc_id:Named_XP_Smoke_T1` | Named has `solo_block_profile_id` with at least health/mana wall plus interrupt pressure. Any baseline solo kill is a tuning defect unless marked exploit-under-investigation. |
 
 ## Edge Cases
 
@@ -434,7 +434,7 @@ Combat Core owns this temporary fixture set only for combat-feel prototyping. Cl
 - **If `ZoneTransitionBeginEvent` fires during a cast or swing windup**: Combat Core cancels the cast/swing before any completion event can affect the incoming zone.
 - **If `ZoneTransitionBeginEvent` and `PlayerDeathEvent` are possible in the same frame**: transition cleanup resolves first. If lethal damage was already applied before transition begin, death resolves in the outgoing zone; otherwise no cross-zone death is synthesized.
 - **If Save/Load hydrates `current_health <= 0` without a Death & Corpse Recovery state**: Combat Core treats this as invalid combat hydration and returns a hydration failure to Save/Load. A dead player must be represented through the proper corpse-run/death state contract.
-- **If loaded health/mana exceed max values from current Class/Progression data**: clamp to current max and log a migration warning. If max data is missing, fail hydration rather than inventing values.
+- **If loaded health/mana exceed max values from current Class/Progression data**: apply Combat-owned hydration clamp/reject behavior against the ADR-0003 `CombatProgressionBaselineSnapshot` maxima and log a migration warning when clamping is the selected policy. If the Combat-scoped progression baseline or max data is missing, fail hydration rather than inventing values.
 - **If a future system requests PvP damage in T1**: reject the request; emit a development warning in non-shipping builds; no damage or threat event fires.
 - **If a future companion actor uses the interface before companion GDDs are authored**: test harnesses may instantiate a combat actor through the generic interface only; shipped T1 content must not spawn companion combat actors.
 - **If hate values tie exactly**: earliest threat-entry timestamp wins; if still tied, lowest `combat_sort_key` wins. This keeps tests deterministic without using runtime ids as stable identity.
@@ -456,7 +456,7 @@ Combat Core owns this temporary fixture set only for combat-feel prototyping. Cl
 
 | Dependent | Contract Combat Core Must Provide |
 |---|---|
-| Character Progression | Kill/death/XP-relevant event hooks; level/stat input points. |
+| Character Progression | Approved `PlayerKillCreditEvent` hook plus ADR-0003 `CombatProgressionBaselineSnapshot` input for player actor level and permanent health/mana maxima; Combat Core must not consume generic progression snapshots, `visible_level`, XP progress fields, or spell eligibility. |
 | Class Design | Shared actor, auto-attack, spell profile, threat, and resource hooks for Cleric T1 and Warrior/Enchanter T2. |
 | Spell Memorization | Cast request, cast start, cast complete, interrupt, cancel, and recovery framework. |
 | Status Effects & Buffs | Hook points for modifiers to damage, threat, interrupt, regen, movement, casting, and actor state. |
@@ -628,7 +628,7 @@ All Combat Core acceptance criteria use the project QA taxonomy: Unit, Integrati
 *Unit | gameplay-programmer | T1-blocking*
 
 **H-CCOM-FIXTURE-01 - Prototype fixture package exists**
-**GIVEN** the Combat Core prototype fixture data is loaded, **WHEN** QA inspects the fixture package, **THEN** it includes lowest/mid/top T1 Cleric fixtures, lowest/mid/top T1 trash fixtures, a top-band named fixture, `Smite_T1_Prototype`, `LesserHeal_T1_Prototype`, and the `SoloTrash_EvenCon_T1`, `TwoTrash_Overpull_T1`, and `NamedSoloBlock_T1` encounter fixtures; `Cleric_Mid_T1` is level 5 with 140 HP and 180 max mana; the package documents that final levels remap to the T1 haunt band when Level / Encounter Design locks that band.
+**GIVEN** the Combat Core prototype fixture data is loaded, **WHEN** QA inspects the fixture package, **THEN** it includes lowest/mid/top T1 Cleric fixtures, lowest/mid/top T1 trash fixtures, a top-band named fixture, `Smite_T1_Prototype`, `LesserHeal_T1_Prototype`, and the `SoloTrash_EvenCon_T1`, `TwoTrash_Overpull_T1`, and `NamedSoloBlock_T1` encounter fixtures with explicit T1 `kill_weight_seed` values and source-ref aliases for downstream fixture validation; `Cleric_Mid_T1` is level 5 with 140 HP and 180 max mana; the package documents that final levels remap to the T1 haunt band when Level / Encounter Design locks that band.
 *Editor-validation + Unit | game-designer + systems-designer + qa-tester | fixture-gated T1-blocking*
 
 **H-CCOM-F2B - Damage fixture extremes**
@@ -748,7 +748,7 @@ All Combat Core acceptance criteria use the project QA taxonomy: Unit, Integrati
 *Unit + Integration | gameplay-programmer + qa-tester | T1-blocking*
 
 **H-CCOM-KILL-01 - NPC death emits kill credit hook**
-**GIVEN** a hostile NPC combat actor reaches zero health and the player has qualifying contribution, **WHEN** death resolves, **THEN** Combat Core emits `CombatActorDeathEvent(combat_actor_id, defeated_source_ref, zoneId)` for immediate runtime subscribers and `PlayerKillCreditEvent(defeated_source_ref, zoneId, faction_id, kill_weight_seed)` exactly once; only `defeated_source_ref` is legal for persistence or downstream long-lived records.
+**GIVEN** a hostile NPC combat actor reaches zero health and the player has qualifying contribution, **WHEN** death resolves, **THEN** Combat Core opens one same-tick `CombatKillResolutionPhase`, emits `CombatActorDeathEvent(combat_actor_id, defeated_source_ref, zoneId)` for immediate runtime subscribers and `PlayerKillCreditEvent(defeated_source_ref, zoneId, faction_id, kill_weight_seed)` exactly once, waits for same-tick NPC source-lifecycle and Character Progression award-snapshot acknowledgements before source cleanup/despawn or respawn-token rotation, and treats only `defeated_source_ref` as legal for persistence or downstream long-lived records.
 *Integration | gameplay-programmer + qa-tester | T1-blocking*
 
 **H-CCOM-SL-01 - Combat persistence whitelist**
