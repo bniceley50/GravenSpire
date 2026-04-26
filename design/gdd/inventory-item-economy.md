@@ -94,11 +94,227 @@ Classic EQ restraint rather than ARPG loot spectacle: ordinary equipment, memora
 
 ## Formulas
 
-[To be designed]
+### Defaults
+
+| Knob | Default | Safe Range |
+|---|---:|---:|
+| `carried_slot_cap` | `18` slots | `16-22` |
+| `carried_weight_cap` | `60` weight_units | `45-75` |
+| `starting_carried_currency_copper` | `0` | `0-9` |
+| `salvage_sell_multiplier` | `0.15` | `0.10-0.20` |
+| `max_t1_item_weight_units` | `25` | Fixed unless fixture-proven |
+
+`weight_units` is an abstract integer scale. One `weight_unit` corresponds roughly to the carry burden of a coin pouch, a small dagger, or a held trinket. Concrete physical weight in pounds/kilograms and audio/animation weight cues are deferred to art/animation pipeline work; this GDD's weight model is pickup-legality only, not physics, stamina, or movement speed.
+
+### F1: Carry Acceptance
+
+The `can_accept_item` formula is defined as:
+
+`can_accept_item = projected_slot_count <= carried_slot_cap AND projected_weight_units <= carried_weight_cap`
+
+When the pickup merges into an existing compatible stack with capacity, `projected_slot_count = current_slot_count`; otherwise `projected_slot_count = current_slot_count + ceil(pickup_quantity / max_stack)`. Weight always increases regardless of merge: `projected_weight_units = current_weight_units + (unit_weight_units * pickup_quantity)`.
+
+`deterministic_slot_order = ascending carried slot index 0..carried_slot_cap-1`. Stack-fill scans existing compatible stacks in this order before allocating an empty slot.
+
+| Variable | Symbol | Type | Range | Description |
+|---|---:|---|---|---|
+| `current_slot_count` | `CSC0` | int | `0-18` default | Occupied carried slots before the pickup/merge. |
+| `pickup_quantity` | `PQ` | int | `1-max_stack` | Quantity being picked up. |
+| `max_stack` | `MS` | int | `1-20` default | Category-specific maximum stack size. |
+| `projected_slot_count` | `PSC` | int | `0-18` default | Occupied carried slots after the pickup/merge. |
+| `carried_slot_cap` | `CSC` | int | `16-22` | Maximum carried slots. |
+| `current_weight_units` | `CWU0` | int | `0-60` default | Carried weight before pickup. |
+| `unit_weight_units` | `UWU` | int | `0-25` | Authored unit weight for the pickup item. |
+| `projected_weight_units` | `PWU` | int | `0-60` default | Total carried weight after pickup/merge. |
+| `carried_weight_cap` | `CWC` | int | `45-75` | Hard pickup legality cap. |
+
+**Output Range:** boolean.
+
+**Example:** With 17 occupied slots and 58 weight, a 1-slot, 2-weight pickup passes. A 1-slot, 3-weight pickup fails weight. A 3-quantity salvage pickup that merges into an existing compatible stack keeps `projected_slot_count = current_slot_count` while adding `3 * unit_weight_units` to projected weight.
+
+### F2: Stack Weight
+
+The `stack_weight_units` formula is defined as:
+
+`stack_weight_units = unit_weight_units * quantity`
+
+| Variable | Symbol | Type | Range | Description |
+|---|---:|---|---|---|
+| `unit_weight_units` | `UWU` | int | `0-25` | Authored item weight; negative values are illegal. |
+| `quantity` | `Q` | int | `1-max_stack` | Stack quantity. |
+
+**Output Range:** `0-150` under default salvage stack cap; most normal stacks should remain below `60`.
+
+**Example:** A standard salvage stack with `unit_weight_units = 4` and `quantity = 6` weighs `24` weight_units.
+
+Most items should weigh `1-8` weight_units. Items at or near `max_t1_item_weight_units = 25` represent intentionally committal heavy gear, such as two-handed weapons or heavy armor; their inclusion in starter or routine loot loadouts must be deliberate and fixture-validated against haunt-run carry pressure.
+
+Typical authoring bands:
+
+| Category | Typical Weight |
+|---|---:|
+| Charm equipment | `1-3` |
+| OffHand equipment | `4-8` |
+| MainHand equipment | `8-14` |
+| Body equipment | `14-22` |
+| Consumable | `1-2` |
+| Light Salvage | `1-3` |
+| Standard Salvage | `3-6` |
+| Heavy Salvage | `8-14` |
+| FactionToken | `1` each |
+| CurrencyContainer | `1-4` |
+
+### F3: Stack Cap Lookup
+
+The `max_stack` formula is defined as:
+
+`max_stack = category_stack_cap[item_category]`
+
+| Variable | Symbol | Type | Range | Description |
+|---|---:|---|---|---|
+| `item_category` | `IC` | enum | `Equipment, Consumable, Salvage, FactionToken, CurrencyContainer` | T1 legal item category. |
+| `category_stack_cap` | `CSC` | map | See table | Authored stack cap by category. |
+
+Default stack caps:
+
+| Category | Default `max_stack` | Safe Range |
+|---|---:|---:|
+| `Equipment` | `1` | Fixed |
+| `Consumable` | `5` | `3-10` |
+| `Salvage` | `6` | `4-10` |
+| `FactionToken` | `20` | `10-30` |
+| `CurrencyContainer` | `1` | `1-3`; default stays `1` |
+
+**Output Range:** `1-20` under T1 defaults.
+
+**Example:** A `FactionToken` stack can hold `20`; a `CurrencyContainer` stack holds `1` because it is currency in transit, not currency at rest.
+
+### F4: Vendor Salvage Sale
+
+The `vendor_sell_copper` formula is defined as:
+
+`vendor_sell_copper = max(1, floor(nominal_value_copper * salvage_sell_multiplier))`
+
+| Variable | Symbol | Type | Range | Description |
+|---|---:|---|---|---|
+| `nominal_value_copper` | `NVC` | int | `5-250` | Authored salvage value band. |
+| `salvage_sell_multiplier` | `SSM` | float | `0.10-0.20` | Fixed CityHub vendor sale multiplier. |
+
+**Output Range:** `1-50` copper under normal T1 authored ranges and safe multiplier bounds.
+
+**Example:** `nominal_value_copper = 50` and `salvage_sell_multiplier = 0.15` gives `7` copper.
+
+Vendor buy-from-vendor prices (player purchasing) are authored constants in `T1_CityHubVendorBuyTable_T1`, not formula-derived. No price formula exists for the buy side at T1; future dynamic pricing requires a tier-transition decision.
+
+Recommended salvage value bands:
+
+| Source Band | Nominal Default Range | Sale at `0.15` |
+|---|---:|---:|
+| Common haunt refuse | `5-20` | `1-3` copper |
+| Standard useful salvage | `21-50` | `3-7` copper |
+| Heavy or awkward salvage | `51-100` | `7-15` copper |
+| Named or locked-placement salvage | `100-180` | `15-27` copper |
+| Explicit fixture reward salvage | `150-250` | `22-37` copper |
+
+These are source/economy bands only and must not become player-facing rarity tiers.
+
+### F5: CurrencyContainer Consume
+
+The `currency_container_consume` formula is defined as:
+
+`new_carried_currency_copper = checked_add(carried_currency_copper, container_value_copper); destroy CurrencyContainer`
+
+| Variable | Symbol | Type | Range | Description |
+|---|---:|---|---|---|
+| `carried_currency_copper` | `CCC` | int | `0+` | Persisted carried currency balance. |
+| `container_value_copper` | `CVC` | int | `1-75` | Resolved value on the item record. |
+
+**Output Range:** non-negative integer copper balance; overflow rejects the consume transaction.
+
+**Example:** `carried_currency_copper = 4` and a `CurrencyContainer` with `container_value_copper = 12` produces `new_carried_currency_copper = 16`, then destroys the container item record.
+
+Consumption never rolls. If a future container uses randomization, the roll occurs at materialization from an approved fixture seed and persists `resolved_value_copper`; consumption reads the resolved value only.
+
+Recommended `CurrencyContainer` value bands:
+
+| Container Source | Default Range |
+|---|---:|
+| Small authored purse/cache | `1-5` |
+| Haunt placement cache | `6-15` |
+| Named/locked cache | `16-40` |
+| Explicit fixture reward | `25-75` |
+
+### F6: Gear Plateau Validator
+
+The `t1_equipment_combat_delta_valid` formula is defined as:
+
+`t1_equipment_combat_delta_valid = all(combat_stat_delta(item) == 0 for item in T1 equipment)`
+
+For fixture loadouts:
+
+`CombatStats(level, loadout) == CombatProgressionBaselineSnapshot(level) + CombatCoreClassFixture(level)`
+
+| Variable | Symbol | Type | Range | Description |
+|---|---:|---|---|---|
+| `level` | `L` | int | `1, 5, 10` for T1 fixture validation | Character level under validation. |
+| `loadout` | `LO` | enum | `StartingOnly, FieldFullSet, SidegradeMixedSet, IllegalStatBearingEquipment` | Authored validation loadout. |
+| `combat_stat_delta(item)` | `CSD` | stat map | `0` required | Combat stat delta supplied by an item. |
+| `CombatProgressionBaselineSnapshot(level)` | `CPBS` | read model | Approved ADR-0003 fields | Level and permanent max-resource baseline. |
+| `CombatCoreClassFixture(level)` | `CCF` | authored fixture | Cleric T1 fixtures | Combat Core class fixture values. |
+
+**Output Range:** boolean validator result.
+
+**Example:** `FieldFullSet` at level 5 must produce the same Combat stats as the level-5 Combat fixture after ADR-0003 progression baseline is applied. `IllegalStatBearingEquipment` must fail because its item definition includes non-zero Combat stat delta.
+
+F6 consumes `CombatCoreClassFixture(level)` from authored Combat Core Cleric fixture data, including the Cleric fixture rows referenced by Character Progression's level 1/5/10 resource checks. If Combat Core does not expose this as a runtime query, the validator runs as Editor-time validation against authored fixture YAML. The runtime-vs-Editor execution model is `INV-OQ-01` in §Open Questions.
+
+Any T1 equipment with item level, rarity, affix, upgrade rank, socket, set bonus, scaling stat, or non-zero Combat stat delta fails validation.
+
+### Coupled Tuning Rules
+
+- Capacity tuning must move as a group: `carried_slot_cap`, `carried_weight_cap`, category stack caps, pickup frequency, and return-to-city pacing. Changing only one can erase carry pressure or overtax normal 60-minute runs.
+- Currency tuning must move as a group: `salvage_sell_multiplier`, salvage nominal value bands, `CurrencyContainer` values, vendor buy prices, and expected pickups/hour. No acceptance criterion may claim a "modest economy" without a session projection.
+- Gear plateau tuning is not a T1 knob. Any stat-bearing equipment requires a T2+ ADR and hydration-order revision.
+- `CurrencyContainer` loot-table entries require fixture proof before they can support pacing claims. Fixed world placements can use authored values directly, but must still satisfy the overall coin-faucet projection.
+
+### Fixture Gates
+
+Before pacing acceptance criteria can claim tuned carry pressure or modest economy, they need:
+
+- `InventoryHauntRunProfile_T1` or `LegalPickupRoute_T1` for slot/weight pressure over 60, 120, and 180 minutes.
+- `CoinFaucetProjection_T1` for expected sell value, slots used, weight used, and copper/hour.
+- `EquipmentPlateauFixtureSet_T1` for no-combat-stat gear at levels 1, 5, and 10.
+- A fixture gate for any `CurrencyContainer` that appears in loot tables rather than fixed world placement.
 
 ## Edge Cases
 
-[To be designed]
+### Category A: Materialization and First-Save
+
+- **If first-save write or HMAC commit fails after `InventoryFirstSaveMaterializer` succeeds**: the materialized payload is discarded and `InventoryFirstSaveMaterializer` re-runs deterministically on retry from the same pending `InitialCharacterRecord`. The materializer is idempotent: identical inputs (`local_character_id` + `ClericStartingEquipment_T1` + empty carry seed) produce identical `InventorySaveState`. ADR-0004's `rematerializing_existing_record_on_load` ban applies only to post-first-success loads, not failed-first-save retries; retry reuses the pending `local_character_id` per ADR-0004 retry semantics.
+- **If `ClericStartingEquipment_T1` materializes into a state that violates F1 slot or weight caps**: first-save rejects as `FirstSaveMaterializationFailed(StarterLoadoutCapacityInvalid)` before Save/Load serializes bytes. No splitting, deletion, replacement, or fallback loadout is allowed.
+- **If starter equipment contains any non-zero Combat stat delta**: first-save rejects as `FirstSaveMaterializationFailed(T1CombatStatDeltaForbidden)` at authored-data validation or materialization time, not at later hydration.
+- **If a later load is missing `InventorySaveState`**: Save/Load rejects as `LoadRejected(HydrationFailed)` with Inventory reason `InventoryStateMissing`.
+- **If a later load is missing an equipped-slot binding for a slot whose schema marks it required**: Save/Load rejects as `LoadRejected(HydrationFailed)` with Inventory reason `RequiredEquippedSlotMissing`. Slots whose schema permits empty (for example, Charm if Cleric equip rules allow it) are valid as missing; schema-permitted absence is not a hydration failure.
+- **If a later load contains corrupt stack records**: Save/Load rejects as `LoadRejected(HydrationFailed)` with Inventory reason `StackRecordInvalid`; no clamp, deletion, split, or synthetic replacement stack is allowed.
+
+### Category B: Pickup, Equip, Vendor, and Currency Atomicity
+
+- **If pickup would overfill an existing compatible stack**: Inventory fills compatible stacks in `deterministic_slot_order`, allocates any remainder into new slots only if F1 and F3 pass, and rejects the whole pickup before mutation if the full quantity cannot fit. No over-cap stack and no partial pickup are allowed.
+- **If an equip-swap cannot return the old item to a legal carried slot**: the equip rejects as `EquipSwapCarryDestinationInvalid` before mutation (per F1); equipped and carried state remain unchanged.
+- **If equipping a two-handed or exclusive item would clear OffHand and the OffHand item has no legal carried destination**: the equip rejects as `ExclusiveEquipBlockedByCarryCapacity` before mutation (per F1). No ground spill, hidden overflow, or deletion occurs.
+- **If a `CurrencyContainer` pickup fits as an item but later consume would overflow `carried_currency_copper`**: pickup may succeed; consume rejects as `CurrencyOverflowOnConsume` with the container intact and the currency balance unchanged. Intentional consequence: a player at currency cap can carry an unconsumable container indefinitely, and the container occupies a slot until the player spends, vendors, or destroys it. No silent destruction, automatic consume-on-overflow-clear, value clamp, or spillover mechanic exists. Future UI must surface `CurrencyOverflowOnConsume` so the player understands the carrying pressure rather than experiencing it as a bug.
+- **If multiple pickup requests arrive in the same simulation frame**: Inventory processes them in the order their source events were received by the Inventory event handler, using FIFO receive-queue order. Each pickup is a synchronous atomic mutation that recomputes F1 against the post-previous-mutation state before committing. Fixtures can scaffold same-frame pickups by controlling receive-queue order; no parallel merge or batched application exists.
+- **If selling Salvage would overflow `carried_currency_copper`**: the vendor sale rejects as `CurrencyOverflowOnVendorSale` before item removal or currency credit.
+- **If buying from a vendor would exceed carried slot or weight capacity**: Inventory prevalidates F1 before currency debit and rejects as `VendorBuyCarryCapacityExceeded`; currency remains untouched.
+
+### Category C: Cross-System Boundaries
+
+- **If a loot table references a defeated source whose Progression row has `xp_eligible = false`**: loot may still materialize if Inventory's loot table allows it; XP eligibility does not gate loot eligibility.
+- **If Death & Corpse Recovery requests `InventoryCorpseSnapshot(death_context_id)` for an unknown death context**: Inventory rejects as `CorpseSnapshotUnknownDeathContext` before snapshot creation; no item move, delete, or transfer occurs.
+- **If Inventory hydration succeeds but Combat hydration later fails**: the overall load rejects as `LoadRejected(HydrationFailed)`, no playable session starts, and Inventory's staged hydrated state must not become active or write back to disk.
+- **If Manual Save is requested during a vendor transaction**: the transaction must already be fully complete or not yet begun when Save/Load reads. Any implementation that exposes mid-transaction Inventory state violates Rule 18 and requires a future `InventorySaveBarrier` decision.
+- **If a `FactionToken` references an unknown `faction_id`**: hydration rejects as `LoadRejected(HydrationFailed)` with Inventory reason `FactionTokenFactionUnknown`; no token deletion, remap, or reputation inference occurs.
+- **If starter equipment excludes `Cleric` in `class_eligibility`**: first-save rejects as `FirstSaveMaterializationFailed(ClassIllegalEquipment)`. If class-illegal equipment appears in a later save, hydration rejects instead.
 
 ## Dependencies
 
