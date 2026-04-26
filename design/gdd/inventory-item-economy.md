@@ -1,9 +1,10 @@
 # Inventory & Item Economy
 
-> **Status**: In Design
+> **Status**: Design Draft - Parked Pending Inventory Implementation Pre-Spec
 > **Author**: Codex (session with brian, 2026-04-26)
 > **Last Updated**: 2026-04-26
 > **Implements Pillar**: Primary - **P3 Reputation Is The Progression**. Supports - **P5 Stakes Are Honest**.
+> **Review Disposition**: Full review on 2026-04-26 returned **NEEDS REVISION**. The Save/Load reverse-listing drift is repaired; remaining blockers are parked in `INV-OQ-05` for a future implementation pre-spec before Inventory implementation.
 
 ## Locked Inputs
 
@@ -651,3 +652,4 @@ Advisory-at-T1: 0.
 | `INV-OQ-02` | The Combat -> Inventory loot eligibility contract must be designed before any kill-credited loot drops. The likely shape is `InventoryLootEligibilityRequest(local_character_id, defeated_source_ref, zoneId, loot_context_id)` plus Inventory-owned `LootSourceRefLookup_T1`, separate from `ProgressionXpSourceRefLookup_T1`. T1 can ship authored placements such as fixed pickups/chests before this is resolved. | Combat Core + Inventory | Kill-credited loot drops |
 | `INV-OQ-03` | Death & Corpse Recovery must own death timing and the call into `InventoryCorpseSnapshot(death_context_id)` before corpse-run item recovery can ship. If D&CR introduces multi-frame inventory transfer, this GDD must be amended to declare an ADR-0002 `InventorySaveBarrier` grouped with corpse state under `inventory_corpse_consistency`. | Death & Corpse Recovery + Inventory + ADR-0002 | Corpse-run item recovery implementation |
 | `INV-OQ-04` | Authored data location and asset format are not locked for `ClericStartingEquipment_T1`, item definitions, `T1_CityHubVendorBuyTable_T1`, salvage value bands, or `CurrencyContainer` value bands. Likely path is ScriptableObjects under `assets/data/inventory/` per project structure, but asset format and Addressables grouping are implementation decisions. | gameplay-programmer + unity-addressables-specialist | Inventory implementation start |
+| `INV-OQ-05` | Full review on 2026-04-26 found implementation-pre-spec blockers that are intentionally parked while the project pivots to combat-feel prototyping: concrete `InventorySaveState v1` schema plus item/stack/slot identity and hydration staging; F1 partial-stack fill/remainder algorithm plus currency cap/overflow semantics; vendor buy/sell matrix, transaction result codes, no-arbitrage policy, and `CoinFaucetProjection_T1` numeric bounds; fixture-gating or future-scoping Combat loot and Death & Corpse Recovery criteria; Layer 1 HUD / Inventory UI receiver and `InventoryTransactionResult` handoff. Inventory is not approved for implementation until this pre-spec closes and a fresh full review passes. | systems-designer + economy-designer + gameplay-programmer + ui-programmer + qa-tester | Before Inventory implementation |

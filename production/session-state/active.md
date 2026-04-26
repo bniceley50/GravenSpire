@@ -5,7 +5,7 @@
 
 ## Current Task
 
-Design **Inventory & Item Economy GDD** via `/design-system Inventory & Item Economy`.
+Park **Inventory & Item Economy GDD** after full review and pivot to `/prototype combat-feel`.
 
 ## Status
 
@@ -42,13 +42,15 @@ Design **Inventory & Item Economy GDD** via `/design-system Inventory & Item Eco
 - ✅ Inventory & Item Economy Tuning Knobs section written 2026-04-26.
 - ✅ Inventory & Item Economy Acceptance Criteria section written and count-verified 2026-04-26 (`51` criteria; `47` ordinary T1-blocking, `4` fixture-gated T1-blocking, `0` advisory-at-T1).
 - ✅ Inventory & Item Economy Open Questions section written 2026-04-26.
-- ✅ Inventory & Item Economy authoring complete; pending fresh-session full design review.
-- Next: run `/design-review design/gdd/inventory-item-economy.md --depth full` in a fresh session.
+- ⚠️ Inventory & Item Economy full design review completed 2026-04-26 with verdict **NEEDS REVISION** and scope signal **XL**. Six blocker groups: (1) Save/Load first-save reverse-listing drift, (2) Inventory schema/id/hydration pre-spec gap, (3) F1/currency/vendor math gaps, (4) vendor transaction economy not closed, (5) future Combat / Death & Corpse Recovery / Faction Reputation criteria leaking into T1, (6) Layer 1 HUD / Inventory UI receiver not registered.
+- ✅ Inventory blocker 1 repaired 2026-04-26: Save/Load now reverse-lists `InventoryFirstSaveMaterializer`; remaining blockers parked in [design/gdd/inventory-item-economy.md](../../design/gdd/inventory-item-economy.md) `INV-OQ-05` for future Inventory implementation pre-spec.
+- Next: open a fresh session for `/prototype combat-feel`.
 - ✅ Codex PR #1 (`codex/dotnet-format-setup` → `main`) merged into `main`; follow-up cleanup commit `ce634c3` recorded.
 
 ## Files Being Worked On
 
-- **Active:** [design/gdd/inventory-item-economy.md](../../design/gdd/inventory-item-economy.md) — authoring complete; pending fresh-session full design review
+- **Active:** `/prototype combat-feel` — next fresh-session task; Inventory & Item Economy is drafted but parked pending implementation pre-spec
+- Inventory & Item Economy: [design/gdd/inventory-item-economy.md](../../design/gdd/inventory-item-economy.md) — design draft, **NEEDS REVISION**, blocker 1 repaired, remaining blockers tracked in `INV-OQ-05`
 - Character Progression: [design/gdd/character-progression.md](../../design/gdd/character-progression.md) — APPROVED 2026-04-26; commits `6459ceb` and `557fa3e`
 - World Structure: [design/gdd/world-structure.md](../../design/gdd/world-structure.md)
 - Game concept: [design/gdd/game-concept.md](../../design/gdd/game-concept.md)
@@ -76,9 +78,10 @@ Design **Inventory & Item Economy GDD** via `/design-system Inventory & Item Eco
 - Mana-restore 1:1 linear fill depends on med-break mechanics (not yet specced in combat GDD)
 - Zone definition = Addressable streaming group boundary; `unity-addressables-specialist` must configure streaming groups
 - 26 MVP systems is large scope for a solo first-time dev — every design decision should keep asking "is this actually needed for Tier 1?"
+- Inventory & Item Economy is intentionally parked after review; do not implement it until an Inventory implementation pre-spec closes `INV-OQ-05` and a fresh full review passes.
 
 ## Next Skill to Run
 
-- **Run `/design-review design/gdd/inventory-item-economy.md --depth full` in a fresh session** — Inventory & Item Economy authoring is complete.
-- After Inventory & Item Economy sections are complete: run `/design-review design/gdd/inventory-item-economy.md` in a fresh session.
+- **Run `/prototype combat-feel` in a fresh session** — validate the core combat-feel risk before further Inventory authoring.
+- Later: run Inventory implementation pre-spec to close `INV-OQ-05`, then rerun `/design-review design/gdd/inventory-item-economy.md --depth full`.
 - Codex PR #1 is merged; no Codex follow-up pending in this active state file.

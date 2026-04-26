@@ -34,7 +34,7 @@ Systems marked **E** are explicit in the game concept's Core Mechanics or Techni
 | 6 | Character Creation (I) | Core | **MVP** | APPROVED 2026-04-24 | [character-creation.md](character-creation.md) | Save/Load |
 | 7 | Combat Core (E) | Gameplay | **MVP** | APPROVED 2026-04-25 (re-review #3) | [combat-core.md](combat-core.md) | World Structure, NPC System, Save/Load |
 | 8 | Character Progression (I) | Progression | **MVP** | APPROVED 2026-04-26 (re-review #4) | [character-progression.md](character-progression.md) | Character Creation, Save/Load, Combat Core, NPC System |
-| 9 | Inventory & Item Economy (I) | Economy | **MVP** | Not Started | — | Save/Load, Character Creation |
+| 9 | Inventory & Item Economy (I) | Economy | **MVP** | Draft parked — implementation pre-spec required | [inventory-item-economy.md](inventory-item-economy.md) | Save/Load, Character Creation |
 | 10 | Class Design (I) | Gameplay | **MVP** (Cleric) / **T2** (Warrior, Enchanter) | Not Started | — | Combat Core, Character Progression |
 | 11 | Spell Memorization (I) | Gameplay | **MVP** | Not Started | — | Combat Core, Class Design |
 | 12 | Status Effects & Buffs (I) | Gameplay | **MVP** | Not Started | — | Combat Core |
@@ -50,7 +50,7 @@ Systems marked **E** are explicit in the game concept's Core Mechanics or Techni
 | 22 | Sister Elara Mentor (I) | Meta | **MVP** | Not Started | — | Named AI Companion Core |
 | 23 | Dialogue System (E) | Narrative | **MVP** (templated) / **T3** (LLM for key NPCs) | Not Started | — | World Structure, NPC System, Faction State Simulation |
 | 24 | Moderation & Safety (I) | Meta | **Tier 3** | Not Started | — | Dialogue System |
-| 25 | Layer 1 HUD (I) | UI | **MVP** | Not Started | — | Combat Core, Character Progression, Status Effects |
+| 25 | Layer 1 HUD (I) | UI | **MVP** | Not Started | — | Combat Core, Character Progression, Status Effects, Inventory & Item Economy |
 | 26 | Dialogue UI Panel (I) | UI | **MVP** | Not Started | — | Dialogue System |
 | 27 | Personal Journal (I) | UI | **MVP** | Not Started | — | Faction Reputation |
 | 28 | Faction Board UI (I) | UI | **MVP** | Not Started | — | Faction Events, Faction State Simulation |
@@ -110,7 +110,7 @@ Systems sorted by dependency order. Design and build from top (Foundation) to bo
 6. **Character Creation** — depends on: Save/Load. Class selection, starting faction-neutral state.
 7. **Combat Core** — depends on: World Structure, NPC System, Save/Load. ⚠ **Bottleneck — 9 downstream systems.** The core hypothesis.
 8. **Character Progression** — depends on: Character Creation, Save/Load, Combat Core, NPC System. Approved: [character-progression.md](character-progression.md). EQ-native XP, levels, spell eligibility, `CharacterProgressionFirstSaveMaterializer`, `ProgressionSaveBarrier`, `CombatProgressionBaselineSnapshot`, Combat kill-credit hooks, and ADR-0001 NPC-owned source lifecycle records.
-9. **Inventory & Item Economy** — depends on: Save/Load, Character Creation. Items, gear, faction tokens, Syndicate transactions.
+9. **Inventory & Item Economy** — depends on: Save/Load, Character Creation. Draft parked after full review; Save/Load reverse-listing repaired, remaining implementation-pre-spec blockers tracked in [inventory-item-economy.md](inventory-item-economy.md) `INV-OQ-05`. Items, gear, faction tokens, restrained currency/vendor contracts.
 
 ### Layer 3 — Core Extensions *(depend on Layer 2)*
 
@@ -141,7 +141,7 @@ Systems sorted by dependency order. Design and build from top (Foundation) to bo
 
 ### Layer 7 — Presentation (UI)
 
-25. **Layer 1 HUD** — depends on: Combat Core, Character Progression, Status Effects. Health/mana/hate/spell queue plus restrained level/XP progress per art bible S7 and Character Progression.
+25. **Layer 1 HUD** — depends on: Combat Core, Character Progression, Status Effects, Inventory & Item Economy. Health/mana/hate/spell queue plus restrained level/XP progress per art bible S7 and Character Progression; future Inventory implementation pre-spec must define UI-safe inventory transaction result handoff.
 26. **Dialogue UI Panel** — depends on: Dialogue System. Diegetic faction-specific paper panel.
 27. **Personal Journal** — depends on: Faction Reputation. Diegetic carried object tracking faction standings.
 28. **Faction Board UI** — depends on: Faction Events, Faction State Simulation. Diegetic world-object bulletin.
@@ -176,7 +176,7 @@ Combining dependency sort + priority tier. **Write the GDDs in this order.** Ind
 | 6 | Character Creation | MVP | Core | game-designer + systems-designer | S | Single class at MVP (Cleric) — scope is small. |
 | 7 | **Combat Core** | MVP | Core | **game-designer + systems-designer** | **L** | **THE core hypothesis. Prototype this earliest.** |
 | 8 | Character Progression | MVP | Progression | systems-designer | L | Approved. EQ-native XP curves; formula-heavy; consumes Combat kill-credit hooks, `CombatProgressionBaselineSnapshot`, and NPC source lifecycle records. |
-| 9 | Inventory & Item Economy | MVP | Economy | economy-designer + systems-designer | M | Faction tokens, rep-gated items, currency. |
+| 9 | Inventory & Item Economy | MVP | Economy | economy-designer + systems-designer | M (XL integration flags) | Draft parked pending implementation pre-spec; full review blockers are contract-tightening, not architecture rework. |
 | 10 | Class Design — Cleric | MVP | Gameplay | game-designer + systems-designer | L | Cleric is hardest class — group-dependency pivots here. |
 | 11 | Spell Memorization | MVP | Gameplay | game-designer | M | Signature mechanic; EQ-specific. |
 | 12 | Status Effects & Buffs | MVP | Gameplay | systems-designer | M | Interaction matrix is formula-heavy. |
@@ -259,7 +259,7 @@ Systems flagged for early prototyping regardless of priority tier — get these 
 
 ## Next Steps
 
-- [ ] Start `/design-system Inventory & Item Economy` in a fresh session; Inventory & Item Economy is the next MVP system in dependency order.
+- [ ] Start `/prototype combat-feel` in a fresh session; Inventory & Item Economy is drafted but parked pending implementation pre-spec.
 - [ ] Run `/map-systems next` to always pick the highest-priority undesigned system automatically.
 - [ ] Run `/design-review design/gdd/[system].md` in a fresh session after each GDD is authored.
 - [ ] **Prototype Combat Core + Zone Control early** — the concept's core hypothesis cannot be validated in design docs alone. Run `/prototype combat-feel` after enough GDDs are written to inform the prototype.
