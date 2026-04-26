@@ -404,4 +404,241 @@ Tuning Knobs consolidates values already defined in §Formulas. This section doe
 
 ## Acceptance Criteria
 
-[To be designed]
+All criteria use the project QA taxonomy: Unit, Integration, Editor-validation, Dev-build smoke, or Profiled playtest. All are T1-blocking unless marked fixture-gated.
+
+### Scope / Initialization
+
+**H-INV-SCOPE-01 - T1 scope exclusions**
+**GIVEN** authored Inventory feature flags and item categories, **WHEN** the Editor validator runs, **THEN** only `Equipment`, `Consumable`, `Salvage`, `FactionToken`, and `CurrencyContainer` are legal; no crafting, durability, auction, player trade, mail, account bank, shared stash, PvP transfer, companion inventory, LLM item text, rare affix, set bonus, transmog, cosmetic, or multi-character inventory feature is enabled.
+*Editor-validation | gameplay-programmer + qa-tester | T1-blocking*
+
+**H-INV-INIT-01 - First-save materializer produces Inventory state**
+**GIVEN** Save/Load invokes `InventoryFirstSaveMaterializer` with ADR-0004 active `local_character_id`, `starting_class_id = Cleric`, `starting_equipment_template_id = ClericStartingEquipment_T1`, and `carried_inventory = []`, **WHEN** materialization succeeds, **THEN** Inventory produces valid `InventorySaveState` with equipped starter items, empty carried inventory, `carried_currency_copper = 0`, and no duplicated `local_character_id` inside item records.
+*Unit + Integration | gameplay-programmer + qa-tester | T1-blocking*
+
+**H-INV-INIT-02 - Character Creation seed does not create items**
+**GIVEN** a valid `InitialCharacterRecord`, **WHEN** Character Creation completes, **THEN** no item instances, equipped slots, stack records, currency balances, or faction-token records are created outside `InventoryFirstSaveMaterializer`.
+*Integration | gameplay-programmer + qa-tester | T1-blocking*
+
+### Persistence Schema / Hydration
+
+**H-INV-SL-01 - Persistence whitelist**
+**GIVEN** an Inventory save payload, **WHEN** serialized fields are inspected, **THEN** it contains only `inventory_schema_version`, equipped slot bindings, carried slot contents, item instance records, stack records, `carried_currency_copper`, faction-token stack records, and optional test state revision.
+*Unit | gameplay-programmer | T1-blocking*
+
+**H-INV-SL-02 - Forbidden persisted fields absent**
+**GIVEN** an Inventory save payload, **WHEN** serialized fields are inspected, **THEN** no derived stat totals, rarity colors, runtime handles, scene refs, loot containers, drag state, vendor UI state, combat actor ids, or cached formulas are present.
+*Unit + Editor-validation | gameplay-programmer + qa-tester | T1-blocking*
+
+**H-INV-SL-03 - Missing Inventory state rejects load**
+**GIVEN** an initialized save is missing `InventorySaveState`, **WHEN** Save/Load hydrates Inventory, **THEN** load rejects as `LoadRejected(HydrationFailed)` with Inventory reason `InventoryStateMissing`, and no playable session starts.
+*Integration | gameplay-programmer + qa-tester | T1-blocking*
+
+**H-INV-SL-04 - Required equipped-slot absence rejects load**
+**GIVEN** a save is missing an equipped-slot binding whose schema marks it required, **WHEN** Inventory hydrates, **THEN** load rejects with Inventory reason `RequiredEquippedSlotMissing`; schema-permitted empty slots remain valid.
+*Integration | gameplay-programmer + qa-tester | T1-blocking*
+
+**H-INV-SL-05 - Corrupt stack records reject load**
+**GIVEN** stack quantity is zero, negative, above `max_stack`, non-integer, or attached to an illegal item category, **WHEN** Inventory hydrates, **THEN** load rejects with Inventory reason `StackRecordInvalid`; no clamp, split, deletion, or replacement occurs.
+*Unit + Integration | gameplay-programmer + qa-tester | T1-blocking*
+
+**H-INV-SL-06 - Invalid payload classes reject loudly**
+**GIVEN** unknown item definitions, duplicate item instance ids, one instance in multiple locations, illegal equipped slots, class-illegal equipment, currency underflow/overflow, unknown faction token definitions, runtime handles, scene refs, or malformed schema versions, **WHEN** Inventory hydrates, **THEN** hydration fails loudly and no playable session starts.
+*Integration + Editor-validation | gameplay-programmer + qa-tester | T1-blocking*
+
+**H-INV-SL-07 - No load-time repair from creation defaults**
+**GIVEN** an initialized save is missing Inventory state, starter records, or required equipped-slot records, **WHEN** Inventory hydrates, **THEN** it does not synthesize fallback gear, delete invalid records, clamp values, or re-run first-save materialization.
+*Integration | gameplay-programmer + qa-tester | T1-blocking*
+
+### First-Save Materialization
+
+**H-INV-FS-01 - Failed first-save retry is deterministic**
+**GIVEN** first-save write or HMAC commit fails after materialization, **WHEN** Save/Load retries with the same pending `InitialCharacterRecord`, **THEN** `InventoryFirstSaveMaterializer` re-runs idempotently and produces identical `InventorySaveState` from identical inputs.
+*Integration | gameplay-programmer + engine-programmer + qa-tester | T1-blocking*
+
+**H-INV-FS-02 - Starter loadout capacity violation rejects first save**
+**GIVEN** `ClericStartingEquipment_T1` would exceed F1 slot or weight caps, **WHEN** first-save materialization runs, **THEN** it rejects as `FirstSaveMaterializationFailed(StarterLoadoutCapacityInvalid)` and Save/Load writes no bytes.
+*Unit + Integration | gameplay-programmer + qa-tester | T1-blocking*
+
+**H-INV-FS-03 - Starter combat stat delta rejects first save**
+**GIVEN** starter equipment contains non-zero Combat stat delta, **WHEN** authored data validates or first-save materialization runs, **THEN** it rejects as `FirstSaveMaterializationFailed(T1CombatStatDeltaForbidden)`.
+*Editor-validation + Unit | gameplay-programmer + qa-tester | T1-blocking*
+
+**H-INV-FS-04 - Class-illegal starter equipment rejects first save**
+**GIVEN** starter equipment excludes `Cleric` in `class_eligibility`, **WHEN** first-save materialization runs, **THEN** it rejects as `FirstSaveMaterializationFailed(ClassIllegalEquipment)` and no initialized record exists.
+*Unit + Integration | gameplay-programmer + qa-tester | T1-blocking*
+
+### Equip / Slot / Stack Atomicity
+
+**H-INV-EQ-01 - T1 equipment slots are exact**
+**GIVEN** T1 item definitions, **WHEN** the Editor validator inspects equippable items, **THEN** every equippable item targets only `MainHand`, `OffHand`, `Body`, or `Charm`, declares Cleric eligibility, and is non-stackable.
+*Editor-validation | gameplay-programmer + qa-tester | T1-blocking*
+
+**H-INV-EQ-02 - Equip-swap is atomic**
+**GIVEN** replacing equipped gear requires moving the old item into carried inventory, **WHEN** the carried destination fails F1, **THEN** equip rejects as `EquipSwapCarryDestinationInvalid` and equipped/carried state remains unchanged.
+*Unit | gameplay-programmer + qa-tester | T1-blocking*
+
+**H-INV-EQ-03 - Exclusive OffHand clear must have carry destination**
+**GIVEN** equipping a two-handed or exclusive item would clear OffHand, **WHEN** the OffHand item has no legal carried destination, **THEN** equip rejects as `ExclusiveEquipBlockedByCarryCapacity`; no ground spill, hidden overflow, or deletion occurs.
+*Unit | gameplay-programmer + qa-tester | T1-blocking*
+
+**H-INV-STK-01 - Stacks merge only by exact key**
+**GIVEN** two stackable items differ in definition, faction marker, bind state, condition field, or token metadata, **WHEN** pickup or merge is attempted, **THEN** they do not merge and must allocate separate legal slots or reject.
+*Unit | gameplay-programmer | T1-blocking*
+
+**H-INV-STK-02 - Over-cap stack pickup rejects whole pickup if remainder cannot fit**
+**GIVEN** pickup would overfill an existing compatible stack, **WHEN** deterministic fill plus new-slot allocation cannot fit the full quantity under F1 and F3, **THEN** the whole pickup rejects before mutation.
+*Unit + Integration | gameplay-programmer + qa-tester | T1-blocking*
+
+**H-INV-STK-03 - Stack-fill order is deterministic**
+**GIVEN** multiple compatible carried stacks with capacity, **WHEN** pickup merges, **THEN** Inventory fills stacks in ascending carried slot index before allocating an empty slot.
+*Unit | gameplay-programmer | T1-blocking*
+
+### Carry Pressure / Formulas
+
+**H-INV-F1-01 - Slot and weight caps both gate pickup**
+**GIVEN** 17 occupied slots and 58 weight, **WHEN** a 1-slot, 2-weight pickup is tested, **THEN** F1 passes; **WHEN** a 1-slot, 3-weight pickup is tested, **THEN** F1 rejects on weight.
+*Unit | gameplay-programmer | T1-blocking*
+
+**H-INV-F1-02 - Merge accounting keeps slot count stable**
+**GIVEN** a pickup merges into an existing compatible stack with capacity, **WHEN** F1 evaluates, **THEN** `projected_slot_count = current_slot_count` and `projected_weight_units` still increases by `unit_weight_units * pickup_quantity`.
+*Unit | gameplay-programmer | T1-blocking*
+
+**H-INV-F2-01 - Stack weight formula matches example**
+**GIVEN** `unit_weight_units = 4` and `quantity = 6`, **WHEN** `stack_weight_units` evaluates, **THEN** output is `24` weight_units.
+*Unit | gameplay-programmer | T1-blocking*
+
+**H-INV-F3-01 - Default stack caps validate**
+**GIVEN** T1 stack cap config, **WHEN** F3 validates defaults, **THEN** `Equipment = 1`, `Consumable = 5`, `Salvage = 6`, `FactionToken = 20`, and `CurrencyContainer = 1`.
+*Unit + Editor-validation | gameplay-programmer + qa-tester | T1-blocking*
+
+**H-INV-CARRY-01 - Weight is pickup legality only**
+**GIVEN** carried weight ranges from `0` to `carried_weight_cap`, **WHEN** player movement, stamina, encumbrance, animation, regen, combat, casting, or any non-pickup runtime behavior is inspected, **THEN** weight has zero effect; the only legal weight consequence is pickup rejection via F1.
+*Integration + Editor-validation | gameplay-programmer + qa-tester | T1-blocking*
+
+### Currency / Vendor
+
+**H-INV-CUR-01 - Currency at rest is integer copper only**
+**GIVEN** Inventory save state, **WHEN** currency fields are inspected, **THEN** only non-negative integer `carried_currency_copper` represents currency at rest; floats, denominations, coin piles, negative balances, and malformed balances reject.
+*Unit + Integration | gameplay-programmer + qa-tester | T1-blocking*
+
+**H-INV-CUR-02 - Vendor salvage sale formula matches examples**
+**GIVEN** `nominal_value_copper = 50` and `salvage_sell_multiplier = 0.15`, **WHEN** F4 evaluates, **THEN** `vendor_sell_copper = 7`; **GIVEN** the product floors below `1`, **THEN** output is `1`.
+*Unit | gameplay-programmer | T1-blocking*
+
+**H-INV-CUR-03 - Ordinary kills do not directly grant coin**
+**GIVEN** Combat loot context from an ordinary T1 kill, **WHEN** Inventory evaluates currency outcomes, **THEN** it never directly increments `carried_currency_copper`; only an approved `CurrencyContainer` item can later credit currency through F5.
+*Integration | gameplay-programmer + qa-tester | T1-blocking*
+
+**H-INV-CUR-04 - CurrencyContainer consume is deterministic**
+**GIVEN** `carried_currency_copper = 4` and a `CurrencyContainer` with `container_value_copper = 12`, **WHEN** F5 consume succeeds, **THEN** new balance is `16` and the container item record is destroyed.
+*Unit | gameplay-programmer | T1-blocking*
+
+**H-INV-CUR-05 - Currency overflow on consume preserves container**
+**GIVEN** consuming a `CurrencyContainer` would overflow `carried_currency_copper`, **WHEN** consume is attempted, **THEN** it rejects as `CurrencyOverflowOnConsume`, leaves the container intact, and leaves currency unchanged.
+*Unit + Integration | gameplay-programmer + qa-tester | T1-blocking*
+
+**H-INV-VEN-01 - Vendor buy prevalidates before debit**
+**GIVEN** a CityHub vendor purchase would exceed carried slot or weight capacity, **WHEN** buy is attempted, **THEN** Inventory rejects as `VendorBuyCarryCapacityExceeded` before currency debit.
+*Integration | gameplay-programmer + qa-tester | T1-blocking*
+
+**H-INV-VEN-02 - Vendor profile is fixed-constant only**
+**GIVEN** the T1 CityHub vendor profile and authored buy/sell tables, **WHEN** the Editor validator inspects vendor configuration, **THEN** buy/sell prices are authored constants only; no dynamic pricing, stock simulation, reputation discount, faction-rank goods, limited-time rotation, token buying, or arbitrage hook is configured. Future dynamic pricing requires a tier-transition decision.
+*Editor-validation | gameplay-programmer + qa-tester | T1-blocking*
+
+### Faction Tokens
+
+**H-INV-TOK-01 - Token possession schema is narrow**
+**GIVEN** faction-token records, **WHEN** persisted fields are inspected, **THEN** only Inventory-owned possession fields such as `token_def_id`, `faction_id`, `source_ref`, quantity, bind state, and deposit state are present.
+*Unit + Editor-validation | gameplay-programmer + qa-tester | T1-blocking*
+
+**H-INV-TOK-02 - Tokens do not mutate reputation**
+**GIVEN** a faction token is picked up, carried, stacked, saved, loaded, or deposited as Inventory state, **WHEN** downstream faction systems are absent, **THEN** no reputation, rank, access, title, NPC trust, political state, or faction meaning changes.
+*Integration | gameplay-programmer + qa-tester | T1-blocking*
+
+**H-INV-TOK-03 - Unknown faction id rejects hydration**
+**GIVEN** a persisted `FactionToken` references an unknown `faction_id`, **WHEN** Inventory hydrates, **THEN** load rejects as `LoadRejected(HydrationFailed)` with Inventory reason `FactionTokenFactionUnknown`.
+*Integration | gameplay-programmer + qa-tester | T1-blocking*
+
+### Combat Boundary / Gear Plateau
+
+**H-INV-CB-01 - Combat actor ids are illegal**
+**GIVEN** Inventory persistence, loot lookup, or item records are schema-scanned, **WHEN** fields are inspected, **THEN** no `combat_actor_id`, runtime Combat handle, threat table, damage roll, or Combat current-resource field is present.
+*Editor-validation | gameplay-programmer + qa-tester | T1-blocking*
+
+**H-INV-CB-02 - XP eligibility does not gate loot**
+**GIVEN** a defeated source has `xp_eligible = false` in Progression metadata but an Inventory loot table permits a drop, **WHEN** Inventory evaluates loot, **THEN** XP eligibility does not block the Inventory-owned loot decision.
+*Integration | gameplay-programmer + qa-tester | T1-blocking*
+
+**H-INV-GEAR-01 - Gear plateau fixture preserves Combat envelope**
+**GIVEN** `EquipmentPlateauFixtureSet_T1` validates `StartingOnly`, `FieldFullSet`, and `SidegradeMixedSet` at levels `1`, `5`, and `10`, **WHEN** F6 evaluates, **THEN** Combat stats match ADR-0003 `CombatProgressionBaselineSnapshot(level)` plus `CombatCoreClassFixture(level)` with zero item Combat stat delta.
+*Editor-validation + Unit | gameplay-programmer + systems-designer + qa-tester | fixture-gated T1-blocking*
+
+**H-INV-GEAR-02 - Stat-bearing equipment is illegal in T1**
+**GIVEN** any T1 equipment contains item level, rarity, affix, upgrade rank, socket, set bonus, scaling stat, or non-zero Combat stat delta, **WHEN** item definitions validate, **THEN** validation fails and `EquipmentCombatStatSnapshot_T1` remains future-reserved only.
+*Editor-validation | gameplay-programmer + qa-tester | T1-blocking*
+
+### Death / Corpse Boundary
+
+**H-INV-DCR-01 - Death alone does not mutate Inventory**
+**GIVEN** Combat emits `PlayerDeathEvent`, **WHEN** Death & Corpse Recovery has not called an approved Inventory snapshot/recovery interface, **THEN** Inventory does not move, delete, transfer, expire, or restore items, currency, or faction tokens.
+*Integration | gameplay-programmer + qa-tester | T1-blocking*
+
+**H-INV-DCR-02 - Unknown death context rejects snapshot**
+**GIVEN** Death & Corpse Recovery requests `InventoryCorpseSnapshot(death_context_id)` for an unknown death context, **WHEN** Inventory evaluates the request, **THEN** it rejects as `CorpseSnapshotUnknownDeathContext` before creating a snapshot or mutating state.
+*Unit + Integration | gameplay-programmer + qa-tester | T1-blocking*
+
+### Atomicity / Save Boundary
+
+**H-INV-ATM-01 - No InventorySaveBarrier in T1**
+**GIVEN** T1 Inventory runtime mutation APIs, **WHEN** implementation is scanned, **THEN** all mutations are synchronous and atomic, no ADR-0002 `InventorySaveBarrier` is declared, and no multi-frame ownership-changing transaction exists.
+*Editor-validation + Integration | gameplay-programmer + engine-programmer + qa-tester | T1-blocking*
+
+**H-INV-ATM-02 - Manual Save cannot observe mid-vendor state**
+**GIVEN** Manual Save is requested during a vendor transaction test latch, **WHEN** Save/Load reads Inventory state, **THEN** the transaction is either fully complete or not yet begun; no partially debited, partially removed, or partially credited state is visible.
+*Integration | gameplay-programmer + engine-programmer + qa-tester | T1-blocking*
+
+### Same-Frame Pickup Determinism
+
+**H-INV-ATM-03 - Same-frame pickups are FIFO and recompute F1**
+**GIVEN** two pickup requests arrive in one simulation frame, **WHEN** fixtures enqueue them in a known receive-queue order, **THEN** Inventory commits them FIFO, recomputes F1 after the first mutation, and never applies a parallel merge or batched state.
+*Unit + Integration | gameplay-programmer + qa-tester | T1-blocking*
+
+### Tuning / Fixture Validation
+
+**H-INV-TUNE-01 - Tuning safe-range validator**
+**GIVEN** authored Inventory tuning data, **WHEN** the Editor validator runs, **THEN** every knob in §Tuning Knobs is within its safe range or explicitly marked fixed, fixture-owned, or TBA fixture value.
+*Editor-validation | systems-designer + qa-tester | T1-blocking*
+
+**H-INV-TUNE-02 - Capacity tuning changes warn as a group**
+**GIVEN** `carried_slot_cap`, `carried_weight_cap`, category stack caps, pickup frequency, item weight bands, or return-to-city pacing changes alone, **WHEN** validation runs, **THEN** it emits a designer-facing warning requiring carry-pressure revalidation.
+*Editor-validation | systems-designer | T1-blocking*
+
+**H-INV-TUNE-03 - Coin pacing requires projection fixture**
+**GIVEN** any claim about modest economy, copper/hour, vendor affordability, or coin pacing, **WHEN** validation checks evidence, **THEN** it must cite passing `CoinFaucetProjection_T1`; formula-only examples do not count as pacing proof.
+*Editor-validation | systems-designer + qa-tester | fixture-gated T1-blocking*
+
+**H-INV-TUNE-04 - Carry pressure requires haunt-run fixture**
+**GIVEN** any claim about tuned slot/weight pressure over 60, 120, or 180 minutes, **WHEN** validation checks evidence, **THEN** it must cite `InventoryHauntRunProfile_T1` or `LegalPickupRoute_T1` with passing projection.
+*Editor-validation + Profiled playtest | systems-designer + qa-tester | fixture-gated T1-blocking*
+
+**H-INV-TUNE-05 - CurrencyContainer loot-table entries require fixture proof**
+**GIVEN** a `CurrencyContainer` appears in a loot table rather than fixed world placement, **WHEN** tuning validation runs, **THEN** the loot entry must be included in the coin-faucet projection before it can support pacing claims.
+*Editor-validation | systems-designer + qa-tester | fixture-gated T1-blocking*
+
+### Presentation / Non-Scope
+
+**H-INV-VUI-01 - No loot spectacle or gear-score presentation**
+**GIVEN** T1 item definitions and Inventory-facing presentation hooks, **WHEN** they are inspected, **THEN** no rarity color, item level, gear score, affix tier, loot-confetti event, hero reward banner, or item-power ladder marker exists.
+*Editor-validation + Dev-build smoke | ui-programmer + qa-tester | T1-blocking*
+
+**H-INV-VUI-02 - Currency overflow reason is available to UI**
+**GIVEN** `CurrencyOverflowOnConsume` occurs, **WHEN** Inventory returns the transaction result, **THEN** the reason code is available to future UI consumers without exposing formula internals, stack internals, or raw debug state in shipping surfaces.
+*Unit + Integration | gameplay-programmer + ui-programmer + qa-tester | T1-blocking*
+
+### Summary
+
+Total: 51 criteria.
+Ordinary T1-blocking: 47.
+Fixture-gated T1-blocking: 4.
+Advisory-at-T1: 0.
