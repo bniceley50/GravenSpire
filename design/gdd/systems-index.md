@@ -2,7 +2,7 @@
 
 > **Status**: Draft
 > **Created**: 2026-04-22
-> **Last Updated**: 2026-04-24
+> **Last Updated**: 2026-04-26
 > **Source Concept**: [design/gdd/game-concept.md](game-concept.md)
 > **Governing Art Bible**: [design/art/art-bible.md](../art/art-bible.md)
 
@@ -33,7 +33,7 @@ Systems marked **E** are explicit in the game concept's Core Mechanics or Techni
 | 5 | Day/Night Cycle (I) | Core | **MVP** | APPROVED 2026-04-24 (re-entry #1) | [day-night-cycle.md](day-night-cycle.md) | World Structure |
 | 6 | Character Creation (I) | Core | **MVP** | APPROVED 2026-04-24 | [character-creation.md](character-creation.md) | Save/Load |
 | 7 | Combat Core (E) | Gameplay | **MVP** | APPROVED 2026-04-25 (re-review #3) | [combat-core.md](combat-core.md) | World Structure, NPC System, Save/Load |
-| 8 | Character Progression (I) | Progression | **MVP** | In Review 2026-04-25 (re-review #4) | [character-progression.md](character-progression.md) | Character Creation, Save/Load, Combat Core, NPC System |
+| 8 | Character Progression (I) | Progression | **MVP** | APPROVED 2026-04-26 (re-review #4) | [character-progression.md](character-progression.md) | Character Creation, Save/Load, Combat Core, NPC System |
 | 9 | Inventory & Item Economy (I) | Economy | **MVP** | Not Started | — | Save/Load, Character Creation |
 | 10 | Class Design (I) | Gameplay | **MVP** (Cleric) / **T2** (Warrior, Enchanter) | Not Started | — | Combat Core, Character Progression |
 | 11 | Spell Memorization (I) | Gameplay | **MVP** | Not Started | — | Combat Core, Class Design |
@@ -109,7 +109,7 @@ Systems sorted by dependency order. Design and build from top (Foundation) to bo
 5. **Day/Night Cycle** — depends on: World Structure. Approved: [day-night-cycle.md](day-night-cycle.md). UTC-derived local world clock; no Save/Load dependency or persisted clock field. Court hours vs. inn hours; world state shifts per art bible S2.
 6. **Character Creation** — depends on: Save/Load. Class selection, starting faction-neutral state.
 7. **Combat Core** — depends on: World Structure, NPC System, Save/Load. ⚠ **Bottleneck — 9 downstream systems.** The core hypothesis.
-8. **Character Progression** — depends on: Character Creation, Save/Load, Combat Core, NPC System. EQ-native XP, levels, spell unlocks, Combat kill-credit hooks, and NPC-owned source lifecycle records.
+8. **Character Progression** — depends on: Character Creation, Save/Load, Combat Core, NPC System. Approved: [character-progression.md](character-progression.md). EQ-native XP, levels, spell eligibility, `CharacterProgressionFirstSaveMaterializer`, `ProgressionSaveBarrier`, `CombatProgressionBaselineSnapshot`, Combat kill-credit hooks, and ADR-0001 NPC-owned source lifecycle records.
 9. **Inventory & Item Economy** — depends on: Save/Load, Character Creation. Items, gear, faction tokens, Syndicate transactions.
 
 ### Layer 3 — Core Extensions *(depend on Layer 2)*
@@ -175,7 +175,7 @@ Combining dependency sort + priority tier. **Write the GDDs in this order.** Ind
 | 5 | Day/Night Cycle | MVP | Core | game-designer | S | UTC-derived local clock coupled with World Structure `SessionResumeEvent` / `ZoneActiveEvent` ordering. |
 | 6 | Character Creation | MVP | Core | game-designer + systems-designer | S | Single class at MVP (Cleric) — scope is small. |
 | 7 | **Combat Core** | MVP | Core | **game-designer + systems-designer** | **L** | **THE core hypothesis. Prototype this earliest.** |
-| 8 | Character Progression | MVP | Progression | systems-designer | L | EQ-native XP curves; formula-heavy; consumes Combat kill-credit hooks and NPC source lifecycle records. |
+| 8 | Character Progression | MVP | Progression | systems-designer | L | Approved. EQ-native XP curves; formula-heavy; consumes Combat kill-credit hooks, `CombatProgressionBaselineSnapshot`, and NPC source lifecycle records. |
 | 9 | Inventory & Item Economy | MVP | Economy | economy-designer + systems-designer | M | Faction tokens, rep-gated items, currency. |
 | 10 | Class Design — Cleric | MVP | Gameplay | game-designer + systems-designer | L | Cleric is hardest class — group-dependency pivots here. |
 | 11 | Spell Memorization | MVP | Gameplay | game-designer | M | Signature mechanic; EQ-specific. |
@@ -247,10 +247,10 @@ Systems flagged for early prototyping regardless of priority tier — get these 
 | Metric | Count |
 |---|---|
 | Total systems identified | 33 |
-| Design docs started | 7 |
-| Design docs reviewed | 7 |
-| Design docs approved | 7 |
-| MVP systems designed | 7 / 26 |
+| Design docs started | 8 |
+| Design docs reviewed | 8 |
+| Design docs approved | 8 |
+| MVP systems designed | 8 / 26 |
 | Tier 2 systems designed | 0 / 7 |
 | Tier 3 systems designed | 0 / 5 |
 | Tier 4 systems designed | 0 / — |
@@ -259,7 +259,7 @@ Systems flagged for early prototyping regardless of priority tier — get these 
 
 ## Next Steps
 
-- [ ] Start `/design-system Character Progression` in a fresh session; Character Progression is the next MVP system in dependency order.
+- [ ] Start `/design-system Inventory & Item Economy` in a fresh session; Inventory & Item Economy is the next MVP system in dependency order.
 - [ ] Run `/map-systems next` to always pick the highest-priority undesigned system automatically.
 - [ ] Run `/design-review design/gdd/[system].md` in a fresh session after each GDD is authored.
 - [ ] **Prototype Combat Core + Zone Control early** — the concept's core hypothesis cannot be validated in design docs alone. Run `/prototype combat-feel` after enough GDDs are written to inform the prototype.
