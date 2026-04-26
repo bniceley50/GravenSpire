@@ -155,3 +155,33 @@ other D005 consequences (governance stack port, new top-level files, new
 rules, new skills) remain locked.
 **Related:** `AGENTS.md` §0 worktree rules (commit `486f0a0`); Codex
 onboarding brief (delivered 2026-04-22).
+
+---
+
+## D007 — ADR-0001 XP Source Lifecycle Registry
+
+**Date:** 2026-04-26
+**Status:** Proposed
+**Context:** Character Progression round-4 review exposed that XP source
+lookup, lifecycle tokens, repeatability classes, and NPC-owned source
+lifecycle durability were being designed inline in GDD prose without an
+architecture lock. Repeated GDD-only revision rounds were expanding the blast
+radius across Character Progression, Save/Load, NPC System, systems-index, and
+Character Creation.
+**Decision:** Create the first Gravenspire ADR:
+`docs/architecture/adr-0001-xp-source-lifecycle-registry.md`. The ADR proposes
+that Character Progression owns authored XP metadata, transient source
+registry entries, immutable award snapshots, and session-local processed-award
+dedupe, while NPC System owns durable source lifecycle state through
+`NpcSourceLifecycleRecord`. Combat Core's approved narrow kill-credit payload
+remains unchanged.
+**Consequences:**
+- Character Progression GDD should reference ADR-0001 instead of redefining XP
+  source lifecycle architecture inline.
+- `NonRepeatableFirstKill` is future-reserved and invalid for T1 shipping rows
+  until a later ADR defines durable per-character claim persistence.
+- Follow-up ADRs remain needed for save-stability barriers, progression
+  baseline snapshots, first-save identity/materialization, and pacing fixtures.
+**See also:** `docs/architecture/adr-0001-xp-source-lifecycle-registry.md`;
+`design/gdd/character-progression.md`; `design/gdd/npc-system.md`;
+`design/gdd/save-load-persistence.md`; `design/gdd/combat-core.md`.

@@ -30,7 +30,7 @@
 #   Superseded entries:     Grep pattern="status: superseded"
 
 version: 1
-last_updated: ""
+last_updated: "2026-04-26"
 
 # ─── STATE OWNERSHIP ─────────────────────────────────────────────────────────
 # Who is the authoritative owner of each piece of shared game state.
@@ -43,7 +43,34 @@ last_updated: ""
 # interface: how other systems access this state (read-only property, method call,
 #   signal, shared resource, etc.) — this is the contract other ADRs depend on.
 
-state_ownership: []
+state_ownership:
+  - state: npc_source_lifecycle_state
+    status: proposed
+    owner_system: NPC System
+    adr: docs/architecture/adr-0001-xp-source-lifecycle-registry.md
+    interface: "NpcSourceLifecycleRecord(zoneId, defeated_source_ref, source_lifecycle_token, source_lifecycle_state, source_lifecycle_token_policy, respawn_or_availability_timing_key)"
+    write_access: NPC-System-only
+    referenced_by:
+      - docs/architecture/adr-0001-xp-source-lifecycle-registry.md
+      - design/gdd/npc-system.md
+      - design/gdd/character-progression.md
+      - design/gdd/save-load-persistence.md
+    added: 2026-04-26
+    revised: ""
+
+  - state: progression_xp_source_metadata
+    status: proposed
+    owner_system: Character Progression
+    adr: docs/architecture/adr-0001-xp-source-lifecycle-registry.md
+    interface: "ProgressionXpSourceRefLookup_T1, XpSourceLifecycleRegistry, and XpAwardResolutionSnapshot"
+    write_access: Character-Progression-only
+    referenced_by:
+      - docs/architecture/adr-0001-xp-source-lifecycle-registry.md
+      - design/gdd/character-progression.md
+      - design/gdd/npc-system.md
+      - design/gdd/save-load-persistence.md
+    added: 2026-04-26
+    revised: ""
 
 # Example:
 #
@@ -71,7 +98,22 @@ state_ownership: []
 #
 # pattern options: signal | direct_call | event_bus | shared_resource | rpc | none
 
-interfaces: []
+interfaces:
+  - contract: npc_source_lifecycle_to_progression_registry
+    status: proposed
+    pattern: direct_call
+    producer: NPC System
+    consumers:
+      - Character Progression
+    adr: docs/architecture/adr-0001-xp-source-lifecycle-registry.md
+    signal_signature: "RegisterXpSourceLifecycle(zoneId, defeated_source_ref, source_lifecycle_token, source_lifecycle_state, source_lifecycle_token_policy)"
+    notes: "Synchronous lifecycle hook used before XP eligibility and during the same kill-resolution phase that captures XpAwardResolutionSnapshot."
+    referenced_by:
+      - docs/architecture/adr-0001-xp-source-lifecycle-registry.md
+      - design/gdd/character-progression.md
+      - design/gdd/npc-system.md
+    added: 2026-04-26
+    revised: ""
 
 # Example:
 #
@@ -157,7 +199,38 @@ api_decisions: []
 # Register a pattern when an ADR explicitly bans it AND other ADRs might
 # unknowingly use it (i.e., it's a tempting but wrong approach for this project).
 
-forbidden_patterns: []
+forbidden_patterns:
+  - pattern: combat_actor_id_as_xp_identity
+    status: proposed
+    description: "Combat runtime actor ids must not be used in XP award identity, dedupe keys, save data, or source lifecycle records."
+    why: "Combat actor ids are transient runtime/session identifiers; XP awards require stable source refs and source lifecycle tokens so duplicates and respawns are deterministic."
+    adr: docs/architecture/adr-0001-xp-source-lifecycle-registry.md
+    referenced_by:
+      - docs/architecture/adr-0001-xp-source-lifecycle-registry.md
+      - design/gdd/character-progression.md
+      - design/gdd/combat-core.md
+    added: 2026-04-26
+
+  - pattern: live_npc_state_xp_lookup_after_death
+    status: proposed
+    description: "Character Progression must not resolve XP metadata by querying mutable live NPC or spawn runtime state after Combat kill credit has fired."
+    why: "Cleanup, despawn, or respawn can replace the source occupant; XP must come from the same-dispatch immutable XpAwardResolutionSnapshot."
+    adr: docs/architecture/adr-0001-xp-source-lifecycle-registry.md
+    referenced_by:
+      - docs/architecture/adr-0001-xp-source-lifecycle-registry.md
+      - design/gdd/character-progression.md
+      - design/gdd/npc-system.md
+    added: 2026-04-26
+
+  - pattern: t1_nonrepeatable_firstkill_shipping_rows
+    status: proposed
+    description: "T1 shipping ProgressionXpSourceRefLookup rows must not use repeatability_class = NonRepeatableFirstKill."
+    why: "NonRepeatableFirstKill needs durable per-character claim persistence, which ADR-0001 intentionally defers to a later decision."
+    adr: docs/architecture/adr-0001-xp-source-lifecycle-registry.md
+    referenced_by:
+      - docs/architecture/adr-0001-xp-source-lifecycle-registry.md
+      - design/gdd/character-progression.md
+    added: 2026-04-26
 
 # Example:
 #
