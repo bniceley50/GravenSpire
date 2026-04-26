@@ -42,6 +42,7 @@ namespace Gravenspire.Prototypes.CombatFeel
         private float castTimer;
         private float castDuration;
         private SpellKind castingSpell;
+        private CombatPrototypeState stateBeforeCast;
         private bool lastMeditating;
 
         public CombatLoop(CadenceKnobs knobs)
@@ -98,6 +99,7 @@ namespace Gravenspire.Prototypes.CombatFeel
             castTimer = 0f;
             castDuration = 0f;
             castingSpell = SpellKind.None;
+            stateBeforeCast = CombatPrototypeState.BetweenPulls;
             lastMeditating = false;
             PullsCompleted = 0;
             TotalCombatSeconds = 0f;
@@ -237,6 +239,7 @@ namespace Gravenspire.Prototypes.CombatFeel
 
             if (State != CombatPrototypeState.Fighting)
             {
+                Log("Smite needs an active hostile target in melee range.");
                 return false;
             }
 
@@ -259,8 +262,21 @@ namespace Gravenspire.Prototypes.CombatFeel
 
         public bool CastHeal()
         {
-            if (State != CombatPrototypeState.Fighting)
+            if (State == CombatPrototypeState.Casting)
             {
+                Log($"Already casting {castingSpell}. Wait for the cast bar.");
+                return false;
+            }
+
+            if (State != CombatPrototypeState.Fighting && State != CombatPrototypeState.BetweenPulls)
+            {
+                Log("Heal can be cast during combat or between pulls.");
+                return false;
+            }
+
+            if (Cleric.Health >= Cleric.MaxHealth)
+            {
+                Log("You are already at full health.");
                 return false;
             }
 
@@ -408,6 +424,7 @@ namespace Gravenspire.Prototypes.CombatFeel
 
         private void BeginCast(SpellKind spell, float duration)
         {
+            stateBeforeCast = State;
             castingSpell = spell;
             castDuration = Mathf.Max(0.01f, duration);
             castTimer = 0f;
@@ -442,7 +459,9 @@ namespace Gravenspire.Prototypes.CombatFeel
             castDuration = 0f;
             if (State != CombatPrototypeState.Dead)
             {
-                State = CombatPrototypeState.Fighting;
+                State = stateBeforeCast == CombatPrototypeState.BetweenPulls
+                    ? CombatPrototypeState.BetweenPulls
+                    : CombatPrototypeState.Fighting;
             }
         }
 

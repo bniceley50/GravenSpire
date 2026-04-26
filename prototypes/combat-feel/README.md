@@ -62,11 +62,21 @@ rate. Document which knob moved the feel.
 - Tab: cycle preview target while between pulls.
 - 1: pull selected hostile.
 - Q: cast Smite.
-- E: cast Heal.
+- E: cast Heal during combat or between pulls.
 - R: sit or stand to meditate.
 - X: stop the prototype loop.
 
 The same actions are available as HUD buttons.
+
+## Easiest Run Path
+
+Use the batch files from Windows Explorer:
+
+1. Double-click `BUILD_COMBAT_FEEL.bat`.
+2. Double-click `RUN_COMBAT_FEEL.bat`.
+
+The build script prefers Unity 6000.3.x if installed, then falls back to
+6000.4.x for advisory practice builds.
 
 ## File Map
 
@@ -79,8 +89,12 @@ The same actions are available as HUD buttons.
   and combat log events.
 - `Assets/Scripts/Editor/CombatFeelSceneBuilder.cs` - editor-only menu command
   that creates a blank scene with the bootstrap object attached.
+- `Assets/Scripts/Editor/CombatFeelBuildRunner.cs` - editor-only Windows
+  standalone build command used by `BUILD_COMBAT_FEEL.bat`.
 - `Assets/Scripts/Editor/CombatFeelSmokeRunner.cs` - editor-only scripted
   mechanics smoke check for multi-pull completion and forced med break.
+- `BUILD_COMBAT_FEEL.bat` - command-line Windows build helper.
+- `RUN_COMBAT_FEEL.bat` - launches the generated Windows player.
 
 ## Run Notes
 

@@ -46,11 +46,12 @@ Park **Inventory & Item Economy GDD** after full review and pivot to `/prototype
 - ✅ Inventory blocker 1 repaired 2026-04-26: Save/Load now reverse-lists `InventoryFirstSaveMaterializer`; remaining blockers parked in [design/gdd/inventory-item-economy.md](../../design/gdd/inventory-item-economy.md) `INV-OQ-05` for future Inventory implementation pre-spec.
 - 🧪 `/prototype combat-feel` started 2026-04-26. Tech choice locked to Unity 6.3 LTS standalone prototype under `prototypes/combat-feel/`, with 3-5 sequential pulls, at least one default med break between pulls 2 and 3, explicit success/failure criteria, and durable findings target `production/prototypes/combat-feel-report.md`.
 - ✅ Combat-feel scripted mechanics smoke passed under locally installed Unity `6000.4.1f1` batchmode (not pinned `6000.3.x`): 5/5 scripted pulls, 97.1s combat, 41.9s downtime, 19.4s average pull, 1 med break, 9 Smites, 4 Heals, 0 unsafe pulls. Human feel playtest still required before verdict.
+- ✅ Combat-feel advisory playtest completed 2026-04-26 under Unity `6000.4.1f1` standalone build: player reported the loop felt "pretty smooth" and saw casting time as tuneable, not a fundamental pacing rejection. Heal usability bug and standalone black-screen HUD issue were fixed; post-fix smoke passed 5/5 pulls with 22.7s average pull and 5 Heals. Report written to [production/prototypes/combat-feel-report.md](../prototypes/combat-feel-report.md). Verdict: **ADVISORY POSITIVE**, pending pinned Unity `6000.3.x` validation.
 - ✅ Codex PR #1 (`codex/dotnet-format-setup` → `main`) merged into `main`; follow-up cleanup commit `ce634c3` recorded.
 
 ## Files Being Worked On
 
-- **Active:** `/prototype combat-feel` — Unity standalone prototype scaffold in [prototypes/combat-feel/](../../prototypes/combat-feel/); Inventory & Item Economy remains parked pending implementation pre-spec
+- **Active:** `/prototype combat-feel` — Unity standalone prototype scaffold in [prototypes/combat-feel/](../../prototypes/combat-feel/); advisory report in [production/prototypes/combat-feel-report.md](../prototypes/combat-feel-report.md); Inventory & Item Economy remains parked pending implementation pre-spec
 - Combat Feel Prototype: [prototypes/combat-feel/README.md](../../prototypes/combat-feel/README.md) — prototype question, success/failure criteria, loop spec, controls, run notes
 - Inventory & Item Economy: [design/gdd/inventory-item-economy.md](../../design/gdd/inventory-item-economy.md) — design draft, **NEEDS REVISION**, blocker 1 repaired, remaining blockers tracked in `INV-OQ-05`
 - Character Progression: [design/gdd/character-progression.md](../../design/gdd/character-progression.md) — APPROVED 2026-04-26; commits `6459ceb` and `557fa3e`
@@ -84,6 +85,6 @@ Park **Inventory & Item Economy GDD** after full review and pivot to `/prototype
 
 ## Next Skill to Run
 
-- **Continue `/prototype combat-feel`** — run the Unity scene interactively in the pinned Unity 6.3 LTS editor if available, self-playtest 3-5 pulls, then write `production/prototypes/combat-feel-report.md` with metrics and verdict.
+- **Continue `/prototype combat-feel`** — rerun the standalone/scene in pinned Unity `6000.3.x LTS`, explicitly probe all four README success criteria, then decide whether one-knob Smite cast-time iteration is needed.
 - Later: run Inventory implementation pre-spec to close `INV-OQ-05`, then rerun `/design-review design/gdd/inventory-item-economy.md --depth full`.
 - Codex PR #1 is merged; no Codex follow-up pending in this active state file.

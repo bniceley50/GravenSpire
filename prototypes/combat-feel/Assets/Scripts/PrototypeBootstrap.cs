@@ -29,6 +29,12 @@ namespace Gravenspire.Prototypes.CombatFeel
         private Button healButton;
         private Button medButton;
         private Button stopButton;
+        private GUIStyle guiHeader;
+        private GUIStyle guiBody;
+        private GUIStyle guiSmall;
+        private GUIStyle guiButton;
+        private GUIStyle guiLog;
+        private Texture2D whiteTexture;
 
         private void Awake()
         {
@@ -42,6 +48,55 @@ namespace Gravenspire.Prototypes.CombatFeel
             HandleKeyboard();
             loop.Tick(Time.deltaTime);
             RefreshHud();
+        }
+
+        private void OnGUI()
+        {
+            if (loop == null)
+            {
+                return;
+            }
+
+            EnsureGuiStyles();
+
+            var panelWidth = Mathf.Min(Screen.width - 32f, 980f);
+            var panelHeight = Screen.height - 32f;
+            GUILayout.BeginArea(new Rect(16f, 16f, panelWidth, panelHeight), GUI.skin.box);
+            GUILayout.Label("Combat Feel Prototype", guiHeader);
+            GUILayout.Label("Keys: 1 Pull | Q Smite | E Heal | R Sit/Med | Tab Target | X Stop", guiSmall);
+            GUILayout.Space(8f);
+
+            GUILayout.Label($"State: {loop.State}    Pulls: {loop.PullsCompleted}/{loop.PullsGoal}", guiBody);
+            DrawGuiBar("Health", loop.Cleric.Health, loop.Cleric.MaxHealth, loop.Cleric.HealthPercent, new Color(0.55f, 0.08f, 0.08f, 1f));
+            DrawGuiBar("Mana", loop.Cleric.Mana, loop.Cleric.MaxMana, loop.Cleric.ManaPercent, new Color(0.16f, 0.28f, 0.62f, 1f));
+
+            var target = loop.CurrentTarget;
+            if (target != null)
+            {
+                DrawGuiBar(target.Name, target.Health, target.MaxHealth, target.HealthPercent, new Color(0.48f, 0.05f, 0.05f, 1f));
+            }
+            else
+            {
+                var preview = loop.PreviewTarget;
+                GUILayout.Label(preview == null ? "No remaining target." : $"Next: {preview.Name} - {preview.HauntCue}", guiBody);
+            }
+
+            var castText = loop.CastingSpell == SpellKind.None ? "No active cast" : $"{loop.CastingSpell}";
+            DrawGuiBar(castText, Mathf.RoundToInt(loop.CastProgress * 100f), 100, loop.CastProgress, new Color(0.78f, 0.68f, 0.35f, 1f));
+
+            GUILayout.Space(8f);
+            GUILayout.BeginHorizontal();
+            if (GUILayout.Button("Pull (1)", guiButton, GUILayout.Height(36f))) loop.PullSelected();
+            if (GUILayout.Button("Smite (Q)", guiButton, GUILayout.Height(36f))) loop.CastSmite();
+            if (GUILayout.Button("Heal (E)", guiButton, GUILayout.Height(36f))) loop.CastHeal();
+            if (GUILayout.Button(loop.Cleric.IsSitting ? "Stand (R)" : "Sit / Med (R)", guiButton, GUILayout.Height(36f))) loop.ToggleMeditation();
+            if (GUILayout.Button("Stop (X)", guiButton, GUILayout.Height(36f))) loop.Stop();
+            GUILayout.EndHorizontal();
+
+            GUILayout.Space(8f);
+            GUILayout.Label(loop.BuildMetricsSummary(), guiSmall);
+            GUILayout.Label(loop.BuildLogText(14), guiLog, GUILayout.ExpandHeight(true));
+            GUILayout.EndArea();
         }
 
         private void HandleKeyboard()
@@ -184,6 +239,54 @@ namespace Gravenspire.Prototypes.CombatFeel
             root.Add(logLabel);
         }
 
+        private void EnsureGuiStyles()
+        {
+            if (guiHeader != null)
+            {
+                return;
+            }
+
+            whiteTexture = Texture2D.whiteTexture;
+            guiHeader = new GUIStyle(GUI.skin.label)
+            {
+                fontSize = 28,
+                fontStyle = FontStyle.Bold,
+                normal = { textColor = new Color(0.9f, 0.84f, 0.68f, 1f) }
+            };
+            guiBody = new GUIStyle(GUI.skin.label)
+            {
+                fontSize = 18,
+                wordWrap = true,
+                normal = { textColor = new Color(0.86f, 0.82f, 0.74f, 1f) }
+            };
+            guiSmall = new GUIStyle(guiBody)
+            {
+                fontSize = 15
+            };
+            guiButton = new GUIStyle(GUI.skin.button)
+            {
+                fontSize = 16
+            };
+            guiLog = new GUIStyle(guiSmall)
+            {
+                alignment = TextAnchor.UpperLeft,
+                wordWrap = true,
+                normal = { textColor = new Color(0.84f, 0.8f, 0.7f, 1f) }
+            };
+        }
+
+        private void DrawGuiBar(string label, int current, int max, float percent, Color fill)
+        {
+            GUILayout.Label($"{label}: {current}/{max}", guiSmall);
+            var rect = GUILayoutUtility.GetRect(1f, 18f, GUILayout.ExpandWidth(true));
+            var previousColor = GUI.color;
+            GUI.color = new Color(0.02f, 0.02f, 0.018f, 1f);
+            GUI.DrawTexture(rect, whiteTexture);
+            GUI.color = fill;
+            GUI.DrawTexture(new Rect(rect.x, rect.y, rect.width * Mathf.Clamp01(percent), rect.height), whiteTexture);
+            GUI.color = previousColor;
+        }
+
         private VisualElement BuildPanel(string heading)
         {
             var panel = new VisualElement();
@@ -271,7 +374,9 @@ namespace Gravenspire.Prototypes.CombatFeel
 
             pullButton.SetEnabled(loop.State == CombatPrototypeState.BetweenPulls);
             smiteButton.SetEnabled(loop.State == CombatPrototypeState.Fighting && target != null);
-            healButton.SetEnabled(loop.State == CombatPrototypeState.Fighting);
+            healButton.SetEnabled((loop.State == CombatPrototypeState.Fighting ||
+                                  loop.State == CombatPrototypeState.BetweenPulls) &&
+                                 loop.Cleric.Health < loop.Cleric.MaxHealth);
             medButton.SetEnabled(loop.State == CombatPrototypeState.BetweenPulls);
             stopButton.SetEnabled(loop.State != CombatPrototypeState.Stopped);
         }
