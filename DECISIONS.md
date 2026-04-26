@@ -216,3 +216,41 @@ serialized; unresolved barriers fail the write loudly with
 `docs/architecture/adr-0001-xp-source-lifecycle-registry.md`;
 `design/gdd/save-load-persistence.md`; `design/gdd/character-progression.md`;
 `design/gdd/npc-system.md`; `design/gdd/world-structure.md`.
+
+---
+
+## D009 — ADR-0003 Progression Baseline Snapshot Contract
+
+**Date:** 2026-04-26
+**Status:** Proposed
+**Context:** Character Progression round-4 review exposed that the current
+`ProgressionBaselineSnapshot(current_level, permanent_max_health,
+permanent_max_mana, spell_eligibility_tier)` wording was too broad and
+internally ambiguous. Save/Load and Character Progression said Combat used only
+health/mana maxima, while Combat Core still needed explicit player actor level
+input for its own formulas.
+**Decision:** Create
+`docs/architecture/adr-0003-progression-baseline-snapshot-contract.md`. The ADR
+proposes consumer-scoped immutable progression snapshots. Combat Core consumes
+only `CombatProgressionBaselineSnapshot`, which carries
+`combat_actor_level = current_level`, permanent max health, permanent max mana,
+class/character ids, schema, and revision metadata. UI/Menu and spell systems
+must use separate read models and may not receive the Combat hydration payload
+as a generic progression snapshot.
+**Consequences:**
+- Character Progression and Save/Load GDDs should replace generic
+  `ProgressionBaselineSnapshot` handoff wording with
+  `CombatProgressionBaselineSnapshot`.
+- Combat Core gets an explicit level/max-resource input contract while keeping
+  ownership of combat formulas, current resources, hydration clamp/reject
+  behavior, threat, casting, regen, and death.
+- `visible_level`, XP progress fields, `spell_eligibility_tier`, spell content,
+  and UI presentation data are banned from the Combat baseline handoff.
+- Follow-up ADRs remain needed for first-save identity/materialization and
+  progression pacing fixtures.
+**See also:**
+`docs/architecture/adr-0003-progression-baseline-snapshot-contract.md`;
+`docs/architecture/adr-0001-xp-source-lifecycle-registry.md`;
+`docs/architecture/adr-0002-save-stability-barrier-protocol.md`;
+`design/gdd/character-progression.md`; `design/gdd/save-load-persistence.md`;
+`design/gdd/combat-core.md`; `design/gdd/systems-index.md`.

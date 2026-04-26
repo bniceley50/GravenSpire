@@ -72,6 +72,49 @@ state_ownership:
     added: 2026-04-26
     revised: ""
 
+  - state: progression_level_state
+    status: proposed
+    owner_system: Character Progression
+    adr: docs/architecture/adr-0003-progression-baseline-snapshot-contract.md
+    interface: "CombatProgressionBaselineSnapshot.combat_actor_level; ProgressionPresentationReadModel_T1.current_level/visible_level; SpellEligibilityReadModel_T1.current_level"
+    write_access: Character-Progression-only
+    referenced_by:
+      - docs/architecture/adr-0003-progression-baseline-snapshot-contract.md
+      - design/gdd/character-progression.md
+      - design/gdd/save-load-persistence.md
+      - design/gdd/combat-core.md
+      - design/gdd/systems-index.md
+    added: 2026-04-26
+    revised: ""
+
+  - state: progression_permanent_resource_baselines
+    status: proposed
+    owner_system: Character Progression
+    adr: docs/architecture/adr-0003-progression-baseline-snapshot-contract.md
+    interface: "CombatProgressionBaselineSnapshot(permanent_max_health, permanent_max_mana)"
+    write_access: Character-Progression-only
+    referenced_by:
+      - docs/architecture/adr-0003-progression-baseline-snapshot-contract.md
+      - design/gdd/character-progression.md
+      - design/gdd/save-load-persistence.md
+      - design/gdd/combat-core.md
+    added: 2026-04-26
+    revised: ""
+
+  - state: spell_eligibility_tier
+    status: proposed
+    owner_system: Character Progression
+    adr: docs/architecture/adr-0003-progression-baseline-snapshot-contract.md
+    interface: "SpellEligibilityReadModel_T1.spell_eligibility_tier and SpellEligibilityChanged"
+    write_access: Character-Progression-only
+    referenced_by:
+      - docs/architecture/adr-0003-progression-baseline-snapshot-contract.md
+      - design/gdd/character-progression.md
+      - design/gdd/save-load-persistence.md
+      - design/gdd/systems-index.md
+    added: 2026-04-26
+    revised: ""
+
 # Example:
 #
 # state_ownership:
@@ -150,6 +193,58 @@ interfaces:
       - design/gdd/save-load-persistence.md
       - design/gdd/character-progression.md
       - design/gdd/npc-system.md
+    added: 2026-04-26
+    revised: ""
+
+  - contract: combat_progression_baseline_snapshot
+    status: proposed
+    pattern: direct_call
+    producer: Character Progression
+    consumers:
+      - Combat Core
+      - "Save / Load & Persistence"
+    adr: docs/architecture/adr-0003-progression-baseline-snapshot-contract.md
+    method_signature: "GetCombatProgressionBaselineSnapshot(local_character_id) -> CombatProgressionBaselineSnapshot"
+    notes: "Combat's only legal Character Progression baseline in T1; carries combat_actor_level = current_level plus permanent max health/mana and revision metadata."
+    referenced_by:
+      - docs/architecture/adr-0003-progression-baseline-snapshot-contract.md
+      - design/gdd/character-progression.md
+      - design/gdd/save-load-persistence.md
+      - design/gdd/combat-core.md
+    added: 2026-04-26
+    revised: ""
+
+  - contract: progression_presentation_read_model_t1
+    status: proposed
+    pattern: direct_call
+    producer: Character Progression
+    consumers:
+      - Layer 1 HUD
+      - "Menus & Settings"
+    adr: docs/architecture/adr-0003-progression-baseline-snapshot-contract.md
+    method_signature: "GetProgressionPresentationReadModel_T1(local_character_id) -> ProgressionPresentationReadModel_T1"
+    notes: "Future UI/Menu read model for visible_level and current XP band display; not a Combat input and not available as a generic baseline."
+    referenced_by:
+      - docs/architecture/adr-0003-progression-baseline-snapshot-contract.md
+      - design/gdd/character-progression.md
+      - design/gdd/systems-index.md
+    added: 2026-04-26
+    revised: ""
+
+  - contract: spell_eligibility_read_model_t1
+    status: proposed
+    pattern: direct_call
+    producer: Character Progression
+    consumers:
+      - Spell Memorization
+      - Class Design
+    adr: docs/architecture/adr-0003-progression-baseline-snapshot-contract.md
+    method_signature: "GetSpellEligibilityReadModel_T1(local_character_id) -> SpellEligibilityReadModel_T1"
+    notes: "Eligibility-tier read model only; contains no spell ids, learned abilities, spellbook state, memorized slots, vendors, drops, UI, VFX, or spell effects."
+    referenced_by:
+      - docs/architecture/adr-0003-progression-baseline-snapshot-contract.md
+      - design/gdd/character-progression.md
+      - design/gdd/systems-index.md
     added: 2026-04-26
     revised: ""
 
@@ -304,6 +399,50 @@ forbidden_patterns:
       - design/gdd/save-load-persistence.md
       - design/gdd/character-progression.md
       - design/gdd/npc-system.md
+    added: 2026-04-26
+
+  - pattern: generic_all_consumer_progression_baseline_snapshot
+    status: proposed
+    description: "Do not expose or consume a generic all-consumer ProgressionBaselineSnapshot for Combat, UI, spell systems, or future consumers."
+    why: "ADR-0003 requires consumer-scoped immutable read models so consumers cannot depend on unrelated fields or carry hidden coupling through a fat snapshot."
+    adr: docs/architecture/adr-0003-progression-baseline-snapshot-contract.md
+    referenced_by:
+      - docs/architecture/adr-0003-progression-baseline-snapshot-contract.md
+      - design/gdd/character-progression.md
+      - design/gdd/save-load-persistence.md
+      - design/gdd/combat-core.md
+    added: 2026-04-26
+
+  - pattern: combat_consuming_visible_level
+    status: proposed
+    description: "Combat Core must not consume Character Progression visible_level as a combat actor level input."
+    why: "visible_level is a presentation field; ADR-0003 maps Combat's level input to CombatProgressionBaselineSnapshot.combat_actor_level, which equals current_level in T1."
+    adr: docs/architecture/adr-0003-progression-baseline-snapshot-contract.md
+    referenced_by:
+      - docs/architecture/adr-0003-progression-baseline-snapshot-contract.md
+      - design/gdd/character-progression.md
+      - design/gdd/combat-core.md
+    added: 2026-04-26
+
+  - pattern: ui_or_spell_consumer_reading_combat_snapshot
+    status: proposed
+    description: "UI, Menus, Spell Memorization, Class Design, vendors, drops, and other non-Combat consumers must not read CombatProgressionBaselineSnapshot for progression data."
+    why: "CombatProgressionBaselineSnapshot is scoped to Combat actor hydration and max-resource baselines; UI and spell systems have separate read models with separate ownership rules."
+    adr: docs/architecture/adr-0003-progression-baseline-snapshot-contract.md
+    referenced_by:
+      - docs/architecture/adr-0003-progression-baseline-snapshot-contract.md
+      - design/gdd/character-progression.md
+      - design/gdd/systems-index.md
+    added: 2026-04-26
+
+  - pattern: consumer_mutating_progression_snapshot
+    status: proposed
+    description: "Consumers must not mutate Character Progression state through progression snapshots or read models."
+    why: "ADR-0003 defines immutable consumer-scoped read models; Character Progression remains the only writer of progression level, permanent baselines, and spell eligibility state."
+    adr: docs/architecture/adr-0003-progression-baseline-snapshot-contract.md
+    referenced_by:
+      - docs/architecture/adr-0003-progression-baseline-snapshot-contract.md
+      - design/gdd/character-progression.md
     added: 2026-04-26
 
 # Example:
