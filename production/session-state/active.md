@@ -44,12 +44,14 @@ Park **Inventory & Item Economy GDD** after full review and pivot to `/prototype
 - ✅ Inventory & Item Economy Open Questions section written 2026-04-26.
 - ⚠️ Inventory & Item Economy full design review completed 2026-04-26 with verdict **NEEDS REVISION** and scope signal **XL**. Six blocker groups: (1) Save/Load first-save reverse-listing drift, (2) Inventory schema/id/hydration pre-spec gap, (3) F1/currency/vendor math gaps, (4) vendor transaction economy not closed, (5) future Combat / Death & Corpse Recovery / Faction Reputation criteria leaking into T1, (6) Layer 1 HUD / Inventory UI receiver not registered.
 - ✅ Inventory blocker 1 repaired 2026-04-26: Save/Load now reverse-lists `InventoryFirstSaveMaterializer`; remaining blockers parked in [design/gdd/inventory-item-economy.md](../../design/gdd/inventory-item-economy.md) `INV-OQ-05` for future Inventory implementation pre-spec.
-- Next: open a fresh session for `/prototype combat-feel`.
+- 🧪 `/prototype combat-feel` started 2026-04-26. Tech choice locked to Unity 6.3 LTS standalone prototype under `prototypes/combat-feel/`, with 3-5 sequential pulls, at least one default med break between pulls 2 and 3, explicit success/failure criteria, and durable findings target `production/prototypes/combat-feel-report.md`.
+- ✅ Combat-feel scripted mechanics smoke passed under locally installed Unity `6000.4.1f1` batchmode (not pinned `6000.3.x`): 5/5 scripted pulls, 97.1s combat, 41.9s downtime, 19.4s average pull, 1 med break, 9 Smites, 4 Heals, 0 unsafe pulls. Human feel playtest still required before verdict.
 - ✅ Codex PR #1 (`codex/dotnet-format-setup` → `main`) merged into `main`; follow-up cleanup commit `ce634c3` recorded.
 
 ## Files Being Worked On
 
-- **Active:** `/prototype combat-feel` — next fresh-session task; Inventory & Item Economy is drafted but parked pending implementation pre-spec
+- **Active:** `/prototype combat-feel` — Unity standalone prototype scaffold in [prototypes/combat-feel/](../../prototypes/combat-feel/); Inventory & Item Economy remains parked pending implementation pre-spec
+- Combat Feel Prototype: [prototypes/combat-feel/README.md](../../prototypes/combat-feel/README.md) — prototype question, success/failure criteria, loop spec, controls, run notes
 - Inventory & Item Economy: [design/gdd/inventory-item-economy.md](../../design/gdd/inventory-item-economy.md) — design draft, **NEEDS REVISION**, blocker 1 repaired, remaining blockers tracked in `INV-OQ-05`
 - Character Progression: [design/gdd/character-progression.md](../../design/gdd/character-progression.md) — APPROVED 2026-04-26; commits `6459ceb` and `557fa3e`
 - World Structure: [design/gdd/world-structure.md](../../design/gdd/world-structure.md)
@@ -82,6 +84,6 @@ Park **Inventory & Item Economy GDD** after full review and pivot to `/prototype
 
 ## Next Skill to Run
 
-- **Run `/prototype combat-feel` in a fresh session** — validate the core combat-feel risk before further Inventory authoring.
+- **Continue `/prototype combat-feel`** — run the Unity scene interactively in the pinned Unity 6.3 LTS editor if available, self-playtest 3-5 pulls, then write `production/prototypes/combat-feel-report.md` with metrics and verdict.
 - Later: run Inventory implementation pre-spec to close `INV-OQ-05`, then rerun `/design-review design/gdd/inventory-item-economy.md --depth full`.
 - Codex PR #1 is merged; no Codex follow-up pending in this active state file.

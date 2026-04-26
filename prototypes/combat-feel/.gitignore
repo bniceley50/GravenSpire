@@ -1,0 +1,17 @@
+# PROTOTYPE - NOT FOR PRODUCTION
+# Question: Can Cleric tab-target combat, slow cast cadence, mana pressure, and med-break recovery make the silence between pulls feel intentional rather than empty?
+# Date: 2026-04-26
+
+/Library/
+/Temp/
+/Logs/
+/UserSettings/
+/ProjectSettings/
+/Packages/
+/.vscode/
+/Obj/
+/Build/
+/Builds/
+*.csproj
+*.slnx
+*.log
