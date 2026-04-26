@@ -272,10 +272,7 @@ Any T1 equipment with item level, rarity, affix, upgrade rank, socket, set bonus
 
 ### Coupled Tuning Rules
 
-- Capacity tuning must move as a group: `carried_slot_cap`, `carried_weight_cap`, category stack caps, pickup frequency, and return-to-city pacing. Changing only one can erase carry pressure or overtax normal 60-minute runs.
-- Currency tuning must move as a group: `salvage_sell_multiplier`, salvage nominal value bands, `CurrencyContainer` values, vendor buy prices, and expected pickups/hour. No acceptance criterion may claim a "modest economy" without a session projection.
-- Gear plateau tuning is not a T1 knob. Any stat-bearing equipment requires a T2+ ADR and hydration-order revision.
-- `CurrencyContainer` loot-table entries require fixture proof before they can support pacing claims. Fixed world placements can use authored values directly, but must still satisfy the overall coin-faucet projection.
+Coupled tuning rules are consolidated in §Tuning Knobs so formula math and tuning policy do not drift.
 
 ### Fixture Gates
 
@@ -318,11 +315,92 @@ Before pacing acceptance criteria can claim tuned carry pressure or modest econo
 
 ## Dependencies
 
-[To be designed]
+Inventory & Item Economy has two hard direct upstream dependencies in T1: Save / Load & Persistence and Character Creation. Other systems below are build-time validation boundaries, future event boundaries, or explicit non-dependencies. This dependency narrowness directly enforces P3 (items do not replace reputation as the ladder) and P5 (carry pressure must be honest, not laundered through hidden cross-system effects). This system owns item truth; it must not become a hidden bridge from combat, progression, faction reputation, UI, or networking into item state.
+
+Each downstream GDD listed below must reverse-list Inventory & Item Economy when authored if it consumes an Inventory-owned interface. `/consistency-check` and `/review-all-gdds` should verify bidirectional agreement.
+
+### Hard Direct Upstream
+
+| System | Direction | Data Interface | Contract |
+|---|---|---|---|
+| **Save / Load & Persistence** | Inventory is a hard persistence client | `InventorySaveState`, equipped slot bindings, carried slot contents, item instance records, stack records, `carried_currency_copper`, faction-token records, `InventoryFirstSaveMaterializer`, hydration validation result, Inventory reason codes under `LoadRejected(HydrationFailed)` | Inventory owns schema, materialization, validation, atomic mutation state, and rejection of invalid payloads. Save/Load owns serialization, HMAC, versioning, active-record identity context, first-save orchestration, write failure, load rejection, and save timing. T1 Inventory declares no ADR-0002 `InventorySaveBarrier` because all mutations are synchronous and atomic. |
+| **Character Creation** | Inventory consumes first-save seed data | ADR-0004 `InitialCharacterRecord` context: active `local_character_id`, `starting_class_id = Cleric`, `starting_equipment_template_id = ClericStartingEquipment_T1`, and `carried_inventory = []` | Character Creation owns local character identity and seed validation. Inventory owns item instance materialization, equipment-slot legality, stack rules, currency defaults, starter-template validation, and all Inventory save-state output. Character Creation never creates item instances or repairs missing starter templates. |
+
+### Build-Time Data and Validation Boundaries
+
+| Source | Direction | Data Interface | Contract |
+|---|---|---|---|
+| **Combat Core** | Inventory may consume future loot eligibility context; Inventory validates against Combat fixture data | Stable `defeated_source_ref`, `zoneId`, optional `faction_id`; authored `CombatCoreClassFixture(level)` for F6 validation | Combat owns combat resolution, kill/death events, runtime resources, actor ids, and combat formulas. Inventory owns loot tables, item drops, equipment legality, and item schema. `combat_actor_id` is never legal in Inventory persistence or loot lookup. |
+| **NPC System / Spawn Authoring Data** | Inventory loot tables may key against stable authored source refs | Stable NPC/spawn refs used by Combat as `defeated_source_ref` | NPC System owns source identity and lifecycle durability. Inventory owns loot eligibility and item materialization keyed to stable refs. Inventory does not read or mutate NPC source lifecycle state. |
+| **Character Progression** | Inventory uses only build-time validation context in T1 | ADR-0003 `CombatProgressionBaselineSnapshot(level)` for F6 gear plateau fixture checks | Progression owns XP, level, permanent max health/mana baselines, spell eligibility, and XP-source lookup. Inventory does not grant XP, read XP progress, gate T1 items by level, or use progression source metadata as loot metadata. |
+
+### Future Hard Downstream
+
+| Future System | Inventory Interface Consumed | Contract |
+|---|---|---|
+| **Death & Corpse Recovery** | `InventoryCorpseSnapshot(death_context_id)` containing equipped items, carried items, carried currency, and carried faction tokens | Death & Corpse Recovery owns death timing, corpse creation, recovery, expiry, restoration, and any XP/currency/item penalties. Inventory only provides a snapshot when called with a valid death context. |
+| **Faction Reputation** | Faction-token possession, deposit state, and any future token turn-in request | Faction Reputation owns social meaning, reputation values, tiers, titles, access, NPC trust, and token effects. Inventory owns token possession and persistence only. |
+| **Layer 1 HUD / Inventory UI** | Item/currency/token read models, capacity state, transaction failure reasons such as `CurrencyOverflowOnConsume` | UI owns presentation, affordances, accessibility, and player-facing messaging. Inventory owns the data and failure reasons. |
+| **Combat Core** | Future `EquipmentCombatStatSnapshot` only after a T2+ ADR introduces stat-bearing equipment | T1 equipment has zero Combat stat delta. Any future stat-bearing equipment requires ADR-level hydration-order revision and Combat reverse-listing. |
+
+### Future Optional Consumers
+
+| System | Possible Interface | Boundary |
+|---|---|---|
+| **Class Design** | Future class eligibility expansion beyond Cleric | T1 eligibility is Cleric-only and Inventory-owned. Future classes may consume or extend eligibility rules after Class Design is authored. |
+| **Vendor / Dialogue / NPC-facing surfaces** | Vendor profile presentation, item names, sale/buy prompts | Inventory owns transaction legality and authored price tables. Dialogue/NPC/UI systems own presentation and interaction framing. |
+| **Audio System** | Transaction, pickup, reject, equip, and inventory-full events | Audio owns playback and mix. Inventory emits restrained event hooks only if later UI/audio work requests them. |
+
+### Boundary-Only / Non-Dependencies
+
+| System | Relationship | Explicit Non-Contract |
+|---|---|---|
+| **World Structure** | Boundary only | Inventory may reference `CityHub` and `Haunt` placement context in authored content, but it does not own zone transitions, zone activation, save triggers, or corpse records. |
+| **Character Progression** | Boundary only at runtime in T1; Editor-time fixture validation only | Inventory does not award XP, consume XP events, set level gates, grant spells, or inspect XP-source lifecycle at runtime. The only legal Character Progression touch is Editor-time consumption of `CombatProgressionBaselineSnapshot` for the F6 gear plateau validator, per §Build-Time Data and Validation Boundaries above. |
+| **Faction State Simulation / Zone Control** | Boundary only | Inventory does not mutate faction control, faction state, zone ownership, political outcomes, or kill-weight math. |
+| **Network Architecture / Authentication & Accounts** | Boundary only in T1 | No account inventory, server authority, replicated item ownership, trading, shared stash, or online identity exists in T1. |
+| **Crafting / Durability / Auction / Trade Systems** | Out of scope | These systems are not T1 dependencies and cannot be implied by Inventory schema fields. |
+
+### Reverse-Listing Obligations
+
+- Save / Load already lists Inventory & Item Economy as a hard persistence client. When Save/Load is revised, it should name `InventoryFirstSaveMaterializer`, `InventorySaveState`, Inventory-owned hydration reason codes, and the T1 no-`InventorySaveBarrier` constraint.
+- Character Creation already lists Inventory as the downstream owner of `ClericStartingEquipment_T1` materialization and empty carried-inventory seed consumption. That boundary must remain: Character Creation seeds, Inventory materializes.
+- Combat Core should reverse-list Inventory only for future loot eligibility or any T2+ stat-bearing equipment contract. T1 Combat stats remain independent of equipment.
+- Death & Corpse Recovery must reverse-list `InventoryCorpseSnapshot(death_context_id)` when authored.
+- Faction Reputation must reverse-list any faction-token turn-in, deposit, or meaning contract when authored.
+- Layer 1 HUD / Inventory UI must reverse-list Inventory read models and failure reasons when authored.
 
 ## Tuning Knobs
 
-[To be designed]
+Tuning Knobs consolidates values already defined in §Formulas. This section does not introduce new economy surfaces; it records defaults, safe ranges, and failure modes for implementation and fixture review.
+
+| Knob | Default | Safe Range | Too Low / Narrow | Too High / Broad |
+|---|---:|---|---|---|
+| `carried_slot_cap` | `18` slots | `16-22` | Carry pressure becomes cramped before the player can make meaningful keep/sell/equip choices. | Hoarding becomes easy and return-to-city decisions lose weight. |
+| `carried_weight_cap` | `60` weight_units | `45-75` | Heavy items become soft traps and normal haunt pickups overtax 60-minute runs. | Weight stops mattering as a pickup-legality constraint. |
+| `max_t1_item_weight_units` | `25` | Fixed unless fixture-proven | Heavy gear cannot feel committal. | One item can consume too much of the bag and create avoidable starter/loadout traps. |
+| `equipment_max_stack` | `1` | Fixed | Equipment stacking becomes undefined. | Equipment becomes item-stack economy instead of gear choice. |
+| `consumable_max_stack` | `5` | `3-10` | Consumables tax slots so hard that preparation feels punitive. | Consumable hoarding weakens carry-pressure decisions. |
+| `salvage_max_stack` | `6` | `4-10` | Salvage floods slots and makes vendor return loops too frequent. | Salvage becomes too compact and coin faucet pressure becomes too soft. |
+| `faction_token_max_stack` | `20` | `10-30` | Token possession crowds out normal loot before Faction Reputation exists. | Tokens become frictionless counters and lose object weight. |
+| `currency_container_max_stack` | `1` | `1-3`; default stays `1` | `< 1` is invalid; `max_stack >= 1` by F3 contract. The `1` lock exists because containers are currency in transit; stacking would conflate transit with rest. | Currency-in-transit starts acting like currency at rest. |
+| `starting_carried_currency_copper` | `0` | `0-9` | New Cleric starts with no spending buffer; this is intentional at default. | New Cleric feels pre-funded and early coin stops mattering. |
+| `salvage_sell_multiplier` | `0.15` | `0.10-0.20` | Salvage feels worthless and vendor visits lose purpose. | Salvage becomes the dominant reward loop before economy feel is proven. |
+| `salvage_nominal_value_bands` | See F4 bands | F4 ranges only until `CoinFaucetProjection_T1` passes | Haunt returns feel empty and spending cannot recover naturally. | Coin/hour inflates and vendor prices lose bite. |
+| `currency_container_value_bands` | See F5 bands | F5 ranges only until `CoinFaucetProjection_T1` passes | Authored purses feel irrelevant. | Fixed pickups bypass the salvage loop and overfund the player. |
+| `T1_CityHubVendorBuyTable_T1` | TBA authored constants | Fixture-owned; must pass `CoinFaucetProjection_T1` | Purchases are unreachable and coin becomes cosmetic. | Purchases are trivial and spending stops feeling like a choice. |
+| `t1_equipment_bands` | `Starting`, `Field`, `Sidegrade` | Fixed for T1 | Gear distinctions become too flat to support preparation. | Gear begins to imply vertical progression. |
+| `equipment_plateau_fixture_lock_levels` | `[1, 5, 10]` | Fixed for T1 | Gear plateau validation becomes implicit and easy to break. | More lock points make validation brittle before playable combat data exists. |
+| `pickup_frequency_per_haunt_run` | TBA fixture value | Owned by `InventoryHauntRunProfile_T1` / `LegalPickupRoute_T1` | Carry pressure never appears in normal sessions. | Bag pressure becomes constant friction instead of meaningful choice. |
+| `return_to_city_pacing` | TBA fixture value | Owned by `InventoryHauntRunProfile_T1` | Vendor/sell loops feel optional and stakes soften. | Runs feel interrupted by inventory cleanup rather than danger or planning. |
+
+### Coupled Tuning Rules
+
+- Capacity tuning must move as a group: `carried_slot_cap`, `carried_weight_cap`, category stack caps, pickup frequency, item weight bands, and return-to-city pacing. Changing one value alone can erase carry pressure or overtax normal haunt runs.
+- Currency tuning must move as a group: `salvage_sell_multiplier`, salvage nominal value bands, `CurrencyContainer` values, vendor buy prices, and expected pickups/hour. No acceptance criterion may claim a modest economy without `CoinFaucetProjection_T1`.
+- Gear plateau tuning is not a T1 knob. Any stat-bearing equipment, item level, rarity, affix, upgrade rank, socket, set bonus, or scaling stat requires a T2+ ADR and hydration-order revision.
+- `CurrencyContainer` entries from loot tables require fixture proof before supporting pacing claims. Fixed world placements can use authored values directly, but still count against the overall coin-faucet projection.
+- `InventoryHauntRunProfile_T1`, `LegalPickupRoute_T1`, `CoinFaucetProjection_T1`, and `EquipmentPlateauFixtureSet_T1` are required before review can treat carry pressure, coin pacing, or gear plateau claims as tuned rather than provisional.
 
 ## Acceptance Criteria
 

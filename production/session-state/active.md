@@ -38,12 +38,14 @@ Design **Inventory & Item Economy GDD** via `/design-system Inventory & Item Eco
 - ✅ Inventory & Item Economy Detailed Rules section written 2026-04-26.
 - ✅ Inventory & Item Economy Formulas section written 2026-04-26.
 - ✅ Inventory & Item Economy Edge Cases section written 2026-04-26.
-- Next: author Inventory & Item Economy Dependencies section.
+- ✅ Inventory & Item Economy Dependencies section written 2026-04-26.
+- ✅ Inventory & Item Economy Tuning Knobs section written 2026-04-26.
+- Next: author Inventory & Item Economy Acceptance Criteria section.
 - ✅ Codex PR #1 (`codex/dotnet-format-setup` → `main`) merged into `main`; follow-up cleanup commit `ce634c3` recorded.
 
 ## Files Being Worked On
 
-- **Active:** [design/gdd/inventory-item-economy.md](../../design/gdd/inventory-item-economy.md) — in design; Overview, Player Fantasy, Detailed Rules, Formulas, and Edge Cases complete; next action Dependencies section
+- **Active:** [design/gdd/inventory-item-economy.md](../../design/gdd/inventory-item-economy.md) — in design; Overview, Player Fantasy, Detailed Rules, Formulas, Edge Cases, Dependencies, and Tuning Knobs complete; next action Acceptance Criteria section
 - Character Progression: [design/gdd/character-progression.md](../../design/gdd/character-progression.md) — APPROVED 2026-04-26; commits `6459ceb` and `557fa3e`
 - World Structure: [design/gdd/world-structure.md](../../design/gdd/world-structure.md)
 - Game concept: [design/gdd/game-concept.md](../../design/gdd/game-concept.md)
@@ -74,6 +76,6 @@ Design **Inventory & Item Economy GDD** via `/design-system Inventory & Item Eco
 
 ## Next Skill to Run
 
-- **Continue `/design-system Inventory & Item Economy`** — Overview, Player Fantasy, Detailed Rules, Formulas, and Edge Cases are complete; next section is Dependencies.
+- **Continue `/design-system Inventory & Item Economy`** — Overview, Player Fantasy, Detailed Rules, Formulas, Edge Cases, Dependencies, and Tuning Knobs are complete; next section is Acceptance Criteria.
 - After Inventory & Item Economy sections are complete: run `/design-review design/gdd/inventory-item-economy.md` in a fresh session.
 - Codex PR #1 is merged; no Codex follow-up pending in this active state file.
