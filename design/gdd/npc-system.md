@@ -83,6 +83,8 @@ The core fantasy is social literacy. At first, the player cannot reliably tell a
 
 17. **Persistence boundary.** Save/Load persists `NpcRecord` data and any NPC-owned schedule state. NPC System owns the schema and hydration validation for that data. Save/Load owns serialization, integrity, versioning, and failure handling. NPC System must reject or fail hydration loudly if persisted NPC data contains invalid ids, out-of-range enum values, unsafe strings, or any runtime-handle field.
 
+17a. **Progression source lifecycle durability.** NPC System owns durable source lifecycle state for any NPC or spawn that can be referenced by Character Progression XP lookup. The persisted `NpcSourceLifecycleRecord` contains only data fields: `zoneId`, `defeated_source_ref`, `source_lifecycle_token`, `source_lifecycle_state` (`Active`, `Defeated`, `RespawnEligible`), `source_lifecycle_token_policy`, and any authored respawn/availability timing key needed to avoid recreating a defeated source immediately after load. It does not contain XP values, progression dedupe keys, Combat runtime actor ids, GameObject references, or Character Progression tombstones. Character Progression owns XP math and transient award dedupe; NPC System owns whether the source lifecycle is alive, defeated, or eligible to respawn across saves.
+
 18. **String safety.** T1 NPC-facing strings use authored localization/template keys. NPC System does not accept player-authored NPC names or free-text memories in T1. If future systems add player-authored labels or notes involving NPCs, those strings must be length-bounded and sanitized before NPC System consumes them.
 
 19. **Sister Elara scope line.** NPC System provides the minimum substrate Sister Elara needs later: stable named identity, schedule, faction affiliation, known-name state, mentor-capable tags, occupation posture, and interaction context. Her first-hour behavior, party following, teaching logic, healing competence, departure timing, and companion relationship state belong to Sister Elara Mentor and Named AI Companion Core.
@@ -101,7 +103,7 @@ NPC System has two related state machines: a data-record lifecycle and an active
 | `PendingZoneActivation` | `ZoneActiveEvent(zoneId, zoneType)` matches the record's evaluated zone | Spawn/enable succeeds -> `ActiveInZone`; spawn invalid -> `RecordScheduled` with logged unavailable reason | Resolves schedule anchor/route data to active-zone scene anchors. Scene references may be acquired only here. |
 | `ActiveInZone` | NPC scene instance created or enabled in the active zone | Player initiates interaction -> `Interacting`; combat system claims actor -> `CombatDelegated`; `ZoneUnloadingEvent` -> `UnloadingPurge` | Active GameObject, Animator, NavMeshAgent/route controller, Collider, AudioSource, and interaction volume may exist. Ticks are gated by active zone. |
 | `Interacting` | Player intentionally interacts within allowed range and Dialogue System accepts context | Dialogue ends -> `ActiveInZone`; `ZoneUnloadingEvent` -> `UnloadingPurge`; Combat claim -> `CombatDelegated` | NPC holds current interaction context only. Dialogue UI/content are external. No nameplate or marker is created. |
-| `CombatDelegated` | Combat Core / Creature AI claims the NPC as a combat actor | Combat ends and actor survives -> `ActiveInZone`; actor death/despawn -> `RecordScheduled`; `ZoneUnloadingEvent` -> `UnloadingPurge` | NPC System stops owning moment-to-moment behavior except identity/persistence hooks. Combat systems own combat state. |
+| `CombatDelegated` | Combat Core / Creature AI claims the NPC as a combat actor | Combat ends and actor survives -> `ActiveInZone`; actor death/despawn recorded -> `RecordScheduled`; `ZoneUnloadingEvent` -> `UnloadingPurge` | NPC System stops owning moment-to-moment behavior except identity/persistence hooks. On actor death/despawn, NPC System records `NpcSourceLifecycleRecord(source_lifecycle_state = Defeated)` and acknowledges Character Progression's same-frame snapshot phase before source cleanup may retire scene references. Combat systems own combat state. |
 | `UnloadingPurge` | `ZoneUnloadingEvent(zoneId)` received for an active NPC's zone | All scene references cleared -> `RecordScheduled` | Interactions disabled immediately. Scene-instance state deltas written to `NpcRecord`; GameObject/component references cleared before zone unload completes. |
 | `NpcHydrationFailed` | Invalid save data, missing archetype, missing schedule, unsafe string, or runtime-handle field detected during hydration | Load path rejects via Save/Load failure handling | No playable session may start from partial NPC state. Pairs with Save/Load `HydrationFailed`. |
 
@@ -116,6 +118,7 @@ If multiple events arrive in the same frame, NPC System resolves them in this or
 5. Active-zone schedule tick.
 6. Player interaction request.
 7. Combat delegation request.
+8. Combat death/despawn source-lifecycle recording.
 
 This priority prevents outgoing-zone references from surviving because a lower-priority interaction or tick ran during unload.
 
@@ -124,10 +127,11 @@ This priority prevents outgoing-zone references from surviving because a lower-p
 | System | Inputs Consumed by NPC System | Outputs Published by NPC System | Ownership Boundary | Dependency |
 |--------|-------------------------------|---------------------------------|--------------------|------------|
 | **World Structure** | `ZoneActiveEvent(zoneId, zoneType)`, `ZoneUnloadingEvent(zoneId)`, `SessionResumeEvent(real_elapsed_seconds, last_exit_timestamp_utc)` | NPC subscriber logs; optional `NpcZoneReady(zoneId)` after spawn enable completes | World Structure owns zone state and event ordering. NPC System owns schedule/spawn response and reference purge. | **Hard** |
-| **Save / Load & Persistence** | Hydrated NPC records; save trigger requests from Foundation flow | Current `NpcRecord` data, `NpcHydrationFailed` on invalid data | Save/Load owns serialization/integrity. NPC owns NPC schema and valid/invalid state. | **Hard** |
+| **Save / Load & Persistence** | Hydrated NPC records and NPC-owned progression source lifecycle records; save trigger requests from Foundation flow | `NpcSourceLifecycleSaveBarrier`; current `NpcRecord` and `NpcSourceLifecycleRecord` data; `NpcHydrationFailed` on invalid data | Save/Load owns serialization/integrity. NPC owns NPC schema, source lifecycle durability, and valid/invalid state. | **Hard** |
 | **Day/Night Cycle** | Current world time / phase once authored; schedule phase predicates | None required at T1; may publish schedule-readiness diagnostics | Day/Night owns world clock. NPC owns interpreting clock into NPC schedules. | **Soft until Day/Night GDD; hard when authored** |
 | **Faction State Simulation** | Faction control/reaction outputs once authored | `NpcPresenceTraceRecorded`, NPC availability/reaction hooks for faction systems | Faction Sim owns faction state and political calculation. NPC owns inhabitant presence and reaction-profile application. | **Soft before Faction Sim; hard at MVP once Faction Sim lands** |
 | **Combat Core** | Combat eligibility request, death/despawn outcomes, active zone type from WS indirectly | NPC identity/combat-actor seed, targetable eligibility, social/civilian flags | Combat owns damage, hate, abilities, death. NPC owns identity and non-combat state. | **Hard downstream** |
+| **Character Progression** | No XP values consumed; only progression source lifecycle registration requirements from approved Character Progression GDD | Stable `defeated_source_ref`, source lifecycle token, activation/death lifecycle hooks, and persisted `NpcSourceLifecycleRecord` for XP-eligible NPC/spawn sources | Character Progression owns XP lookup, XP math, and transient dedupe. NPC owns stable source refs and durable lifecycle state. | **Hard downstream data boundary** |
 | **Creature / Enemy AI** | AI claim/release for hostile actors | Spawn anchors, archetype ids, route/posture seeds | Creature AI owns hostile state machine. NPC owns spawn container and non-combat identity. | **Hard downstream** |
 | **Dialogue System** | Dialogue-ended callback; template availability queries once authored | `NpcInteractionContext`, `dialogueTemplateSetId`, `knownNameState`, schedule/faction context | Dialogue owns content, UI, template resolution, and any future LLM. NPC owns who is available to speak and in what state. | **Hard downstream** |
 | **Faction Events** | Event-state predicates once authored | NPC presence/absence tokens, named-NPC availability state | Faction Events owns event narratives. NPC owns where people are and whether an event can use them. | **Soft at T1, hard when authored** |
@@ -357,6 +361,10 @@ NPC System owns no direct UI.
 **GIVEN** a valid save fixture containing NPC-owned `NpcRecord` data for named and ambient NPCs, **WHEN** Save/Load enters `Resuming`, **THEN** NPC System hydrates the records before it observes `SessionResumeEvent`; programmatic accessors report post-hydration `npcId`, `scheduleStateId`, `routeProgress`, `availabilityState`, `knownNameState`, and `lastEvaluatedTimestampUtc` matching the fixture; NPC catch-up runs on those hydrated records; and no `ZoneActiveEvent` enables NPC gameplay until NPC System reports readiness.  
 *Integration | gameplay-programmer + qa-tester | T1-blocking*
 
+**H-NPC-SL-05 - Progression source lifecycle persists with XP-relevant deaths**
+**GIVEN** a Combat-delegated NPC or spawn dies and is eligible for Character Progression kill-credit lookup, **WHEN** Save/Load requests NPC state in the same frame or later, **THEN** `NpcSourceLifecycleSaveBarrier` settles the death/despawn outcome before serialization; the saved `NpcSourceLifecycleRecord` contains the defeated `zoneId`, `defeated_source_ref`, `source_lifecycle_token`, lifecycle state, lifecycle policy, and respawn/availability timing key; and no runtime actor id, XP value, or progression dedupe key is persisted by NPC System.
+*Integration | gameplay-programmer + qa-tester | T1-blocking*
+
 ### Population And Scheduling
 
 **H-NPC-F1 - Catch-up formula bounds at default and safe-range-minimum quantum**  
@@ -403,6 +411,10 @@ NPC System owns no direct UI.
 **GIVEN** an NPC becomes combat-eligible in a `HauntZone`, **WHEN** Combat Core / Creature AI claims the actor, **THEN** NPC System stops owning combat decisions and retains only identity/persistence hooks; damage, hate, death, and hostile AI state are owned by downstream systems.  
 *Integration | gameplay-programmer + qa-tester | T1-blocking*
 
+**H-NPC-CPRO-01 - Progression snapshot precedes source cleanup**
+**GIVEN** Combat emits kill credit for a defeated NPC/spawn source that has an active NPC source lifecycle token, **WHEN** the same-frame kill-resolution event log is inspected, **THEN** NPC System records the defeated `NpcSourceLifecycleRecord`, Character Progression captures its `XpAwardResolutionSnapshot`, and only then may NPC cleanup/despawn retire scene references or allow a respawn with a new lifecycle token.
+*Integration | gameplay-programmer + qa-tester | T1-blocking*
+
 **H-NPC-FACTION-01 - Faction fallback baseline**  
 **GIVEN** Faction State Simulation is absent or not yet authored, **WHEN** NPC System evaluates faction reactive hooks, **THEN** it uses authored baseline behavior with `faction_presence_scalar = 1.0` and does not invent faction-state changes locally.  
 *Unit | gameplay-programmer | T1-blocking until Faction State Simulation lands*
@@ -422,6 +434,7 @@ NPC System owns no direct UI.
 | H-NPC-SL-02 | Hydration failure | Integration | gameplay-programmer, qa-tester | Yes |
 | H-NPC-SL-03 | String safety | Unit | gameplay-programmer | Yes |
 | H-NPC-SL-04 | Valid NPC hydration and pre-SessionResume readiness | Integration | gameplay-programmer, qa-tester | Yes |
+| H-NPC-SL-05 | Progression source lifecycle persistence | Integration | gameplay-programmer, qa-tester | Yes |
 | H-NPC-F1 | Catch-up formula at both quanta | Unit | gameplay-programmer | Yes |
 | H-NPC-F2 | Active population cap | Integration | gameplay-programmer, qa-tester | Yes |
 | H-NPC-F3 | Ambient spawn formula | Unit | gameplay-programmer | Yes |
@@ -432,9 +445,10 @@ NPC System owns no direct UI.
 | H-NPC-ART-02 | Named specificity | Dev-build smoke | art-lead, game-designer | Yes |
 | H-NPC-DLG-01 | T1 templated dialogue boundary | Integration | gameplay-programmer, qa-tester | Yes |
 | H-NPC-COMBAT-01 | Combat boundary | Integration | gameplay-programmer, qa-tester | Yes |
+| H-NPC-CPRO-01 | Character Progression source snapshot ordering | Integration | gameplay-programmer, qa-tester | Yes |
 | H-NPC-FACTION-01 | Faction fallback baseline | Unit | gameplay-programmer | Yes |
 
-**Total: 22 criteria. 22 T1-blocking.**
+**Total: 24 criteria. 24 T1-blocking.**
 
 ## Open Questions
 

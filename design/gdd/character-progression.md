@@ -48,7 +48,7 @@ Character Progression must not make the player feel socially promoted. Leveling 
 
 4. **XP source metadata lookup.** Character Progression resolves `defeated_level`, `encounter_role`, `encounter_role_multiplier`, `xp_eligible`, progression-owned `xp_weight_seed_t1`, expected T1 Combat `kill_weight_seed`, and `source_lifecycle_token` from its `XpSourceLifecycleRegistry`. Resolution is not a loose receive-time lookup against whatever source currently occupies the spawn anchor: the progression registration adapter must create a same-dispatch immutable `XpAwardResolutionSnapshot` before the defeated source can retire or respawn. This is the chosen contract for the Combat mismatch blocker: Combat Core remains approved and unchanged; progression-owned lookup/runtime registry data supplies XP-only metadata.
 
-5. **Kill-credit dedupe identity.** Every XP award attempt requires a structured tuple `XpAwardDedupeKey(local_character_id, zoneId, defeated_source_ref, source_lifecycle_token)` taken from the immutable award snapshot. If any component is missing or unresolved, no XP is awarded. Character Progression keeps a processed-key set for the current playable session and at least the source lifecycle retention window; duplicate events with the same key cannot award twice, while a respawn or new lifecycle token at the same spawn anchor is eligible for a new award only after the prior lifecycle is retained as a separate defeated tombstone.
+5. **Kill-credit dedupe identity.** Every XP award attempt requires a structured tuple `XpAwardDedupeKey(local_character_id, zoneId, defeated_source_ref, source_lifecycle_token)`. `local_character_id` comes from the hydrated active Character Progression profile; the source identity components come from the immutable award snapshot. If any component is missing or unresolved, no XP is awarded. Character Progression keeps a processed-key set for the current playable session and at least the source lifecycle retention window; duplicate events with the same key cannot award twice, while a respawn or new lifecycle token at the same spawn anchor is eligible for a new award only after the prior lifecycle is retained as a separate defeated tombstone.
 
 6. **Combat event consumption is narrow.** Character Progression consumes `PlayerKillCreditEvent` only to evaluate XP eligibility and award XP. It reads the event fields listed in Rule 3, performs the lookup in Rule 4, and never inspects threat tables, damage rolls, combat actor ids, loot, corpse records, or runtime combat state.
 
@@ -106,7 +106,7 @@ Character Progression must not make the player feel socially promoted. Leveling 
 | **Character Creation** | `starting_class_id = Cleric` | No output | Character Creation owns first-run identity seed; Progression owns level/XP initialization. | Hard upstream |
 | **Save / Load & Persistence** | Hydrated progression payload; `ProgressionSaveBarrier` call before save serialization; load-order call before Combat hydration | `CharacterProgressionSaveState` only after pending progression transactions and same-frame kill-credit dispatch settle; hydration validation result; `ProgressionBaselineSnapshot` for Combat hydration | Progression owns schema, validation, permanent baseline computation, and save-eligible stability. Save/Load owns serialization, HMAC, migration, load ordering, and failure surfacing. | Hard |
 | **Combat Core** | `PlayerKillCreditEvent(defeated_source_ref, zoneId, faction_id, kill_weight_seed)`; permanent baseline read requests | `ProgressionBaselineSnapshot`; `XPChangedEvent`; per-level `LevelChangedEvent` | Combat owns approved kill/death event emission, runtime current health/mana, active-zone/playability kill-credit filtering, and combat rules. Progression owns XP, level, lookup/snapshot of XP metadata, and permanent max values. | Hard event boundary |
-| **NPC / Spawn Authoring Data** | Stable source refs represented in `ProgressionXpSourceRefLookup` at build time | No runtime output | Progression validates authored XP metadata against source refs. Runtime registration is progression-owned and must not mutate NPC records or infer XP metadata from NPC runtime state after death. | Build-time data boundary |
+| **NPC System / Spawn Authoring Data** | Stable source refs represented in `ProgressionXpSourceRefLookup` at build time; NPC source lifecycle activation/death hooks; persisted NPC-owned `NpcSourceLifecycleRecord` data | No progression-owned runtime output to NPC | NPC owns source refs and source lifecycle durability. Progression owns XP metadata, award snapshots, and dedupe; it must not mutate NPC records or infer XP metadata from NPC runtime state after death. | Hard data boundary |
 | **Death & Corpse Recovery** | Approved XP adjustment request once authored | `death_xp_debt_preview`; future adjustment integration point | Death system owns death timing, corpse, XP-loss application trigger, resurrection, mitigation, and deleveling policy. Progression owns XP math target state when a future approved request is accepted. | Future hard downstream |
 | **Class Design** | Cleric class progression table once authored | Current level and class progression band | Class Design owns class content and final stat tables; Progression owns applying approved tables. | Future hard downstream |
 | **Spell Memorization** | None in T1 | `SpellEligibilityChanged`; level eligibility query | Spell system owns memorized slots, spellbook behavior, learned abilities, spell ids, and availability presentation. Progression owns eligibility tier by authored unlock level only. | Future hard downstream |
@@ -128,9 +128,21 @@ ProgressionXpSourceRefLookupRow:
   encounter_role_multiplier: float
   xp_weight_seed_t1: float
   expected_kill_weight_seed_t1: float
+  repeatability_class: Repeatable | NonRepeatableFirstKill | RespawnLockout
   source_lifecycle_token_policy: PersistentNpcEpisode | SpawnCycle
   xp_eligible: bool
 ```
+
+Character Progression owns the authored lookup asset `ProgressionXpSourceRefLookup_T1` and the Editor validator for it. NPC System owns the stable `defeated_source_ref` namespace, source lifecycle records, and the runtime lifecycle hooks that feed the progression registration adapter. This is no longer an open authoring question for T1: XP-awarding implementation is blocked until the authored lookup asset contains rows for every Combat fixture source and the NPC source lifecycle hooks below are present.
+
+Minimum T1 fixture rows:
+
+| Fixture source ref | zoneId | defeated_level | encounter_role | encounter_role_multiplier | xp_weight_seed_t1 | expected_kill_weight_seed_t1 | repeatability_class | lifecycle policy | xp_eligible |
+|---|---|---:|---|---:|---:|---:|---|---|---|
+| `SoloTrash_EvenCon_T1` | `T1_Haunt` | `5` | `Trash` | `1.0` | `1.25` | `1.25` | `Repeatable` | `SpawnCycle` | `true` |
+| `SoloTrash_SoftUndercon_T1` | `T1_Haunt` | `4` | `Trash` | `1.0` | `1.25` | `1.25` | `Repeatable` | `SpawnCycle` | `true` |
+| `SoloTrash_Trivial_T1` | `T1_Haunt` | `3` | `Trash` | `1.0` | `1.25` | `1.25` | `Repeatable` | `SpawnCycle` | `true` |
+| `Named_XP_Smoke_T1` | `T1_Haunt` | `6` | `Named` | `3.0` | `1.25` | `1.25` | `RespawnLockout` | `PersistentNpcEpisode` | `true` |
 
 At runtime, Character Progression owns an `XpSourceLifecycleRegistry` populated from these rows by its registration adapter. NPC/spawn activation and Combat actor-claim boundaries must be observable by that adapter before the source can award XP; this does not add fields to Combat Core events and does not make Combat Core responsible for XP metadata. The registry never resolves XP against a replaced current occupant at the same source ref. Award resolution uses an immutable snapshot captured on the same event-dispatch frame as Combat's kill-credit delivery, before source cleanup can remove the defeated lifecycle or a respawn can rotate the active token.
 
@@ -144,6 +156,7 @@ XpSourceLifecycleRegistryEntry:
   encounter_role_multiplier: float
   xp_weight_seed_t1: float
   expected_kill_weight_seed_t1: float
+  repeatability_class: Repeatable | NonRepeatableFirstKill | RespawnLockout
   xp_eligible: bool
   lifecycle_state: Active | DefeatedTombstone
 
@@ -156,6 +169,7 @@ XpAwardResolutionSnapshot:
   encounter_role_multiplier: float
   xp_weight_seed_t1: float
   expected_kill_weight_seed_t1: float
+  repeatability_class: Repeatable | NonRepeatableFirstKill | RespawnLockout
   xp_eligible: bool
   lifecycle_state: DefeatedTombstone
 ```
@@ -165,12 +179,12 @@ For persistent NPCs, `source_lifecycle_token` identifies the current defeat/avai
 Lifecycle registry entries must follow this lifetime:
 
 1. **Active registration before eligibility.** A source cannot award XP until the adapter has registered an `Active` entry with all required metadata and a lifecycle token.
-2. **Defeat snapshot barrier.** When Combat's death resolution emits `PlayerKillCreditEvent`, Character Progression must synchronously resolve the active entry into one `XpAwardResolutionSnapshot` and convert the entry to `DefeatedTombstone` before NPC/spawn cleanup may retire the source lifecycle.
+2. **Defeat snapshot barrier.** When Combat's death resolution emits `PlayerKillCreditEvent`, Character Progression must synchronously resolve the active entry into one `XpAwardResolutionSnapshot` and convert the entry to `DefeatedTombstone` before NPC/spawn cleanup may retire the source lifecycle. NPC System's `NpcSourceLifecycleRecord` death update and Character Progression's award snapshot are captured in the same kill-resolution phase; NPC cleanup/despawn may run only after both systems have acknowledged the phase.
 3. **Respawn isolation.** A respawn or new NPC availability episode may create a new `Active` entry only with a new `source_lifecycle_token`. It must not replace, mutate, or reuse the defeated tombstone for the prior lifecycle.
 4. **Retention.** Defeated tombstones and processed dedupe keys remain queryable until `xp_source_lookup_retention_seconds` elapses or until all same-dispatch kill-credit subscribers have acknowledged source cleanup, whichever is later. They may be retained for the rest of the playable session.
 5. **Stale duplicate handling.** A duplicate event for a defeated lifecycle resolves to the retained tombstone and processed dedupe key, so it cannot award twice. A late duplicate with no retained tombstone is rejected as stale; it must never resolve against a new active respawn token.
 
-Registry entries, tombstones, and processed dedupe keys are not saved because Combat kill-credit events are not replayed by Save/Load.
+Registry entries, tombstones, and processed dedupe keys are not saved because Combat kill-credit events are not replayed by Save/Load. Durable source death/respawn state belongs to NPC System's persisted `NpcSourceLifecycleRecord`; Character Progression save state persists only XP/level/spell eligibility.
 
 ### Event Payloads and Public Queries
 
@@ -180,7 +194,7 @@ Character Progression locks these payloads for T1. Payloads must not include fac
 XPChangedEvent:
   local_character_id: stable T1 player save identity
   xp_transaction_id: local progression transaction id
-  reason: KillCredit
+  reason: KillCredit | DeathAdjustment
   previous_total_xp: int
   new_total_xp: int
   xp_delta: int
@@ -190,7 +204,7 @@ XPChangedEvent:
   current_level_xp_band: int
 ```
 
-`XPChangedEvent.xp_delta` is the applied persisted XP delta after cap clamp, not the raw award request. `previous_total_xp + xp_delta == new_total_xp` must hold. A cap-crossing award that would add `300` XP from `11,600` stores `11,710` and emits `xp_delta = 110`; an already-at-cap award emits no event. `XPChangedEvent` emits only when `xp_delta != 0`. Trivial kills, `xp_eligible = false`, malformed events, unresolved lookup rows, duplicate dedupe keys, at-cap kills, and rejected death-adjustment previews emit diagnostics in development builds but no `XPChangedEvent`. `xp_transaction_id` is a per-character, monotonic, local-session id; it is not persisted.
+`XPChangedEvent.xp_delta` is the applied persisted XP delta after cap clamp, not the raw award request. `previous_total_xp + xp_delta == new_total_xp` must hold. `current_level`, `visible_level`, `current_level_xp_progress`, and `current_level_xp_band` are the final post-transaction values after all level steps have been computed, even though `XPChangedEvent` is the first notification emitted to subscribers. A cap-crossing award that would add `300` XP from `11,600` stores `11,710`, emits `xp_delta = 110`, and carries `current_level = 10`, `visible_level = 10`, `current_level_xp_progress = 0`, and `current_level_xp_band = 0`; an already-at-cap award emits no event. `XPChangedEvent` emits only when `xp_delta != 0`. T1 emits `reason = KillCredit` only; `DeathAdjustment` is reserved for the future approved Death & Corpse Recovery integration. Trivial kills, `xp_eligible = false`, malformed events, unresolved lookup rows, duplicate dedupe keys, at-cap kills, and rejected death-adjustment previews emit diagnostics in development builds but no `XPChangedEvent`. `xp_transaction_id` is a per-character, monotonic, local-session id; it is not persisted.
 
 ```yaml
 LevelChangedEvent:
@@ -230,9 +244,9 @@ SpellEligibilityChanged:
 
 Spell eligibility authority is the authored `spell_tier_unlock_levels_t1` list. The query returns the highest eligible tier whose unlock level is less than or equal to `current_level`; it never creates spell content, learned abilities, spellbook records, vendors, drops, memorized slots, UI buttons, VFX, or spell effects.
 
-Within one XP transaction, event ordering is fixed: preflight the transaction guard; reject the whole transaction before mutation if it would exceed `max_levels_per_xp_transaction`; compute `applied_xp_delta` after cap clamp; apply the XP state mutation; emit `XPChangedEvent` if `applied_xp_delta > 0`; resolve each level sequentially; for each level step, compute permanent health/mana and spell eligibility, emit `LevelChangedEvent`, then emit `SpellEligibilityChanged` if the spell tier changed on that step; after the final level step, emit `LevelCapReached` if the transaction reached the cap for the first time. UI/audio subscribers must treat `SpellEligibilityChanged` and `LevelCapReached` as system-facing notifications until their owning downstream GDDs define player-facing presentation.
+Within one XP transaction, event ordering is fixed: preflight the transaction guard; reject the whole transaction before mutation if it would exceed `max_levels_per_xp_transaction`; compute `applied_xp_delta` after cap clamp; precompute the final level chain and permanent outputs; atomically commit the final XP/level/spell-eligibility state; emit `XPChangedEvent` first if `applied_xp_delta != 0`; then emit one `LevelChangedEvent` per level step in ascending order; emit `SpellEligibilityChanged` immediately after the `LevelChangedEvent` for the step that changed eligibility; after the final level step, emit `LevelCapReached` if the transaction reached the cap for the first time. Subscribers must treat event payloads as authoritative for the transaction and must not infer mid-transaction state by reading live progression during event dispatch. UI/audio subscribers must treat `SpellEligibilityChanged` and `LevelCapReached` as system-facing notifications until their owning downstream GDDs define player-facing presentation.
 
-`ProgressionSaveBarrier` is the synchronous readiness hook Save/Load must call before serializing Character Progression. It returns only after same-frame Combat kill-credit dispatch has either produced a valid XP transaction, rejected the event, or confirmed no progression-relevant event is pending. Save/Load receives `CharacterProgressionSaveState` only from `InitializedLevel1`, `Ready`, or `LevelCapped`; pending `XpAwarding`, `LevelingUp`, `XpAdjustmentPending`, or unacknowledged kill-credit dispatch is not save-eligible.
+`ProgressionSaveBarrier` is the synchronous readiness hook Save/Load must call before serializing Character Progression. It returns only after same-frame Combat kill-credit dispatch has either produced a valid XP transaction, rejected the event, or confirmed no progression-relevant event is pending. Save/Load receives `CharacterProgressionSaveState` only from `InitializedLevel1`, `Ready`, or `LevelCapped`; pending `XpAwarding`, `LevelingUp`, `XpAdjustmentPending`, or unacknowledged kill-credit dispatch is not save-eligible. If the barrier cannot settle by `progression_save_barrier_max_ms` or before the caller's stricter transition-save deadline, it returns `ProgressionSaveBarrierUnresolved`; Save/Load must fail the write loudly rather than serializing stale or partial XP.
 
 ## Formulas
 
@@ -477,7 +491,9 @@ The `cap_clamp` formula is defined as:
 
 - **If `PlayerKillCreditEvent` arrives before Character Progression has initialized or hydrated**: ignore the event, emit a diagnostic, and award no XP. XP cannot be queued against an unvalidated progression state.
 
-- **If a save trigger arrives while Character Progression is in `XpAwarding`, `LevelingUp`, `XpAdjustmentPending`, or while a same-frame Combat kill-credit dispatch is unresolved**: finish the transient progression transaction or reject the pending event first, then expose the post-resolution stable state through `ProgressionSaveBarrier`. Save serialization is valid only from `InitializedLevel1`, `Ready`, or `LevelCapped`; no pending kill credit, mid-award, mid-level-chain, or partially applied XP adjustment state may be persisted. Tests use `progression_transaction_test_latch` and a `kill_credit_dispatch_test_latch` to hold transient states open deterministically.
+- **If a save trigger arrives while Character Progression is in `XpAwarding`, `LevelingUp`, `XpAdjustmentPending`, or while a same-frame Combat kill-credit dispatch is unresolved**: finish the transient progression transaction or reject the pending event first, then expose the post-resolution stable state through `ProgressionSaveBarrier`. Save serialization is valid only from `InitializedLevel1`, `Ready`, or `LevelCapped`; no pending kill credit, mid-award, mid-level-chain, or partially applied XP adjustment state may be persisted. If the barrier cannot settle by `progression_save_barrier_max_ms`, Save/Load receives `ProgressionSaveBarrierUnresolved` and fails the write. Tests use `progression_transaction_test_latch` and a `kill_credit_dispatch_test_latch` to hold transient states open deterministically.
+
+- **If a save trigger arrives during the same kill-resolution phase that awarded XP**: Save/Load must wait for both Character Progression's `ProgressionSaveBarrier` and NPC System's `NpcSourceLifecycleSaveBarrier`. XP cannot be serialized unless the NPC-owned `NpcSourceLifecycleRecord` for the defeated source is also save-stable. Character Progression does not persist its own tombstone to solve this race.
 
 - **If `PlayerKillCreditEvent.defeated_source_ref` is missing, empty, or an unrecognized stable-source type**: reject the event receive-side, emit a diagnostic, do not transition state, and award no XP. T1 legal XP source refs are the stable forms Combat Core uses for NPC death kill credit: persistent NPC source or non-persistent spawn source.
 
@@ -495,11 +511,11 @@ The `cap_clamp` formula is defined as:
 
 - **If Save/Load hydrates Combat before Character Progression**: the load sequence is invalid. Character Progression must validate first and publish `ProgressionBaselineSnapshot`; Combat actor hydration then validates `current_health` and `current_mana` against the snapshot. Progression never persists or repairs Combat current resources.
 
-- **If Save/Load hydrates class id other than `Cleric`, level below 1, level above 10 in T1, negative `total_xp`, XP outside the persisted level band, `total_xp` above `xp_threshold(10)`, inconsistent spell eligibility tier, missing formula data, or missing authored spell unlock data**: return progression hydration failure to Save/Load. For non-cap saves, valid XP must satisfy `xp_threshold(current_level) <= total_xp < xp_threshold(current_level + 1)`; at cap, valid XP must equal `xp_threshold(10)`. Do not silently clamp, downgrade, recalculate from defaults, or enter playable state.
+- **If Save/Load hydrates class id other than `Cleric`, level below 1, level above 10 in T1, negative `total_xp`, XP outside the persisted level band, `total_xp` above `xp_threshold(10)`, inconsistent spell eligibility tier, unknown `progression_schema_version`, missing authored formula config for that schema version, or missing authored spell unlock data**: return progression hydration failure to Save/Load. `progression_schema_version` is the only persisted progression version field and selects the compatible formula/config contract; no separate formula-version field is saved. For non-cap saves, valid XP must satisfy `xp_threshold(current_level) <= total_xp < xp_threshold(current_level + 1)`; at cap, valid XP must equal `xp_threshold(10)`. Do not silently clamp, downgrade, recalculate from defaults, or enter playable state.
 
 - **If saved `total_xp` exceeds the level-10 threshold in T1**: reject hydration. T1 has no banked over-cap XP.
 
-- **If Death & Corpse Recovery requests an XP penalty before it is authored or without a valid death context**: reject the request with a diagnostic and leave XP unchanged. Character Progression exposes the penalty formula and adjustment interface only; it does not invent death timing.
+- **If Death & Corpse Recovery requests an XP penalty before it is authored or without a valid death context**: reject the request with a diagnostic and leave XP unchanged. Character Progression exposes the penalty formula and adjustment interface only; it does not invent death timing. Durable idempotency for applied death contexts belongs to Death & Corpse Recovery when that system is authored; Character Progression persists no applied death-context ids in T1.
 
 - **If a death XP adjustment would reduce `total_xp` below the current level threshold**: do not apply it in this GDD. Until Death & Corpse Recovery is authored, Character Progression exposes preview values only and persists no XP debt. Deleveling is a Death & Corpse Recovery policy decision, not a Character Progression rule.
 
@@ -530,7 +546,7 @@ Each downstream GDD listed below must declare Character Progression in its own D
 
 | Source | Direction | Data Interface | Contract |
 |---|---|---|---|
-| **NPC / Spawn Authoring Data** | Character Progression validates against authored source refs | `ProgressionXpSourceRefLookup(zoneId, defeated_source_ref) -> defeated_level, encounter_role, encounter_role_multiplier, xp_weight_seed_t1, expected_kill_weight_seed_t1, source_lifecycle_token_policy, xp_eligible` | Lookup rows are progression-owned XP metadata keyed to Combat-stable refs. Runtime Progression owns the `XpSourceLifecycleRegistry` registration/snapshot/tombstone seam and does not require new Combat event fields or NPC runtime mutation. |
+| **NPC System / Spawn Authoring Data** | Character Progression validates against NPC-authored source refs and consumes NPC source lifecycle hooks | `ProgressionXpSourceRefLookup(zoneId, defeated_source_ref) -> defeated_level, encounter_role, encounter_role_multiplier, xp_weight_seed_t1, expected_kill_weight_seed_t1, repeatability_class, source_lifecycle_token_policy, xp_eligible`; NPC-owned `NpcSourceLifecycleRecord` durability | Lookup rows are progression-owned XP metadata keyed to Combat-stable refs. NPC System owns source refs, lifecycle hooks, and durable source state. Runtime Progression owns the `XpSourceLifecycleRegistry` registration/snapshot/tombstone seam and does not require new Combat event fields or NPC runtime mutation. |
 
 ### Future Hard Downstream
 
@@ -588,6 +604,7 @@ Each downstream GDD listed below must declare Character Progression in its own D
 | `encounter_role_multiplier_named` | `3.0` | `2.0-4.0` | Named kills feel unrewarding relative to danger. | Named farming becomes the dominant XP strategy if respawn rules allow it. |
 | `encounter_role_multiplier_camp` | `1.0` | `0.8-1.2` | Camp-tagged individual kills feel weak relative to pull risk. | Camp-tagged individual kills become the dominant XP route instead of a warning about pull danger. |
 | `xp_source_lookup_retention_seconds` | `10` | `5-30` | Duplicate late subscribers may lose metadata and reject valid same-tick events. | Stale lookup rows linger longer, increasing debugging ambiguity. Respawn safety still depends on lifecycle token change. |
+| `progression_save_barrier_max_ms` | `10` | `5-25` | Save/Load may fail writes during legitimate same-frame XP transactions. | Transition Save may consume too much of WS's `save_mutex_max_ms` budget. |
 | `base_health` | `80` | `70-90` | Level 1 Cleric becomes too fragile for the approved Combat fixture. | Level 1 Cleric may trivialize early trash. |
 | `base_mana` | `100` | `90-110` | Level 1 Cleric cannot sustain intended spell cadence. | Level 1 Cleric can over-cast before med-break rhythm matters. |
 | `health_linear` | `131 / 9` | Fixture-derived; change only with Combat fixture revision | Breaks `Cleric_Mid_T1` / `Cleric_Top_T1` alignment. | Breaks Combat fixture alignment and soloability tests. |
@@ -605,8 +622,8 @@ Each downstream GDD listed below must declare Character Progression in its own D
 
 - `xp_base`, `xp_exponent`, `xp_linear`, `base_xp_per_weight`, `xp_award_minimum_nontrivial`, `max_xp_per_kill`, and `max_xp_per_kill_pct_of_level_band` must be tuned together. Changing only one side can halve or double time-to-level.
 - `trivial_cutoff`, `diff_step`, `min_nontrivial_modifier`, and `max_level_difference_modifier` define anti-farming behavior as a group.
-- `encounter_role_multiplier_named` must be tuned against named respawn cadence and Combat Core's named soloability envelope. Named enemies should feel valuable, not become the dominant XP route.
-- `ProgressionXpSourceRefLookup` rows must be validated against NPC/spawn source refs, legal `Trash | Named | Camp` roles, progression-owned `xp_weight_seed_t1`, expected T1 Combat `kill_weight_seed`, and XP eligibility before pacing tests. Missing `source_lifecycle_token_policy` is a blocker, not a warning.
+- `encounter_role_multiplier_named` must be tuned against `repeatability_class`, named respawn cadence, and Combat Core's named soloability envelope. Named enemies should feel valuable, not become the dominant XP route.
+- `ProgressionXpSourceRefLookup` rows must be validated against NPC/spawn source refs, legal `Trash | Named | Camp` roles, progression-owned `xp_weight_seed_t1`, expected T1 Combat `kill_weight_seed`, `repeatability_class`, and XP eligibility before pacing tests. Missing `source_lifecycle_token_policy` is a blocker, not a warning.
 - `health_linear`, `health_quadratic`, `mana_linear`, and `mana_quadratic` are fixture-alignment knobs. Changing them requires re-validating Combat Core's Cleric fixtures at `resource_fixture_lock_levels`.
 - `death_debt_pct` is preview-only until Death & Corpse Recovery owns application timing. Character Progression persists no XP debt in T1.
 - `max_t1_spell_tier` and `spell_tier_unlock_levels_t1` must be reconciled with Class Design and Spell Memorization before implementation. The authored unlock list is the authority.
@@ -654,7 +671,7 @@ Character Progression exposes progression data and events for future UI systems;
 | Layer 1 HUD | Must show `visible_level` and restrained XP band progress once Layer 1 HUD exists; no spell-tier copy and no cap celebration. | May show the same fields plus transaction timing during UI smoke tests. | Layer 1 HUD / UX |
 | Character sheet or journal | Deferred; no screen is created by this GDD. | May inspect read-only level and permanent max resource queries in test harnesses. | Future UX spec |
 | Spellbook / spell memorization | No abstract "Tier N unlocked" message, no spell icons, and no learned spell presentation from Character Progression. | May log `SpellEligibilityChanged` for integration tests only. | Spell Memorization + UX |
-| Save slot / load screen | May show `visible_level` only if Menus & Settings later requests it; no XP progress or cap badge from this GDD. | May show schema-validation diagnostics. | Menus & Settings |
+| T1 title / Continue active-record summary | May show `visible_level` only if Menus & Settings later requests it for the single active local record; no save-slot grid, XP progress, or cap badge from this GDD. | May show schema-validation diagnostics. | Menus & Settings |
 | Developer diagnostics | Not visible. | May show kill-weight, lookup, dedupe, rejection, and formula details behind explicit debug tooling. | Engineering |
 
 ## Acceptance Criteria
@@ -682,7 +699,7 @@ All criteria use the project QA taxonomy: Unit, Integration, Editor-validation, 
 *Unit | gameplay-programmer | T1-blocking*
 
 **H-CPRO-XP-02 - Valid kill credit awards XP once**
-**GIVEN** a valid `PlayerKillCreditEvent(defeated_source_ref, zoneId, faction_id, kill_weight_seed)` and a same-dispatch `XpAwardResolutionSnapshot` with `defeated_level`, `encounter_role`, `encounter_role_multiplier`, `xp_weight_seed_t1`, `expected_kill_weight_seed_t1` matching the event, `xp_eligible = true`, and `source_lifecycle_token`, **WHEN** Character Progression processes it, **THEN** exactly one XP transaction is applied using `xp_award` and the structured dedupe tuple is `XpAwardDedupeKey(local_character_id, zoneId, defeated_source_ref, source_lifecycle_token)`.
+**GIVEN** a valid active progression profile and `PlayerKillCreditEvent(defeated_source_ref, zoneId, faction_id, kill_weight_seed)` plus a same-dispatch `XpAwardResolutionSnapshot` with `defeated_level`, `encounter_role`, `encounter_role_multiplier`, `xp_weight_seed_t1`, `expected_kill_weight_seed_t1` matching the event, `repeatability_class`, `xp_eligible = true`, and `source_lifecycle_token`, **WHEN** Character Progression processes it, **THEN** exactly one XP transaction is applied using `xp_award` and the structured dedupe tuple is `XpAwardDedupeKey(active_profile.local_character_id, zoneId, defeated_source_ref, source_lifecycle_token)`.
 *Integration | gameplay-programmer + qa-tester | T1-blocking*
 
 **H-CPRO-XP-03 - Duplicate kill credit dedupes**
@@ -722,7 +739,7 @@ All criteria use the project QA taxonomy: Unit, Integration, Editor-validation, 
 *Unit + Integration | gameplay-programmer + qa-tester | T1-blocking*
 
 **H-CPRO-XP-12 - Authored kill-weight mismatch rejects XP**
-**GIVEN** a valid kill-credit event whose `kill_weight_seed` does not match the snapshot's `expected_kill_weight_seed_t1`, **WHEN** Character Progression evaluates XP in T1 fixtures, **THEN** no XP is awarded, no threshold check occurs, and a development diagnostic identifies the source ref and expected kill weight.
+**GIVEN** a T1 fixture kill-credit event whose `kill_weight_seed` does not match the snapshot's `expected_kill_weight_seed_t1`, **WHEN** strict fixture validation is enabled, **THEN** no XP is awarded, no threshold check occurs, and a development diagnostic identifies the source ref and expected kill weight; non-fixture shipping lookup rows validate this mismatch at authoring time instead of silently zeroing runtime XP.
 *Unit + Integration | gameplay-programmer + systems-designer + qa-tester | T1-blocking*
 
 **H-CPRO-XP-13 - Stale duplicate cannot bind to respawn**
@@ -730,7 +747,7 @@ All criteria use the project QA taxonomy: Unit, Integration, Editor-validation, 
 *Integration | gameplay-programmer + qa-tester | T1-blocking*
 
 **H-CPRO-XP-14 - Save barrier drains pending kill credit**
-**GIVEN** Combat emits `PlayerKillCreditEvent` on the same frame a Manual Save trigger enters Save/Load, **WHEN** Save/Load invokes `ProgressionSaveBarrier`, **THEN** the kill-credit event is either fully awarded or fully rejected before the progression save state is serialized; no valid save can contain pre-award XP while post-save gameplay contains the awarded XP from that same event.
+**GIVEN** Combat emits `PlayerKillCreditEvent` on the same frame a Manual Save or Transition Save trigger enters Save/Load, **WHEN** Save/Load invokes `ProgressionSaveBarrier`, **THEN** the kill-credit event is either fully awarded or fully rejected before the progression save state is serialized; if the barrier exceeds `progression_save_barrier_max_ms`, Save/Load fails the write loudly; no valid save can contain pre-award XP while post-save gameplay contains the awarded XP from that same event.
 *Integration | gameplay-programmer + engine-programmer + qa-tester | T1-blocking*
 
 ### Event Schemas
@@ -748,7 +765,7 @@ All criteria use the project QA taxonomy: Unit, Integration, Editor-validation, 
 *Unit | gameplay-programmer | T1-blocking*
 
 **H-CPRO-EVT-04 - Transaction event order is stable**
-**GIVEN** one fixture XP transaction changes XP and advances into a spell-eligibility level, and a separate cap-crossing fixture reaches level 10, **WHEN** event logs are inspected, **THEN** subscribers observe `XPChangedEvent` first, then one ordered `LevelChangedEvent` per level step, then any `SpellEligibilityChanged` for the corresponding level step, and `LevelCapReached` last only in the cap-crossing transaction.
+**GIVEN** one fixture XP transaction changes XP and advances into a spell-eligibility level, and a separate cap-crossing fixture reaches level 10, **WHEN** event logs are inspected, **THEN** subscribers observe `XPChangedEvent` first with final post-transaction `current_level`, `visible_level`, `current_level_xp_progress`, and `current_level_xp_band`, then one ordered `LevelChangedEvent` per level step, then any `SpellEligibilityChanged` for the corresponding level step, and `LevelCapReached` last only in the cap-crossing transaction.
 *Integration | gameplay-programmer + ui-programmer + qa-tester | T1-blocking*
 
 ### Formulas
@@ -786,7 +803,7 @@ All criteria use the project QA taxonomy: Unit, Integration, Editor-validation, 
 *Unit | gameplay-programmer | T1-blocking*
 
 **H-CPRO-F7 - Cap clamp**
-**GIVEN** a level 9 character at `11,600` XP earns `300` raw XP, **WHEN** cap clamp evaluates, **THEN** `applied_xp_delta = 110`, stored XP is `11,710`, `XPChangedEvent.xp_delta = 110`, visible level becomes `10`, `LevelCapReached` emits once, and no over-cap XP or T1 benefit is granted.
+**GIVEN** a level 9 character at `11,600` XP earns `300` raw XP, **WHEN** cap clamp evaluates, **THEN** `applied_xp_delta = 110`, stored XP is `11,710`, `XPChangedEvent.xp_delta = 110`, `XPChangedEvent.current_level = 10`, `XPChangedEvent.visible_level = 10`, `LevelCapReached` emits once, and no over-cap XP or T1 benefit is granted.
 *Unit | gameplay-programmer | T1-blocking*
 
 ### Save / Load Hydration
@@ -796,7 +813,7 @@ All criteria use the project QA taxonomy: Unit, Integration, Editor-validation, 
 *Unit | gameplay-programmer | T1-blocking*
 
 **H-CPRO-SL-02 - Invalid hydration fails loud**
-**GIVEN** Save/Load hydrates invalid class id, level, schema version, missing formula version, missing authored spell unlock data, spell eligibility mismatch, negative XP, non-cap XP outside `xp_threshold(current_level) <= total_xp < xp_threshold(current_level + 1)`, or cap XP not equal to `xp_threshold(10)`, **WHEN** Character Progression validates, **THEN** it returns hydration failure and no playable session is enabled.
+**GIVEN** Save/Load hydrates invalid class id, level, unknown `progression_schema_version`, missing authored formula config for that schema version, missing authored spell unlock data, spell eligibility mismatch, negative XP, non-cap XP outside `xp_threshold(current_level) <= total_xp < xp_threshold(current_level + 1)`, or cap XP not equal to `xp_threshold(10)`, **WHEN** Character Progression validates, **THEN** it returns hydration failure and no playable session is enabled.
 *Integration | gameplay-programmer + qa-tester | T1-blocking*
 
 **H-CPRO-SL-03 - Over-cap XP is invalid save data**
@@ -812,14 +829,14 @@ All criteria use the project QA taxonomy: Unit, Integration, Editor-validation, 
 *Integration | gameplay-programmer + engine-programmer + qa-tester | T1-blocking*
 
 **H-CPRO-SL-06 - Pending kill credit cannot serialize stale XP**
-**GIVEN** a pending same-frame Combat kill-credit dispatch exists when Save/Load requests Character Progression state, **WHEN** `ProgressionSaveBarrier` is invoked, **THEN** Character Progression returns no save payload until the event has been awarded, rejected, or diagnosed as stale, and the serialized `total_xp` equals the post-barrier runtime value.
+**GIVEN** a pending same-frame Combat kill-credit dispatch exists when Save/Load requests Character Progression state, **WHEN** `ProgressionSaveBarrier` is invoked, **THEN** Character Progression returns no save payload until the event has been awarded, rejected, or diagnosed as stale; Save/Load must also obtain NPC System's matching source-lifecycle save barrier before serialization; and the serialized `total_xp` equals the post-barrier runtime value. If either barrier fails to settle within its bounded save-barrier budget, the write fails loudly rather than writing inconsistent XP/source state.
 *Integration | gameplay-programmer + engine-programmer + qa-tester | T1-blocking*
 
 ### Combat Boundaries
 
 **H-CPRO-CB-01 - Combat event is consumed narrowly**
 **GIVEN** a valid Combat kill-credit event, **WHEN** Character Progression processes it, **THEN** only `defeated_source_ref`, `zoneId`, `faction_id`, `kill_weight_seed`, and `XpSourceLifecycleRegistry` XP metadata are read; threat tables, damage rolls, loot, corpse records, runtime current resources, and `combat_actor_id` are not read or persisted.
-*Unit + Integration | gameplay-programmer + qa-tester | T1-blocking*
+*Unit + Integration + Editor-validation (DTO/static API boundary scan) | gameplay-programmer + qa-tester | T1-blocking*
 
 **H-CPRO-CB-02 - Permanent max update does not mutate current resources**
 **GIVEN** level-up increases permanent max health or mana during combat, **WHEN** outputs refresh, **THEN** Combat receives new maxima, but `current_health`, `current_mana`, threat, casts, regen, med-break, and death state are unchanged by Character Progression.
@@ -844,7 +861,7 @@ All criteria use the project QA taxonomy: Unit, Integration, Editor-validation, 
 *Unit | gameplay-programmer | T1-blocking*
 
 **H-CPRO-DCS-03a - Death adjustment contract is idempotent**
-**GIVEN** a future approved `ProgressionXpAdjustmentRequest` with a previously applied `death_context_id`, wrong `local_character_id`, non-negative XP delta, missing policy ref, or `allow_delevel = false` while the projected XP crosses below the current level threshold, **WHEN** Character Progression evaluates the request, **THEN** it rejects before mutation, emits no `XPChangedEvent`, and leaves saved XP unchanged.
+**GIVEN** any `ProgressionXpAdjustmentRequest` reaches Character Progression before Death & Corpse Recovery is authored and approved, including requests with duplicate-looking `death_context_id`, wrong `local_character_id`, non-negative XP delta, missing policy ref, or `allow_delevel = false`, **WHEN** Character Progression evaluates the request, **THEN** it rejects before mutation, emits no `XPChangedEvent`, persists no death-context id, and leaves saved XP unchanged.
 *Unit | gameplay-programmer + qa-tester | T1-blocking*
 
 **H-CPRO-DCS-04 - Spell eligibility does not create spell content**
@@ -908,8 +925,8 @@ All criteria use the project QA taxonomy: Unit, Integration, Editor-validation, 
 *Editor-validation + Dev-build smoke | ui-programmer + qa-tester | T1-blocking*
 
 **H-CPRO-VUI-07 - Shipping HUD exposes readable XP progress**
-**GIVEN** the T1 Layer 1 HUD exists, **WHEN** a shipping UI build is inspected at level 5 with partial XP progress and at level 10 cap, **THEN** level 5 shows `visible_level` plus readable/non-color-only current-band XP progress, and level 10 shows `visible_level = 10` while hiding the XP progress track and any cap celebration.
-*UX review + Dev-build smoke | ui-programmer + qa-tester | T1-blocking*
+**GIVEN** the Character Progression UI handoff contract is validated before Layer 1 HUD implementation, **WHEN** Editor validation scans progression UI requirements and public queries, **THEN** the contract exposes `visible_level`, `current_level_xp_progress`, and `current_level_xp_band`, requires downstream HUD to define readable/non-color-only progress treatment before `shipping_t1_progression_hud_ready = true`, and keeps cap presentation quiet (`visible_level = 10`, no progress track or cap celebration).
+*Editor-validation + Dev-build smoke | ui-programmer + qa-tester | T1-blocking*
 
 ### Tuning / Fixture Validation
 
@@ -934,7 +951,7 @@ All criteria use the project QA taxonomy: Unit, Integration, Editor-validation, 
 *Editor-validation | gameplay-programmer + qa-tester | T1-blocking*
 
 **H-CPRO-TUNE-06 - XP source lookup validator**
-**GIVEN** authored `ProgressionXpSourceRefLookup` data, **WHEN** the Editor validator runs, **THEN** every row has legal `zoneId`, legal `defeated_source_ref`, `defeated_level` inside T1 authored range, legal `encounter_role` (`Trash`, `Named`, or `Camp`), role multiplier inside the configured safe range, `xp_weight_seed_t1` and `expected_kill_weight_seed_t1` inside the progression-authored T1 fixture range, explicit `xp_eligible`, and a non-empty `source_lifecycle_token_policy`; missing rows for Combat fixture sources fail validation.
+**GIVEN** authored `ProgressionXpSourceRefLookup` data, **WHEN** the Editor validator runs, **THEN** every row has legal `zoneId`, legal `defeated_source_ref`, `defeated_level` inside T1 authored range, legal `encounter_role` (`Trash`, `Named`, or `Camp`), role multiplier inside the configured safe range, `xp_weight_seed_t1` and `expected_kill_weight_seed_t1` inside the progression-authored T1 fixture range, legal `repeatability_class`, explicit `xp_eligible`, and a non-empty `source_lifecycle_token_policy`; missing rows for Combat fixture sources fail validation.
 *Editor-validation | gameplay-programmer + systems-designer + qa-tester | T1-blocking*
 
 ### Pacing Fantasy
@@ -948,15 +965,15 @@ All criteria use the project QA taxonomy: Unit, Integration, Editor-validation, 
 *Profiled playtest + Unit | systems-designer + qa-tester | fixture-gated T1-blocking*
 
 **H-CPRO-PACE-03 - Soft-undercon farming is slower than even-con**
-**GIVEN** paired 30-minute fixtures for a level 7 Cleric killing level 7 trash and level 4 trash with equal pull cadence, med cadence, and valid lookup rows, **WHEN** XP/hour and projected kills-to-level are compared, **THEN** the level 4 route produces no more than 60% of the even-con XP/hour and cannot project a faster time-to-ding than the even-con route.
+**GIVEN** paired 30-minute fixtures for a level 7 Cleric killing level 7 trash and level 4 trash with identical `xp_weight_seed_t1 = 1.25`, `encounter_role = Trash`, `encounter_role_multiplier = 1.0`, `repeatability_class = Repeatable`, and `xp_eligible = true`, while the level 4 route uses its fastest profiled safe pull cadence and lowest observed med-break cadence, **WHEN** XP/hour and projected kills-to-level are compared, **THEN** the level 4 route produces no more than 60% of the even-con XP/hour and cannot project a faster time-to-ding than the even-con route.
 *Profiled playtest + Unit | systems-designer + qa-tester | fixture-gated T1-blocking*
 
 **H-CPRO-PACE-04 - Named and camp density do not bypass slow progression**
-**GIVEN** named and dense-camp T1 fixtures use legal `Named` or `Camp` lookup rows, **WHEN** QA profiles a 30-minute loop with authored respawn/med cadence, **THEN** observed XP/hour remains within the approved even-con camp-session band unless the encounter is explicitly marked non-repeatable, and the report records named respawn lockout or camp-density assumptions.
+**GIVEN** named and dense-camp T1 fixtures use legal `Named` or `Camp` lookup rows with explicit `repeatability_class`, **WHEN** QA profiles a 60-minute loop with authored respawn/lockout/med cadence, **THEN** any `Repeatable` route produces no more than 100% of the even-con trash fixture XP/hour from `H-CPRO-PACE-01`; any `RespawnLockout` or `NonRepeatableFirstKill` route records its lockout or one-time status and cannot be projected as a repeatable XP/hour route.
 *Profiled playtest | game-designer + systems-designer + qa-tester | fixture-gated T1-blocking*
 
 **H-CPRO-PACE-05 - Early, mid, and late level bands preserve earned cadence**
-**GIVEN** level-band fixtures from 2->3, 5->6, and 9->10 use valid Combat kill credit and progression lookup rows, **WHEN** QA profiles time-to-ding, **THEN** each band reports XP/hour, kills/level, and med cadence, with early progression faster than the mid fixture and late progression not faster than the mid fixture.
+**GIVEN** level-band fixtures from 2->3, 5->6, and 9->10 use valid Combat kill credit and progression lookup rows, **WHEN** QA profiles time-to-ding, **THEN** each band reports XP/hour, kills/level, and med cadence, with 2->3 between 20-60 minutes, 5->6 between 45-120 minutes, and 9->10 between 90-180 minutes under default T1 camp cadence.
 *Profiled playtest | game-designer + systems-designer + qa-tester | fixture-gated T1-blocking*
 
 ### Summary
@@ -972,5 +989,4 @@ Advisory-at-T1: 0.
 |---|---|---|---|
 | `CPRO-OQ-01` | Class Design and Spell Memorization must map tiers 3/5/7/9 to authored Cleric gameplay beats before spell eligibility becomes player-facing. | Class Design + Spell Memorization | Player-facing spell unlocks |
 | `CPRO-OQ-02` | Death & Corpse Recovery must define approved XP-loss timing, corpse recovery reversal/mitigation, and deleveling policy before Character Progression accepts `ProgressionXpAdjustmentRequest` beyond preview rejection. | Death & Corpse Recovery | Death penalty implementation |
-| `CPRO-OQ-03` | Layer 1 HUD / UX must approve the shipping treatment for required `visible_level` + current-band XP progress, save-slot level display, accessibility, and any character-sheet surface before UI exposes progression data. | Layer 1 HUD / UX | Shipping progression UI |
-| `CPRO-OQ-04` | NPC / Spawn authoring must produce `ProgressionXpSourceRefLookup` rows and runtime `XpSourceLifecycleRegistry` registration/snapshot/tombstone hooks before kill-credit XP can be enabled. | NPC / Spawn Authoring + Character Progression | XP-awarding implementation |
+| `CPRO-OQ-03` | Layer 1 HUD / UX must approve the shipping treatment for required `visible_level` + current-band XP progress, T1 title/Continue active-record summary, accessibility, and any character-sheet surface before UI exposes progression data. | Layer 1 HUD / UX | Shipping progression UI |

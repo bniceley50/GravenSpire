@@ -33,7 +33,7 @@ Systems marked **E** are explicit in the game concept's Core Mechanics or Techni
 | 5 | Day/Night Cycle (I) | Core | **MVP** | APPROVED 2026-04-24 (re-entry #1) | [day-night-cycle.md](day-night-cycle.md) | World Structure |
 | 6 | Character Creation (I) | Core | **MVP** | APPROVED 2026-04-24 | [character-creation.md](character-creation.md) | Save/Load |
 | 7 | Combat Core (E) | Gameplay | **MVP** | APPROVED 2026-04-25 (re-review #3) | [combat-core.md](combat-core.md) | World Structure, NPC System, Save/Load |
-| 8 | Character Progression (I) | Progression | **MVP** | Not Started | — | Character Creation, Save/Load |
+| 8 | Character Progression (I) | Progression | **MVP** | In Review 2026-04-25 (re-review #4) | [character-progression.md](character-progression.md) | Character Creation, Save/Load, Combat Core, NPC System |
 | 9 | Inventory & Item Economy (I) | Economy | **MVP** | Not Started | — | Save/Load, Character Creation |
 | 10 | Class Design (I) | Gameplay | **MVP** (Cleric) / **T2** (Warrior, Enchanter) | Not Started | — | Combat Core, Character Progression |
 | 11 | Spell Memorization (I) | Gameplay | **MVP** | Not Started | — | Combat Core, Class Design |
@@ -50,7 +50,7 @@ Systems marked **E** are explicit in the game concept's Core Mechanics or Techni
 | 22 | Sister Elara Mentor (I) | Meta | **MVP** | Not Started | — | Named AI Companion Core |
 | 23 | Dialogue System (E) | Narrative | **MVP** (templated) / **T3** (LLM for key NPCs) | Not Started | — | World Structure, NPC System, Faction State Simulation |
 | 24 | Moderation & Safety (I) | Meta | **Tier 3** | Not Started | — | Dialogue System |
-| 25 | Layer 1 HUD (I) | UI | **MVP** | Not Started | — | Combat Core, Status Effects |
+| 25 | Layer 1 HUD (I) | UI | **MVP** | Not Started | — | Combat Core, Character Progression, Status Effects |
 | 26 | Dialogue UI Panel (I) | UI | **MVP** | Not Started | — | Dialogue System |
 | 27 | Personal Journal (I) | UI | **MVP** | Not Started | — | Faction Reputation |
 | 28 | Faction Board UI (I) | UI | **MVP** | Not Started | — | Faction Events, Faction State Simulation |
@@ -109,7 +109,7 @@ Systems sorted by dependency order. Design and build from top (Foundation) to bo
 5. **Day/Night Cycle** — depends on: World Structure. Approved: [day-night-cycle.md](day-night-cycle.md). UTC-derived local world clock; no Save/Load dependency or persisted clock field. Court hours vs. inn hours; world state shifts per art bible S2.
 6. **Character Creation** — depends on: Save/Load. Class selection, starting faction-neutral state.
 7. **Combat Core** — depends on: World Structure, NPC System, Save/Load. ⚠ **Bottleneck — 9 downstream systems.** The core hypothesis.
-8. **Character Progression** — depends on: Character Creation, Save/Load. EQ-native XP, levels, spell unlocks.
+8. **Character Progression** — depends on: Character Creation, Save/Load, Combat Core, NPC System. EQ-native XP, levels, spell unlocks, Combat kill-credit hooks, and NPC-owned source lifecycle records.
 9. **Inventory & Item Economy** — depends on: Save/Load, Character Creation. Items, gear, faction tokens, Syndicate transactions.
 
 ### Layer 3 — Core Extensions *(depend on Layer 2)*
@@ -141,7 +141,7 @@ Systems sorted by dependency order. Design and build from top (Foundation) to bo
 
 ### Layer 7 — Presentation (UI)
 
-25. **Layer 1 HUD** — depends on: Combat Core, Status Effects. Health/mana/hate/spell queue per art bible S7.
+25. **Layer 1 HUD** — depends on: Combat Core, Character Progression, Status Effects. Health/mana/hate/spell queue plus restrained level/XP progress per art bible S7 and Character Progression.
 26. **Dialogue UI Panel** — depends on: Dialogue System. Diegetic faction-specific paper panel.
 27. **Personal Journal** — depends on: Faction Reputation. Diegetic carried object tracking faction standings.
 28. **Faction Board UI** — depends on: Faction Events, Faction State Simulation. Diegetic world-object bulletin.
@@ -175,7 +175,7 @@ Combining dependency sort + priority tier. **Write the GDDs in this order.** Ind
 | 5 | Day/Night Cycle | MVP | Core | game-designer | S | UTC-derived local clock coupled with World Structure `SessionResumeEvent` / `ZoneActiveEvent` ordering. |
 | 6 | Character Creation | MVP | Core | game-designer + systems-designer | S | Single class at MVP (Cleric) — scope is small. |
 | 7 | **Combat Core** | MVP | Core | **game-designer + systems-designer** | **L** | **THE core hypothesis. Prototype this earliest.** |
-| 8 | Character Progression | MVP | Progression | systems-designer | M | EQ-native XP curves; formula-heavy. |
+| 8 | Character Progression | MVP | Progression | systems-designer | L | EQ-native XP curves; formula-heavy; consumes Combat kill-credit hooks and NPC source lifecycle records. |
 | 9 | Inventory & Item Economy | MVP | Economy | economy-designer + systems-designer | M | Faction tokens, rep-gated items, currency. |
 | 10 | Class Design — Cleric | MVP | Gameplay | game-designer + systems-designer | L | Cleric is hardest class — group-dependency pivots here. |
 | 11 | Spell Memorization | MVP | Gameplay | game-designer | M | Signature mechanic; EQ-specific. |
@@ -189,7 +189,7 @@ Combining dependency sort + priority tier. **Write the GDDs in this order.** Ind
 | 19 | Named AI Companion Core | MVP | Gameplay | ai-programmer + game-designer | L | Class AI competence is hard. |
 | 22 | Sister Elara Mentor | MVP | Meta | ai-programmer + narrative-director | M | Onboarding-critical. |
 | 23 | Dialogue System (templated) | MVP | Narrative | narrative-director + writer | M | Templated at MVP; LLM at T3. |
-| 25 | Layer 1 HUD | MVP | UI | unity-ui-specialist + ui-programmer | M | Art bible S7 spec is detailed — execution from spec. |
+| 25 | Layer 1 HUD | MVP | UI | unity-ui-specialist + ui-programmer | M | Art bible S7 spec is detailed — execution from spec; consumes Character Progression level/XP progress handoff. |
 | 26 | Dialogue UI Panel | MVP | UI | unity-ui-specialist | M | Diegetic paper panel per art bible S7.3. |
 | 27 | Personal Journal | MVP | UI | unity-ui-specialist + narrative-director | M | Diegetic held object; world-written. |
 | 28 | Faction Board UI | MVP | UI | unity-ui-specialist | S | Physical world object per art bible. |
