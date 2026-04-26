@@ -115,6 +115,36 @@ state_ownership:
     added: 2026-04-26
     revised: ""
 
+  - state: local_character_id
+    status: proposed
+    owner_system: Character Creation
+    adr: docs/architecture/adr-0004-first-save-materialization-and-character-identity.md
+    interface: "InitialCharacterRecord.local_character_id; Save/Load active-record identity context"
+    write_access: Character-Creation-generation-only; Save/Load-persists-read-only-context
+    referenced_by:
+      - docs/architecture/adr-0004-first-save-materialization-and-character-identity.md
+      - docs/architecture/adr-0001-xp-source-lifecycle-registry.md
+      - docs/architecture/adr-0003-progression-baseline-snapshot-contract.md
+      - design/gdd/character-creation.md
+      - design/gdd/character-progression.md
+      - design/gdd/save-load-persistence.md
+    added: 2026-04-26
+    revised: ""
+
+  - state: initial_character_record_seed
+    status: proposed
+    owner_system: Character Creation
+    adr: docs/architecture/adr-0004-first-save-materialization-and-character-identity.md
+    interface: "InitialCharacterRecord validated by Character Creation and handed to Save/Load for first-save materialization"
+    write_access: Character-Creation-only-before-first-save; Save/Load-persists-atomically
+    referenced_by:
+      - docs/architecture/adr-0004-first-save-materialization-and-character-identity.md
+      - design/gdd/character-creation.md
+      - design/gdd/character-progression.md
+      - design/gdd/save-load-persistence.md
+    added: 2026-04-26
+    revised: ""
+
 # Example:
 #
 # state_ownership:
@@ -245,6 +275,42 @@ interfaces:
       - docs/architecture/adr-0003-progression-baseline-snapshot-contract.md
       - design/gdd/character-progression.md
       - design/gdd/systems-index.md
+    added: 2026-04-26
+    revised: ""
+
+  - contract: first_save_materialization_protocol
+    status: proposed
+    pattern: direct_call
+    producer: "Save / Load & Persistence"
+    consumers:
+      - Character Progression
+      - Future downstream systems with T1-required seed materialization
+    adr: docs/architecture/adr-0004-first-save-materialization-and-character-identity.md
+    method_signature: "FirstSaveMaterializer(request: FirstSaveMaterializationRequest) -> FirstSaveMaterializationResult"
+    notes: "Save/Load invokes declared required materializers before the first successful save; any non-Materialized required result emits SaveFailedEvent(FirstSaveMaterializationFailed), writes no bytes, and does not mark the record initialized."
+    referenced_by:
+      - docs/architecture/adr-0004-first-save-materialization-and-character-identity.md
+      - design/gdd/character-creation.md
+      - design/gdd/character-progression.md
+      - design/gdd/save-load-persistence.md
+    added: 2026-04-26
+    revised: ""
+
+  - contract: character_progression_first_save_materializer
+    status: proposed
+    pattern: direct_call
+    producer: Character Progression
+    consumers:
+      - "Save / Load & Persistence"
+    adr: docs/architecture/adr-0004-first-save-materialization-and-character-identity.md
+    method_signature: "CharacterProgressionFirstSaveMaterializer(local_character_id, starting_class_id) -> CharacterProgressionSaveState"
+    notes: "T1 required first-save materializer; consumes local_character_id as identity context and starting_class_id = Cleric, then produces whitelisted CharacterProgressionSaveState without storing local_character_id in the progression payload."
+    referenced_by:
+      - docs/architecture/adr-0004-first-save-materialization-and-character-identity.md
+      - docs/architecture/adr-0003-progression-baseline-snapshot-contract.md
+      - design/gdd/character-progression.md
+      - design/gdd/save-load-persistence.md
+      - design/gdd/character-creation.md
     added: 2026-04-26
     revised: ""
 
@@ -442,6 +508,64 @@ forbidden_patterns:
     adr: docs/architecture/adr-0003-progression-baseline-snapshot-contract.md
     referenced_by:
       - docs/architecture/adr-0003-progression-baseline-snapshot-contract.md
+      - design/gdd/character-progression.md
+    added: 2026-04-26
+
+  - pattern: save_load_generating_local_character_id
+    status: proposed
+    description: "Save/Load must not generate, regenerate, repair, replace, or derive local_character_id for a character record."
+    why: "ADR-0004 assigns local_character_id generation to Character Creation; Save/Load persists the id and exposes active-record context but does not own identity creation."
+    adr: docs/architecture/adr-0004-first-save-materialization-and-character-identity.md
+    referenced_by:
+      - docs/architecture/adr-0004-first-save-materialization-and-character-identity.md
+      - design/gdd/character-creation.md
+      - design/gdd/save-load-persistence.md
+    added: 2026-04-26
+
+  - pattern: first_save_seed_only_without_required_materialization
+    status: proposed
+    description: "The first successful save must not persist only InitialCharacterRecord seed data when T1-required downstream materializers have not produced their payloads."
+    why: "ADR-0004 requires Save/Load to invoke required first-save materializers before writing; seed-only saves would defer required state creation to load and hide incomplete first-save records."
+    adr: docs/architecture/adr-0004-first-save-materialization-and-character-identity.md
+    referenced_by:
+      - docs/architecture/adr-0004-first-save-materialization-and-character-identity.md
+      - design/gdd/character-creation.md
+      - design/gdd/character-progression.md
+      - design/gdd/save-load-persistence.md
+    added: 2026-04-26
+
+  - pattern: first_load_synthesizing_progression_state
+    status: proposed
+    description: "Character Progression must not synthesize missing CharacterProgressionSaveState from starting_class_id during first load or Continue."
+    why: "ADR-0004 requires CharacterProgressionSaveState to be materialized before the first successful save; missing persisted progression state after initialization is a load failure, not a defaulting opportunity."
+    adr: docs/architecture/adr-0004-first-save-materialization-and-character-identity.md
+    referenced_by:
+      - docs/architecture/adr-0004-first-save-materialization-and-character-identity.md
+      - design/gdd/character-progression.md
+      - design/gdd/save-load-persistence.md
+    added: 2026-04-26
+
+  - pattern: rematerializing_existing_record_on_load
+    status: proposed
+    description: "No system may re-run first-save materialization for a record that was already initialized by a successful first save."
+    why: "Re-materialization would silently repair missing identity or downstream payloads; ADR-0004 requires previously initialized records with missing required state to fail loud through Save/Load."
+    adr: docs/architecture/adr-0004-first-save-materialization-and-character-identity.md
+    referenced_by:
+      - docs/architecture/adr-0004-first-save-materialization-and-character-identity.md
+      - design/gdd/save-load-persistence.md
+      - design/gdd/character-progression.md
+      - design/gdd/character-creation.md
+    added: 2026-04-26
+
+  - pattern: local_character_id_derived_from_player_authored_data
+    status: proposed
+    description: "local_character_id must not be derived from character_name, raw player input, save-slot labels, account names, device usernames, save paths, or Combat runtime ids."
+    why: "ADR-0004 requires an opaque, immutable, non-player-authored local identity; deriving it from player-authored or runtime data risks collisions, leakage, and unstable identity."
+    adr: docs/architecture/adr-0004-first-save-materialization-and-character-identity.md
+    referenced_by:
+      - docs/architecture/adr-0004-first-save-materialization-and-character-identity.md
+      - design/gdd/character-creation.md
+      - design/gdd/save-load-persistence.md
       - design/gdd/character-progression.md
     added: 2026-04-26
 

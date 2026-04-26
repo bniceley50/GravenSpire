@@ -254,3 +254,42 @@ as a generic progression snapshot.
 `docs/architecture/adr-0002-save-stability-barrier-protocol.md`;
 `design/gdd/character-progression.md`; `design/gdd/save-load-persistence.md`;
 `design/gdd/combat-core.md`; `design/gdd/systems-index.md`.
+
+---
+
+## D010 — ADR-0004 First-Save Materialization and Character Identity
+
+**Date:** 2026-04-26
+**Status:** Proposed
+**Context:** Character Creation already defines
+`InitialCharacterRecord.local_character_id`, but its generation location was an
+open question. Character Progression requires `local_character_id` for XP dedupe
+and first-save progression state, while Save/Load owns the first-run path and
+must not synthesize missing progression state on first load.
+**Decision:** Create
+`docs/architecture/adr-0004-first-save-materialization-and-character-identity.md`.
+The ADR proposes that Character Creation owns `local_character_id` generation
+and validation, Save/Load owns persistence and active-record identity context,
+and downstream systems consume the id read-only. Before the first successful
+save, Save/Load invokes declared first-save materializers; in T1, Character
+Progression must materialize `CharacterProgressionSaveState` from
+`local_character_id` plus `starting_class_id = Cleric` before any bytes are
+written.
+**Consequences:**
+- First-save materialization is separate from ADR-0002 save-stability barriers:
+  materializers run only before the first successful save; barriers run before
+  normal saves of runtime-owned state.
+- Failed first-save materialization emits
+  `SaveFailedEvent(FirstSaveMaterializationFailed)`, writes no bytes, and does
+  not mark the local record initialized.
+- Subsequent loads never repair missing identity or progression state by
+  re-running first-save materialization; missing required persisted state fails
+  loud through Save/Load.
+- Follow-up ADR remains needed for progression pacing fixture contracts.
+**See also:**
+`docs/architecture/adr-0004-first-save-materialization-and-character-identity.md`;
+`docs/architecture/adr-0001-xp-source-lifecycle-registry.md`;
+`docs/architecture/adr-0002-save-stability-barrier-protocol.md`;
+`docs/architecture/adr-0003-progression-baseline-snapshot-contract.md`;
+`design/gdd/character-creation.md`; `design/gdd/character-progression.md`;
+`design/gdd/save-load-persistence.md`; `design/gdd/systems-index.md`.
