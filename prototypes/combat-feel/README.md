@@ -92,6 +92,13 @@ folder, then use `Gravenspire/Prototypes/Combat Feel/Create Prototype Scene`.
 If Unity regenerates project metadata, keep that metadata inside this prototype
 folder and do not move any files into production `src`.
 
+Engine version note: Scaffold and scene generation were verified on Unity
+6000.4.1f1 because the pinned editor, Unity 6000.3.x LTS, was not available on
+the scaffolding machine. Open the scene in pinned Unity 6000.3.x for
+self-playtest findings to count against the project engine pin per
+`docs/engine-reference/unity/VERSION.md` and `DECISIONS.md` D001. Findings
+under any other Unity version are advisory only.
+
 ## Report Target
 
 Durable findings should be written after self-playtest to:

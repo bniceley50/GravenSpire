@@ -21,6 +21,34 @@ Promote repeating lessons to `CLAUDE-patterns.md` (cross-cutting) or a
 
 ## Entries (newest first)
 
+### 2026-04-26 — [GLOBAL][TEST] Prototype smoke checks catch cadence bugs before human playtest
+
+**Context:** During combat-feel prototype scaffolding (commit `7add6ee`), a
+scripted smoke runner was added alongside the human-playtest scene to validate
+the multi-pull loop mechanically before any qualitative playtest. The smoke
+run caught two real bugs that would have invalidated human feel-test findings:
+per-frame integer-floored mana regen, where med breaks would never restore
+mana under normal frame rates, and per-frame integer-floored health regen,
+where post-pull recovery would stall forever. Both bugs were fixed before the
+prototype was opened for self-playtest.
+
+**Lesson:** Prototypes that test *feel* still benefit from mechanical smoke
+validation. The qualitative question being asked is hostage to the quantitative
+machinery actually working. A five-minute scripted loop check before human
+playtest prevents the "playtested for 30 minutes, found med break broken, threw
+out the playtest data" failure mode. Smoke discipline is not just for
+production code; it is for any artifact whose purpose is to produce evidence.
+
+**Evidence:** `prototypes/combat-feel/Assets/Scripts/Editor/CombatFeelSmokeRunner.cs`;
+commit `7add6ee`; bugs caught in iterative `ClericActor.cs` regen-as-float fix.
+
+**Promotion status:** open — promote to universal system prompt
+(`docs/brian-system-prompt-v4-6.md`) when that placeholder is populated; this
+discipline is universal across all prototype work, not Gravenspire-specific.
+Tag remains `[GLOBAL]` for that propagation pathway. Could also promote to
+`.claude/rules/prototype-discipline.md` if a rules file is ever created for
+prototype work specifically.
+
 ### 2026-04-26 — [GLOBAL][SCOPE] Repair contract drift, park implementation detail
 
 **Context:** Inventory & Item Economy full design review found six legitimate
