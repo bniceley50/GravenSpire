@@ -1,12 +1,12 @@
 # Active Session State
 
-**Last Updated:** 2026-04-26
+**Last Updated:** 2026-04-27
 **Project Stage:** Pre-Production — Design
 
 ## Current Task
 
-Combat-feel prototype reached pinned-engine **HEADLINE PASS**; next work is
-Combat Core revision before `/sprint-plan new`.
+Combat Core D012 amendment drafted; next work is fresh
+`/design-review design/gdd/combat-core.md` before `/sprint-plan new`.
 
 ## Status
 
@@ -56,11 +56,12 @@ Combat Core revision before `/sprint-plan new`.
 - ✅ Combat-feel pinned Unity `6000.3.14f1` validation completed 2026-04-26. Disk-captured run `prototypes/combat-feel/Logs/playtest-20260426-204721.log`: 5/5 pulls, 24.507s average pull, 5 med breaks, 0 unsafe pulls, 0 deaths. Six criteria passed except Attack toggle feedback clarity; mechanic passed but ON state was not visually explicit enough.
 - ✅ Attack ON highlight fix added in `PrototypeBootstrap.cs` and rerun on pinned Unity `6000.3.14f1`. Disk-captured run `prototypes/combat-feel/Logs/playtest-20260426-205508.log`: 5/5 pulls, 18.734s average pull, 5 med breaks, 0 unsafe pulls, 0 deaths. Player confirmed the highlight fixed clunky feel, Attack toggle now feels right, and everything else still felt smooth.
 - ✅ **HEADLINE PASS:** T1 combat-feel is validated on pinned Unity 6.3 LTS. The game-concept risk "Does EQ-Classic combat still feel good in 2026?" is answered affirmatively at prototype-grade evidence level. Preferred T1 baseline: Classic-EQ tab-target discipline with tactical Cleric instants, player-controlled Attack toggle, and explicit Attack ON visual feedback.
+- 📝 Combat Core D012 amendment drafted 2026-04-27 in [design/gdd/combat-core.md](../../design/gdd/combat-core.md): Attack toggle no longer auto-starts on pull, tactical Cleric instants are specified as profile-contract shape rather than fixed numeric GDD constants, Attack ON HUD state is exposed without UI presentation ownership, and Class Design reverse-listing is required. Pending fresh `/design-review` before `/sprint-plan new`.
 - ✅ Codex PR #1 (`codex/dotnet-format-setup` → `main`) merged into `main`; follow-up cleanup commit `ce634c3` recorded.
 
 ## Files Being Worked On
 
-- **Active:** Combat Core revision required before `/sprint-plan new` — incorporate combat-feel v2 implications from [production/prototypes/combat-feel-report.md](../prototypes/combat-feel-report.md): Attack toggle as first-class player actor state, tactical Cleric instants, and explicit Attack ON visual state.
+- **Active:** Combat Core D012 amendment drafted — run fresh `/design-review design/gdd/combat-core.md` before `/sprint-plan new`.
 - Combat Feel Prototype: [prototypes/combat-feel/](../../prototypes/combat-feel/) — pinned-engine headline pass complete; prototype code remains throwaway evidence artifact.
 - Combat Feel Prototype README: [prototypes/combat-feel/README.md](../../prototypes/combat-feel/README.md) — prototype question, success/failure criteria, loop spec, controls, run notes
 - Inventory & Item Economy: [design/gdd/inventory-item-economy.md](../../design/gdd/inventory-item-economy.md) — design draft, **NEEDS REVISION**, blocker 1 repaired, remaining blockers tracked in `INV-OQ-05`
@@ -88,8 +89,8 @@ Combat Core revision before `/sprint-plan new`.
 ## Open Questions / Flags
 
 - Technical-artist validation items accumulated in art bible (URP SSS cost model, decal projector perf, camera-stack isolation for corpse-run desat, GPU instancing behavior, etc.) — consolidated in art-bible.md Document Status header
-- Mana-restore 1:1 linear fill depends on med-break mechanics (not yet specced in combat GDD)
-- Combat Core revision is now the next strategic gate: specify Attack toggle as first-class player actor state, include tactical Cleric instants (or T1-equivalent set), and require explicit Attack ON visual feedback before T1 sprint planning.
+- Mana-restore 1:1 linear fill now depends on Combat Core's med-break regen tick contract; Layer 1 HUD must consume Combat Core state rather than inventing separate fill timing.
+- Combat Core D012 amendment is now the next strategic gate: fresh design review must confirm Attack toggle, tactical instant profile contract, Attack ON HUD state, and downstream Class Design reverse-listing before T1 sprint planning.
 - Remaining game-concept project-killer risk: `design/gdd/game-concept.md:304` asks whether kills shifting faction control feel meaningful at the five-minute scale. Needs a later separate `/prototype faction-feel`.
 - Zone definition = Addressable streaming group boundary; `unity-addressables-specialist` must configure streaming groups
 - 26 MVP systems is large scope for a solo first-time dev — every design decision should keep asking "is this actually needed for Tier 1?"
@@ -97,6 +98,6 @@ Combat Core revision before `/sprint-plan new`.
 
 ## Next Skill to Run
 
-- **Revise Combat Core GDD** — add Attack toggle + tactical Cleric instants + Attack ON visual state, then rerun `/design-review` before `/sprint-plan new`.
+- **Run `/design-review design/gdd/combat-core.md`** in a fresh session; if approved, proceed to `/sprint-plan new` for the T1 combat sprint.
 - Later: run Inventory implementation pre-spec to close `INV-OQ-05`, then rerun `/design-review design/gdd/inventory-item-economy.md --depth full`.
 - Codex PR #1 is merged; no Codex follow-up pending in this active state file.

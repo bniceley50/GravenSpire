@@ -1,9 +1,9 @@
 # Combat Core
 
-> **Status**: Designed (second blocker revision; pending re-review)
+> **Status**: Designed (D012 combat-feel amendment drafted; pending re-review)
 > **Author**: Codex (session with Brian, 2026-04-24)
-> **Last Updated**: 2026-04-26
-> **Last Verified**: 2026-04-25 - second blocker revision pass
+> **Last Updated**: 2026-04-27
+> **Last Verified**: 2026-04-25 - second blocker revision pass; D012 amendment pending re-review
 > **Implements Pillar**: Primary - **P2 The Silence Is Sacred**. Supports - **P5 Stakes Are Honest**, plus future-facing hooks for **P4 Every Companion Is A Person** and **P3 Reputation Is The Progression**.
 
 ## Locked Inputs
@@ -26,15 +26,21 @@ These inputs are authoritative for Combat Core. This GDD reproduces them rather 
 
 8. **Art/UI/audio combat posture** - `art-bible.md:113` forbids combat-state post-process, desaturation, red vignette, and global lighting shifts. `art-bible.md:116-117` says the player watches hate list/spell queue rather than spectacle, and the combat signal is the pivot. `art-bible.md:1125-1126` defines Layer 1 HUD health, mana, hate, and spell queue as peripheral practical UI. `art-bible.md:1314` flags mana-restore fill as dependent on med-break mechanics, resolved here.
 
+9. **D012 pinned combat-feel validation** - D012 (`DECISIONS.md:339`) locks the pinned-engine combat-feel result and requires this Combat Core amendment before `/sprint-plan new`. The underlying evidence is the combat-feel report's pinned validation section (`production/prototypes/combat-feel-report.md:196`) and JSONL playtest records: `prototypes/combat-feel/Logs/playtest-20260426-204721.log:1` (`engine_version = 6000.3.14f1`, `5/5` pulls, `24.507s` average pull, `5` med breaks) and `prototypes/combat-feel/Logs/playtest-20260426-205508.log:1` (`engine_version = 6000.3.14f1`, `5/5` pulls, `18.734s` average pull, `5` med breaks). Verification method: JSONL parsed with PowerShell `ConvertFrom-Json`; all six README success criteria passed after the Attack ON highlight fix.
+
 ## Second-Revision Scope
 
 The 2026-04-25 second revision resolves Combat Core's local contract blockers for T1 implementation: runtime-vs-stable identity, death handoff payload semantics, combat-owned pause behavior, social assist data contracts, threat edge cases, fixture coherence, and pull/LoS/leash testability. It does not edit Menus & Settings or Day/Night Cycle; those GDDs still need a coordinated follow-up if their open pause-semantics rows are to be closed on disk.
+
+## D012 Amendment Scope
+
+The 2026-04-27 D012 amendment incorporates pinned combat-feel validation into Combat Core without reopening the approved death, kill-credit, save, threat, or pull architecture. It makes three implicit/prototype-validated contracts explicit: Attack toggle does not auto-enable on pull, T1 Cleric tactical instants are a first-class ability surface owned by the spell-profile contract, and Layer 1 HUD must receive enough Attack state to render an explicit Attack ON visual state. `PlayerKillCreditEvent` remains unchanged.
 
 ## Summary
 
 Combat Core defines the T1 offline tab-target combat loop for a single Cleric player in one haunt zone. It owns combat actor state, target acquisition, auto-attack, melee/spell range checks, slow casting framework, mana spend, interruption, recovery, health and mana resources, hate/threat tables, combat entry and exit, med-break regeneration, kill/death events, and the data outputs consumed by downstream HUD, Spell Memorization, Class Design, Creature / Enemy AI, Death & Corpse Recovery, Zone Control, Character Progression, Inventory, Audio, and future companion systems.
 
-T1 reproduces strict EQ-classic combat feel where feasible: toggle auto-attack, weapon-delay ticks, slow spell casts, meaningful interruptions, explicit hate, careful body/line-of-sight pulls, sitting to recover mana, and trash encounters that a careful Cleric can solo. It does not implement PvP, networking, raids, future classes, live companions, full spellbook memorization, loot economy, XP curves, corpse-run penalties, or named/boss soloability. Combat Core validates the combat-feel half of the MVP hypothesis; Zone Control must still validate the "kills shift faction control" bridge alongside the combat prototype.
+T1 reproduces strict EQ-classic combat feel where feasible: player-controlled toggle auto-attack, weapon-delay ticks, slow spell casts, tactical Cleric instants, meaningful interruptions, explicit hate, careful body/line-of-sight pulls, sitting to recover mana, and trash encounters that a careful Cleric can solo. It does not implement PvP, networking, raids, future classes, live companions, full spellbook memorization, loot economy, XP curves, corpse-run penalties, or named/boss soloability. Combat Core validates the combat-feel half of the MVP hypothesis; Zone Control must still validate the "kills shift faction control" bridge alongside the combat prototype.
 
 ## Overview
 
@@ -104,13 +110,13 @@ The Cleric is not a solo power fantasy. In T1, the Cleric survives trash by disc
 
 3. **Player target selection.** The player may target one combat-eligible actor at a time using tab-target selection or direct click/selection. Targeting does not start combat by itself. Targets are valid only when alive, enabled by the active `HauntZone`, within `target_acquire_radius_meters`, and line-of-sight valid according to the T1 LoS query. Invalid targets clear or fail selection silently with no UI error beyond HUD target loss.
 
-4. **Auto-attack toggle.** Auto-attack is an explicit on/off state. When enabled against a valid hostile target in melee range, the player swings on `weapon_delay_seconds` ticks until toggled off, target invalidates, the player sits/meditates, casts a spell that forbids melee overlap, dies, leaves combat, or crosses a zone transition boundary. Auto-attack does not queue multiple swings while out of range.
+4. **Attack toggle / auto-attack state.** Auto-attack is an explicit player-controlled `Attack` on/off state, separate from targeting and pulling. Target selection, tab cycling, body-pull aggro, hostile social assist, and spell casts never turn `Attack` on by themselves. A toggle-on request with no valid hostile target silently no-ops and leaves `Attack` off. When enabled against a valid hostile target in melee range, the player swings on `weapon_delay_seconds` ticks until toggled off, target invalidates, the player successfully sits/meditates, casts a spell that forbids melee overlap, dies, leaves combat, or crosses a zone transition boundary. Auto-attack does not queue multiple swings while out of range.
 
 5. **Melee tick resolution.** On each eligible weapon tick, Combat Core validates target, range, facing tolerance, line-of-sight, actor alive state, and combat zone gate. If valid, it computes hit/miss and damage through the melee formulas. If invalid, the swing is skipped without resetting the weapon timer unless the invalid condition is target death, auto-attack off, or combat exit.
 
 6. **T1 range scope.** T1 supports melee and spell range only. There is no bow, thrown weapon, wand auto-shot, ammunition, ranged weapon delay, ranged ammo economy, or future-class ranged attack in Combat Core. Future Class Design may add ranged capability through this actor interface in T2+.
 
-7. **Pull model.** Combat starts through explicit pulling: body proximity, line-of-sight body-pull, or hostile actor social-link response. The body-pull predicate is `hostile faction targetable AND player within aggro_radius_meters AND unobstructed LoS from hostile aggro origin to player target point`. Facing is not required for the initial body-pull unless Creature / Enemy AI later authors a narrower sentry-cone profile; once initial aggro is acquired, breaking LoS by backing around a corner does not erase threat.
+7. **Pull model.** Combat starts through explicit pulling: body proximity, line-of-sight body-pull, or hostile actor social-link response. Pulling initializes threat and hostile intent, but does not enable the player's `Attack` toggle; the player must choose `Attack` separately if they want melee auto-swings. The body-pull predicate is `hostile faction targetable AND player within aggro_radius_meters AND unobstructed LoS from hostile aggro origin to player target point`. Facing is not required for the initial body-pull unless Creature / Enemy AI later authors a narrower sentry-cone profile; once initial aggro is acquired, breaking LoS by backing around a corner does not erase threat.
 
    T1 LoS and pull queries use these implementation contracts:
 
@@ -139,9 +145,11 @@ The Cleric is not a solo power fantasy. In T1, the Cleric survives trash by disc
 
 10. **Target-of-target behavior.** Each hostile actor attacks the highest-threat valid target on its threat table. Ties resolve by earliest threat entry timestamp, then lowest `combat_sort_key` for deterministic tests. If the top target becomes invalid, the actor retargets to the next valid positive entry. If the table has exactly one valid positive entry, that entry is both top target and uncontested aggro. If no valid positive target remains, the hostile actor leashes or exits combat per Rule 18. This is the future "tank holds aggro" foundation: a tank keeps control by remaining highest accumulated threat, while a healer can overtake through effective healing or unsafe sitting. T1 has no tank class, so the Cleric player is normally the top valid target unless a test actor is present.
 
-11. **Casting framework.** Combat Core owns spell-casting state, not spellbook content. A cast request includes `caster_combat_actor_id`, `spell_id`, `target_combat_actor_id`, `cast_time_seconds`, `mana_cost`, `spell_range_meters`, `interrupt_profile_id`, and `recovery_seconds`. These ids are transient runtime lookup ids only. Combat Core validates actor state, target state, range, line-of-sight, mana, and combat locks; enters `Casting`; resolves success, interrupt, cancel, or fizzled validation failure; spends mana according to Rule 13; and emits cast lifecycle events for Spell Memorization and HUD.
+11. **Casting and tactical instant framework.** Combat Core owns spell/ability execution state, not spellbook content. A cast or ability request includes `caster_combat_actor_id`, `spell_id`, optional `target_combat_actor_id`, `cast_time_seconds`, `mana_cost`, `spell_range_meters`, `interrupt_profile_id`, `recovery_seconds`, `cooldown_seconds` or `cooldown_profile_id`, and effect declarations. These ids are transient runtime lookup ids only. `cast_time_seconds = 0` is an instant ability; non-zero values enter the normal cast bar/channel state. Combat Core validates actor state, target state, range, line-of-sight, mana, cooldown availability, and combat locks; enters `Casting` when cast time is non-zero; resolves success, interrupt, cancel, or fizzled validation failure; spends mana according to Rule 13; starts cooldowns as transient runtime timers; and emits lifecycle events for Spell Memorization and HUD.
 
-12. **Slow spell cadence.** T1 default cast times should live primarily in the 3-8 second band, with rare faster utility exceptions and later 6-10 second class-defining casts allowed by Class Design. Global recovery prevents spell spam even when individual spells are fast. Instant-cast spell behavior is not part of T1 Combat Core unless Class Design later explicitly authors it.
+   Tactical instant effect declarations are contract shape only. Numeric damage, cooldown, mana-cost, duration, and scaling values live in fixture data owned by Class Design / Spell Memorization. T1 effect types include hostile direct damage, self-buff with authored duration, and `interrupt_current_channel` for abilities such as Bash. `interrupt_current_channel` cancels the target's current channel if the target has one and the ability profile passes range/validity checks; interrupt duration or recovery pressure is fixture data, not a Combat Core constant.
+
+12. **Slow spell cadence.** T1 default channeled cast times should live primarily in the 3-8 second band, with rare faster utility exceptions and later 6-10 second class-defining casts allowed by Class Design. Global recovery and cooldowns prevent spell spam even when individual spells are fast. D012 authorizes a narrow T1 tactical instant surface for Cleric agency, using `cast_time_seconds = 0` profiles with cooldown and mana-cost fields; this does not authorize an action-combat rotation or spammed manual melee.
 
 13. **Mana spend timing.** The default T1 rule is mana commits when the cast successfully completes. If a cast is interrupted, mana is not spent. If the player cancels manually before completion, mana is not spent. If a cast passes completion but the target becomes invalid at the final resolution frame, spell-specific behavior is deferred to Class Design / Spell Memorization; Combat Core emits `CastResolvedInvalidTarget`.
 
@@ -214,8 +222,8 @@ The Cleric is not a solo power fantasy. In T1, the Cleric survives trash by disc
 | State | Entry Condition | Exit Condition | Behavior |
 |---|---|---|---|
 | `CombatDisabled` | Active zone is not a `HauntZone`; actor not hydrated; actor dead; session not playable | `ZoneActiveEvent` for `HauntZone` and actor ready -> `OutOfCombat` | No hostile combat, auto-attack, casts, threat, or kill credit. |
-| `OutOfCombat` | Actor alive and combat-enabled with no active hostile threat | Pull, hostile action, or valid auto-attack -> `InCombat`; sit command -> `SittingOutOfCombat` | Standing regen applies. Targeting allowed. Auto-attack may be toggled but does not resolve until hostile combat starts. |
-| `SittingOutOfCombat` | Player sits while alive and out of combat | Stand/move/cast/pull/damage -> `OutOfCombat` or `InCombat` | Med-break mana regen applies. Auto-attack disabled. |
+| `OutOfCombat` | Actor alive and combat-enabled with no active hostile threat | Pull, hostile action, or valid auto-attack -> `InCombat`; sit command -> `SittingOutOfCombat` | Standing regen applies. Targeting allowed. `Attack` does not pre-queue without a valid hostile target. |
+| `SittingOutOfCombat` | Player sits while alive and out of combat | Stand/move/cast/pull/damage -> `OutOfCombat` or `InCombat` | Med-break mana regen applies. `Attack` is forced off on successful sit. |
 | `Pulling` | Actor violates hostile proximity/LoS/social-link rule | Threat table initialized -> `InCombat`; invalid pull -> `OutOfCombat` | Initial aggro source recorded. Pivot/hostile claim begins through Creature AI. |
 | `InCombat` | Threat table has at least one valid hostile entry or recent hostile action | No hostile entries/action for `combat_exit_timer_seconds` -> `ExitingCombat`; player death -> `Dead`; cast request -> `Casting` | Auto-attack ticks, threat updates, damage, and hostile retargeting run. In-combat regen minimal/zero. |
 | `Casting` | Valid cast request begins | Cast completes -> `Recovery`; interrupt/cancel -> `Interrupted`; death -> `Dead`; zone transition -> `TransitionCleanup` | Cast timer runs. Damage may trigger interrupt. Movement/sit/transition interrupts. |
@@ -406,6 +414,14 @@ Combat Core owns this temporary fixture set only for combat-feel prototyping. Cl
 | `Smite_T1_Prototype` | 6.0s | 18 / 30 / 48 | 24 / 48 / 82 damage | 1.5s | Hostile spell; eligible for interruption. |
 | `LesserHeal_T1_Prototype` | 6.0s | 20 / 34 / 52 | 34 / 68 / 110 healing | 1.5s | Self-heal fixture; effective healing generates threat if hostile tables include the healed actor. |
 
+D012 tactical instant fixtures use the same profile contract. They are prototype-derived contract fixtures, not final Class Design spell-list commitments.
+
+| Tactical Instant Fixture | Cast-Time Contract | Cost/Cooldown Ownership | Effect Contract | Notes |
+|---|---|---|---|---|
+| `SmiteOfAuthority_T1_Prototype` | `cast_time_seconds = 0` | Fixture data | Hostile direct damage | Aggressive filler button; final name/value may change in Class Design. |
+| `Bash_T1_Prototype` | `cast_time_seconds = 0` | Fixture data | Melee-range direct damage plus `interrupt_current_channel` | Interrupt value/duration is fixture data; Combat Core owns channel-cancel effect resolution. |
+| `DefensivePrayer_T1_Prototype` | `cast_time_seconds = 0` | Fixture data | Self-buff with authored duration | Defensive preservation button; final name/value may change in Class Design. |
+
 ### Encounter fixtures
 
 | Fixture | Composition | T1 `kill_weight_seed` | Source-ref aliases available to downstream fixtures | Required Outcome |
@@ -417,8 +433,11 @@ Combat Core owns this temporary fixture set only for combat-feel prototyping. Cl
 ## Edge Cases
 
 - **If the player targets a valid NPC in `CityHubZone` and presses auto-attack**: auto-attack does not start; no threat table is created; no damage event fires. T1 city combat remains disabled.
+- **If the player presses `Attack` with no valid hostile target**: the toggle-on request no-ops, `Attack` remains off, and no auto-swing timer is queued.
 - **If auto-attack is on and the target steps out of melee range before the weapon tick**: the tick validates range, deals no damage, and the next tick waits for the normal weapon delay.
-- **If a target dies on the same frame as the player's swing tick**: death resolves before the swing by transition priority; the swing is discarded and no overkill second death event fires.
+- **If a target dies on the same frame as the player's swing tick**: death resolves before the swing by transition priority; the swing is discarded, `Attack` is forced off, and no overkill second death event fires.
+- **If the player successfully sits/meditates while `Attack` is on**: the sit transition forces `Attack` off before med-break regen begins; no melee ticks occur while seated.
+- **If the player tab-cycles targets while `Attack` is on**: `Attack` remains on, but the next swing tick validates the new target, range, LoS, hostility, and zone gate before dealing damage. If the new target is invalid, the tick is skipped or the toggle is forced off per invalid-target rules.
 - **If two actors reach lethal health in the same frame**: resolve player death first for `PlayerDeathEvent`, then NPC deaths for kill/death events; tests must assert single event emission per actor.
 - **If a cast completes on the same frame as incoming damage**: cast completion resolves before the new interrupt check. Damage may still apply after the spell resolves.
 - **If damage interrupts a cast**: emit `CastInterruptedEvent`, enter `Interrupted`, do not spend mana under default T1 mana-spend rule, and apply interrupt recovery.
@@ -457,13 +476,13 @@ Combat Core owns this temporary fixture set only for combat-feel prototyping. Cl
 | Dependent | Contract Combat Core Must Provide |
 |---|---|
 | Character Progression | Approved `PlayerKillCreditEvent` hook plus ADR-0003 `CombatProgressionBaselineSnapshot` input for player actor level and permanent health/mana maxima; Combat Core must not consume generic progression snapshots, `visible_level`, XP progress fields, or spell eligibility. |
-| Class Design | Shared actor, auto-attack, spell profile, threat, and resource hooks for Cleric T1 and Warrior/Enchanter T2. |
-| Spell Memorization | Cast request, cast start, cast complete, interrupt, cancel, and recovery framework. |
+| Class Design | Shared actor, Attack toggle, tactical instant profile contract, spell profile, threat, and resource hooks for Cleric T1 and Warrior/Enchanter T2; when authored, Class Design must reverse-list Combat Core's tactical instant fixture contract and decide final Cleric names/values. |
+| Spell Memorization | Cast request, zero-cast-time instant profile support, cast start, cast complete, interrupt, cancel, cooldown, and recovery framework. |
 | Status Effects & Buffs | Hook points for modifiers to damage, threat, interrupt, regen, movement, casting, and actor state. |
 | Creature / Enemy AI | Threat table, current target, damage results, death state, and leash state. |
 | Death & Corpse Recovery | Player death payload with `death_context_id`, stable source refs, death position, and zone id. |
 | Zone Control | Kill-credit event with stable defeated source ref, `zoneId`, `faction_id`, and kill-weight seed. |
-| Layer 1 HUD | Practical state outputs: health, mana, target, cast, recovery, auto-attack, and categorical hate. |
+| Layer 1 HUD | Practical state outputs: health, mana, target, cast, recovery, Attack on/off plus explicit Attack ON visual-state signal, and categorical hate. |
 | Audio System | Combat timing events for restrained SFX and no-stinger death/interruption policy. |
 
 ### Forward-looking T2+ dependents
@@ -478,6 +497,7 @@ Combat Core owns this temporary fixture set only for combat-feel prototyping. Cl
 - **NPC System Rule 16 verification** - Combat Core should be cross-checked against `npc-system.md:82` and `npc-system.md:403` during review. Any divergence in hostility/hate/damage/death ownership must be resolved explicitly.
 - **World Structure death-event fields** - `world-structure.md:615` only requires `PlayerDeathEvent`; this GDD now requires `PlayerDeathPayload` with `death_context_id`, `local_character_id`, `zoneId`, `death_position`, stable `killer_source_ref`, and `death_cause_type`. World Structure and Death & Corpse Recovery must mirror or explicitly supersede that payload when their implementations/GDDs are updated.
 - **Save/Load Rule 1 amendment** - Save/Load may need to list Combat Core's direct persisted fields (`current_health`, `current_mana`, `combat_life_state`, and optional pending death handoff payload) before implementation. Threat tables, cast progress, swing timers, target selection, cooldown timers, regen rates, `combat_actor_id`, runtime handles, XP, item drops, and corpse records remain outside Combat Core persistence.
+- **Class Design tactical instant reverse-listing** - Class Design must reverse-list Combat Core's D012 tactical instant profile contract (`cast_time_seconds = 0`, mana cost, cooldown, and declared effects) before final Cleric T1 spell/ability data is accepted.
 
 ## Cross-References
 
@@ -495,6 +515,8 @@ These references do not override Locked Inputs. They bind implementation constra
 | `docs/engine-reference/unity/modules/navigation.md` | 89-124, 321-323 | Creature / Enemy AI path validity and leashing should consume NavMesh path status and avoid per-frame `SetDestination()` churn. |
 | `docs/engine-reference/unity/modules/animation.md` | 10-11, 34-40 | Combat posture, pivot, medbreak, and death animations should use Animator Controller state machines rather than legacy animation. |
 | `docs/engine-reference/unity/modules/audio.md` | 10-12, 256-260 | Combat Core emits audio timing hooks only; Audio System owns AudioSource/Audio Mixer playback and the single-listener rule. |
+| `DECISIONS.md` | 339-358 | D012 locks pinned-engine combat-feel validation and requires Combat Core revision before `/sprint-plan new`. |
+| `production/prototypes/combat-feel-report.md` | 196-251 | Pinned Unity 6000.3.14f1 validation passes all six combat-feel criteria and identifies v2 Attack toggle plus tactical instants as the preferred T1 combat baseline. |
 
 ## Tuning Knobs
 
@@ -557,7 +579,7 @@ Combat Core owns no UI presentation, but it must expose state required by Layer 
 - Player current/max health.
 - Player current/max mana.
 - Current target id, target current/max health, target alive/dead state, target hostility state.
-- Auto-attack on/off and next swing readiness category.
+- Attack on/off, explicit Attack ON visual-state signal, and next swing readiness category.
 - Cast state: not casting, casting, interrupted, recovery, cast complete/fail.
 - Cast progress normalized value for HUD bar/timer.
 - Categorical threat state: `NoThreat`, `ThreatListed`, `ThreatClose`, `HasAggroStable`, or `HasAggroContested`.
@@ -570,6 +592,8 @@ Combat Core owns no UI presentation, but it must expose state required by Layer 
 - Nameplate color changes, aggro outlines, target rings, quest markers, minimap enemy dots, or path arrows.
 - Center-screen combat warnings except future accessibility work explicitly approved by HUD/Accessibility GDDs.
 - Any HUD element participating in world desaturation; HUD presentation follows Layer 1 GDD/art-bible rules.
+
+Layer 1 HUD owns the final visual treatment for Attack ON, but Combat Core must expose an unambiguous state/event so the HUD can render it distinctly. The combat-feel prototype's pinned-engine highlight fix showed that unclear Attack feedback made the otherwise validated toggle feel clunky; this GDD requires the state surface, not the specific gold-highlight prototype presentation.
 
 ## Acceptance Criteria
 
@@ -619,6 +643,10 @@ All Combat Core acceptance criteria use the project QA taxonomy: Unit, Integrati
 **GIVEN** auto-attack is on and the hostile target moves outside `melee_range_meters` before the next weapon tick, **WHEN** the tick resolves, **THEN** no damage or threat from that swing is applied and the actor remains in combat if threat remains valid.
 *Integration | gameplay-programmer + qa-tester | T1-blocking*
 
+**H-CCOM-AA-03 - Pull does not auto-enable Attack**
+**GIVEN** the player targets, tab-cycles to, body-pulls, or spell-pulls a valid hostile actor in a `HauntZone`, **WHEN** threat initializes or the hostile enters combat, **THEN** the player's `Attack` state remains off until the player explicitly toggles it on; pressing `Attack` with no valid hostile target no-ops; target death, successful sit/med, combat exit, death, and zone transition force `Attack` off.
+*Integration | gameplay-programmer + qa-tester | T1-blocking*
+
 **H-CCOM-F1 - Melee hit chance formula**
 **GIVEN** equal-level attacker/defender with equal skills and default hit parameters, **WHEN** `melee_hit_chance` is evaluated, **THEN** output is `0.72`; with extreme unfavorable/favorable inputs, output clamps to `hit_chance_min` and `hit_chance_max` respectively.
 *Unit | gameplay-programmer | T1-blocking*
@@ -628,7 +656,7 @@ All Combat Core acceptance criteria use the project QA taxonomy: Unit, Integrati
 *Unit | gameplay-programmer | T1-blocking*
 
 **H-CCOM-FIXTURE-01 - Prototype fixture package exists**
-**GIVEN** the Combat Core prototype fixture data is loaded, **WHEN** QA inspects the fixture package, **THEN** it includes lowest/mid/top T1 Cleric fixtures, lowest/mid/top T1 trash fixtures, a top-band named fixture, `Smite_T1_Prototype`, `LesserHeal_T1_Prototype`, and the `SoloTrash_EvenCon_T1`, `TwoTrash_Overpull_T1`, and `NamedSoloBlock_T1` encounter fixtures with explicit T1 `kill_weight_seed` values and source-ref aliases for downstream fixture validation; `Cleric_Mid_T1` is level 5 with 140 HP and 180 max mana; the package documents that final levels remap to the T1 haunt band when Level / Encounter Design locks that band.
+**GIVEN** the Combat Core prototype fixture data is loaded, **WHEN** QA inspects the fixture package, **THEN** it includes lowest/mid/top T1 Cleric fixtures, lowest/mid/top T1 trash fixtures, a top-band named fixture, `Smite_T1_Prototype`, `LesserHeal_T1_Prototype`, D012 tactical instant fixtures (`SmiteOfAuthority_T1_Prototype`, `Bash_T1_Prototype`, and `DefensivePrayer_T1_Prototype` or Class Design-approved T1 equivalents), and the `SoloTrash_EvenCon_T1`, `TwoTrash_Overpull_T1`, and `NamedSoloBlock_T1` encounter fixtures with explicit T1 `kill_weight_seed` values and source-ref aliases for downstream fixture validation; `Cleric_Mid_T1` is level 5 with 140 HP and 180 max mana; the package documents that final levels remap to the T1 haunt band when Level / Encounter Design locks that band.
 *Editor-validation + Unit | game-designer + systems-designer + qa-tester | fixture-gated T1-blocking*
 
 **H-CCOM-F2B - Damage fixture extremes**
@@ -715,10 +743,14 @@ All Combat Core acceptance criteria use the project QA taxonomy: Unit, Integrati
 **GIVEN** a test spell profile with cast time, mana cost, range, interrupt profile, and recovery seconds, **WHEN** Combat Core resolves start, completion, interruption, cancellation, recovery start, and recovery end cases, **THEN** it emits `CastStartedEvent`, `CastCompletedEvent`, `CastInterruptedEvent`, `CastCancelledEvent`, `CastRecoveryStartedEvent`, and `CastRecoveryEndedEvent` with spell id, caster transient id, target transient id where applicable, and Combat Simulation Tick id; Combat Core does not own spellbook slots or memorized-spell availability.
 *Integration | gameplay-programmer + qa-tester | T1-blocking*
 
+**H-CCOM-INST-01 - Tactical instant profile contract**
+**GIVEN** a Cleric tactical instant profile with `cast_time_seconds = 0`, authored mana cost, authored cooldown, valid range, and declared effect type (`direct_damage`, `self_buff`, or `interrupt_current_channel`), **WHEN** the player activates the ability with sufficient mana and a valid target/self target, **THEN** Combat Core resolves it without a cast bar, spends mana through the same Rule 13 path, starts the transient cooldown, emits ability lifecycle/result events, and applies the declared effect without hard-coded numeric values in Combat Core prose or code. If `interrupt_current_channel` is declared and the target is channeling, the current channel is cancelled through the normal interrupt/cancel event surface.
+*Integration + Unit | gameplay-programmer + systems-designer + qa-tester | T1-blocking*
+
 ### Regen and med breaks
 
 **H-CCOM-MED-01 - Sitting disables auto-attack**
-**GIVEN** auto-attack is on and the player successfully sits out of combat, **WHEN** the sitting state begins, **THEN** auto-attack is disabled and no melee ticks occur while seated.
+**GIVEN** auto-attack is on and the player successfully enters any sitting/med posture, **WHEN** the sitting state begins, **THEN** auto-attack is disabled before regen/threat updates and no melee ticks occur while seated.
 *Integration | gameplay-programmer + qa-tester | T1-blocking*
 
 **H-CCOM-MED-02 - Sitting out of combat boosts mana regen**
@@ -795,6 +827,10 @@ All Combat Core acceptance criteria use the project QA taxonomy: Unit, Integrati
 **GIVEN** Combat Core is running without Layer 1 HUD implementation, **WHEN** health, mana, cast, target, auto-attack, and hate states change, **THEN** Combat Core exposes data/events through testable accessors and does not instantiate HUD UI, nameplates, floating combat text, or screen-space warning elements.
 *Integration | gameplay-programmer + qa-tester | T1-blocking*
 
+**H-CCOM-HUD-04 - Attack ON state exposed for HUD feedback**
+**GIVEN** the player toggles `Attack` on, off, loses target to death, successfully sits/meds, exits combat, dies, or transitions zones, **WHEN** HUD-facing combat state is inspected, **THEN** Combat Core exposes an explicit Attack ON/OFF state-change signal and current-state accessor so Layer 1 HUD can render a distinct Attack ON visual state; Combat Core does not prescribe the final color, shape, animation, or layout.
+*Integration | gameplay-programmer + ui-programmer + qa-tester | T1-blocking*
+
 **H-CCOM-AUD-01 - Audio hooks only, no playback ownership**
 **GIVEN** Combat Core emits swing, hit, miss, cast start, interrupt, death, or med start/stop timing events, **WHEN** the runtime scene is inspected, **THEN** Combat Core does not create or control `AudioSource`, `AudioMixer`, music state, warning stingers, low-health alarms, or kill fanfare; Audio System owns playback.
 *Editor-validation + Integration | gameplay-programmer + audio-lead + qa-tester | T1-blocking*
@@ -813,6 +849,7 @@ All Combat Core acceptance criteria use the project QA taxonomy: Unit, Integrati
 | H-CCOM-TGT-01 | Target acquisition | Integration | gameplay-programmer, qa-tester | T1-blocking |
 | H-CCOM-AA-01 | Auto-attack toggle | Integration | gameplay-programmer, qa-tester | T1-blocking |
 | H-CCOM-AA-02 | Out-of-range swing | Integration | gameplay-programmer, qa-tester | T1-blocking |
+| H-CCOM-AA-03 | Pull does not auto-enable Attack | Integration | gameplay-programmer, qa-tester | T1-blocking |
 | H-CCOM-F1 | Hit chance formula | Unit | gameplay-programmer | T1-blocking |
 | H-CCOM-F2 | Damage formula | Unit | gameplay-programmer | T1-blocking |
 | H-CCOM-FIXTURE-01 | Prototype fixture package | Editor-validation + Unit | game-designer, systems-designer, qa-tester | fixture-gated T1-blocking |
@@ -836,6 +873,7 @@ All Combat Core acceptance criteria use the project QA taxonomy: Unit, Integrati
 | H-CCOM-CAST-04 | Damage interrupt | Integration | gameplay-programmer, qa-tester | T1-blocking |
 | H-CCOM-CAST-05 | Same-tick cast priority | Unit + Integration | gameplay-programmer, qa-tester | T1-blocking |
 | H-CCOM-IF-01 | Spell Memorization cast lifecycle interface | Integration | gameplay-programmer, qa-tester | T1-blocking |
+| H-CCOM-INST-01 | Tactical instant profile contract | Integration + Unit | gameplay-programmer, systems-designer, qa-tester | T1-blocking |
 | H-CCOM-MED-01 | Sitting disables auto-attack | Integration | gameplay-programmer, qa-tester | T1-blocking |
 | H-CCOM-MED-02 | Sitting mana regen | Unit + Integration | gameplay-programmer, qa-tester | T1-blocking |
 | H-CCOM-MED-03 | Sitting in combat unsafe | Integration | gameplay-programmer, qa-tester | T1-blocking |
@@ -854,9 +892,10 @@ All Combat Core acceptance criteria use the project QA taxonomy: Unit, Integrati
 | H-CCOM-ART-01 | Pivot/no marker | Dev-build smoke | game-designer, art-lead, qa-tester | T1-blocking |
 | H-CCOM-ART-02 | No global combat visual state | Editor-validation + Dev-build smoke | technical-artist, qa-tester | T1-blocking |
 | H-CCOM-HUD-02 | HUD output boundary | Integration | gameplay-programmer, qa-tester | T1-blocking |
+| H-CCOM-HUD-04 | Attack ON HUD state | Integration | gameplay-programmer, ui-programmer, qa-tester | T1-blocking |
 | H-CCOM-AUD-01 | Audio hook boundary | Editor-validation + Integration | gameplay-programmer, audio-lead, qa-tester | T1-blocking |
 
-**Total: 52 criteria. 46 ordinary T1-blocking. 6 fixture-gated T1-blocking. 0 advisory-at-T1.**
+**Total: 55 criteria. 49 ordinary T1-blocking. 6 fixture-gated T1-blocking. 0 advisory-at-T1.**
 
 ## Non-Goals
 
@@ -881,7 +920,8 @@ All Combat Core acceptance criteria use the project QA taxonomy: Unit, Integrati
 | **Pause semantics integration.** Combat Core now hard-stops Combat-owned timers, movement intents, combat-tied animation progression, and combat audio hook emission. Menus & Settings owns pause entry/input flow. Day/Night and Menus still have open global world-simulation pause rows outside this file. | `game-designer` + `engine-programmer` | Before Pause Menu + Combat implementation | Combat slice closed; cross-doc global pause policy still open outside approved edit scope |
 | **Save/Load amendment for combat persisted fields.** Combat Core now defines `current_health`, `current_mana`, `combat_life_state`, optional death handoff payload, and transient exclusions. Save/Load must mirror the whitelist before implementation. | `gameplay-programmer` + `engine-programmer` | Before Save/Load implementation | Closed for Combat Core; downstream amendment required |
 | **World Structure / Death payload confirmation.** Combat Core now requires `PlayerDeathEvent(death_payload)` with `death_context_id`, `local_character_id`, `zoneId`, `death_position`, stable `killer_source_ref`, and `death_cause_type`, with T1 sources restricted to NPC/spawn/environmental combat. World Structure and Death & Corpse Recovery must mirror or explicitly supersede this payload when those contracts are implemented. | `gameplay-programmer` + `game-designer` | Before Death & Corpse Recovery GDD | Closed for Combat Core; downstream confirmation required |
-| **Temporary spell profile data ownership.** Combat Core now defines `CombatPrototypeSpellProfileSet_T1` for the combat-feel prototype. Class Design and Spell Memorization own final spell lists, memorized slots, and spell acquisition. | `game-designer` + `systems-designer` | Before Class Design / Spell Memorization GDDs | Closed for Combat Core; downstream ownership noted |
+| **Temporary spell profile data ownership.** Combat Core now defines `CombatPrototypeSpellProfileSet_T1` and D012 tactical instant fixture contracts for the combat-feel prototype. Class Design and Spell Memorization own final spell lists, memorized slots, spell acquisition, and final numeric cooldown/mana/effect values; Class Design must reverse-list the tactical instant contract when authored. | `game-designer` + `systems-designer` | Before Class Design / Spell Memorization GDDs | Closed for Combat Core; downstream ownership noted |
+| **Attack ON HUD treatment.** Combat Core exposes explicit Attack ON/OFF state and state-change signals. Layer 1 HUD owns final visual treatment consistent with art bible restraint and must make Attack ON unmistakable enough to avoid the pinned-prototype "clunky feedback" failure. | `ui-programmer` + `game-designer` | Before Layer 1 HUD implementation | Closed for Combat Core; downstream presentation required |
 | **Threat HUD categories.** Combat Core now exposes `NoThreat`, `ThreatListed`, `ThreatClose`, `HasAggroStable`, and `HasAggroContested` using ratio thresholds. Layer 1 HUD owns visual treatment without raw numbers. | `ux-designer` + `ui-programmer` | During Layer 1 HUD GDD | Closed for Combat Core; downstream presentation deferred |
 | **Leash/path failure details.** Combat Core now defines T1 path-failure grace, path-pending grace, path-status sample cadence, re-aggro distance, threat-memory expiry, query anchors, LayerMasks, and social-assist pulse rules. Creature / Enemy AI owns return-to-anchor movement implementation. | `ai-programmer` + `gameplay-programmer` | During Creature / Enemy AI GDD | Closed for Combat Core; downstream movement detail deferred |
 | **Ranged combat addition.** Future classes may require ranged attacks. This is explicitly out of T1 and should be added through Class Design / Combat Core amendment only when needed. | `game-designer` + `systems-designer` | T2+ class expansion | Deferred |
