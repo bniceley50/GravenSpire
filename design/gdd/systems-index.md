@@ -32,7 +32,7 @@ Systems marked **E** are explicit in the game concept's Core Mechanics or Techni
 | 4 | NPC System (I) | Core | **MVP** | APPROVED 2026-04-24 (re-entry #2) | [npc-system.md](npc-system.md) | World Structure, Save/Load |
 | 5 | Day/Night Cycle (I) | Core | **MVP** | APPROVED 2026-04-24 (re-entry #1) | [day-night-cycle.md](day-night-cycle.md) | World Structure |
 | 6 | Character Creation (I) | Core | **MVP** | APPROVED 2026-04-24 | [character-creation.md](character-creation.md) | Save/Load |
-| 7 | Combat Core (E) | Gameplay | **MVP** | D012 AMENDMENT DRAFTED 2026-04-27 (pending re-review; prior APPROVED 2026-04-25) | [combat-core.md](combat-core.md) | World Structure, NPC System, Save/Load |
+| 7 | Combat Core (E) | Gameplay | **MVP** | APPROVED 2026-04-27 (D012 amendment re-review; prior APPROVED 2026-04-25) | [combat-core.md](combat-core.md) | World Structure, NPC System, Save/Load |
 | 8 | Character Progression (I) | Progression | **MVP** | APPROVED 2026-04-26 (re-review #4) | [character-progression.md](character-progression.md) | Character Creation, Save/Load, Combat Core, NPC System |
 | 9 | Inventory & Item Economy (I) | Economy | **MVP** | Draft parked — implementation pre-spec required | [inventory-item-economy.md](inventory-item-economy.md) | Save/Load, Character Creation |
 | 10 | Class Design (I) | Gameplay | **MVP** (Cleric) / **T2** (Warrior, Enchanter) | Not Started | — | Combat Core, Character Progression |
@@ -108,7 +108,7 @@ Systems sorted by dependency order. Design and build from top (Foundation) to bo
 4. **NPC System** — depends on: World Structure, Save/Load. ⚠ **Bottleneck — 6 downstream systems depend on this.** Ambient + named behavioral framework, occupation postures, idle loops.
 5. **Day/Night Cycle** — depends on: World Structure. Approved: [day-night-cycle.md](day-night-cycle.md). UTC-derived local world clock; no Save/Load dependency or persisted clock field. Court hours vs. inn hours; world state shifts per art bible S2.
 6. **Character Creation** — depends on: Save/Load. Class selection, starting faction-neutral state.
-7. **Combat Core** — depends on: World Structure, NPC System, Save/Load. ⚠ **Bottleneck — 9 downstream systems.** The core hypothesis is validated by D012; D012 amendment is drafted and pending re-review before `/sprint-plan new`.
+7. **Combat Core** — depends on: World Structure, NPC System, Save/Load. ⚠ **Bottleneck — 9 downstream systems.** The core hypothesis is validated by D012; the D012 amendment is approved and `/sprint-plan new` is unblocked for the T1 combat sprint.
 8. **Character Progression** — depends on: Character Creation, Save/Load, Combat Core, NPC System. Approved: [character-progression.md](character-progression.md). EQ-native XP, levels, spell eligibility, `CharacterProgressionFirstSaveMaterializer`, `ProgressionSaveBarrier`, `CombatProgressionBaselineSnapshot`, Combat kill-credit hooks, and ADR-0001 NPC-owned source lifecycle records.
 9. **Inventory & Item Economy** — depends on: Save/Load, Character Creation. Draft parked after full review; Save/Load reverse-listing repaired, remaining implementation-pre-spec blockers tracked in [inventory-item-economy.md](inventory-item-economy.md) `INV-OQ-05`. Items, gear, faction tokens, restrained currency/vendor contracts.
 
@@ -141,7 +141,7 @@ Systems sorted by dependency order. Design and build from top (Foundation) to bo
 
 ### Layer 7 — Presentation (UI)
 
-25. **Layer 1 HUD** — depends on: Combat Core, Character Progression, Status Effects, Inventory & Item Economy. Health/mana/hate/spell queue plus restrained level/XP progress per art bible S7 and Character Progression; future Inventory implementation pre-spec must define UI-safe inventory transaction result handoff.
+25. **Layer 1 HUD** — depends on: Combat Core, Character Progression, Status Effects, Inventory & Item Economy. Health/mana/hate/spell queue, Combat Core Attack on/off plus explicit Attack ON visual-state signal, and restrained level/XP progress per art bible S7 and Character Progression; future Inventory implementation pre-spec must define UI-safe inventory transaction result handoff.
 26. **Dialogue UI Panel** — depends on: Dialogue System. Diegetic faction-specific paper panel.
 27. **Personal Journal** — depends on: Faction Reputation. Diegetic carried object tracking faction standings.
 28. **Faction Board UI** — depends on: Faction Events, Faction State Simulation. Diegetic world-object bulletin.
@@ -174,7 +174,7 @@ Combining dependency sort + priority tier. **Write the GDDs in this order.** Ind
 | 4 | NPC System | MVP | Core | ai-programmer + game-designer | L | **Bottleneck — high-quality design critical.** |
 | 5 | Day/Night Cycle | MVP | Core | game-designer | S | UTC-derived local clock coupled with World Structure `SessionResumeEvent` / `ZoneActiveEvent` ordering. |
 | 6 | Character Creation | MVP | Core | game-designer + systems-designer | S | Single class at MVP (Cleric) — scope is small. |
-| 7 | **Combat Core** | MVP | Core | **game-designer + systems-designer** | **L** | **Core hypothesis validated in D012; amendment pending re-review before sprint planning.** |
+| 7 | **Combat Core** | MVP | Core | **game-designer + systems-designer** | **L** | **Core hypothesis validated in D012; amendment approved; ready for T1 combat sprint planning.** |
 | 8 | Character Progression | MVP | Progression | systems-designer | L | Approved. EQ-native XP curves; formula-heavy; consumes Combat kill-credit hooks, `CombatProgressionBaselineSnapshot`, and NPC source lifecycle records. |
 | 9 | Inventory & Item Economy | MVP | Economy | economy-designer + systems-designer | M (XL integration flags) | Draft parked pending implementation pre-spec; full review blockers are contract-tightening, not architecture rework. |
 | 10 | Class Design — Cleric | MVP | Gameplay | game-designer + systems-designer | L | Cleric is hardest class — group-dependency pivots here. |
@@ -231,7 +231,7 @@ Systems flagged for early prototyping regardless of priority tier — get these 
 
 | System | Risk Type | Risk Description | Mitigation |
 |---|---|---|---|
-| **Combat Core** | Technical + Design | EQ-classic tab-target may not feel good to modern players in 2026; this was the core hypothesis of the entire project. | **Validated by `/prototype combat-feel` and locked in D012.** Combat Core D012 amendment is drafted; run fresh `/design-review` before `/sprint-plan new`. |
+| **Combat Core** | Technical + Design | EQ-classic tab-target may not feel good to modern players in 2026; this was the core hypothesis of the entire project. | **Validated by `/prototype combat-feel` and locked in D012.** Combat Core D012 amendment is approved; `/sprint-plan new` is unblocked on the Combat side. |
 | **Faction State Simulation** | Design | "Alive but legible" sweet spot is narrow. Too chaotic = meaningless; too static = nothing happens. Unproven at solo-dev scale. | MVP is **reactive sim only** (faction state responds to player actions). Autonomous autonomous sim deferred to Tier 4 so mechanism can evolve from a working foundation. |
 | **Zone Control — kills shift faction control** | Design | The load-bearing bridge between 30-sec combat and macro faction politics. If it doesn't feel meaningful, the game has no soul. | **Prototype alongside Combat Core** — cannot be validated in isolation. |
 | **Named AI Companion Core** | Technical | Class AI competent enough to fill tank/heal/CC roles in a tab-target group is genuinely hard. | MVP scopes to ONE companion (Sister Elara as Cleric). Validate class AI quality before expanding roster. |
@@ -262,7 +262,7 @@ Systems flagged for early prototyping regardless of priority tier — get these 
 - [x] `/prototype combat-feel` completed; D012 locks pinned-engine validation, while Inventory & Item Economy remains parked pending implementation pre-spec.
 - [ ] Run `/map-systems next` to always pick the highest-priority undesigned system automatically.
 - [ ] Run `/design-review design/gdd/[system].md` in a fresh session after each GDD is authored.
-- [x] **Prototype Combat Core early** — combat-feel validated by `/prototype combat-feel` and D012; Combat Core amendment pending re-review before sprint planning.
+- [x] **Prototype Combat Core early** — combat-feel validated by `/prototype combat-feel` and D012; Combat Core amendment approved, unblocking T1 combat sprint planning.
 - [ ] **Prototype Zone Control / faction-feel early** — the remaining faction-control hypothesis cannot be validated in design docs alone.
 - [ ] Run `/create-architecture` after MVP GDDs (or a strategic subset) are authored — architecture translates GDDs into technical blueprints.
 - [ ] Run `/gate-check pre-production` when MVP GDDs are designed, prototype-validated, and architecture is drafted.

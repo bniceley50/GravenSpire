@@ -1,9 +1,9 @@
 # Combat Core
 
-> **Status**: Designed (D012 combat-feel amendment drafted; pending re-review)
+> **Status**: Designed (APPROVED after D012 combat-feel amendment re-review)
 > **Author**: Codex (session with Brian, 2026-04-24)
 > **Last Updated**: 2026-04-27
-> **Last Verified**: 2026-04-25 - second blocker revision pass; D012 amendment pending re-review
+> **Last Verified**: 2026-04-27 - D012 amendment full design-review approved; prior full approval 2026-04-25
 > **Implements Pillar**: Primary - **P2 The Silence Is Sacred**. Supports - **P5 Stakes Are Honest**, plus future-facing hooks for **P4 Every Companion Is A Person** and **P3 Reputation Is The Progression**.
 
 ## Locked Inputs
@@ -58,7 +58,7 @@ The Cleric is not a solo power fantasy. In T1, the Cleric survives trash by disc
 
 ### Anchor moments
 
-- **The first careful body pull.** The player edges close enough for one haunt inhabitant to pivot without pulling the room. No alert marker appears. The mesh rotation, closing movement, and auto-attack start are the signal.
+- **The first careful body pull.** The player edges close enough for one haunt inhabitant to pivot without pulling the room. No alert marker appears. The mesh rotation and closing movement are the signal; if the player chooses `Attack`, the measured auto-attack tick begins only from that explicit toggle.
 - **The interrupted heal.** A slow Cleric cast is nearly complete when a hit lands inside the interruption window. The cast drops, mana is not refunded beyond the specified rule, and the player learns to create space or time spells between enemy swings.
 - **The med break that matters.** After a narrow trash fight, the player sits near a practical light source, mana rises faster, auto-attack is disabled, and the next pull waits because the player chooses patience.
 - **The overpull.** Two enemies enter the hate table. The Cleric can delay death but not erase the mistake. The lesson is legible: the pull was wrong, not the math hidden.
