@@ -333,3 +333,38 @@ playtest evidence can count.
 `docs/architecture/adr-0004-first-save-materialization-and-character-identity.md`;
 `design/gdd/character-progression.md`; `design/gdd/combat-core.md`;
 `design/gdd/npc-system.md`; `design/gdd/systems-index.md`.
+
+---
+
+## D012 — T1 Combat-Feel Validated; Combat Core Revision Required Before /sprint-plan new
+
+**Date:** 2026-04-26
+**Status:** Locked
+**Context:** The combat-feel prototype cycle ran v1 baseline, v2 tactical
+instants plus Attack toggle, and pinned Unity `6000.3.14f1` validation. All six
+README success criteria passed with disk-captured JSONL evidence recorded in
+`prototypes/combat-feel/Logs/playtest-20260426-204721.log` and
+`prototypes/combat-feel/Logs/playtest-20260426-205508.log`; those metrics are
+summarized durably in `production/prototypes/combat-feel-report.md`. The
+project's biggest documented core-hypothesis risk in
+`design/gdd/game-concept.md:303` is answered affirmatively at prototype-grade
+evidence level.
+**Decision:** T1 combat-feel is the project's first prototype-validated pillar.
+Combat Core GDD must revise before `/sprint-plan new` is run, adding:
+- Attack toggle as a first-class player actor state
+- Tactical Cleric instants as a first-class T1 ability surface
+- Explicit Attack ON visual state requirement
+
+T1 sprint planning is unblocked once Combat Core revision passes
+`/design-review`.
+**Consequences:**
+- Combat Core's currently approved `PlayerKillCreditEvent` payload is preserved;
+  the validation requires scoped combat-feel additions, not an architectural
+  pivot.
+- Attack toggle and tactical instants must be designed into production Combat
+  Core rather than copied from throwaway prototype code.
+- The faction-control prototype risk in `design/gdd/game-concept.md:304`
+  remains open; run a separate `/prototype faction-feel` later.
+**See also:** `production/prototypes/combat-feel-report.md`;
+`prototypes/combat-feel/README.md`; `design/gdd/combat-core.md`;
+`design/gdd/game-concept.md`; commits `7add6ee` through `83598de`.

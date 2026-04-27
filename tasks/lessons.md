@@ -21,6 +21,40 @@ Promote repeating lessons to `CLAUDE-patterns.md` (cross-cutting) or a
 
 ## Entries (newest first)
 
+### 2026-04-26 — [GLOBAL][SCOPE] Prototype-validated pillar beats speculative pillar
+
+**Context:** The combat-feel prototype cycle (commits `7add6ee` through
+`83598de`) ran v1 baseline, v2 tactical instants plus Attack toggle, and pinned
+Unity `6000.3.14f1` validation in one day. The session arc was: speculation
+("does EQ-Classic combat still feel good in 2026?") → playtest → playtester
+instinct ("can we have manual melee?") → explicit design-tension surfacing
+(Read A/B/C) → playtester chose Read A → v2 implementation → re-playtest →
+pinned-engine validation gate → headline milestone. The result moved the
+project's biggest documented core-hypothesis risk from speculation to
+prototype-grade evidence on the pinned engine.
+
+**Lesson:** Pillars locked by speculation are fragile until prototype-validated.
+The pillar discipline that survived this session — "EQ-Classic IS, not inspired
+by" plus P2 Silence Is Sacred — was preserved by surfacing the design tension
+when playtester instinct conflicted with it, not by silently implementing the
+first requested mechanic. The Read A/B/C framing let the player choose an
+agency direction while keeping the pillar-fit tradeoff visible, then the chosen
+path was revalidated to confirm it did not dilute med breaks. General rule:
+when playtester instinct conflicts with a pillar, surface alternatives with
+pillar-fit notes; do not silently choose either capitulation or rejection.
+
+**Evidence:** Commits `7add6ee` through `83598de`;
+`production/prototypes/combat-feel-report.md` v1, v2, and pinned-validation
+sections; pinned-engine metrics captured in
+`prototypes/combat-feel/Logs/playtest-20260426-204721.log` and
+`prototypes/combat-feel/Logs/playtest-20260426-205508.log`; D012 in
+`DECISIONS.md`.
+
+**Promotion status:** open — promote to universal system prompt
+(`docs/brian-system-prompt-v4-6.md`) when that placeholder is populated; this
+discipline is universal across design-prototype cycles, not Gravenspire-
+specific. Tag remains `[GLOBAL]` for that propagation pathway.
+
 ### 2026-04-26 — [GLOBAL][TEST] Prototype smoke checks catch cadence bugs before human playtest
 
 **Context:** During combat-feel prototype scaffolding (commit `7add6ee`), a
