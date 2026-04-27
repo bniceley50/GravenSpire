@@ -109,6 +109,11 @@ Use the batch files from Windows Explorer:
 The build script prefers Unity 6000.3.x if installed, then falls back to
 6000.4.x for advisory practice builds.
 
+Manual playtest metrics are written on Stop (`X`) or five-pull completion to
+`Logs/playtest-<timestamp>.log` as one JSON line. `Logs/` is ignored by git; copy
+the relevant line into `production/prototypes/combat-feel-report.md` when a run
+is evidence-bearing.
+
 ## File Map
 
 - `Assets/Scripts/PrototypeBootstrap.cs` - Unity entry point and UI bootstrap.

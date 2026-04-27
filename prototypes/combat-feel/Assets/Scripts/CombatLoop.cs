@@ -4,6 +4,8 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
+using System.IO;
 using System.Text;
 using UnityEngine;
 
@@ -49,6 +51,7 @@ namespace Gravenspire.Prototypes.CombatFeel
         private float defensivePrayerTimer;
         private bool lastMeditating;
         private bool autoAttackEnabled;
+        private bool playtestMetricsSaved;
 
         public CombatLoop(CadenceKnobs knobs)
         {
@@ -469,6 +472,7 @@ namespace Gravenspire.Prototypes.CombatFeel
             State = CombatPrototypeState.Stopped;
             Log("Prototype stopped by player.");
             Log(BuildMetricsSummary());
+            SavePlaytestMetrics("X");
         }
 
         public string BuildMetricsSummary()
@@ -755,6 +759,116 @@ namespace Gravenspire.Prototypes.CombatFeel
             State = CombatPrototypeState.Complete;
             Log("Five-pull rhythm complete. Stop and write the feel notes now.");
             Log(BuildMetricsSummary());
+            SavePlaytestMetrics("completion");
+        }
+
+        private void SavePlaytestMetrics(string stoppedVia)
+        {
+            if (playtestMetricsSaved)
+            {
+                return;
+            }
+
+            playtestMetricsSaved = true;
+            try
+            {
+                var prototypeRoot = ResolvePrototypeRoot();
+                var logsDirectory = Path.Combine(prototypeRoot, "Logs");
+                Directory.CreateDirectory(logsDirectory);
+
+                var timestamp = DateTime.Now;
+                var outputPath = Path.Combine(logsDirectory, $"playtest-{timestamp:yyyyMMdd-HHmmss}.log");
+                File.AppendAllText(outputPath, BuildPlaytestMetricsJson(timestamp, stoppedVia) + Environment.NewLine);
+                Log($"Playtest metrics saved: {outputPath}");
+            }
+            catch (Exception exception)
+            {
+                Log($"Playtest metrics save failed: {exception.Message}");
+                Debug.LogWarning($"Combat-feel playtest metrics save failed: {exception}");
+            }
+        }
+
+        private string BuildPlaytestMetricsJson(DateTime timestamp, string stoppedVia)
+        {
+            var pullAverage = PullsCompleted <= 0 ? 0f : TotalCombatSeconds / PullsCompleted;
+            var builder = new StringBuilder();
+            builder.Append('{');
+            AppendJsonField(builder, "timestamp", timestamp.ToString("O", CultureInfo.InvariantCulture));
+            AppendJsonField(builder, "engine_version", Application.unityVersion);
+            AppendJsonField(builder, "final_state", State.ToString());
+            AppendJsonField(builder, "stopped_via", stoppedVia);
+            AppendJsonField(builder, "pulls_completed", PullsCompleted);
+            AppendJsonField(builder, "pulls_target", PullsGoal);
+            AppendJsonField(builder, "total_combat_seconds", TotalCombatSeconds);
+            AppendJsonField(builder, "total_downtime_seconds", TotalDowntimeSeconds);
+            AppendJsonField(builder, "avg_pull_seconds", pullAverage);
+            AppendJsonField(builder, "med_breaks", MedBreaks);
+            AppendJsonField(builder, "auto_swings", AutoAttackSwings);
+            AppendJsonField(builder, "hostile_swings", HostileSwings);
+            AppendJsonField(builder, "smites_channeled", SmiteCasts);
+            AppendJsonField(builder, "heals_used", HealCasts);
+            AppendJsonField(builder, "smite_of_authority_uses", AuthorityCasts);
+            AppendJsonField(builder, "bash_uses", BashUses);
+            AppendJsonField(builder, "defensive_prayer_uses", DefensivePrayerUses);
+            AppendJsonField(builder, "defensive_prayer_damage_prevented", DefensivePrayerDamagePrevented);
+            AppendJsonField(builder, "unsafe_pulls", UnsafePullAttempts);
+            AppendJsonField(builder, "deaths", Deaths, true);
+            builder.Append('}');
+            return builder.ToString();
+        }
+
+        private static void AppendJsonField(StringBuilder builder, string name, string value, bool isLast = false)
+        {
+            builder.Append('"').Append(EscapeJson(name)).Append("\":\"").Append(EscapeJson(value)).Append('"');
+            if (!isLast)
+            {
+                builder.Append(',');
+            }
+        }
+
+        private static void AppendJsonField(StringBuilder builder, string name, int value, bool isLast = false)
+        {
+            builder.Append('"').Append(EscapeJson(name)).Append("\":").Append(value.ToString(CultureInfo.InvariantCulture));
+            if (!isLast)
+            {
+                builder.Append(',');
+            }
+        }
+
+        private static void AppendJsonField(StringBuilder builder, string name, float value, bool isLast = false)
+        {
+            builder.Append('"').Append(EscapeJson(name)).Append("\":").Append(value.ToString("0.###", CultureInfo.InvariantCulture));
+            if (!isLast)
+            {
+                builder.Append(',');
+            }
+        }
+
+        private static string EscapeJson(string value)
+        {
+            return value
+                .Replace("\\", "\\\\", StringComparison.Ordinal)
+                .Replace("\"", "\\\"", StringComparison.Ordinal)
+                .Replace("\r", "\\r", StringComparison.Ordinal)
+                .Replace("\n", "\\n", StringComparison.Ordinal);
+        }
+
+        private static string ResolvePrototypeRoot()
+        {
+            var directory = new DirectoryInfo(Application.dataPath);
+            for (var i = 0; i < 8 && directory != null; i++)
+            {
+                var readmePath = Path.Combine(directory.FullName, "README.md");
+                var buildScriptPath = Path.Combine(directory.FullName, "BUILD_COMBAT_FEEL.bat");
+                if (File.Exists(readmePath) && File.Exists(buildScriptPath))
+                {
+                    return directory.FullName;
+                }
+
+                directory = directory.Parent;
+            }
+
+            return Directory.GetCurrentDirectory();
         }
 
         private void Log(string message)
