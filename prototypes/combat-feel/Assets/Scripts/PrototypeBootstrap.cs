@@ -92,7 +92,12 @@ namespace Gravenspire.Prototypes.CombatFeel
             GUILayout.Space(8f);
             GUILayout.BeginHorizontal();
             if (GUILayout.Button("Pull (1)", guiButton, GUILayout.Height(36f))) loop.PullSelected();
-            if (GUILayout.Button(loop.AutoAttackEnabled ? "Attack ON (A)" : "Attack OFF (A)", guiButton, GUILayout.Height(36f))) loop.ToggleAutoAttack();
+            var previousBackground = GUI.backgroundColor;
+            GUI.backgroundColor = loop.AutoAttackEnabled
+                ? new Color(0.95f, 0.68f, 0.18f, 1f)
+                : new Color(0.42f, 0.42f, 0.38f, 1f);
+            if (GUILayout.Button(loop.AutoAttackEnabled ? "ATTACK ON (A)" : "Attack OFF (A)", guiButton, GUILayout.Height(36f))) loop.ToggleAutoAttack();
+            GUI.backgroundColor = previousBackground;
             if (GUILayout.Button("Smite (Q)", guiButton, GUILayout.Height(36f))) loop.CastSmite();
             if (GUILayout.Button("Heal (E)", guiButton, GUILayout.Height(36f))) loop.CastHeal();
             if (GUILayout.Button("Authority (2)", guiButton, GUILayout.Height(36f))) loop.UseSmiteOfAuthority();
@@ -410,6 +415,7 @@ namespace Gravenspire.Prototypes.CombatFeel
             pullButton.SetEnabled(loop.State == CombatPrototypeState.BetweenPulls);
             attackButton.text = loop.AutoAttackEnabled ? "Attack ON A" : "Attack OFF A";
             attackButton.SetEnabled(loop.State == CombatPrototypeState.Fighting && target != null);
+            RefreshAttackButtonStyle(loop.AutoAttackEnabled);
             smiteButton.SetEnabled(loop.State == CombatPrototypeState.Fighting && target != null);
             healButton.SetEnabled((loop.State == CombatPrototypeState.Fighting ||
                                   loop.State == CombatPrototypeState.BetweenPulls) &&
@@ -419,6 +425,28 @@ namespace Gravenspire.Prototypes.CombatFeel
             prayerButton.SetEnabled(loop.CanUseDefensivePrayer);
             medButton.SetEnabled(loop.State == CombatPrototypeState.BetweenPulls);
             stopButton.SetEnabled(loop.State != CombatPrototypeState.Stopped);
+        }
+
+        private void RefreshAttackButtonStyle(bool attackOn)
+        {
+            attackButton.style.unityFontStyleAndWeight = FontStyle.Bold;
+            attackButton.style.color = attackOn
+                ? new Color(0.08f, 0.055f, 0.02f, 1f)
+                : new Color(0.82f, 0.78f, 0.68f, 1f);
+            attackButton.style.backgroundColor = attackOn
+                ? new Color(0.95f, 0.68f, 0.18f, 1f)
+                : new Color(0.14f, 0.13f, 0.11f, 1f);
+            var borderColor = attackOn
+                ? new Color(1f, 0.92f, 0.45f, 1f)
+                : new Color(0.34f, 0.3f, 0.22f, 1f);
+            attackButton.style.borderTopColor = borderColor;
+            attackButton.style.borderRightColor = borderColor;
+            attackButton.style.borderBottomColor = borderColor;
+            attackButton.style.borderLeftColor = borderColor;
+            attackButton.style.borderTopWidth = attackOn ? 2f : 1f;
+            attackButton.style.borderRightWidth = attackOn ? 2f : 1f;
+            attackButton.style.borderBottomWidth = attackOn ? 2f : 1f;
+            attackButton.style.borderLeftWidth = attackOn ? 2f : 1f;
         }
 
         private static void SetBar(VisualElement fill, float percent)

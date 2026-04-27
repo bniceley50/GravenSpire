@@ -5,7 +5,8 @@
 
 ## Current Task
 
-Park **Inventory & Item Economy GDD** after full review and pivot to `/prototype combat-feel`.
+Combat-feel prototype reached pinned-engine **HEADLINE PASS**; next work is
+Combat Core revision before `/sprint-plan new`.
 
 ## Status
 
@@ -52,12 +53,16 @@ Park **Inventory & Item Economy GDD** after full review and pivot to `/prototype
 - 🧪 Attack-toggle adjustment added after v2 playtest feedback: Pull starts combat but does not enable auto-swinging; player toggles Attack with `A`; Attack turns off on target death; Bash remains independent of Attack. This preserves auto-attack as an EQ-style toggle rather than spammed manual melee.
 - ✅ Attack-toggle smoke passed under Unity `6000.4.1f1`: 5/5 pulls, 81.1s combat, 40.8s downtime, 16.2s average pull, 1 med break, 32 auto swings, 6 Smites, 2 Heals, 7 Smite of Authority uses, 6 Bashes, 2 Defensive Prayers, 0 unsafe pulls.
 - ✅ Combat-feel v2 full advisory playtest completed 2026-04-26: player reported "you nailed it! felt really smooth"; med breaks still felt "very" necessary; Attack toggle solved the manual-melee instinct without spam. Verdict: **ADVISORY POSITIVE — stronger than v1 baseline; preferred T1 combat-feel direction**, pending pinned Unity `6000.3.x` validation.
+- ✅ Combat-feel pinned Unity `6000.3.14f1` validation completed 2026-04-26. Disk-captured run `prototypes/combat-feel/Logs/playtest-20260426-204721.log`: 5/5 pulls, 24.507s average pull, 5 med breaks, 0 unsafe pulls, 0 deaths. Six criteria passed except Attack toggle feedback clarity; mechanic passed but ON state was not visually explicit enough.
+- ✅ Attack ON highlight fix added in `PrototypeBootstrap.cs` and rerun on pinned Unity `6000.3.14f1`. Disk-captured run `prototypes/combat-feel/Logs/playtest-20260426-205508.log`: 5/5 pulls, 18.734s average pull, 5 med breaks, 0 unsafe pulls, 0 deaths. Player confirmed the highlight fixed clunky feel, Attack toggle now feels right, and everything else still felt smooth.
+- ✅ **HEADLINE PASS:** T1 combat-feel is validated on pinned Unity 6.3 LTS. The game-concept risk "Does EQ-Classic combat still feel good in 2026?" is answered affirmatively at prototype-grade evidence level. Preferred T1 baseline: Classic-EQ tab-target discipline with tactical Cleric instants, player-controlled Attack toggle, and explicit Attack ON visual feedback.
 - ✅ Codex PR #1 (`codex/dotnet-format-setup` → `main`) merged into `main`; follow-up cleanup commit `ce634c3` recorded.
 
 ## Files Being Worked On
 
-- **Active:** `/prototype combat-feel` — Unity standalone prototype scaffold in [prototypes/combat-feel/](../../prototypes/combat-feel/); advisory report in [production/prototypes/combat-feel-report.md](../prototypes/combat-feel-report.md); Inventory & Item Economy remains parked pending implementation pre-spec
-- Combat Feel Prototype: [prototypes/combat-feel/README.md](../../prototypes/combat-feel/README.md) — prototype question, success/failure criteria, loop spec, controls, run notes
+- **Active:** Combat Core revision required before `/sprint-plan new` — incorporate combat-feel v2 implications from [production/prototypes/combat-feel-report.md](../prototypes/combat-feel-report.md): Attack toggle as first-class player actor state, tactical Cleric instants, and explicit Attack ON visual state.
+- Combat Feel Prototype: [prototypes/combat-feel/](../../prototypes/combat-feel/) — pinned-engine headline pass complete; prototype code remains throwaway evidence artifact.
+- Combat Feel Prototype README: [prototypes/combat-feel/README.md](../../prototypes/combat-feel/README.md) — prototype question, success/failure criteria, loop spec, controls, run notes
 - Inventory & Item Economy: [design/gdd/inventory-item-economy.md](../../design/gdd/inventory-item-economy.md) — design draft, **NEEDS REVISION**, blocker 1 repaired, remaining blockers tracked in `INV-OQ-05`
 - Character Progression: [design/gdd/character-progression.md](../../design/gdd/character-progression.md) — APPROVED 2026-04-26; commits `6459ceb` and `557fa3e`
 - World Structure: [design/gdd/world-structure.md](../../design/gdd/world-structure.md)
@@ -84,13 +89,14 @@ Park **Inventory & Item Economy GDD** after full review and pivot to `/prototype
 
 - Technical-artist validation items accumulated in art bible (URP SSS cost model, decal projector perf, camera-stack isolation for corpse-run desat, GPU instancing behavior, etc.) — consolidated in art-bible.md Document Status header
 - Mana-restore 1:1 linear fill depends on med-break mechanics (not yet specced in combat GDD)
-- Combat Core revision item from combat-feel v2: specify Attack toggle as first-class player actor state and include tactical Cleric instants (or T1-equivalent set) before T1 sprint planning; do not block the prototype report on that revision.
+- Combat Core revision is now the next strategic gate: specify Attack toggle as first-class player actor state, include tactical Cleric instants (or T1-equivalent set), and require explicit Attack ON visual feedback before T1 sprint planning.
+- Remaining game-concept project-killer risk: `design/gdd/game-concept.md:304` asks whether kills shifting faction control feel meaningful at the five-minute scale. Needs a later separate `/prototype faction-feel`.
 - Zone definition = Addressable streaming group boundary; `unity-addressables-specialist` must configure streaming groups
 - 26 MVP systems is large scope for a solo first-time dev — every design decision should keep asking "is this actually needed for Tier 1?"
 - Inventory & Item Economy is intentionally parked after review; do not implement it until an Inventory implementation pre-spec closes `INV-OQ-05` and a fresh full review passes.
 
 ## Next Skill to Run
 
-- **Continue `/prototype combat-feel`** — rerun v2 in pinned Unity `6000.3.x LTS`; if positive, feed Attack toggle + tactical Cleric instants into Combat Core revision before T1 sprint planning.
+- **Revise Combat Core GDD** — add Attack toggle + tactical Cleric instants + Attack ON visual state, then rerun `/design-review` before `/sprint-plan new`.
 - Later: run Inventory implementation pre-spec to close `INV-OQ-05`, then rerun `/design-review design/gdd/inventory-item-economy.md --depth full`.
 - Codex PR #1 is merged; no Codex follow-up pending in this active state file.

@@ -192,3 +192,110 @@ give hands-on agency without erasing med breaks.
 3. Feed v2 implications into Combat Core revision before T1 sprint planning:
    Attack toggle and tactical Cleric instants should be specified before
    production implementation.
+
+## Pinned Unity 6.3 LTS Validation: T1 Combat-Feel Unblocked
+
+> Status: HEADLINE PASS - pinned-engine validation succeeded; T1 sprint planning unblocked.
+> Date: 2026-04-26
+> Engine: Unity `6000.3.14f1` (pinned `6000.3.x` LTS per `DECISIONS.md:12` and `docs/engine-reference/unity/VERSION.md:5`).
+
+### Run Conditions
+
+- Engine: Unity `6000.3.14f1`, within the project-pinned Unity 6.3 LTS
+  `6000.3.x` family.
+- Build artifact: Windows standalone build via `BUILD_COMBAT_FEEL.bat`, which
+  selected `C:\Program Files\Unity\Hub\Editor\6000.3.14f1\Editor\Unity.exe`.
+- Session count: 2 pinned-engine sessions: initial pinned run and post-highlight
+  fix rerun.
+- Disk-captured evidence:
+  - `prototypes/combat-feel/Logs/playtest-20260426-204721.log`
+  - `prototypes/combat-feel/Logs/playtest-20260426-205508.log`
+- Player log evidence: `Initialize engine version: 6000.3.14f1 (d68c3f99a318)`
+  in `%USERPROFILE%\AppData\LocalLow\DefaultCompany\combat-feel\Player.log`.
+- Reporter: brian, single playtester.
+
+### Initial Pinned Run: `playtest-20260426-204721.log`
+
+- `5/5` pulls complete, `24.507s` average pull, `122.535s` combat,
+  `76.289s` downtime, `5` med breaks, `0` unsafe pulls, `0` deaths.
+- Ability use: `26` auto swings, `9` channeled Smites, `4` Heals, `4` Smite
+  of Authority uses, `6` Bashes, `2` Defensive Prayers.
+- Criteria read:
+  - Med breaks: PASS - playtester said they felt useful.
+  - Pull duration: PASS - playtester said yes; measured average stayed inside
+    the `15-45s` target band.
+  - Downtime as preparation: PASS - corrected from initial uncertainty to yes.
+  - Mana pressure: PASS - playtester said yes.
+  - Tactical instants: PASS - playtester said they felt intentional, not busy.
+  - Attack toggle: MECHANIC PASS, FEEDBACK FAIL - playtester said Attack felt
+    clunky because the ON state was not highlighted clearly enough.
+
+### Highlight Fix Iteration
+
+- `PrototypeBootstrap.cs` now makes the Attack ON state visually explicit:
+  fallback HUD uses a bright gold `ATTACK ON (A)` button, while the UI Toolkit
+  Attack button uses gold background, bold text, and stronger border when ON.
+- Rebuilt with pinned Unity `6000.3.14f1`.
+- Reran the prototype under the pinned engine.
+
+### Post-Fix Pinned Run: `playtest-20260426-205508.log`
+
+- `5/5` pulls complete, `18.734s` average pull, `93.671s` combat, `71.148s`
+  downtime, `5` med breaks, `0` unsafe pulls, `0` deaths.
+- Ability use: `27` auto swings, `9` channeled Smites, `2` Heals, `3` Smite
+  of Authority uses, `4` Bashes, `2` Defensive Prayers.
+- Criteria read:
+  - Attack ON highlight fixed the clunky feeling: YES.
+  - Attack toggle now feels right: YES.
+  - Everything else still felt smooth: YES.
+
+### Headline Verdict
+
+**T1 combat-feel is validated on pinned Unity 6.3 LTS.**
+
+All six README success criteria pass with disk-captured evidence. The project's
+largest documented core-hypothesis risk in `design/gdd/game-concept.md:303` -
+"Does EQ-Classic combat still feel good in 2026?" - is answered
+**affirmatively** at prototype-grade evidence level.
+
+The preferred T1 combat-feel baseline is v2: Classic-EQ tab-target discipline
+with tactical Cleric instants, player-controlled Attack toggle, and explicit
+Attack ON visual feedback.
+
+### Implications for T1 Sprint Planning
+
+Combat Core must be revised before `/sprint-plan new` is run. The v2 verdict
+drives three required production design revisions:
+
+1. Attack toggle as a first-class player actor state. Auto-attack must not
+   auto-start on pull.
+2. Tactical Cleric instants as a first-class T1 ability surface: Smite of
+   Authority, Bash, Defensive Prayer, or T1-equivalent abilities per Class
+   Design.
+3. Attack ON visual state must be explicit in the combat HUD or production
+   equivalent.
+
+These should land as a Combat Core GDD revision plus `/design-review` before T1
+combat sprint planning.
+
+### Limitations / What This Validation Does Not Claim
+
+- Single playtester. This is acceptable for solo-dev prototype validation, but
+  not alpha-stage player evidence.
+- Two pinned-engine sessions, `5/5` pulls each. This is not a soak test.
+- No real game art or haunt space. Visual feel may shift with production
+  assets.
+- Class fixture data is prototype-only and not yet aligned with the Combat Core
+  fixture envelope.
+- The second core-hypothesis risk in `design/gdd/game-concept.md:304` - whether
+  kills shifting faction control feel meaningful at the five-minute scale - is
+  still untouched and needs a separate `/prototype faction-feel`.
+
+### Next Strategic Moves
+
+1. Revise Combat Core to include Attack toggle, tactical Cleric instants, and
+   explicit Attack ON visual state, then rerun `/design-review`.
+2. Run `/sprint-plan new` for the T1 combat sprint using this v2 verdict as the
+   approved combat-feel baseline.
+3. Later, run `/prototype faction-feel` for the remaining game-concept
+   core-hypothesis risk.
