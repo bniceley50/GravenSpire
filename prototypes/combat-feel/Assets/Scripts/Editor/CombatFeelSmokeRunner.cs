@@ -92,9 +92,37 @@ namespace Gravenspire.Prototypes.CombatFeel.Editor
                 return;
             }
 
+            if (!loop.AutoAttackEnabled)
+            {
+                loop.ToggleAutoAttack();
+                return;
+            }
+
             if (loop.Cleric.HealthPercent < 0.68f && loop.Cleric.Mana >= knobs.healManaCost)
             {
                 loop.CastHeal();
+                return;
+            }
+
+            if (loop.Cleric.HealthPercent < 0.78f && loop.CanUseDefensivePrayer)
+            {
+                loop.UseDefensivePrayer();
+                return;
+            }
+
+            if (loop.CurrentTarget != null &&
+                loop.CurrentTarget.Health > knobs.authorityMaxDamage &&
+                loop.CanUseAuthority)
+            {
+                loop.UseSmiteOfAuthority();
+                return;
+            }
+
+            if (loop.CurrentTarget != null &&
+                loop.CurrentTarget.Health > knobs.bashMaxDamage &&
+                loop.CanUseBash)
+            {
+                loop.UseBash();
                 return;
             }
 

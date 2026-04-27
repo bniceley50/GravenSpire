@@ -27,6 +27,7 @@ they would not test Unity runtime UI/input/timing behavior.
 - Three to five sequential hostile pulls in a haunt-like space.
 - Default cadence knobs force at least one med break between pulls 2 and 3.
 - Player can pull again if ready, or sit and med if mana/health are low.
+- Pull starts combat without auto-swinging. Press Attack to begin melee.
 - Loop ends when five pulls are complete, the player stops, or the player dies.
 - Runtime HUD uses UI Toolkit generated from code: player frame, target frame,
   cast bar, controls, combat log, and prototype metrics.
@@ -61,12 +62,42 @@ rate. Document which knob moved the feel.
 
 - Tab: cycle preview target while between pulls.
 - 1: pull selected hostile.
+- A: toggle auto-attack on or off during combat.
 - Q: cast Smite.
 - E: cast Heal during combat or between pulls.
+- 2: Smite of Authority instant damage.
+- 3: Bash instant melee damage and brief interrupt.
+- 4: Defensive Prayer instant self-buff.
 - R: sit or stand to meditate.
 - X: stop the prototype loop.
 
 The same actions are available as HUD buttons.
+
+## V2 Tactical Instants Iteration
+
+This iteration tests the Read A agency question: does the EQ-baseline loop need
+more tactical buttons, rather than faster manual melee?
+
+- Smite of Authority: instant ranged filler, light damage, 7s cooldown, low
+  mana cost.
+- Bash: instant melee hit, low damage, 10s cooldown, low mana cost, briefly
+  delays the next hostile swing.
+- Defensive Prayer: instant self-buff, 20% damage reduction for 8s, 30s
+  cooldown, meaningful mana cost.
+
+Keep all baseline success criteria and add:
+
+- Tactical instants criterion: choosing between channeled Smite, instant filler,
+  Bash, and Defensive Prayer should make the loop feel intentional, not just
+  busier.
+- Pacing preservation criterion: med breaks must still feel necessary after 3-5
+  pulls with full ability use. If instants erase sitting, the iteration failed.
+
+Comparison protocol:
+
+1. Run the baseline build from commit `3a49df9` if available and note feel.
+2. Run this v2 build with instants and the same default knobs.
+3. Compare whether v2 is meaningfully more intentional or merely more busy.
 
 ## Easiest Run Path
 

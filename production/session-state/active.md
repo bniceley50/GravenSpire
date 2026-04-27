@@ -47,6 +47,11 @@ Park **Inventory & Item Economy GDD** after full review and pivot to `/prototype
 - 🧪 `/prototype combat-feel` started 2026-04-26. Tech choice locked to Unity 6.3 LTS standalone prototype under `prototypes/combat-feel/`, with 3-5 sequential pulls, at least one default med break between pulls 2 and 3, explicit success/failure criteria, and durable findings target `production/prototypes/combat-feel-report.md`.
 - ✅ Combat-feel scripted mechanics smoke passed under locally installed Unity `6000.4.1f1` batchmode (not pinned `6000.3.x`): 5/5 scripted pulls, 97.1s combat, 41.9s downtime, 19.4s average pull, 1 med break, 9 Smites, 4 Heals, 0 unsafe pulls. Human feel playtest still required before verdict.
 - ✅ Combat-feel advisory playtest completed 2026-04-26 under Unity `6000.4.1f1` standalone build: player reported the loop felt "pretty smooth" and saw casting time as tuneable, not a fundamental pacing rejection. Heal usability bug and standalone black-screen HUD issue were fixed; post-fix smoke passed 5/5 pulls with 22.7s average pull and 5 Heals. Report written to [production/prototypes/combat-feel-report.md](../prototypes/combat-feel-report.md). Verdict: **ADVISORY POSITIVE**, pending pinned Unity `6000.3.x` validation.
+- 🧪 Combat-feel v2 tactical-instants iteration started 2026-04-26 after Read A confirmation. Scope: preserve auto-attack baseline and med breaks while testing Smite of Authority, Bash, and Defensive Prayer as non-spammable agency buttons. Manual melee spam remains out of scope unless a later pillar-level reframe is explicitly approved.
+- ✅ Combat-feel v2 scripted smoke passed under Unity `6000.4.1f1`: 5/5 pulls, 80.9s combat, 37.9s downtime, 16.2s average pull, 1 med break, 5 Smites, 2 Heals, 8 Smite of Authority uses, 7 Bashes, 2 Defensive Prayers, 0 unsafe pulls. Added agency did not erase the med-break requirement in smoke.
+- 🧪 Attack-toggle adjustment added after v2 playtest feedback: Pull starts combat but does not enable auto-swinging; player toggles Attack with `A`; Attack turns off on target death; Bash remains independent of Attack. This preserves auto-attack as an EQ-style toggle rather than spammed manual melee.
+- ✅ Attack-toggle smoke passed under Unity `6000.4.1f1`: 5/5 pulls, 81.1s combat, 40.8s downtime, 16.2s average pull, 1 med break, 32 auto swings, 6 Smites, 2 Heals, 7 Smite of Authority uses, 6 Bashes, 2 Defensive Prayers, 0 unsafe pulls.
+- ✅ Combat-feel v2 full advisory playtest completed 2026-04-26: player reported "you nailed it! felt really smooth"; med breaks still felt "very" necessary; Attack toggle solved the manual-melee instinct without spam. Verdict: **ADVISORY POSITIVE — stronger than v1 baseline; preferred T1 combat-feel direction**, pending pinned Unity `6000.3.x` validation.
 - ✅ Codex PR #1 (`codex/dotnet-format-setup` → `main`) merged into `main`; follow-up cleanup commit `ce634c3` recorded.
 
 ## Files Being Worked On
@@ -79,12 +84,13 @@ Park **Inventory & Item Economy GDD** after full review and pivot to `/prototype
 
 - Technical-artist validation items accumulated in art bible (URP SSS cost model, decal projector perf, camera-stack isolation for corpse-run desat, GPU instancing behavior, etc.) — consolidated in art-bible.md Document Status header
 - Mana-restore 1:1 linear fill depends on med-break mechanics (not yet specced in combat GDD)
+- Combat Core revision item from combat-feel v2: specify Attack toggle as first-class player actor state and include tactical Cleric instants (or T1-equivalent set) before T1 sprint planning; do not block the prototype report on that revision.
 - Zone definition = Addressable streaming group boundary; `unity-addressables-specialist` must configure streaming groups
 - 26 MVP systems is large scope for a solo first-time dev — every design decision should keep asking "is this actually needed for Tier 1?"
 - Inventory & Item Economy is intentionally parked after review; do not implement it until an Inventory implementation pre-spec closes `INV-OQ-05` and a fresh full review passes.
 
 ## Next Skill to Run
 
-- **Continue `/prototype combat-feel`** — rerun the standalone/scene in pinned Unity `6000.3.x LTS`, explicitly probe all four README success criteria, then decide whether one-knob Smite cast-time iteration is needed.
+- **Continue `/prototype combat-feel`** — rerun v2 in pinned Unity `6000.3.x LTS`; if positive, feed Attack toggle + tactical Cleric instants into Combat Core revision before T1 sprint planning.
 - Later: run Inventory implementation pre-spec to close `INV-OQ-05`, then rerun `/design-review design/gdd/inventory-item-economy.md --depth full`.
 - Codex PR #1 is merged; no Codex follow-up pending in this active state file.

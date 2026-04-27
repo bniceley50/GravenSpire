@@ -110,3 +110,85 @@ This is positive evidence, but not authoritative evidence, because:
 - Other player perspectives not validated.
 - Cleric prototype data is not aligned with production Combat Core fixtures.
 - No game art or real haunt space; this is HUD-only, so visual feel may shift.
+
+## v2 Iteration: Tactical Instants + Attack Toggle
+
+> Status: ADVISORY POSITIVE - stronger than baseline; preferred T1 combat-feel direction
+> Date: 2026-04-26
+> Implementation commit: pending
+
+### Iteration Question
+
+Following v1's "smooth but the player wanted more agency" read, does adding
+Cleric instant abilities plus an EQ-style Attack toggle preserve Pillar 2 while
+resolving the agency instinct?
+
+### Iteration Changes
+
+- Added three instant Cleric abilities: Smite of Authority as instant filler,
+  Bash as melee instant plus brief interrupt, and Defensive Prayer as instant
+  self-buff.
+- Cooldowns range from 7-30s. Mana costs trade against Heal and channeled Smite.
+- Added Attack toggle on `A`: auto-melee starts only on player toggle, and turns
+  off on target death.
+- Pull starts combat without auto-melee. Bash works regardless of Attack toggle
+  state.
+
+### Findings Against v2 Success Criteria
+
+| Criterion | Direct evidence |
+|---|---|
+| Med breaks still feel necessary | "very" - direct playtest answer. |
+| Tactical instants make loop intentional, not merely busier | "you nailed it! felt really smooth" - direct playtest answer. |
+| Attack toggle resolves manual-melee instinct without spam | "yes" - direct playtest answer. |
+| All four v1 baseline criteria still hold | Implied positive; no regression report after full test. |
+
+### Smoke Validation
+
+After tactical instants: 5/5 pulls, 80.9s combat, 37.9s downtime, 16.2s
+average pull, 1 med break, 5 Smites, 2 Heals, 8 Smite of Authority uses, 7
+Bashes, 2 Defensive Prayers, 0 unsafe pulls.
+
+After Attack toggle integration: 5/5 pulls, 81.1s combat, 40.8s downtime,
+16.2s average pull, 1 med break, 32 auto swings, 6 Smites, 2 Heals, 7 Smite of
+Authority uses, 6 Bashes, 2 Defensive Prayers, 0 unsafe pulls.
+
+### v2 Verdict
+
+**ADVISORY POSITIVE - stronger than v1 baseline.**
+
+EQ-Classic discipline plus Attack toggle plus tactical Cleric instants is the
+preferred T1 combat-feel direction. The second-thought manual-melee instinct was
+answered without adding ARPG click-to-swing: the EQ-style Attack toggle gives
+engagement choice while preserving the loop discipline, and tactical instants
+give hands-on agency without erasing med breaks.
+
+### Implications for T1 Combat Core
+
+- Combat Core's player actor should support Attack toggle as a first-class
+  combat state, not auto-on-pull.
+- Combat Core's Cleric class should include the three instant abilities, or a
+  T1-equivalent instant set, alongside channeled spells.
+- Med-break mana economy must be tuned so sitting is still required after 2-3
+  pulls even with full instant use.
+- Bash-style melee instants are a legitimate Cleric T1 ability surface, not
+  only Warrior territory.
+
+### v2 Limitations
+
+- Unity `6000.4.1f1`, not pinned Unity `6000.3.x LTS`.
+- Single playtester, two iteration sessions.
+- No production class fixture data and no real game art.
+- v2 did not separately probe pull duration, downtime-as-preparation, or mana
+  pressure beyond the full-test positive read; those carry forward from v1.
+
+## Updated Recommended Next Moves
+
+1. Run pinned Unity `6000.3.x LTS` validation of the v2 build with the same
+   default knobs. Probe all four v1 criteria plus v2's agency and
+   pacing-preservation criteria explicitly.
+2. If pinned-engine v2 read holds positive, treat T1 sprint planning as
+   unblocked with v2 as the combat-feel baseline.
+3. Feed v2 implications into Combat Core revision before T1 sprint planning:
+   Attack toggle and tactical Cleric instants should be specified before
+   production implementation.

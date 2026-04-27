@@ -25,8 +25,12 @@ namespace Gravenspire.Prototypes.CombatFeel
         private VisualElement targetHealthFill;
         private VisualElement castFill;
         private Button pullButton;
+        private Button attackButton;
         private Button smiteButton;
         private Button healButton;
+        private Button authorityButton;
+        private Button bashButton;
+        private Button prayerButton;
         private Button medButton;
         private Button stopButton;
         private GUIStyle guiHeader;
@@ -63,7 +67,7 @@ namespace Gravenspire.Prototypes.CombatFeel
             var panelHeight = Screen.height - 32f;
             GUILayout.BeginArea(new Rect(16f, 16f, panelWidth, panelHeight), GUI.skin.box);
             GUILayout.Label("Combat Feel Prototype", guiHeader);
-            GUILayout.Label("Keys: 1 Pull | Q Smite | E Heal | R Sit/Med | Tab Target | X Stop", guiSmall);
+            GUILayout.Label("Keys: 1 Pull | A Attack Toggle | Q Smite | E Heal | 2 Authority | 3 Bash | 4 Prayer | R Sit/Med | Tab Target | X Stop", guiSmall);
             GUILayout.Space(8f);
 
             GUILayout.Label($"State: {loop.State}    Pulls: {loop.PullsCompleted}/{loop.PullsGoal}", guiBody);
@@ -83,12 +87,17 @@ namespace Gravenspire.Prototypes.CombatFeel
 
             var castText = loop.CastingSpell == SpellKind.None ? "No active cast" : $"{loop.CastingSpell}";
             DrawGuiBar(castText, Mathf.RoundToInt(loop.CastProgress * 100f), 100, loop.CastProgress, new Color(0.78f, 0.68f, 0.35f, 1f));
+            GUILayout.Label(loop.BuildInstantSummary(), guiSmall);
 
             GUILayout.Space(8f);
             GUILayout.BeginHorizontal();
             if (GUILayout.Button("Pull (1)", guiButton, GUILayout.Height(36f))) loop.PullSelected();
+            if (GUILayout.Button(loop.AutoAttackEnabled ? "Attack ON (A)" : "Attack OFF (A)", guiButton, GUILayout.Height(36f))) loop.ToggleAutoAttack();
             if (GUILayout.Button("Smite (Q)", guiButton, GUILayout.Height(36f))) loop.CastSmite();
             if (GUILayout.Button("Heal (E)", guiButton, GUILayout.Height(36f))) loop.CastHeal();
+            if (GUILayout.Button("Authority (2)", guiButton, GUILayout.Height(36f))) loop.UseSmiteOfAuthority();
+            if (GUILayout.Button("Bash (3)", guiButton, GUILayout.Height(36f))) loop.UseBash();
+            if (GUILayout.Button("Prayer (4)", guiButton, GUILayout.Height(36f))) loop.UseDefensivePrayer();
             if (GUILayout.Button(loop.Cleric.IsSitting ? "Stand (R)" : "Sit / Med (R)", guiButton, GUILayout.Height(36f))) loop.ToggleMeditation();
             if (GUILayout.Button("Stop (X)", guiButton, GUILayout.Height(36f))) loop.Stop();
             GUILayout.EndHorizontal();
@@ -111,6 +120,11 @@ namespace Gravenspire.Prototypes.CombatFeel
                 loop.PullSelected();
             }
 
+            if (Input.GetKeyDown(KeyCode.A))
+            {
+                loop.ToggleAutoAttack();
+            }
+
             if (Input.GetKeyDown(KeyCode.Q))
             {
                 loop.CastSmite();
@@ -119,6 +133,21 @@ namespace Gravenspire.Prototypes.CombatFeel
             if (Input.GetKeyDown(KeyCode.E))
             {
                 loop.CastHeal();
+            }
+
+            if (Input.GetKeyDown(KeyCode.Alpha2))
+            {
+                loop.UseSmiteOfAuthority();
+            }
+
+            if (Input.GetKeyDown(KeyCode.Alpha3))
+            {
+                loop.UseBash();
+            }
+
+            if (Input.GetKeyDown(KeyCode.Alpha4))
+            {
+                loop.UseDefensivePrayer();
             }
 
             if (Input.GetKeyDown(KeyCode.R))
@@ -211,8 +240,12 @@ namespace Gravenspire.Prototypes.CombatFeel
             root.Add(controls);
 
             pullButton = AddButton(controls, "Pull 1", () => loop.PullSelected());
+            attackButton = AddButton(controls, "Attack A", () => loop.ToggleAutoAttack());
             smiteButton = AddButton(controls, "Smite Q", () => loop.CastSmite());
             healButton = AddButton(controls, "Heal E", () => loop.CastHeal());
+            authorityButton = AddButton(controls, "Authority 2", () => loop.UseSmiteOfAuthority());
+            bashButton = AddButton(controls, "Bash 3", () => loop.UseBash());
+            prayerButton = AddButton(controls, "Prayer 4", () => loop.UseDefensivePrayer());
             medButton = AddButton(controls, "Sit/Med R", () => loop.ToggleMeditation());
             stopButton = AddButton(controls, "Stop X", () => loop.Stop());
 
@@ -359,11 +392,13 @@ namespace Gravenspire.Prototypes.CombatFeel
             var target = loop.CurrentTarget;
             var preview = loop.PreviewTarget;
 
-            stateLabel.text = $"State: {loop.State} | Pulls: {loop.PullsCompleted}/{loop.PullsGoal} | Tab cycles target, 1 pulls, Q smites, E heals, R sits.";
+            stateLabel.text = $"State: {loop.State} | Pulls: {loop.PullsCompleted}/{loop.PullsGoal} | Attack {(loop.AutoAttackEnabled ? "ON" : "OFF")} | 1 pull, A attack, Q smite, E heal, 2 authority, 3 bash, 4 prayer, R sit.";
             playerLabel.text = $"HP {cleric.Health}/{cleric.MaxHealth} | Mana {cleric.Mana}/{cleric.MaxMana} | {(cleric.IsSitting ? "Sitting" : "Standing")}";
             targetLabel.text = target == null ? "No active hostile." : $"{target.Name} | HP {target.Health}/{target.MaxHealth}";
             previewLabel.text = preview == null ? "No remaining preview target." : $"Next pull preview: {preview.Name}. {preview.HauntCue}";
-            castLabel.text = loop.CastingSpell == SpellKind.None ? "No active cast." : $"{loop.CastingSpell} casting...";
+            castLabel.text = loop.CastingSpell == SpellKind.None
+                ? $"No active cast. {loop.BuildInstantSummary()}"
+                : $"{loop.CastingSpell} casting... {loop.BuildInstantSummary()}";
             metricsLabel.text = loop.BuildMetricsSummary();
             logLabel.text = loop.BuildLogText();
 
@@ -373,10 +408,15 @@ namespace Gravenspire.Prototypes.CombatFeel
             SetBar(castFill, loop.CastProgress);
 
             pullButton.SetEnabled(loop.State == CombatPrototypeState.BetweenPulls);
+            attackButton.text = loop.AutoAttackEnabled ? "Attack ON A" : "Attack OFF A";
+            attackButton.SetEnabled(loop.State == CombatPrototypeState.Fighting && target != null);
             smiteButton.SetEnabled(loop.State == CombatPrototypeState.Fighting && target != null);
             healButton.SetEnabled((loop.State == CombatPrototypeState.Fighting ||
                                   loop.State == CombatPrototypeState.BetweenPulls) &&
                                  loop.Cleric.Health < loop.Cleric.MaxHealth);
+            authorityButton.SetEnabled(loop.CanUseAuthority);
+            bashButton.SetEnabled(loop.CanUseBash);
+            prayerButton.SetEnabled(loop.CanUseDefensivePrayer);
             medButton.SetEnabled(loop.State == CombatPrototypeState.BetweenPulls);
             stopButton.SetEnabled(loop.State != CombatPrototypeState.Stopped);
         }

@@ -44,6 +44,25 @@ namespace Gravenspire.Prototypes.CombatFeel
         [Min(0)] public int healMinAmount = 28;
         [Min(0)] public int healMaxAmount = 36;
 
+        [Header("Smite of Authority")]
+        [Min(0f)] public float authorityCooldownSeconds = 7.0f;
+        [Min(0)] public int authorityManaCost = 10;
+        [Min(0)] public int authorityMinDamage = 13;
+        [Min(0)] public int authorityMaxDamage = 16;
+
+        [Header("Bash")]
+        [Min(0f)] public float bashCooldownSeconds = 10.0f;
+        [Min(0)] public int bashManaCost = 10;
+        [Min(0)] public int bashMinDamage = 7;
+        [Min(0)] public int bashMaxDamage = 11;
+        [Min(0f)] public float bashInterruptSeconds = 1.0f;
+
+        [Header("Defensive Prayer")]
+        [Min(0f)] public float defensivePrayerCooldownSeconds = 30.0f;
+        [Min(0)] public int defensivePrayerManaCost = 25;
+        [Min(0f)] public float defensivePrayerDurationSeconds = 8.0f;
+        [Range(0f, 0.9f)] public float defensivePrayerDamageReduction = 0.2f;
+
         [Header("Hostiles")]
         [Min(0f)] public float hostileAttackSeconds = 2.9f;
         [Min(0)] public int hostileDamageVariance = 2;
