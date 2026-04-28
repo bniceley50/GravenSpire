@@ -9,7 +9,7 @@ generated: "2026-04-28"
 updated: "2026-04-28"
 branch: "main"
 head: "2e268b4"
-qa_plan: ""
+qa_plan: "production/qa/plans/qa-plan-sprint-20260428.md"
 implementation_gate: "Run /qa-plan sprint, then /test-setup, then /dev-story T1-COMBAT-01-cleric-base-combat-actor-fixture-hydration."
 
 stories:
