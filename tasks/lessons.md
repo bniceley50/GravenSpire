@@ -21,6 +21,16 @@ Promote repeating lessons to `CLAUDE-patterns.md` (cross-cutting) or a
 
 ## Entries (newest first)
 
+### 2026-04-28 — [GLOBAL][TEST] Use the narrowest real runner for runnable domain tests
+
+**Context:** `T1-COMBAT-01` Stage 1 created pure C# Combat Core domain code and NUnit-style test intent before a Unity project shell existed. Stage 2 needed runnable verification without absorbing Unity bootstrap scope into the story. The selected harness was a small `tests/Gravenspire.Combat.Tests.csproj` bridge that compiles `src/gameplay/combat/**` plus the existing unit/integration tests and runs them with `dotnet test`, while Unity Test Runner remains the correct path for later MonoBehaviour, scene, and PlayMode-dependent code.
+
+**Lesson:** Match the runner to the code under test, but still require real execution. Pure domain code should use the cheapest runnable local harness that exercises the actual production files and tests. Unity shell creation belongs at the point where Unity APIs, MonoBehaviours, scenes, or PlayMode behavior are required; it should not be smuggled into an unrelated domain story just to satisfy a test-run checkbox. The durable split is: domain code can run under `dotnet test`; Unity-dependent code runs under Unity Test Runner.
+
+**Evidence:** `tests/Gravenspire.Combat.Tests.csproj`; `tests/evidence/T1-COMBAT-01/verification.md`; `tests/evidence/T1-COMBAT-01/t1-combat-01-stage2.trx`; command `dotnet test tests\Gravenspire.Combat.Tests.csproj --logger "trx;LogFileName=t1-combat-01-stage2.trx" --results-directory "tests\evidence\T1-COMBAT-01"` passed 15/15 tests.
+
+**Promotion status:** open — promote to `.claude/rules/test-standards.md` or the universal prompt after this runner split repeats outside the first Combat Core domain slice.
+
 ### 2026-04-26 — [GLOBAL][SCOPE] Prototype-validated pillar beats speculative pillar
 
 **Context:** The combat-feel prototype cycle (commits `7add6ee` through

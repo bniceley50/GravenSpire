@@ -58,6 +58,11 @@ export_presets.cfg
 *.user
 *.userprefs
 *.pidb
+
+# === .NET / C# test harness ===
+[Bb]in/
+.vs/
+!tests/Gravenspire.Combat.Tests.csproj
 *.booproj
 *.svd
 *.pdb
