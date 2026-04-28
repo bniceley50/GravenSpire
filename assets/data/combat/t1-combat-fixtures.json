@@ -1,0 +1,389 @@
+{
+  "fixtureSetId": "CombatPrototypeSpellProfileSet_T1",
+  "fixtureSetVersion": "CombatPrototypeSpellProfileSet_T1@2026-04-28-stage1",
+  "sourceDocument": "design/gdd/combat-core.md:394-430; production/sprints/sprint-1.md:72-108",
+  "prototypeHauntBand": "PrototypeHauntBand_T1=1-10",
+  "combatTickRateHz": 50,
+  "actorFixtures": [
+    {
+      "id": "Cleric_Low_T1",
+      "actorKind": "player",
+      "classId": "Cleric",
+      "encounterRole": "Player",
+      "level": 1,
+      "maxHealth": 80,
+      "maxMana": 100,
+      "armorClass": 20,
+      "attackPower": 10,
+      "weaponBaseDamage": 4,
+      "attackSkill": 10,
+      "defenseSkill": 10,
+      "weaponDelaySeconds": 2.8,
+      "meleeRangeMeters": 2.0,
+      "spellRangeMeters": 30.0,
+      "factionId": "PlayerLocal_T1",
+      "stableSourceAliases": [
+        "local_character_id:<active>"
+      ]
+    },
+    {
+      "id": "Cleric_Mid_T1",
+      "actorKind": "player",
+      "classId": "Cleric",
+      "encounterRole": "Player",
+      "level": 5,
+      "maxHealth": 140,
+      "maxMana": 180,
+      "armorClass": 35,
+      "attackPower": 25,
+      "weaponBaseDamage": 8,
+      "attackSkill": 30,
+      "defenseSkill": 30,
+      "weaponDelaySeconds": 2.8,
+      "meleeRangeMeters": 2.0,
+      "spellRangeMeters": 30.0,
+      "factionId": "PlayerLocal_T1",
+      "stableSourceAliases": [
+        "local_character_id:<active>"
+      ]
+    },
+    {
+      "id": "Cleric_Top_T1",
+      "actorKind": "player",
+      "classId": "Cleric",
+      "encounterRole": "Player",
+      "level": 10,
+      "maxHealth": 220,
+      "maxMana": 300,
+      "armorClass": 55,
+      "attackPower": 45,
+      "weaponBaseDamage": 12,
+      "attackSkill": 60,
+      "defenseSkill": 60,
+      "weaponDelaySeconds": 2.8,
+      "meleeRangeMeters": 2.0,
+      "spellRangeMeters": 30.0,
+      "factionId": "PlayerLocal_T1",
+      "stableSourceAliases": [
+        "local_character_id:<active>"
+      ]
+    },
+    {
+      "id": "Trash_Low_T1",
+      "actorKind": "npc",
+      "encounterRole": "Trash",
+      "level": 1,
+      "maxHealth": 70,
+      "maxMana": 0,
+      "armorClass": 15,
+      "attackPower": 12,
+      "weaponBaseDamage": 5,
+      "attackSkill": 10,
+      "defenseSkill": 10,
+      "weaponDelaySeconds": 3.0,
+      "meleeRangeMeters": 2.0,
+      "spellRangeMeters": 0.0,
+      "factionId": "VampireCourt_T1",
+      "stableSourceAliases": [
+        "source_spawn_ref:Trash_Early_L2_T1"
+      ]
+    },
+    {
+      "id": "Trash_Mid_T1",
+      "actorKind": "npc",
+      "encounterRole": "Trash",
+      "level": 5,
+      "maxHealth": 120,
+      "maxMana": 0,
+      "armorClass": 30,
+      "attackPower": 25,
+      "weaponBaseDamage": 8,
+      "attackSkill": 30,
+      "defenseSkill": 30,
+      "weaponDelaySeconds": 3.0,
+      "meleeRangeMeters": 2.0,
+      "spellRangeMeters": 0.0,
+      "factionId": "VampireCourt_T1",
+      "stableSourceAliases": [
+        "source_spawn_ref:SoloTrash_EvenCon_T1",
+        "source_spawn_ref:DenseCamp_Trash_T1"
+      ]
+    },
+    {
+      "id": "Trash_Top_T1",
+      "actorKind": "npc",
+      "encounterRole": "Trash",
+      "level": 10,
+      "maxHealth": 200,
+      "maxMana": 0,
+      "armorClass": 50,
+      "attackPower": 45,
+      "weaponBaseDamage": 12,
+      "attackSkill": 60,
+      "defenseSkill": 60,
+      "weaponDelaySeconds": 3.0,
+      "meleeRangeMeters": 2.0,
+      "spellRangeMeters": 0.0,
+      "factionId": "VampireCourt_T1",
+      "stableSourceAliases": [
+        "source_spawn_ref:Trash_Level7_T1",
+        "source_spawn_ref:Trash_Late_L9_T1",
+        "source_spawn_ref:SoloTrash_SoftUndercon_T1",
+        "source_spawn_ref:SoloTrash_Trivial_T1"
+      ]
+    },
+    {
+      "id": "Named_Top_T1",
+      "actorKind": "npc",
+      "encounterRole": "Named",
+      "level": 10,
+      "maxHealth": 520,
+      "maxMana": 0,
+      "armorClass": 65,
+      "attackPower": 60,
+      "weaponBaseDamage": 16,
+      "attackSkill": 70,
+      "defenseSkill": 70,
+      "weaponDelaySeconds": 2.6,
+      "meleeRangeMeters": 2.0,
+      "spellRangeMeters": 0.0,
+      "factionId": "VampireCourt_T1",
+      "stableSourceAliases": [
+        "source_npc_id:Named_XP_Smoke_T1"
+      ],
+      "soloBlockProfileId": "Named_Top_T1_SoloBlock"
+    }
+  ],
+  "spellFixtures": [
+    {
+      "id": "Smite_T1_Prototype",
+      "fixtureKind": "slow_spell",
+      "castTimeSeconds": 6.0,
+      "recoverySeconds": 1.5,
+      "effectType": "hostile_direct_damage",
+      "manaCostByBand": [
+        {
+          "band": "Low",
+          "value": 18
+        },
+        {
+          "band": "Mid",
+          "value": 30
+        },
+        {
+          "band": "Top",
+          "value": 48
+        }
+      ],
+      "effectValueByBand": [
+        {
+          "band": "Low",
+          "value": 24
+        },
+        {
+          "band": "Mid",
+          "value": 48
+        },
+        {
+          "band": "Top",
+          "value": 82
+        }
+      ]
+    },
+    {
+      "id": "LesserHeal_T1_Prototype",
+      "fixtureKind": "slow_spell",
+      "castTimeSeconds": 6.0,
+      "recoverySeconds": 1.5,
+      "effectType": "self_heal",
+      "manaCostByBand": [
+        {
+          "band": "Low",
+          "value": 20
+        },
+        {
+          "band": "Mid",
+          "value": 34
+        },
+        {
+          "band": "Top",
+          "value": 52
+        }
+      ],
+      "effectValueByBand": [
+        {
+          "band": "Low",
+          "value": 34
+        },
+        {
+          "band": "Mid",
+          "value": 68
+        },
+        {
+          "band": "Top",
+          "value": 110
+        }
+      ]
+    }
+  ],
+  "tacticalInstantFixtures": [
+    {
+      "id": "SmiteOfAuthority_T1_Prototype",
+      "fixtureKind": "tactical_instant",
+      "castTimeSeconds": 0.0,
+      "recoverySeconds": 0.0,
+      "effectType": "hostile_direct_damage",
+      "manaCostByBand": [
+        {
+          "band": "Low",
+          "value": 10
+        },
+        {
+          "band": "Mid",
+          "value": 10
+        },
+        {
+          "band": "Top",
+          "value": 10
+        }
+      ],
+      "effectValueByBand": [
+        {
+          "band": "Low",
+          "value": 13
+        },
+        {
+          "band": "Mid",
+          "value": 16
+        },
+        {
+          "band": "Top",
+          "value": 16
+        }
+      ],
+      "cooldownSeconds": 7.0
+    },
+    {
+      "id": "Bash_T1_Prototype",
+      "fixtureKind": "tactical_instant",
+      "castTimeSeconds": 0.0,
+      "recoverySeconds": 0.0,
+      "effectType": "hostile_direct_damage_interrupt_current_channel",
+      "manaCostByBand": [
+        {
+          "band": "Low",
+          "value": 10
+        },
+        {
+          "band": "Mid",
+          "value": 10
+        },
+        {
+          "band": "Top",
+          "value": 10
+        }
+      ],
+      "effectValueByBand": [
+        {
+          "band": "Low",
+          "value": 7
+        },
+        {
+          "band": "Mid",
+          "value": 11
+        },
+        {
+          "band": "Top",
+          "value": 11
+        }
+      ],
+      "cooldownSeconds": 10.0,
+      "interruptSeconds": 1.0
+    },
+    {
+      "id": "DefensivePrayer_T1_Prototype",
+      "fixtureKind": "tactical_instant",
+      "castTimeSeconds": 0.0,
+      "recoverySeconds": 0.0,
+      "effectType": "self_buff_damage_reduction",
+      "manaCostByBand": [
+        {
+          "band": "Low",
+          "value": 25
+        },
+        {
+          "band": "Mid",
+          "value": 25
+        },
+        {
+          "band": "Top",
+          "value": 25
+        }
+      ],
+      "effectValueByBand": [
+        {
+          "band": "Low",
+          "value": 20
+        },
+        {
+          "band": "Mid",
+          "value": 20
+        },
+        {
+          "band": "Top",
+          "value": 20
+        }
+      ],
+      "cooldownSeconds": 30.0,
+      "durationSeconds": 8.0,
+      "damageReduction": 0.2
+    }
+  ],
+  "encounterFixtures": [
+    {
+      "id": "SoloTrash_EvenCon_T1",
+      "actorFixtureIds": [
+        "Cleric_Mid_T1",
+        "Trash_Mid_T1"
+      ],
+      "killWeightSeed": 1.25,
+      "sourceRefAliases": [
+        "source_spawn_ref:Trash_Early_L2_T1",
+        "source_spawn_ref:SoloTrash_EvenCon_T1",
+        "source_spawn_ref:Trash_Level7_T1",
+        "source_spawn_ref:Trash_Late_L9_T1",
+        "source_spawn_ref:SoloTrash_SoftUndercon_T1",
+        "source_spawn_ref:SoloTrash_Trivial_T1",
+        "source_spawn_ref:DenseCamp_Trash_T1"
+      ],
+      "requiredOutcome": "Cleric wins 55-85% of seeded trials from greater than 80% HP and greater than 60% mana."
+    },
+    {
+      "id": "TwoTrash_Overpull_T1",
+      "actorFixtureIds": [
+        "Cleric_Mid_T1",
+        "Trash_Mid_T1",
+        "Trash_Mid_T1"
+      ],
+      "killWeightSeed": 1.25,
+      "sourceRefAliases": [
+        "source_spawn_ref:TwoTrash_A_T1",
+        "source_spawn_ref:TwoTrash_B_T1"
+      ],
+      "requiredOutcome": "Normal two-trash farming is not viable."
+    },
+    {
+      "id": "NamedSoloBlock_T1",
+      "actorFixtureIds": [
+        "Cleric_Top_T1",
+        "Named_Top_T1"
+      ],
+      "killWeightSeed": 1.25,
+      "sourceRefAliases": [
+        "source_npc_id:Named_XP_Smoke_T1"
+      ],
+      "requiredOutcome": "Named has solo block pressure; any baseline solo kill is a tuning defect unless marked exploit-under-investigation.",
+      "soloBlockProfileId": "Named_Top_T1_SoloBlock"
+    }
+  ]
+}
