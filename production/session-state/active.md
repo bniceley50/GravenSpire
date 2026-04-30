@@ -5,8 +5,8 @@
 
 ## Current Task
 
-`T1-COMBAT-06` is closed via `/story-done` with verdict `COMPLETE WITH NOTES`.
-Next work is `/dev-story T1-COMBAT-07-med-sit-regen-combat-exit-timing`.
+`T1-COMBAT-07` is closed via `/story-done` with verdict `COMPLETE WITH NOTES`.
+Next work is `/dev-story T1-COMBAT-08-attack-on-hud-state-signal-hookup`.
 
 ## Status
 
@@ -64,10 +64,11 @@ Next work is `/dev-story T1-COMBAT-07-med-sit-regen-combat-exit-timing`.
 - ✅ Sprint 1 story `T1-COMBAT-04` closed via `/story-done` 2026-04-30 with verdict **COMPLETE WITH NOTES**. Evidence: Stage 2 TRX 59/59 PASS, live closure rerun 59/59 PASS, negative T1 scope grep clean, and AC trace in [production/stories/t1-combat-04-melee-tick-weapon-delay-resolution.md](../stories/t1-combat-04-melee-tick-weapon-delay-resolution.md). `production/sprint-status.yaml` now records 4/13 Sprint 1 stories done.
 - ✅ Sprint 1 story `T1-COMBAT-05` closed via `/story-done` 2026-04-30 with verdict **COMPLETE WITH NOTES**. Evidence: Stage 2 TRX 71/71 PASS, live closure rerun 71/71 PASS, negative T1 scope grep clean, and AC trace in [production/stories/t1-combat-05-slow-cast-framework.md](../stories/t1-combat-05-slow-cast-framework.md). ADR-0003/D009 metadata cleanup was closed in the same approved ride-along. `production/sprint-status.yaml` now records 5/13 Sprint 1 stories done.
 - ✅ Sprint 1 story `T1-COMBAT-06` closed via `/story-done` 2026-04-30 with verdict **COMPLETE WITH NOTES**. Evidence: Stage 2 TRX 81/81 PASS, hardcoded-tuning gate PASS, negative T1 scope grep clean, and AC trace in [production/stories/t1-combat-06-tactical-cleric-instants-fixture-loaded-values.md](../stories/t1-combat-06-tactical-cleric-instants-fixture-loaded-values.md). `production/sprint-status.yaml` now records 6/13 Sprint 1 stories done.
+- ✅ Sprint 1 story `T1-COMBAT-07` closed via `/story-done` 2026-04-30 with verdict **COMPLETE WITH NOTES**. Evidence: Stage 2 TRX 92/92 PASS, hardcoded-tuning gate PASS, negative T1 scope grep clean, composition verification clean, cast-and-sit policy documented, and AC trace in [production/stories/t1-combat-07-med-sit-regen-combat-exit-timing.md](../stories/t1-combat-07-med-sit-regen-combat-exit-timing.md). `production/sprint-status.yaml` now records 7/13 Sprint 1 stories done.
 
 ## Files Being Worked On
 
-- **Active:** T1-COMBAT-07 med/sit regen and combat-exit timing - run `/dev-story T1-COMBAT-07-med-sit-regen-combat-exit-timing`.
+- **Active:** T1-COMBAT-08 Attack ON HUD state signal hookup - run `/dev-story T1-COMBAT-08-attack-on-hud-state-signal-hookup`.
 - Combat Feel Prototype: [prototypes/combat-feel/](../../prototypes/combat-feel/) — pinned-engine headline pass complete; prototype code remains throwaway evidence artifact.
 - Combat Feel Prototype README: [prototypes/combat-feel/README.md](../../prototypes/combat-feel/README.md) — prototype question, success/failure criteria, loop spec, controls, run notes
 - Inventory & Item Economy: [design/gdd/inventory-item-economy.md](../../design/gdd/inventory-item-economy.md) — design draft, **NEEDS REVISION**, blocker 1 repaired, remaining blockers tracked in `INV-OQ-05`
@@ -95,7 +96,7 @@ Next work is `/dev-story T1-COMBAT-07-med-sit-regen-combat-exit-timing`.
 ## Open Questions / Flags
 
 - Technical-artist validation items accumulated in art bible (URP SSS cost model, decal projector perf, camera-stack isolation for corpse-run desat, GPU instancing behavior, etc.) — consolidated in art-bible.md Document Status header
-- Mana-restore 1:1 linear fill now depends on Combat Core's med-break regen tick contract; Layer 1 HUD must consume Combat Core state rather than inventing separate fill timing.
+- T1-COMBAT-07 now provides the Combat Core med-break regen tick contract; Layer 1 HUD must consume Combat Core state rather than inventing separate fill timing.
 - ADR-0003 / D009 status metadata cleanup is closed as of the T1-COMBAT-05 `/story-done` ride-along: ADR-0003 is `Accepted`, and DECISIONS.md D009 is `Locked`. Justification: T1-COMBAT-01 closure commit `565ee26` has been on `main` since 2026-04-28; `CombatProgressionBaselineSnapshot` is consumed by production `CombatActorHydrator` at `src/gameplay/combat/CombatActorHydrator.cs:55`, `src/gameplay/combat/CombatActorHydrator.cs:61-68`, and `src/gameplay/combat/CombatActorHydrator.cs:104-126`; T1-COMBAT-01 verification cites ADR-0003 coverage at `tests/evidence/T1-COMBAT-01/verification.md:31`.
 - `H-CCOM-F2B` fixture extremes are validated by `T1-COMBAT-01`; seeded melee formula execution is validated by `T1-COMBAT-04`.
 - Creature / Enemy AI still owns actual return-to-anchor movement and NavMeshAgent behavior; `T1-COMBAT-02` supplies Combat Core leash hooks and test doubles only.
@@ -107,7 +108,7 @@ Next work is `/dev-story T1-COMBAT-07-med-sit-regen-combat-exit-timing`.
 
 ## Next Skill to Run
 
-- **Run `/dev-story T1-COMBAT-07-med-sit-regen-combat-exit-timing`** for the next Sprint 1 combat story. `T1-COMBAT-06` is closed, so med/sit regen and combat-exit timing are now unblocked as the next sequential story.
+- **Run `/dev-story T1-COMBAT-08-attack-on-hud-state-signal-hookup`** for the next Sprint 1 combat story. `T1-COMBAT-07` is closed, so Attack ON HUD state signal hookup is now unblocked as the next sequential story.
 - Later: run Inventory implementation pre-spec to close `INV-OQ-05`, then rerun `/design-review design/gdd/inventory-item-economy.md --depth full`.
 - Codex PR #1 is merged; no Codex follow-up pending in this active state file.
 
@@ -177,3 +178,16 @@ Next work is `/dev-story T1-COMBAT-07-med-sit-regen-combat-exit-timing`.
 - Tech debt logged: None.
 - Carried forward: med/sit regen and combat-exit timing (`T1-COMBAT-07`), HUD presentation, kill credit, save barriers, death payloads, profiled feel evidence, architecture scan tooling, and the `.claude/skills/dev-story/SKILL.md:75` story-file-creation drift lesson candidate remain owned by later Sprint 1 stories. Class Design still owns final tactical ability names/values beyond these prototype fixture rows.
 - Next recommended: `/dev-story T1-COMBAT-07-med-sit-regen-combat-exit-timing`.
+
+## Session Extract - /story-done 2026-04-30 (T1-COMBAT-07)
+
+- Story: [production/stories/t1-combat-07-med-sit-regen-combat-exit-timing.md](../stories/t1-combat-07-med-sit-regen-combat-exit-timing.md) - T1-COMBAT-07 Med/sit Regen and Combat-exit Timing.
+- Verdict: COMPLETE WITH NOTES.
+- Criteria: 6/6 story checks covered; `H-CCOM-MED-01`, `H-CCOM-MED-02`, `H-CCOM-MED-03`, `H-CCOM-F5`, the `H-CCOM-FEEL-04` prerequisite, and attack-off-before-regen sequencing all have file:line evidence in the story AC trace.
+- Evidence: `tests/evidence/T1-COMBAT-07/t1-combat-07-stage2.trx:570` 92/92 PASS; verification summary at [tests/evidence/T1-COMBAT-07/verification.md](../../tests/evidence/T1-COMBAT-07/verification.md).
+- Composition verification: sit-forces-Attack-off reuses existing `CombatAttackStateMachine.ForceOff` with no parallel attack state; sitting threat reuses existing `ThreatTable` / `AddThreat` with no parallel threat structure; timing uses `CombatTick` and `combat_tick_rate_hz` with no parallel clock.
+- Cast-and-sit policy: manual sit during an active slow cast is rejected per Combat Core Rule 19 (`design/gdd/combat-core.md:174`), documented at `tests/evidence/T1-COMBAT-07/verification.md:81`, and tested at `tests/integration/gameplay/combat/combat_med_sit_regen_combat_exit_test.cs:126`.
+- State updates: story status set to Complete; `production/sprint-status.yaml` marks `T1-COMBAT-07` done, records 7/13 Sprint 1 stories done, and surfaces `T1-COMBAT-08` as next active.
+- Tech debt logged: None.
+- Carried forward: HUD presentation (`T1-COMBAT-08`), kill credit chain (`T1-COMBAT-09a`/`T1-COMBAT-09b`/`T1-COMBAT-09c`), profiled feel evidence (`T1-COMBAT-10`), architecture scan tooling (`T1-COMBAT-11`), and future forced/external sitting-as-interrupt behavior remain owned by later explicit stories.
+- Next recommended: `/dev-story T1-COMBAT-08-attack-on-hud-state-signal-hookup`.

@@ -1,6 +1,6 @@
 # T1-COMBAT-07 - Med/sit Regen and Combat-exit Timing
 
-**Status:** Implemented + Verified; awaiting `/story-done`
+**Status:** Complete
 **Sprint:** 1
 **Priority:** Must Have
 **Layer:** Gameplay / Combat Core
@@ -62,9 +62,25 @@ Result: PASS, 92 total, 92 passed, 0 failed. Evidence: `tests/evidence/T1-COMBAT
 
 ## Story Status
 
-`T1-COMBAT-07` is implemented and awaits `/story-done` closure.
+`T1-COMBAT-07` is complete via `/story-done` with verdict `COMPLETE WITH NOTES`.
 
 ## Blockers / Carried Forward
 
 - HUD presentation, kill credit, save barriers, death payloads, profiled feel evidence, and architecture scan tooling remain owned by later Sprint 1 stories.
 - Future forced/external sitting-as-interrupt behavior is not implemented here; manual sit during active cast is rejected by Rule 19 eligibility.
+
+## Completion Notes
+
+**Completed**: 2026-04-30
+**Verdict**: COMPLETE WITH NOTES
+**Implementation Baseline**: commit `b8ef6cbb283ee655838eaab1f0e35dc788a9e32d` (`Implement T1-COMBAT-07 med sit regen timing`)
+**Closure Baseline**: commit `b8ef6cbb283ee655838eaab1f0e35dc788a9e32d` before this approved `/story-done` closure batch
+**Criteria**: 6/6 story checks covered. `H-CCOM-MED-01`, `H-CCOM-MED-02`, `H-CCOM-MED-03`, `H-CCOM-F5`, the `H-CCOM-FEEL-04` prerequisite, and attack-off-before-regen sequencing all have file:line evidence in `## Acceptance Criteria Coverage`.
+**Deferred/Untested Criteria**: None for this story boundary. `H-CCOM-FEEL-04` full profiled med-break pacing evidence remains owned by `T1-COMBAT-10`; HUD presentation, kill credit, save barriers, death payloads, profiled feel evidence, and architecture scan tooling remain downstream by sprint plan.
+**Test Evidence**: Stage 2 TRX passed 92/92 at `tests/evidence/T1-COMBAT-07/t1-combat-07-stage2.trx:570`; verification summary is in `tests/evidence/T1-COMBAT-07/verification.md:3-86`.
+**Composition Evidence**: Sit-forces-Attack-off reuses `CombatAttackStateMachine.ForceOff` at `src/gameplay/combat/state/CombatPostureStateMachine.cs:49` with no parallel attack state; sitting threat reuses existing `ThreatTable` / `AddThreat` at `src/gameplay/combat/threat/CombatThreatResolver.cs:42` and `src/gameplay/combat/threat/CombatThreatResolver.cs:62`; timing uses `CombatTick` inputs at `src/gameplay/combat/state/CombatExitStateMachine.cs:8-9` and `src/gameplay/combat/regen/CombatRegenResolver.cs:10`.
+**Cast-and-Sit Policy**: Manual sit during an active slow cast is rejected per Combat Core Rule 19 (`design/gdd/combat-core.md:174`), documented at `tests/evidence/T1-COMBAT-07/verification.md:81`, and tested at `tests/integration/gameplay/combat/combat_med_sit_regen_combat_exit_test.cs:126`.
+**GDD/ADR Deviations**: None blocking. No ADR, GDD, D-entry, source, test, evidence, fixture, hook, or `.claude/**` edit was part of this closure batch.
+**Scope Notes**: Hardcoded-tuning gate passed: regen rate, combat-exit duration, sitting threat bonus, and regen tick interval come from `assets/data/combat/t1-combat-fixtures.json:511`; negative T1 scope grep passed on the T1-COMBAT-07 changed implementation and test files with zero forbidden-scope matches.
+**Review Gates**: Lean `/story-done` closure; QA and lead-programmer subagents skipped by review mode. Story, sprint status, and active session state updated in the approved closure batch.
+**Forced Completion**: No.

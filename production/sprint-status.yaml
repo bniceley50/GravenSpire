@@ -10,12 +10,12 @@ updated: "2026-04-30"
 branch: "main"
 head: "57286cb"
 qa_plan: "production/qa/plans/qa-plan-sprint-20260428.md"
-implementation_gate: "T1-COMBAT-06 closed by /story-done. Sprint progress: 6/13 done. Next active gate: /dev-story T1-COMBAT-07-med-sit-regen-combat-exit-timing."
-progress: "6/13 done"
-completed_stories: 6
+implementation_gate: "T1-COMBAT-07 closed by /story-done. Sprint progress: 7/13 done. Next active gate: /dev-story T1-COMBAT-08-attack-on-hud-state-signal-hookup."
+progress: "7/13 done"
+completed_stories: 7
 total_stories: 13
-next_active_story: "T1-COMBAT-07"
-next_active_command: "/dev-story T1-COMBAT-07-med-sit-regen-combat-exit-timing"
+next_active_story: "T1-COMBAT-08"
+next_active_command: "/dev-story T1-COMBAT-08-attack-on-hud-state-signal-hookup"
 
 stories:
   - id: "T1-COMBAT-01"
@@ -76,11 +76,11 @@ stories:
     name: "Med/sit regen and combat-exit timing"
     file: "production/stories/t1-combat-07-med-sit-regen-combat-exit-timing.md"
     priority: must-have
-    status: ready-for-dev
+    status: done
     owner: ""
     estimate_days: 1.5
     blocker: "Depends on T1-COMBAT-03, T1-COMBAT-04, and T1-COMBAT-05."
-    completed: ""
+    completed: "2026-04-30"
   - id: "T1-COMBAT-08"
     name: "Attack ON HUD state signal hookup"
     file: "production/stories/t1-combat-08-attack-on-hud-state-signal-hookup.md"
