@@ -5,8 +5,8 @@
 
 ## Current Task
 
-`T1-COMBAT-03` is closed via `/story-done` with verdict `COMPLETE WITH NOTES`.
-Next work is `/dev-story T1-COMBAT-04-melee-tick-weapon-delay-resolution`.
+`T1-COMBAT-04` is closed via `/story-done` with verdict `COMPLETE WITH NOTES`.
+Next work is `/dev-story T1-COMBAT-05-slow-cast-framework`.
 
 ## Status
 
@@ -61,10 +61,11 @@ Next work is `/dev-story T1-COMBAT-04-melee-tick-weapon-delay-resolution`.
 - ✅ Sprint 1 story `T1-COMBAT-01` closed via `/story-done` 2026-04-28 with verdict **COMPLETE WITH NOTES**. Evidence: Stage 2 TRX 15/15 PASS, Stage 3 rerun TRX 15/15 PASS, and AC trace in [production/stories/t1-combat-01-cleric-base-combat-actor-fixture-hydration.md](../stories/t1-combat-01-cleric-base-combat-actor-fixture-hydration.md).
 - ✅ Sprint 1 story `T1-COMBAT-02` closed via `/story-done` 2026-04-30 with verdict **COMPLETE WITH NOTES**. Evidence: Stage 2 TRX 27/27 PASS, Stage 3 rerun TRX 27/27 PASS, live closure rerun 27/27 PASS, negative T1 scope grep clean except the known README ban line, and AC trace in [production/stories/t1-combat-02-targeting-and-hostile-actor-claim.md](../stories/t1-combat-02-targeting-and-hostile-actor-claim.md). `production/sprint-status.yaml` now records 2/13 Sprint 1 stories done.
 - ✅ Sprint 1 story `T1-COMBAT-03` closed via `/story-done` 2026-04-30 with verdict **COMPLETE WITH NOTES**. Evidence: Stage 2 TRX 43/43 PASS, live closure rerun 43/43 PASS, negative T1 scope grep clean with `src/networking` absent, and AC trace in [production/stories/t1-combat-03-attack-toggle-state-machine.md](../stories/t1-combat-03-attack-toggle-state-machine.md). `production/sprint-status.yaml` now records 3/13 Sprint 1 stories done.
+- ✅ Sprint 1 story `T1-COMBAT-04` closed via `/story-done` 2026-04-30 with verdict **COMPLETE WITH NOTES**. Evidence: Stage 2 TRX 59/59 PASS, live closure rerun 59/59 PASS, negative T1 scope grep clean, and AC trace in [production/stories/t1-combat-04-melee-tick-weapon-delay-resolution.md](../stories/t1-combat-04-melee-tick-weapon-delay-resolution.md). `production/sprint-status.yaml` now records 4/13 Sprint 1 stories done.
 
 ## Files Being Worked On
 
-- **Active:** T1-COMBAT-04 melee tick / weapon-delay resolution - run `/dev-story T1-COMBAT-04-melee-tick-weapon-delay-resolution`.
+- **Active:** T1-COMBAT-05 slow cast framework - run `/dev-story T1-COMBAT-05-slow-cast-framework`.
 - Combat Feel Prototype: [prototypes/combat-feel/](../../prototypes/combat-feel/) — pinned-engine headline pass complete; prototype code remains throwaway evidence artifact.
 - Combat Feel Prototype README: [prototypes/combat-feel/README.md](../../prototypes/combat-feel/README.md) — prototype question, success/failure criteria, loop spec, controls, run notes
 - Inventory & Item Economy: [design/gdd/inventory-item-economy.md](../../design/gdd/inventory-item-economy.md) — design draft, **NEEDS REVISION**, blocker 1 repaired, remaining blockers tracked in `INV-OQ-05`
@@ -94,7 +95,7 @@ Next work is `/dev-story T1-COMBAT-04-melee-tick-weapon-delay-resolution`.
 - Technical-artist validation items accumulated in art bible (URP SSS cost model, decal projector perf, camera-stack isolation for corpse-run desat, GPU instancing behavior, etc.) — consolidated in art-bible.md Document Status header
 - Mana-restore 1:1 linear fill now depends on Combat Core's med-break regen tick contract; Layer 1 HUD must consume Combat Core state rather than inventing separate fill timing.
 - ADR-0003 / D009 status metadata still says `Proposed`; `T1-COMBAT-01` honored the `CombatProgressionBaselineSnapshot` contract but did not rewrite ADR metadata during closure.
-- `H-CCOM-F2B` fixture extremes are validated by `T1-COMBAT-01`; seeded melee formula execution remains owned by `T1-COMBAT-04`.
+- `H-CCOM-F2B` fixture extremes are validated by `T1-COMBAT-01`; seeded melee formula execution is validated by `T1-COMBAT-04`.
 - Creature / Enemy AI still owns actual return-to-anchor movement and NavMeshAgent behavior; `T1-COMBAT-02` supplies Combat Core leash hooks and test doubles only.
 - Optional deferred lesson capture remains open for the `[GLOBAL][CI]` `git diff --check` line-ending warning pattern if it repeats outside `T1-COMBAT-02`.
 - Remaining game-concept project-killer risk: `design/gdd/game-concept.md:304` asks whether kills shifting faction control feel meaningful at the five-minute scale. Needs a later separate `/prototype faction-feel`.
@@ -104,7 +105,7 @@ Next work is `/dev-story T1-COMBAT-04-melee-tick-weapon-delay-resolution`.
 
 ## Next Skill to Run
 
-- **Run `/dev-story T1-COMBAT-04-melee-tick-weapon-delay-resolution`** for the next Sprint 1 combat story.
+- **Run `/dev-story T1-COMBAT-05-slow-cast-framework`** for the next Sprint 1 combat story. The `T1-COMBAT-04` / `T1-COMBAT-05` parallelization note is now moot because `T1-COMBAT-04` is closed and `T1-COMBAT-05` is the next sequential story.
 - Later: run Inventory implementation pre-spec to close `INV-OQ-05`, then rerun `/design-review design/gdd/inventory-item-economy.md --depth full`.
 - Codex PR #1 is merged; no Codex follow-up pending in this active state file.
 
@@ -140,3 +141,14 @@ Next work is `/dev-story T1-COMBAT-04-melee-tick-weapon-delay-resolution`.
 - Tech debt logged: None.
 - Carried forward: ADR-0003 / D009 status metadata cleanup; `H-CCOM-F2B` seeded melee formula execution in `T1-COMBAT-04`; melee resolution, cast lifecycle, tactical instant execution, med regen math, HUD presentation, kill credit, save barriers, death payloads, profiled feel evidence, and architecture scan tooling remain owned by later Sprint 1 stories.
 - Next recommended: `/dev-story T1-COMBAT-04-melee-tick-weapon-delay-resolution`.
+
+## Session Extract - /story-done 2026-04-30 (T1-COMBAT-04)
+
+- Story: [production/stories/t1-combat-04-melee-tick-weapon-delay-resolution.md](../stories/t1-combat-04-melee-tick-weapon-delay-resolution.md) - T1-COMBAT-04 Melee Tick / Weapon-Delay Resolution.
+- Verdict: COMPLETE WITH NOTES.
+- Criteria: 8/8 passing; `H-CCOM-TICK-01`, `H-CCOM-PAUSE-01`, `H-CCOM-AA-02`, `H-CCOM-F1`, `H-CCOM-F2`, seeded `H-CCOM-F2B` formula execution, same-tick death-before-swing priority, and per-tick eligibility validation all have file:line evidence in the story AC trace.
+- Evidence: `tests/evidence/T1-COMBAT-04/t1-combat-04-stage2.trx:372` 59/59 PASS; verification summary at [tests/evidence/T1-COMBAT-04/verification.md](../../tests/evidence/T1-COMBAT-04/verification.md); live closure rerun passed 59/59 with `dotnet test tests\Gravenspire.Combat.Tests.csproj --no-restore --logger "console;verbosity=minimal"`.
+- State updates: story status set to Complete; `production/sprint-status.yaml` marks `T1-COMBAT-04` done, records 4/13 Sprint 1 stories done, and surfaces `T1-COMBAT-05` as next active.
+- Tech debt logged: None.
+- Carried forward: ADR-0003 / D009 status metadata cleanup; cast lifecycle, tactical instant execution, med regen math, HUD presentation, kill credit, save barriers, death payloads, profiled feel evidence, and architecture scan tooling remain owned by later Sprint 1 stories.
+- Next recommended: `/dev-story T1-COMBAT-05-slow-cast-framework`.

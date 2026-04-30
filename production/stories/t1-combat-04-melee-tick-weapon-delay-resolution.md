@@ -1,6 +1,6 @@
 # T1-COMBAT-04 - Melee Tick / Weapon-Delay Resolution
 
-**Status:** Implemented + Verified; awaiting `/story-done`
+**Status:** Complete
 **Sprint:** 1
 **Priority:** Must Have
 **Layer:** Gameplay / Combat Core
@@ -59,7 +59,7 @@ Result: PASS, 59 total, 59 passed, 0 failed. Evidence: `tests/evidence/T1-COMBAT
 
 ## Story Status
 
-`T1-COMBAT-04` is implemented and verified. It is awaiting `/story-done` for closure, sprint status update, and active session-state update.
+`T1-COMBAT-04` is complete via `/story-done`; sprint status and active session state were updated in the approved closure batch.
 
 ## Blockers / Carried Forward
 
@@ -69,12 +69,14 @@ Result: PASS, 59 total, 59 passed, 0 failed. Evidence: `tests/evidence/T1-COMBAT
 
 ## Completion Notes
 
-**Implemented**: 2026-04-30
-**Verdict**: Implemented + Verified; awaiting `/story-done`
-**Implementation Baseline**: commit `aa85defc40fd4c91e19e4ffcbccdfd04524d231f` (`Close T1-COMBAT-03: Attack Toggle State Machine`)
-**Criteria**: 7/7 story checks covered: `H-CCOM-TICK-01`, `H-CCOM-PAUSE-01`, `H-CCOM-AA-02`, `H-CCOM-F1`, `H-CCOM-F2`, seeded `H-CCOM-F2B` formula execution, and same-tick death-before-swing priority all have file:line evidence in `## Acceptance Criteria Coverage`.
-**Deferred/Untested Criteria**: None for this story boundary.
-**Test Evidence**: Stage 2 TRX passed 59/59 at `tests/evidence/T1-COMBAT-04/t1-combat-04-stage2.trx:372`; verification summary is in `tests/evidence/T1-COMBAT-04/verification.md`.
-**GDD/ADR Deviations**: None blocking. No ADR metadata, GDD, fixture data, sprint status, or session-state files were changed.
-**Scope Notes**: Implementation is additive under `src/gameplay/combat/melee/` and `src/gameplay/combat/simulation/`; existing Combat Core source files were not edited.
+**Completed**: 2026-04-30
+**Verdict**: COMPLETE WITH NOTES
+**Implementation Baseline**: commit `50411aeacc3ea4f7dfece16047766954bb2fb202` (`Implement T1-COMBAT-04: Melee Tick + Weapon-Delay Resolution`)
+**Closure Baseline**: commit `50411aeacc3ea4f7dfece16047766954bb2fb202` before this approved `/story-done` closure batch
+**Criteria**: 8/8 story checks covered. `H-CCOM-TICK-01`, `H-CCOM-PAUSE-01`, `H-CCOM-AA-02`, `H-CCOM-F1`, `H-CCOM-F2`, seeded `H-CCOM-F2B` formula execution, same-tick death-before-swing priority, and per-tick eligibility validation all have file:line evidence in `## Acceptance Criteria Coverage`.
+**Deferred/Untested Criteria**: None for this story boundary. Cast lifecycle, tactical instant execution, med regen math, HUD presentation, kill credit, save barriers, death payloads, profiled feel evidence, and architecture scan tooling remain downstream by sprint plan.
+**Test Evidence**: Stage 2 TRX passed 59/59 at `tests/evidence/T1-COMBAT-04/t1-combat-04-stage2.trx:372`; verification summary is in `tests/evidence/T1-COMBAT-04/verification.md:10-31`; live closure rerun passed 59/59 with `dotnet test tests\Gravenspire.Combat.Tests.csproj --no-restore --logger "console;verbosity=minimal"`.
+**GDD/ADR Deviations**: None blocking. No ADR metadata, GDD, fixture data, source code, or test files were changed during closure.
+**Scope Notes**: Negative T1 scope grep passed on the changed story, implementation, test, and evidence files with zero matches for the requested forbidden terms or persistence-shaped `combat_actor_id` misuse. Closure edits are limited to the approved story, sprint-status, and active session-state files.
+**Review Gates**: Lean `/story-done` closure; QA and lead-programmer subagents skipped by review mode. Story, sprint status, and session state updated in the approved closure batch.
 **Forced Completion**: No.
