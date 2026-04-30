@@ -1,6 +1,6 @@
 # T1-COMBAT-08 - Attack ON HUD State Signal Hookup
 
-**Status:** Implemented + Verified; awaiting `/story-done`
+**Status:** Complete
 **Sprint:** 1
 **Priority:** Must Have
 **Layer:** Gameplay / Combat Core
@@ -60,7 +60,23 @@ Result: PASS, 106 total, 106 passed, 0 failed. Evidence: `tests/evidence/T1-COMB
 
 ## Story Status
 
-`T1-COMBAT-08` is implemented and awaits `/story-done` closure.
+`T1-COMBAT-08` is complete.
+
+## Completion Notes
+
+**Completed:** 2026-04-30
+**Verdict:** COMPLETE WITH NOTES
+**Criteria:** 4/4 acceptance criteria covered: `H-CCOM-HUD-01`, `H-CCOM-HUD-02`, `H-CCOM-HUD-03`, and `H-CCOM-HUD-04`. `H-CCOM-HUD-04` includes the 9-case transition surface: Attack on signal, Attack off signal, target death, successful sit/med, combat exit, player death, zone transition, current-state accessor matching event history, and no no-target pulse.
+**Deferred/Untested Criteria:** None.
+**Test Evidence:** Stage 2 TRX passed 106/106 at `tests/evidence/T1-COMBAT-08/t1-combat-08-stage2.trx:654`; verification summary is `tests/evidence/T1-COMBAT-08/verification.md`.
+**UI Seam Guard:** Held. `tests/evidence/T1-COMBAT-08/verification.md:28` records zero Unity/UI/styling primitive matches; `src/gameplay/combat/presentation/CombatHudStateProjection.cs:3` imports only `System` namespaces.
+**Threat Output Guard:** Held. HUD threat output is categorical only through `CombatHudThreatCategory`; raw numeric threat remains internal/test input only, with raw-threat grep passing at `tests/evidence/T1-COMBAT-08/verification.md:38`.
+**Attack Pulse Guard:** Held. The no-target no-op does not emit a misleading transient Attack ON pulse; coverage is `tests/integration/gameplay/combat/combat_hud_state_signal_test.cs:110` with null/empty signal assertions at `tests/integration/gameplay/combat/combat_hud_state_signal_test.cs:125`.
+**Composition Verification:** Projection reads existing actor resources, target/threat table, Attack state-machine snapshot/signals, and Cast state/progress only; anchors are recorded at `tests/evidence/T1-COMBAT-08/verification.md:75`.
+**GDD/ADR Deviations:** None.
+**Scope Notes:** Strictly additive new-file-only implementation footprint. Final Layer 1 HUD visual treatment, categorical threat presentation language, layout, animation, color, and rendering remain downstream UI work.
+**Review Gates:** Lean `/story-done` local evidence review complete; hook smoke and diff hygiene passed in `tests/evidence/T1-COMBAT-08/verification.md:88`.
+**Forced Completion:** No.
 
 ## Blockers / Carried Forward
 
