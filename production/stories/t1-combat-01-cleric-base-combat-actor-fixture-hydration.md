@@ -1,6 +1,6 @@
 # T1-COMBAT-01 - Cleric Base Combat Actor + Fixture Hydration
 
-**Status:** Implemented / in-progress, awaiting `/story-done`
+**Status:** Complete
 **Sprint:** 1
 **Priority:** Must Have
 **Layer:** Gameplay / Combat Core
@@ -37,7 +37,7 @@ Scope guard evidence: `design/gdd/combat-core.md:604-605`; `design/gdd/combat-co
 
 - `/qa-plan sprint` complete: `production/qa/plans/qa-plan-sprint-20260428.md:1-8`.
 - `/test-setup` complete enough for the narrow pure C# bridge: `tests/README.md:1-18`; `tests/README.md:91-99`.
-- Sprint status still leaves this story to `/story-done`: `production/sprint-status.yaml:1-2`; `production/sprint-status.yaml:16-24`.
+- `/story-done` closure is now recorded in `production/sprint-status.yaml:16-26` and `production/session-state/active.md:107-116`.
 - ADR-0003 contract shape: `docs/architecture/adr-0003-progression-baseline-snapshot-contract.md:111-135`.
 
 ## Acceptance Criteria Coverage
@@ -71,10 +71,22 @@ Result: PASS, 15 total, 15 passed, 0 failed. Evidence: `tests/evidence/T1-COMBAT
 
 ## Story Status
 
-`T1-COMBAT-01` is implemented and remains in progress until `/story-done` performs closure. This file intentionally does not mark the story Done, does not update `production/sprint-status.yaml`, and does not advance to `T1-COMBAT-02`.
+`T1-COMBAT-01` is complete. `/story-done` closed the story with verdict `COMPLETE WITH NOTES` after verifying the acceptance trace, Stage 2 TRX evidence, and Stage 3 rerun TRX evidence.
 
 ## Blockers / Carried Forward
 
-- `/story-done` must close `T1-COMBAT-01` and update `production/sprint-status.yaml`; Stage 3 intentionally left that file untouched because its header says it is updated by `/story-done` (`production/sprint-status.yaml:1-2`).
-- `production/session-state/active.md` still points at older sprint-planning work and was intentionally left untouched per Stage 3 instructions.
+- ADR-0003 / D009 status metadata still says `Proposed` (`docs/architecture/adr-0003-progression-baseline-snapshot-contract.md:3-4`; `DECISIONS.md:222-225`) even though this implementation path uses the `CombatProgressionBaselineSnapshot` contract as the governing baseline. This is a separate metadata cleanup, not a `T1-COMBAT-01` blocker.
 - Formula execution for `H-CCOM-F2B` belongs to `T1-COMBAT-04`; this story supplies and validates fixture extremes only.
+
+## Completion Notes
+
+**Completed**: 2026-04-28
+**Verdict**: COMPLETE WITH NOTES
+**Closure Baseline**: Stage 3 commit `d9d2777` (`Implement T1-COMBAT-01 Stage 3: story file + handoff for /story-done`)
+**Criteria**: 6/6 passing. `H-CCOM-SCOPE-01`, `H-CCOM-ACTOR-01`, `H-CCOM-FIXTURE-01`, `H-CCOM-F2B`, `H-CCOM-SL-02`, and ADR-0003 `CombatProgressionBaselineSnapshot` coverage all have file:line evidence in `## Acceptance Criteria Coverage`.
+**Deferred/Untested Criteria**: None for this story.
+**Test Evidence**: Stage 2 TRX passed 15/15 at `tests/evidence/T1-COMBAT-01/t1-combat-01-stage2.trx:107-108`; Stage 3 rerun TRX passed 15/15 at `tests/evidence/T1-COMBAT-01/t1-combat-01-stage3-rerun.trx:107-108`; command/counter summary is in `tests/evidence/T1-COMBAT-01/verification.md:37-45`.
+**GDD/ADR Deviations**: None blocking. Note: ADR-0003 / D009 status metadata remains `Proposed`; do not silently rewrite it inside this story closure.
+**Scope Notes**: `H-CCOM-F2B` fixture extremes are implemented and validated here; seeded melee formula execution remains intentionally owned by `T1-COMBAT-04`.
+**Review Gates**: Lean `/story-done` closure; QA and lead-programmer subagents skipped by review mode.
+**Forced Completion**: No.

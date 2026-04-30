@@ -10,18 +10,20 @@ updated: "2026-04-28"
 branch: "main"
 head: "2e268b4"
 qa_plan: "production/qa/plans/qa-plan-sprint-20260428.md"
-implementation_gate: "Run /qa-plan sprint, then /test-setup, then /dev-story T1-COMBAT-01-cleric-base-combat-actor-fixture-hydration."
+implementation_gate: "T1-COMBAT-01 closed by /story-done. Next active gate: /dev-story T1-COMBAT-02-targeting-and-hostile-actor-claim."
+next_active_story: "T1-COMBAT-02"
+next_active_command: "/dev-story T1-COMBAT-02-targeting-and-hostile-actor-claim"
 
 stories:
   - id: "T1-COMBAT-01"
     name: "Cleric base combat actor + fixture hydration"
     file: "production/stories/t1-combat-01-cleric-base-combat-actor-fixture-hydration.md"
     priority: must-have
-    status: ready-for-dev
+    status: done
     owner: ""
     estimate_days: 2.0
-    blocker: "Implementation gate: /qa-plan sprint and /test-setup must run before this story starts."
-    completed: ""
+    blocker: ""
+    completed: "2026-04-28"
   - id: "T1-COMBAT-02"
     name: "Targeting and hostile actor claim"
     file: "production/stories/t1-combat-02-targeting-and-hostile-actor-claim.md"
@@ -29,7 +31,7 @@ stories:
     status: ready-for-dev
     owner: ""
     estimate_days: 2.5
-    blocker: "Depends on T1-COMBAT-01."
+    blocker: ""
     completed: ""
   - id: "T1-COMBAT-03"
     name: "Attack toggle state machine"
