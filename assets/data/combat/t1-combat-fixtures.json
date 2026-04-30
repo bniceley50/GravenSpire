@@ -383,6 +383,84 @@
       "damageReduction": 0.2
     }
   ],
+  "tacticalInstantAbilityProfiles": [
+    {
+      "id": "SmiteOfAuthority_T1_Prototype",
+      "castTimeSeconds": 0.0,
+      "cost_mana": 10,
+      "cooldown_seconds": 7.0,
+      "range_meters": 30.0,
+      "requires_target": true,
+      "requires_line_of_sight": true,
+      "effects": [
+        {
+          "effect_type": "direct_damage",
+          "damage_by_band": [
+            {
+              "band": "Low",
+              "value": 13
+            },
+            {
+              "band": "Mid",
+              "value": 16
+            },
+            {
+              "band": "Top",
+              "value": 16
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "Bash_T1_Prototype",
+      "castTimeSeconds": 0.0,
+      "cost_mana": 10,
+      "cooldown_seconds": 10.0,
+      "range_meters": 2.0,
+      "requires_target": true,
+      "requires_line_of_sight": true,
+      "effects": [
+        {
+          "effect_type": "direct_damage",
+          "damage_by_band": [
+            {
+              "band": "Low",
+              "value": 7
+            },
+            {
+              "band": "Mid",
+              "value": 11
+            },
+            {
+              "band": "Top",
+              "value": 11
+            }
+          ]
+        },
+        {
+          "effect_type": "interrupt_current_channel",
+          "interrupt_seconds": 1.0
+        }
+      ]
+    },
+    {
+      "id": "DefensivePrayer_T1_Prototype",
+      "castTimeSeconds": 0.0,
+      "cost_mana": 25,
+      "cooldown_seconds": 30.0,
+      "range_meters": 0.0,
+      "requires_target": false,
+      "requires_line_of_sight": false,
+      "effects": [
+        {
+          "effect_type": "self_buff",
+          "duration_seconds": 8.0,
+          "damage_reduction": 0.2
+        }
+      ]
+    }
+  ],
   "encounterFixtures": [
     {
       "id": "SoloTrash_EvenCon_T1",

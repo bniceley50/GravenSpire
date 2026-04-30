@@ -71,6 +71,11 @@ public sealed record CombatFixturePackage
     public List<CombatSpellFixture> TacticalInstantFixtures { get; init; } = new();
 
     /// <summary>
+    /// Strict tactical instant ability profiles used by the T1 execution path.
+    /// </summary>
+    public List<CombatTacticalInstantAbilityProfileFixture> TacticalInstantAbilityProfiles { get; init; } = new();
+
+    /// <summary>
     /// Encounter fixtures available for T1 Combat Core tests.
     /// </summary>
     public List<CombatEncounterFixture> EncounterFixtures { get; init; } = new();
@@ -396,6 +401,93 @@ public sealed record CombatSpellFixture
     /// Optional fixture-owned damage reduction ratio.
     /// </summary>
     public double? DamageReduction { get; init; }
+}
+
+/// <summary>
+/// Executable zero-cast-time tactical instant ability profile row.
+/// </summary>
+public sealed record CombatTacticalInstantAbilityProfileFixture
+{
+    /// <summary>
+    /// Stable ability profile id.
+    /// </summary>
+    public string Id { get; init; } = string.Empty;
+
+    /// <summary>
+    /// Cast-time contract; tactical instant profiles must declare zero.
+    /// </summary>
+    public double CastTimeSeconds { get; init; }
+
+    /// <summary>
+    /// Fixture-owned mana cost.
+    /// </summary>
+    [System.Text.Json.Serialization.JsonPropertyName("cost_mana")]
+    public int CostMana { get; init; }
+
+    /// <summary>
+    /// Fixture-owned transient cooldown length.
+    /// </summary>
+    [System.Text.Json.Serialization.JsonPropertyName("cooldown_seconds")]
+    public double CooldownSeconds { get; init; }
+
+    /// <summary>
+    /// Fixture-owned ability range.
+    /// </summary>
+    [System.Text.Json.Serialization.JsonPropertyName("range_meters")]
+    public double RangeMeters { get; init; }
+
+    /// <summary>
+    /// True when this profile requires the caller to provide a selected target.
+    /// </summary>
+    [System.Text.Json.Serialization.JsonPropertyName("requires_target")]
+    public bool RequiresTarget { get; init; } = true;
+
+    /// <summary>
+    /// True when line of sight must be valid for target resolution.
+    /// </summary>
+    [System.Text.Json.Serialization.JsonPropertyName("requires_line_of_sight")]
+    public bool RequiresLineOfSight { get; init; } = true;
+
+    /// <summary>
+    /// Declared effect profiles, resolved in authored order.
+    /// </summary>
+    public List<CombatTacticalInstantAbilityEffectFixture> Effects { get; init; } = new();
+}
+
+/// <summary>
+/// Effect declaration for a tactical instant ability profile.
+/// </summary>
+public sealed record CombatTacticalInstantAbilityEffectFixture
+{
+    /// <summary>
+    /// Declared effect type.
+    /// </summary>
+    [System.Text.Json.Serialization.JsonPropertyName("effect_type")]
+    public string EffectType { get; init; } = string.Empty;
+
+    /// <summary>
+    /// Fixture-owned damage values for direct damage effects.
+    /// </summary>
+    [System.Text.Json.Serialization.JsonPropertyName("damage_by_band")]
+    public List<CombatBandValue> DamageByBand { get; init; } = new();
+
+    /// <summary>
+    /// Fixture-owned duration for self-buff effects.
+    /// </summary>
+    [System.Text.Json.Serialization.JsonPropertyName("duration_seconds")]
+    public double? DurationSeconds { get; init; }
+
+    /// <summary>
+    /// Fixture-owned damage reduction ratio for self-buff effects.
+    /// </summary>
+    [System.Text.Json.Serialization.JsonPropertyName("damage_reduction")]
+    public double? DamageReduction { get; init; }
+
+    /// <summary>
+    /// Fixture-owned recovery pressure for interrupt effects.
+    /// </summary>
+    [System.Text.Json.Serialization.JsonPropertyName("interrupt_seconds")]
+    public double? InterruptSeconds { get; init; }
 }
 
 /// <summary>

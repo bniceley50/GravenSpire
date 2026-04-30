@@ -228,6 +228,71 @@ public static class CombatActorStateTransitions
         };
     }
 
+    /// <summary>
+    /// Applies tactical ability damage while preserving any target cast runtime fields.
+    /// </summary>
+    public static CombatActorState WithCurrentHealthAfterAbilityDamage(this CombatActorState actor, int damage)
+    {
+        ArgumentNullException.ThrowIfNull(actor);
+        if (damage < 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(damage), "Ability damage cannot be negative.");
+        }
+
+        var currentHealth = Math.Max(0, actor.CurrentHealth - damage);
+        var lifeState = currentHealth == 0 ? CombatActorLifeState.Dead : actor.LifeState;
+        var combatState = currentHealth == 0 ? CombatState.Dead : actor.CombatState;
+
+        return new CombatActorState(
+            actor.CombatActorId,
+            actor.ActorKind,
+            actor.StableSourceRef,
+            actor.FactionId,
+            actor.ZoneId,
+            actor.Level,
+            actor.MaxHealth,
+            currentHealth,
+            actor.MaxMana,
+            actor.CurrentMana,
+            actor.ArmorClass,
+            actor.AttackPower,
+            actor.WeaponBaseDamage,
+            actor.AttackSkill,
+            actor.DefenseSkill,
+            actor.WeaponDelaySeconds,
+            actor.MeleeRangeMeters,
+            actor.SpellRangeMeters,
+            combatState,
+            lifeState,
+            actor.TargetCombatActorId,
+            actor.CombatSortKey,
+            actor.ThreatTable) with
+        {
+            CastRuntimeState = actor.CastRuntimeState,
+            ActiveCastId = actor.ActiveCastId,
+            ActiveCastSpellId = actor.ActiveCastSpellId,
+            ActiveCastTargetCombatActorId = actor.ActiveCastTargetCombatActorId,
+            CastProgressSeconds = actor.CastProgressSeconds,
+            CastRecoveryRemainingSeconds = actor.CastRecoveryRemainingSeconds
+        };
+    }
+
+    /// <summary>
+    /// Routes a declared tactical interrupt effect through the existing cast recovery state.
+    /// </summary>
+    public static CombatActorState CancelActiveChannelByAbility(this CombatActorState actor, double recoveryRemainingSeconds)
+    {
+        ArgumentNullException.ThrowIfNull(actor);
+        if (recoveryRemainingSeconds < 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(recoveryRemainingSeconds), "Recovery remaining cannot be negative.");
+        }
+
+        return actor.CastRuntimeState == CombatCastRuntimeState.Casting
+            ? actor.BeginCastRecovery(recoveryRemainingSeconds)
+            : actor;
+    }
+
     private static CombatActorState CopyWithCastRuntime(CombatActorState actor, int? currentMana = null)
     {
         return new CombatActorState(

@@ -55,6 +55,13 @@ public sealed class CombatFixtureValidator
         "DefensivePrayer_T1_Prototype"
     };
 
+    private static readonly string[] RequiredTacticalInstantAbilityProfiles =
+    {
+        "SmiteOfAuthority_T1_Prototype",
+        "Bash_T1_Prototype",
+        "DefensivePrayer_T1_Prototype"
+    };
+
     private static readonly string[] RequiredEncounterFixtures =
     {
         "SoloTrash_EvenCon_T1",
@@ -91,11 +98,13 @@ public sealed class CombatFixtureValidator
         ValidateActors(package.ActorFixtures, errors);
         ValidateSpellRows(package.SpellFixtures, "spell", requireZeroCast: false, errors);
         ValidateSpellRows(package.TacticalInstantFixtures, "tactical instant", requireZeroCast: true, errors);
+        ValidateTacticalInstantAbilityProfiles(package.TacticalInstantAbilityProfiles, errors);
         ValidateEncounters(package.EncounterFixtures, package.ActorFixtures, errors);
 
         RequireIds(package.ActorFixtures.Select(actor => actor.Id), RequiredActorFixtures, "actor fixture", errors);
         RequireIds(package.SpellFixtures.Select(spell => spell.Id), RequiredSpellFixtures, "spell fixture", errors);
         RequireIds(package.TacticalInstantFixtures.Select(spell => spell.Id), RequiredTacticalInstantFixtures, "tactical instant fixture", errors);
+        RequireIds(package.TacticalInstantAbilityProfiles.Select(profile => profile.Id), RequiredTacticalInstantAbilityProfiles, "tactical instant ability profile", errors);
         RequireIds(package.EncounterFixtures.Select(encounter => encounter.Id), RequiredEncounterFixtures, "encounter fixture", errors);
 
         return errors.Count == 0 ? CombatFixtureValidationResult.Valid : CombatFixtureValidationResult.Invalid(errors);
@@ -295,6 +304,94 @@ public sealed class CombatFixtureValidator
             {
                 errors.Add($"{spell.Id}: damage reduction must be a ratio from zero to one.");
             }
+        }
+    }
+
+    private static void ValidateTacticalInstantAbilityProfiles(
+        IEnumerable<CombatTacticalInstantAbilityProfileFixture> profiles,
+        ICollection<string> errors)
+    {
+        var seen = new HashSet<string>(StringComparer.Ordinal);
+        foreach (var profile in profiles)
+        {
+            RequireUniqueId(profile.Id, "tactical instant ability profile", seen, errors);
+
+            if (profile.CastTimeSeconds != 0)
+            {
+                errors.Add($"{profile.Id}: tactical instant ability profile must declare zero cast time.");
+            }
+
+            if (profile.CostMana <= 0)
+            {
+                errors.Add($"{profile.Id}: cost_mana must be positive.");
+            }
+
+            if (profile.CooldownSeconds <= 0)
+            {
+                errors.Add($"{profile.Id}: cooldown_seconds must be positive.");
+            }
+
+            if (profile.RangeMeters < 0)
+            {
+                errors.Add($"{profile.Id}: range_meters must not be negative.");
+            }
+
+            if (profile.RequiresTarget && profile.RangeMeters <= 0)
+            {
+                errors.Add($"{profile.Id}: targeted tactical instant ability profiles require positive range_meters.");
+            }
+
+            if (profile.Effects.Count == 0)
+            {
+                errors.Add($"{profile.Id}: at least one declared ability effect is required.");
+            }
+
+            foreach (var effect in profile.Effects)
+            {
+                ValidateTacticalInstantAbilityEffect(profile.Id, effect, errors);
+            }
+        }
+    }
+
+    private static void ValidateTacticalInstantAbilityEffect(
+        string profileId,
+        CombatTacticalInstantAbilityEffectFixture effect,
+        ICollection<string> errors)
+    {
+        RequireText(effect.EffectType, $"{profileId}.effect_type", errors);
+
+        switch (effect.EffectType)
+        {
+            case CombatTacticalAbilityEffectTypes.DirectDamage:
+                ValidateBandValues(profileId, "direct damage", effect.DamageByBand, errors);
+                if (effect.DamageByBand.Any(value => value.Value <= 0))
+                {
+                    errors.Add($"{profileId}: direct_damage values must be positive.");
+                }
+
+                break;
+            case CombatTacticalAbilityEffectTypes.SelfBuff:
+                if (effect.DurationSeconds is null or <= 0)
+                {
+                    errors.Add($"{profileId}: self_buff requires positive duration_seconds.");
+                }
+
+                if (effect.DamageReduction is null or < 0 or > 1)
+                {
+                    errors.Add($"{profileId}: self_buff damage_reduction must be a ratio from zero to one.");
+                }
+
+                break;
+            case CombatTacticalAbilityEffectTypes.InterruptCurrentChannel:
+                if (effect.InterruptSeconds is null or <= 0)
+                {
+                    errors.Add($"{profileId}: interrupt_current_channel requires positive interrupt_seconds.");
+                }
+
+                break;
+            default:
+                errors.Add($"{profileId}: unsupported tactical instant ability effect_type {effect.EffectType}.");
+                break;
         }
     }
 

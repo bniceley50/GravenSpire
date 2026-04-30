@@ -90,6 +90,123 @@ public sealed class CombatFixtureValidationTest
         Assert.That(validation.Errors, Has.Some.Contains("Missing required actor fixture: Cleric_Mid_T1"));
     }
 
+    [Test]
+    public void test_combat_fixture_package_declares_tactical_instant_ability_profiles()
+    {
+        var package = LoadPackage();
+
+        var smite = package.TacticalInstantAbilityProfiles.Single(profile => profile.Id == "SmiteOfAuthority_T1_Prototype");
+        var bash = package.TacticalInstantAbilityProfiles.Single(profile => profile.Id == "Bash_T1_Prototype");
+        var prayer = package.TacticalInstantAbilityProfiles.Single(profile => profile.Id == "DefensivePrayer_T1_Prototype");
+
+        Assert.That(smite.CastTimeSeconds, Is.EqualTo(0d));
+        Assert.That(smite.CostMana, Is.EqualTo(10));
+        Assert.That(smite.CooldownSeconds, Is.EqualTo(7.0d).Within(0.000001d));
+        Assert.That(smite.Effects.Single().EffectType, Is.EqualTo(CombatTacticalAbilityEffectTypes.DirectDamage));
+        Assert.That(smite.Effects.Single().DamageByBand.Single(value => value.Band == "Mid").Value, Is.EqualTo(16));
+
+        Assert.That(bash.Effects.Select(effect => effect.EffectType), Is.EqualTo(new[]
+        {
+            CombatTacticalAbilityEffectTypes.DirectDamage,
+            CombatTacticalAbilityEffectTypes.InterruptCurrentChannel
+        }));
+        Assert.That(bash.Effects.Single(effect => effect.EffectType == CombatTacticalAbilityEffectTypes.InterruptCurrentChannel).InterruptSeconds, Is.EqualTo(1.0d).Within(0.000001d));
+
+        Assert.That(prayer.RequiresTarget, Is.False);
+        Assert.That(prayer.RequiresLineOfSight, Is.False);
+        Assert.That(prayer.Effects.Single().EffectType, Is.EqualTo(CombatTacticalAbilityEffectTypes.SelfBuff));
+        Assert.That(prayer.Effects.Single().DurationSeconds, Is.EqualTo(8.0d).Within(0.000001d));
+    }
+
+    [Test]
+    public void test_combat_fixture_validator_rejects_missing_tactical_instant_ability_profile_fields()
+    {
+        var package = LoadPackage() with
+        {
+            TacticalInstantAbilityProfiles = new()
+            {
+                new CombatTacticalInstantAbilityProfileFixture
+                {
+                    Id = "SmiteOfAuthority_T1_Prototype"
+                }
+            }
+        };
+
+        var validation = new CombatFixtureValidator().Validate(package);
+
+        Assert.That(validation.IsValid, Is.False);
+        Assert.That(validation.Errors, Has.Some.Contains("SmiteOfAuthority_T1_Prototype: cost_mana must be positive."));
+        Assert.That(validation.Errors, Has.Some.Contains("SmiteOfAuthority_T1_Prototype: cooldown_seconds must be positive."));
+        Assert.That(validation.Errors, Has.Some.Contains("SmiteOfAuthority_T1_Prototype: at least one declared ability effect is required."));
+        Assert.That(validation.Errors, Has.Some.Contains("Missing required tactical instant ability profile: Bash_T1_Prototype"));
+        Assert.That(validation.Errors, Has.Some.Contains("Missing required tactical instant ability profile: DefensivePrayer_T1_Prototype"));
+    }
+
+    [Test]
+    public void test_combat_fixture_validator_rejects_missing_tactical_instant_effect_specific_data()
+    {
+        var package = LoadPackage() with
+        {
+            TacticalInstantAbilityProfiles = new()
+            {
+                new CombatTacticalInstantAbilityProfileFixture
+                {
+                    Id = "SmiteOfAuthority_T1_Prototype",
+                    CastTimeSeconds = 0d,
+                    CostMana = 10,
+                    CooldownSeconds = 7.0d,
+                    RangeMeters = 30.0d,
+                    Effects = new()
+                    {
+                        new CombatTacticalInstantAbilityEffectFixture
+                        {
+                            EffectType = CombatTacticalAbilityEffectTypes.DirectDamage
+                        }
+                    }
+                },
+                new CombatTacticalInstantAbilityProfileFixture
+                {
+                    Id = "Bash_T1_Prototype",
+                    CastTimeSeconds = 0d,
+                    CostMana = 10,
+                    CooldownSeconds = 10.0d,
+                    RangeMeters = 2.0d,
+                    Effects = new()
+                    {
+                        new CombatTacticalInstantAbilityEffectFixture
+                        {
+                            EffectType = CombatTacticalAbilityEffectTypes.InterruptCurrentChannel
+                        }
+                    }
+                },
+                new CombatTacticalInstantAbilityProfileFixture
+                {
+                    Id = "DefensivePrayer_T1_Prototype",
+                    CastTimeSeconds = 0d,
+                    CostMana = 25,
+                    CooldownSeconds = 30.0d,
+                    RangeMeters = 0d,
+                    RequiresTarget = false,
+                    RequiresLineOfSight = false,
+                    Effects = new()
+                    {
+                        new CombatTacticalInstantAbilityEffectFixture
+                        {
+                            EffectType = CombatTacticalAbilityEffectTypes.SelfBuff
+                        }
+                    }
+                }
+            }
+        };
+
+        var validation = new CombatFixtureValidator().Validate(package);
+
+        Assert.That(validation.IsValid, Is.False);
+        Assert.That(validation.Errors, Has.Some.Contains("SmiteOfAuthority_T1_Prototype: direct damage values are required."));
+        Assert.That(validation.Errors, Has.Some.Contains("Bash_T1_Prototype: interrupt_current_channel requires positive interrupt_seconds."));
+        Assert.That(validation.Errors, Has.Some.Contains("DefensivePrayer_T1_Prototype: self_buff requires positive duration_seconds."));
+    }
+
     private static CombatFixturePackage LoadPackage()
     {
         var path = Path.Combine(FindRepoRoot(), "assets", "data", "combat", "t1-combat-fixtures.json");
