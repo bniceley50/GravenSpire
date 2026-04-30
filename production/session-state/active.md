@@ -5,8 +5,8 @@
 
 ## Current Task
 
-`T1-COMBAT-05` is closed via `/story-done` with verdict `COMPLETE WITH NOTES`.
-Next work is `/dev-story T1-COMBAT-06-tactical-cleric-instants-fixture-loaded-values`.
+`T1-COMBAT-06` is closed via `/story-done` with verdict `COMPLETE WITH NOTES`.
+Next work is `/dev-story T1-COMBAT-07-med-sit-regen-combat-exit-timing`.
 
 ## Status
 
@@ -63,10 +63,11 @@ Next work is `/dev-story T1-COMBAT-06-tactical-cleric-instants-fixture-loaded-va
 - ✅ Sprint 1 story `T1-COMBAT-03` closed via `/story-done` 2026-04-30 with verdict **COMPLETE WITH NOTES**. Evidence: Stage 2 TRX 43/43 PASS, live closure rerun 43/43 PASS, negative T1 scope grep clean with `src/networking` absent, and AC trace in [production/stories/t1-combat-03-attack-toggle-state-machine.md](../stories/t1-combat-03-attack-toggle-state-machine.md). `production/sprint-status.yaml` now records 3/13 Sprint 1 stories done.
 - ✅ Sprint 1 story `T1-COMBAT-04` closed via `/story-done` 2026-04-30 with verdict **COMPLETE WITH NOTES**. Evidence: Stage 2 TRX 59/59 PASS, live closure rerun 59/59 PASS, negative T1 scope grep clean, and AC trace in [production/stories/t1-combat-04-melee-tick-weapon-delay-resolution.md](../stories/t1-combat-04-melee-tick-weapon-delay-resolution.md). `production/sprint-status.yaml` now records 4/13 Sprint 1 stories done.
 - ✅ Sprint 1 story `T1-COMBAT-05` closed via `/story-done` 2026-04-30 with verdict **COMPLETE WITH NOTES**. Evidence: Stage 2 TRX 71/71 PASS, live closure rerun 71/71 PASS, negative T1 scope grep clean, and AC trace in [production/stories/t1-combat-05-slow-cast-framework.md](../stories/t1-combat-05-slow-cast-framework.md). ADR-0003/D009 metadata cleanup was closed in the same approved ride-along. `production/sprint-status.yaml` now records 5/13 Sprint 1 stories done.
+- ✅ Sprint 1 story `T1-COMBAT-06` closed via `/story-done` 2026-04-30 with verdict **COMPLETE WITH NOTES**. Evidence: Stage 2 TRX 81/81 PASS, hardcoded-tuning gate PASS, negative T1 scope grep clean, and AC trace in [production/stories/t1-combat-06-tactical-cleric-instants-fixture-loaded-values.md](../stories/t1-combat-06-tactical-cleric-instants-fixture-loaded-values.md). `production/sprint-status.yaml` now records 6/13 Sprint 1 stories done.
 
 ## Files Being Worked On
 
-- **Active:** T1-COMBAT-06 tactical Cleric instants using fixture-loaded numeric values - run `/dev-story T1-COMBAT-06-tactical-cleric-instants-fixture-loaded-values`.
+- **Active:** T1-COMBAT-07 med/sit regen and combat-exit timing - run `/dev-story T1-COMBAT-07-med-sit-regen-combat-exit-timing`.
 - Combat Feel Prototype: [prototypes/combat-feel/](../../prototypes/combat-feel/) — pinned-engine headline pass complete; prototype code remains throwaway evidence artifact.
 - Combat Feel Prototype README: [prototypes/combat-feel/README.md](../../prototypes/combat-feel/README.md) — prototype question, success/failure criteria, loop spec, controls, run notes
 - Inventory & Item Economy: [design/gdd/inventory-item-economy.md](../../design/gdd/inventory-item-economy.md) — design draft, **NEEDS REVISION**, blocker 1 repaired, remaining blockers tracked in `INV-OQ-05`
@@ -106,7 +107,7 @@ Next work is `/dev-story T1-COMBAT-06-tactical-cleric-instants-fixture-loaded-va
 
 ## Next Skill to Run
 
-- **Run `/dev-story T1-COMBAT-06-tactical-cleric-instants-fixture-loaded-values`** for the next Sprint 1 combat story. `T1-COMBAT-05` is closed, so tactical Cleric instants are now unblocked as the next sequential story.
+- **Run `/dev-story T1-COMBAT-07-med-sit-regen-combat-exit-timing`** for the next Sprint 1 combat story. `T1-COMBAT-06` is closed, so med/sit regen and combat-exit timing are now unblocked as the next sequential story.
 - Later: run Inventory implementation pre-spec to close `INV-OQ-05`, then rerun `/design-review design/gdd/inventory-item-economy.md --depth full`.
 - Codex PR #1 is merged; no Codex follow-up pending in this active state file.
 
@@ -165,3 +166,14 @@ Next work is `/dev-story T1-COMBAT-06-tactical-cleric-instants-fixture-loaded-va
 - Tech debt logged: None.
 - Carried forward: tactical instant execution (`T1-COMBAT-06`), med/sit regen and combat-exit timing, HUD presentation, kill credit, save barriers, death payloads, profiled feel evidence, architecture scan tooling, and the `.claude/skills/dev-story/SKILL.md:75` story-file-creation drift lesson candidate. ADR-0003/D009 metadata cleanup is no longer carried forward.
 - Next recommended: `/dev-story T1-COMBAT-06-tactical-cleric-instants-fixture-loaded-values`.
+
+## Session Extract - /story-done 2026-04-30 (T1-COMBAT-06)
+
+- Story: [production/stories/t1-combat-06-tactical-cleric-instants-fixture-loaded-values.md](../stories/t1-combat-06-tactical-cleric-instants-fixture-loaded-values.md) - T1-COMBAT-06 Tactical Cleric Instants Using Fixture-Loaded Numeric Values.
+- Verdict: COMPLETE WITH NOTES.
+- Criteria: 8/8 passing; `H-CCOM-INST-01`, `H-CCOM-FIXTURE-01`, instant ability resolution without a cast bar, Rule 13 mana spend path, transient cooldown timer behavior, Bash cancellation only through declared `interrupt_current_channel`, fixture-driven self-buff duration, and the static/grep rejection of hardcoded tactical instant tuning all have file:line evidence in the story AC trace.
+- Evidence: `tests/evidence/T1-COMBAT-06/t1-combat-06-stage2.trx:504` 81/81 PASS; verification summary at [tests/evidence/T1-COMBAT-06/verification.md](../../tests/evidence/T1-COMBAT-06/verification.md); hardcoded-tuning gate passed at `tests/evidence/T1-COMBAT-06/verification.md:16-24` against the Sprint 1 T1-COMBAT-06 done-definition gate.
+- State updates: story status set to Complete; `production/sprint-status.yaml` marks `T1-COMBAT-06` done, records 6/13 Sprint 1 stories done, and surfaces `T1-COMBAT-07` as next active.
+- Tech debt logged: None.
+- Carried forward: med/sit regen and combat-exit timing (`T1-COMBAT-07`), HUD presentation, kill credit, save barriers, death payloads, profiled feel evidence, architecture scan tooling, and the `.claude/skills/dev-story/SKILL.md:75` story-file-creation drift lesson candidate remain owned by later Sprint 1 stories. Class Design still owns final tactical ability names/values beyond these prototype fixture rows.
+- Next recommended: `/dev-story T1-COMBAT-07-med-sit-regen-combat-exit-timing`.

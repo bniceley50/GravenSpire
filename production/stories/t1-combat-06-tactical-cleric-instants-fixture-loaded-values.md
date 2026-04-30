@@ -1,6 +1,6 @@
 # T1-COMBAT-06 - Tactical Cleric Instants Using Fixture-Loaded Numeric Values
 
-**Status:** Implemented + Verified; awaiting `/story-done`
+**Status:** Complete
 **Sprint:** 1
 **Priority:** Must Have
 **Layer:** Gameplay / Combat Core
@@ -60,7 +60,7 @@ Result: PASS, 81 total, 81 passed, 0 failed. Evidence: `tests/evidence/T1-COMBAT
 
 ## Story Status
 
-`T1-COMBAT-06` is implemented and verified, awaiting `/story-done`. This file is not marked Complete; closure state remains owned by `/story-done`.
+`T1-COMBAT-06` is complete via `/story-done` with verdict `COMPLETE WITH NOTES`.
 
 ## Blockers / Carried Forward
 
@@ -70,7 +70,14 @@ Result: PASS, 81 total, 81 passed, 0 failed. Evidence: `tests/evidence/T1-COMBAT
 
 ## Completion Notes
 
-**Implemented**: 2026-04-30
-**Verification**: `dotnet test tests\Gravenspire.Combat.Tests.csproj --logger "trx;LogFileName=t1-combat-06-stage2.trx" --results-directory "tests\evidence\T1-COMBAT-06"` passed 81/81.
-**Criteria**: `H-CCOM-INST-01`, `H-CCOM-FIXTURE-01`, and the sprint-plan test-plan bullets all have file:line evidence above.
+**Completed**: 2026-04-30
+**Verdict**: COMPLETE WITH NOTES
+
+**Criteria**: 8/8 story checks covered. `H-CCOM-INST-01`, `H-CCOM-FIXTURE-01`, instant ability resolution without a cast bar, Rule 13 mana spend path, transient cooldown timer behavior, Bash cancellation only through declared `interrupt_current_channel`, fixture-driven self-buff duration, and the static/grep rejection of hardcoded tactical instant tuning all have file:line evidence in `## Acceptance Criteria Coverage`.
+**Deferred/Untested Criteria**: None for this story boundary. Med/sit regen and combat-exit timing remain owned by `T1-COMBAT-07`; HUD presentation, kill credit, save barriers, death payloads, profiled feel evidence, and architecture scan tooling remain downstream by sprint plan. Class Design still owns final tactical ability names/values beyond these prototype fixture rows.
+**Test Evidence**: Stage 2 TRX passed 81/81 at `tests/evidence/T1-COMBAT-06/t1-combat-06-stage2.trx:504`; verification summary is in `tests/evidence/T1-COMBAT-06/verification.md:3-100`; the hardcoded-tuning gate passed at `tests/evidence/T1-COMBAT-06/verification.md:16-24`.
+**GDD/ADR Deviations**: None blocking. No ADR, GDD, D-entry, source, test, evidence, fixture, hook, or `.claude/**` edit was part of this closure batch.
+**Scope Notes**: Negative T1 scope grep passed on the changed implementation and test files with zero matches for the requested forbidden terms; broader Combat Core grep found only existing non-ownership comments and the fixture README ban line. Closure edits are limited to the approved story, sprint-status, and active session-state files.
+**Review Gates**: Lean `/story-done` closure; QA and lead-programmer subagents skipped by review mode. Story, sprint status, and active session state updated in the approved closure batch.
+**Forced Completion**: No.
 **Fixture Version**: `fixtureSetVersion` remains `CombatPrototypeSpellProfileSet_T1@2026-04-28-stage1`; no existing schema or row was changed, and the executable profile list is additive-only.

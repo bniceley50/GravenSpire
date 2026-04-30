@@ -10,12 +10,12 @@ updated: "2026-04-30"
 branch: "main"
 head: "57286cb"
 qa_plan: "production/qa/plans/qa-plan-sprint-20260428.md"
-implementation_gate: "T1-COMBAT-05 closed by /story-done. Sprint progress: 5/13 done. Next active gate: /dev-story T1-COMBAT-06-tactical-cleric-instants-fixture-loaded-values."
-progress: "5/13 done"
-completed_stories: 5
+implementation_gate: "T1-COMBAT-06 closed by /story-done. Sprint progress: 6/13 done. Next active gate: /dev-story T1-COMBAT-07-med-sit-regen-combat-exit-timing."
+progress: "6/13 done"
+completed_stories: 6
 total_stories: 13
-next_active_story: "T1-COMBAT-06"
-next_active_command: "/dev-story T1-COMBAT-06-tactical-cleric-instants-fixture-loaded-values"
+next_active_story: "T1-COMBAT-07"
+next_active_command: "/dev-story T1-COMBAT-07-med-sit-regen-combat-exit-timing"
 
 stories:
   - id: "T1-COMBAT-01"
@@ -67,11 +67,11 @@ stories:
     name: "Tactical Cleric instants using fixture-loaded numeric values"
     file: "production/stories/t1-combat-06-tactical-cleric-instants-fixture-loaded-values.md"
     priority: must-have
-    status: ready-for-dev
+    status: done
     owner: ""
     estimate_days: 1.5
     blocker: ""
-    completed: ""
+    completed: "2026-04-30"
   - id: "T1-COMBAT-07"
     name: "Med/sit regen and combat-exit timing"
     file: "production/stories/t1-combat-07-med-sit-regen-combat-exit-timing.md"
