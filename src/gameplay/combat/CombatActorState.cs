@@ -507,6 +507,26 @@ public sealed record CombatActorState
     public double CastRecoveryRemainingSeconds { get; init; }
 
     /// <summary>
+    /// Combat-owned player posture for med-break and unsafe-sit transitions.
+    /// </summary>
+    public CombatPostureState PostureState { get; init; } = CombatPostureState.Standing;
+
+    /// <summary>
+    /// Optional next Combat Simulation Tick index at which regen may resolve.
+    /// </summary>
+    public long? NextRegenTickIndex { get; init; }
+
+    /// <summary>
+    /// Optional Combat Simulation Tick index of the actor's last hostile action.
+    /// </summary>
+    public long? LastHostileActionTickIndex { get; init; }
+
+    /// <summary>
+    /// Remaining combat-exit time in Combat-owned simulation seconds for HUD/debug consumers.
+    /// </summary>
+    public double CombatExitRemainingSeconds { get; init; }
+
+    /// <summary>
     /// True when Combat may treat the actor as alive for runtime transitions.
     /// </summary>
     public bool IsAlive => LifeState == CombatActorLifeState.Alive && CurrentHealth > 0;
@@ -589,6 +609,11 @@ public sealed record CombatActorState
         if (CastProgressSeconds < 0 || CastRecoveryRemainingSeconds < 0)
         {
             errors.Add("cast progress and recovery remaining seconds must not be negative.");
+        }
+
+        if (NextRegenTickIndex is < 0 || LastHostileActionTickIndex is < 0 || CombatExitRemainingSeconds < 0)
+        {
+            errors.Add("regen and combat-exit tick state must not be negative.");
         }
 
         if (CastRuntimeState != CombatCastRuntimeState.None)

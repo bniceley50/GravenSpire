@@ -207,6 +207,47 @@ public sealed class CombatFixtureValidationTest
         Assert.That(validation.Errors, Has.Some.Contains("DefensivePrayer_T1_Prototype: self_buff requires positive duration_seconds."));
     }
 
+    [Test]
+    public void test_combat_fixture_package_declares_regen_and_combat_exit_tuning()
+    {
+        var package = LoadPackage();
+        var tuning = package.RegenAndCombatExitTuning;
+
+        Assert.That(tuning.RegenTickIntervalSeconds, Is.EqualTo(6.0d).Within(0.000001d));
+        Assert.That(tuning.CombatExitTimerSeconds, Is.EqualTo(30.0d).Within(0.000001d));
+        Assert.That(tuning.SittingThreatBonus, Is.EqualTo(50));
+        Assert.That(tuning.ManaRegen.BaseRegen, Is.EqualTo(1));
+        Assert.That(tuning.ManaRegen.LevelRegenScalar, Is.EqualTo(0.10d).Within(0.000001d));
+        Assert.That(tuning.ManaRegen.PercentRegenScalar, Is.EqualTo(0.005d).Within(0.000001d));
+        Assert.That(tuning.ManaRegen.SittingPostureMultiplier, Is.EqualTo(4.0d).Within(0.000001d));
+        Assert.That(tuning.ManaRegen.InCombatMultiplier, Is.EqualTo(0.0d).Within(0.000001d));
+    }
+
+    [Test]
+    public void test_combat_fixture_validator_rejects_invalid_regen_and_combat_exit_tuning()
+    {
+        var package = LoadPackage() with
+        {
+            RegenAndCombatExitTuning = new CombatRegenAndCombatExitTuning
+            {
+                RegenTickIntervalSeconds = 0d,
+                CombatExitTimerSeconds = 0d,
+                SittingThreatBonus = -1,
+                HealthRegen = new CombatResourceRegenTuning(),
+                ManaRegen = new CombatResourceRegenTuning()
+            }
+        };
+
+        var validation = new CombatFixtureValidator().Validate(package);
+
+        Assert.That(validation.IsValid, Is.False);
+        Assert.That(validation.Errors, Has.Some.Contains("regen_tick_interval_seconds must be positive."));
+        Assert.That(validation.Errors, Has.Some.Contains("combat_exit_timer_seconds must be positive."));
+        Assert.That(validation.Errors, Has.Some.Contains("sitting_threat_bonus must not be negative."));
+        Assert.That(validation.Errors, Has.Some.Contains("health_regen values must be non-negative"));
+        Assert.That(validation.Errors, Has.Some.Contains("mana_regen values must be non-negative"));
+    }
+
     private static CombatFixturePackage LoadPackage()
     {
         var path = Path.Combine(FindRepoRoot(), "assets", "data", "combat", "t1-combat-fixtures.json");

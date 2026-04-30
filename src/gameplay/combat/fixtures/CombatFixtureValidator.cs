@@ -100,6 +100,7 @@ public sealed class CombatFixtureValidator
         ValidateSpellRows(package.TacticalInstantFixtures, "tactical instant", requireZeroCast: true, errors);
         ValidateTacticalInstantAbilityProfiles(package.TacticalInstantAbilityProfiles, errors);
         ValidateEncounters(package.EncounterFixtures, package.ActorFixtures, errors);
+        ValidateRegenAndCombatExitTuning(package.RegenAndCombatExitTuning, errors);
 
         RequireIds(package.ActorFixtures.Select(actor => actor.Id), RequiredActorFixtures, "actor fixture", errors);
         RequireIds(package.SpellFixtures.Select(spell => spell.Id), RequiredSpellFixtures, "spell fixture", errors);
@@ -392,6 +393,46 @@ public sealed class CombatFixtureValidator
             default:
                 errors.Add($"{profileId}: unsupported tactical instant ability effect_type {effect.EffectType}.");
                 break;
+        }
+    }
+
+    private static void ValidateRegenAndCombatExitTuning(
+        CombatRegenAndCombatExitTuning tuning,
+        ICollection<string> errors)
+    {
+        if (tuning.RegenTickIntervalSeconds <= 0)
+        {
+            errors.Add("regen_tick_interval_seconds must be positive.");
+        }
+
+        if (tuning.CombatExitTimerSeconds <= 0)
+        {
+            errors.Add("combat_exit_timer_seconds must be positive.");
+        }
+
+        if (tuning.SittingThreatBonus < 0)
+        {
+            errors.Add("sitting_threat_bonus must not be negative.");
+        }
+
+        ValidateResourceRegenTuning("health_regen", tuning.HealthRegen, errors);
+        ValidateResourceRegenTuning("mana_regen", tuning.ManaRegen, errors);
+    }
+
+    private static void ValidateResourceRegenTuning(
+        string label,
+        CombatResourceRegenTuning tuning,
+        ICollection<string> errors)
+    {
+        if (tuning.BaseRegen < 0 ||
+            tuning.LevelRegenScalar < 0 ||
+            tuning.PercentRegenScalar < 0 ||
+            tuning.StandingPostureMultiplier <= 0 ||
+            tuning.SittingPostureMultiplier <= 0 ||
+            tuning.OutOfCombatMultiplier < 0 ||
+            tuning.InCombatMultiplier < 0)
+        {
+            errors.Add($"{label} values must be non-negative, and posture multipliers must be positive.");
         }
     }
 

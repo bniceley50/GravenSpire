@@ -507,5 +507,28 @@
       "requiredOutcome": "Named has solo block pressure; any baseline solo kill is a tuning defect unless marked exploit-under-investigation.",
       "soloBlockProfileId": "Named_Top_T1_SoloBlock"
     }
-  ]
+  ],
+  "regenAndCombatExitTuning": {
+    "regenTickIntervalSeconds": 6.0,
+    "combatExitTimerSeconds": 30.0,
+    "sittingThreatBonus": 50,
+    "healthRegen": {
+      "baseRegen": 1,
+      "levelRegenScalar": 0.10,
+      "percentRegenScalar": 0.005,
+      "standingPostureMultiplier": 1.0,
+      "sittingPostureMultiplier": 1.5,
+      "outOfCombatMultiplier": 1.0,
+      "inCombatMultiplier": 0.25
+    },
+    "manaRegen": {
+      "baseRegen": 1,
+      "levelRegenScalar": 0.10,
+      "percentRegenScalar": 0.005,
+      "standingPostureMultiplier": 1.0,
+      "sittingPostureMultiplier": 4.0,
+      "outOfCombatMultiplier": 1.0,
+      "inCombatMultiplier": 0.0
+    }
+  }
 }

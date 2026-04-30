@@ -79,6 +79,11 @@ public sealed record CombatFixturePackage
     /// Encounter fixtures available for T1 Combat Core tests.
     /// </summary>
     public List<CombatEncounterFixture> EncounterFixtures { get; init; } = new();
+
+    /// <summary>
+    /// Fixture-owned med-break, regen, unsafe-sit threat, and combat-exit tuning.
+    /// </summary>
+    public CombatRegenAndCombatExitTuning RegenAndCombatExitTuning { get; init; } = new();
 }
 
 /// <summary>
