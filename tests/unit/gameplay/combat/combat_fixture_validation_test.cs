@@ -3,6 +3,7 @@
 using System;
 using System.IO;
 using System.Linq;
+using Gravenspire.Gameplay.Combat;
 using Gravenspire.Gameplay.Combat.Fixtures;
 using NUnit.Framework;
 
@@ -33,6 +34,44 @@ public sealed class CombatFixtureValidationTest
         Assert.That(clericMid.ArmorClass, Is.EqualTo(35));
         Assert.That(clericMid.AttackPower, Is.EqualTo(25));
         Assert.That(clericMid.WeaponDelaySeconds, Is.EqualTo(2.8d).Within(0.000001d));
+    }
+
+    [Test]
+    public void test_combat_fixture_package_resolves_targeting_pull_and_leash_tuning()
+    {
+        var package = LoadPackage();
+
+        Assert.That(package.TargetingTuning.TargetAcquireRadiusMeters, Is.EqualTo(35d).Within(0.000001d));
+        Assert.That(package.TargetingTuning.CombatQueryBufferSize, Is.EqualTo(64));
+        Assert.That(package.TargetingTuning.LosOccluderLayerMaskT1, Is.EquivalentTo(T1CombatLineOfSight.BlockingLayers));
+        Assert.That(package.TargetingTuning.NonBlockingLayersT1.Any(T1CombatLineOfSight.BlocksLineOfSight), Is.False);
+        Assert.That(package.PullTuning.ProximityThreatInitial, Is.EqualTo(25));
+        Assert.That(package.PullTuning.SocialAssistPulseSeconds, Is.EqualTo(2.0d).Within(0.000001d));
+        Assert.That(package.PullTuning.SocialAssistRadiusMeters, Is.EqualTo(12d).Within(0.000001d));
+        Assert.That(package.PullTuning.AssistThreatInitial, Is.EqualTo(25));
+        Assert.That(package.LeashTuning.LeashDistanceMeters, Is.EqualTo(35d).Within(0.000001d));
+        Assert.That(package.LeashTuning.PathFailureGraceSeconds, Is.EqualTo(1.0d).Within(0.000001d));
+        Assert.That(package.LeashTuning.PathPendingGraceSeconds, Is.EqualTo(1.0d).Within(0.000001d));
+        Assert.That(package.LeashTuning.PathStatusSampleSeconds, Is.EqualTo(0.25d).Within(0.000001d));
+        Assert.That(package.LeashTuning.LeashThreatMemorySeconds, Is.EqualTo(30d).Within(0.000001d));
+        Assert.That(package.LeashTuning.LeashReAggroDistanceMeters, Is.EqualTo(20d).Within(0.000001d));
+    }
+
+    [Test]
+    public void test_combat_fixture_package_declares_default_social_assist_profile()
+    {
+        var package = LoadPackage();
+
+        var profile = package.SocialAssistProfiles.Single(item => item.Id == "VampireCourt_T1_DefaultSocial");
+
+        Assert.That(profile.AssistEnabled, Is.True);
+        Assert.That(profile.SocialLinkGroupId, Is.EqualTo("VampireCourt_Haunt_Default_T1"));
+        Assert.That(profile.AssistRadiusMeters, Is.EqualTo(package.PullTuning.SocialAssistRadiusMeters).Within(0.000001d));
+        Assert.That(profile.AssistThreatInitial, Is.EqualTo(package.PullTuning.AssistThreatInitial));
+        Assert.That(profile.AssistRequiresLosToPrimary, Is.True);
+        Assert.That(profile.AssistRequiresLosToTarget, Is.True);
+        Assert.That(profile.AssistFactionFilter, Is.EqualTo("SameFactionOrExplicitAlly"));
+        Assert.That(profile.AssistEncounterFilter, Is.EqualTo("SameEncounterOrSharedSocialGroup"));
     }
 
     [Test]

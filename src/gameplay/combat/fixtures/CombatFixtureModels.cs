@@ -36,6 +36,26 @@ public sealed record CombatFixturePackage
     public int CombatTickRateHz { get; init; }
 
     /// <summary>
+    /// T1 targeting and line-of-sight query tuning.
+    /// </summary>
+    public CombatTargetingTuningFixture TargetingTuning { get; init; } = new();
+
+    /// <summary>
+    /// T1 body-pull and social-assist tuning.
+    /// </summary>
+    public CombatPullTuningFixture PullTuning { get; init; } = new();
+
+    /// <summary>
+    /// T1 leash and path-probe tuning.
+    /// </summary>
+    public CombatLeashTuningFixture LeashTuning { get; init; } = new();
+
+    /// <summary>
+    /// Social assist profiles available to hostile placement fixtures.
+    /// </summary>
+    public List<CombatSocialAssistProfileFixture> SocialAssistProfiles { get; init; } = new();
+
+    /// <summary>
     /// Actor fixtures available for T1 Combat Core tests.
     /// </summary>
     public List<CombatActorFixture> ActorFixtures { get; init; } = new();
@@ -150,6 +170,155 @@ public sealed record CombatActorFixture
     /// Optional named-enemy solo block profile id.
     /// </summary>
     public string? SoloBlockProfileId { get; init; }
+}
+
+/// <summary>
+/// Targeting and line-of-sight fixture tuning.
+/// </summary>
+public sealed record CombatTargetingTuningFixture
+{
+    /// <summary>
+    /// Maximum target acquisition radius in meters.
+    /// </summary>
+    public double TargetAcquireRadiusMeters { get; init; }
+
+    /// <summary>
+    /// Non-alloc query buffer size expected by T1 combat queries.
+    /// </summary>
+    public int CombatQueryBufferSize { get; init; }
+
+    /// <summary>
+    /// Layers that block T1 combat line of sight.
+    /// </summary>
+    public List<CombatLosLayer> LosOccluderLayerMaskT1 { get; init; } = new();
+
+    /// <summary>
+    /// Layers explicitly documented as non-blocking for T1 combat line of sight.
+    /// </summary>
+    public List<CombatLosLayer> NonBlockingLayersT1 { get; init; } = new();
+}
+
+/// <summary>
+/// Body-pull and social-assist fixture tuning.
+/// </summary>
+public sealed record CombatPullTuningFixture
+{
+    /// <summary>
+    /// Threat assigned by a proximity/body pull.
+    /// </summary>
+    public int ProximityThreatInitial { get; init; }
+
+    /// <summary>
+    /// Social assist pulse interval in seconds.
+    /// </summary>
+    public double SocialAssistPulseSeconds { get; init; }
+
+    /// <summary>
+    /// Default social assist radius in meters.
+    /// </summary>
+    public double SocialAssistRadiusMeters { get; init; }
+
+    /// <summary>
+    /// Default threat assigned to assisting hostiles.
+    /// </summary>
+    public int AssistThreatInitial { get; init; }
+}
+
+/// <summary>
+/// Leash and path-probe fixture tuning.
+/// </summary>
+public sealed record CombatLeashTuningFixture
+{
+    /// <summary>
+    /// Distance from anchor that forces leashing.
+    /// </summary>
+    public double LeashDistanceMeters { get; init; }
+
+    /// <summary>
+    /// Continuous path failure grace period.
+    /// </summary>
+    public double PathFailureGraceSeconds { get; init; }
+
+    /// <summary>
+    /// Continuous path-pending grace period.
+    /// </summary>
+    public double PathPendingGraceSeconds { get; init; }
+
+    /// <summary>
+    /// Expected minimum path-status sample cadence.
+    /// </summary>
+    public double PathStatusSampleSeconds { get; init; }
+
+    /// <summary>
+    /// Threat memory duration while leashing.
+    /// </summary>
+    public double LeashThreatMemorySeconds { get; init; }
+
+    /// <summary>
+    /// Distance in which a leashing hostile may re-aggro before anchor return or expiry.
+    /// </summary>
+    public double LeashReAggroDistanceMeters { get; init; }
+}
+
+/// <summary>
+/// Authored social assist profile fixture.
+/// </summary>
+public sealed record CombatSocialAssistProfileFixture
+{
+    /// <summary>
+    /// Stable profile id.
+    /// </summary>
+    public string Id { get; init; } = string.Empty;
+
+    /// <summary>
+    /// Social-link group shared by eligible hostiles.
+    /// </summary>
+    public string SocialLinkGroupId { get; init; } = string.Empty;
+
+    /// <summary>
+    /// Optional encounter group id.
+    /// </summary>
+    public string? EncounterGroupId { get; init; }
+
+    /// <summary>
+    /// True when assist is enabled.
+    /// </summary>
+    public bool AssistEnabled { get; init; }
+
+    /// <summary>
+    /// Assist radius in meters.
+    /// </summary>
+    public double AssistRadiusMeters { get; init; }
+
+    /// <summary>
+    /// Initial assist threat.
+    /// </summary>
+    public int AssistThreatInitial { get; init; }
+
+    /// <summary>
+    /// True when candidate must have LoS to the primary hostile.
+    /// </summary>
+    public bool AssistRequiresLosToPrimary { get; init; }
+
+    /// <summary>
+    /// True when candidate must have LoS to the player target point.
+    /// </summary>
+    public bool AssistRequiresLosToTarget { get; init; }
+
+    /// <summary>
+    /// Faction filter id.
+    /// </summary>
+    public string AssistFactionFilter { get; init; } = string.Empty;
+
+    /// <summary>
+    /// Encounter filter id.
+    /// </summary>
+    public string AssistEncounterFilter { get; init; } = string.Empty;
+
+    /// <summary>
+    /// Authored assist ordering tie-breaker.
+    /// </summary>
+    public int AssistOrderIndex { get; init; }
 }
 
 /// <summary>

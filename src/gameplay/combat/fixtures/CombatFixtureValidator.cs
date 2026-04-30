@@ -84,6 +84,10 @@ public sealed class CombatFixtureValidator
             errors.Add("combat_tick_rate_hz must be positive.");
         }
 
+        ValidateTargetingTuning(package.TargetingTuning, errors);
+        ValidatePullTuning(package.PullTuning, errors);
+        ValidateLeashTuning(package.LeashTuning, errors);
+        ValidateSocialAssistProfiles(package.SocialAssistProfiles, package.PullTuning, errors);
         ValidateActors(package.ActorFixtures, errors);
         ValidateSpellRows(package.SpellFixtures, "spell", requireZeroCast: false, errors);
         ValidateSpellRows(package.TacticalInstantFixtures, "tactical instant", requireZeroCast: true, errors);
@@ -95,6 +99,116 @@ public sealed class CombatFixtureValidator
         RequireIds(package.EncounterFixtures.Select(encounter => encounter.Id), RequiredEncounterFixtures, "encounter fixture", errors);
 
         return errors.Count == 0 ? CombatFixtureValidationResult.Valid : CombatFixtureValidationResult.Invalid(errors);
+    }
+
+    private static void ValidateTargetingTuning(CombatTargetingTuningFixture tuning, ICollection<string> errors)
+    {
+        if (tuning.TargetAcquireRadiusMeters <= 0)
+        {
+            errors.Add("target_acquire_radius_meters must be positive.");
+        }
+
+        if (tuning.CombatQueryBufferSize != 64)
+        {
+            errors.Add("combat_query_buffer_size must be 64 for the approved T1 query contract.");
+        }
+
+        var blockers = new HashSet<CombatLosLayer>(tuning.LosOccluderLayerMaskT1);
+        if (!blockers.SetEquals(T1CombatLineOfSight.BlockingLayers))
+        {
+            errors.Add("los_occluder_layer_mask_t1 must contain exactly WorldSolid, ClosedDoor, and LargeProp.");
+        }
+
+        foreach (var layer in tuning.NonBlockingLayersT1)
+        {
+            if (T1CombatLineOfSight.BlocksLineOfSight(layer))
+            {
+                errors.Add($"{layer}: non-blocking LoS layer cannot also be in los_occluder_layer_mask_t1.");
+            }
+        }
+    }
+
+    private static void ValidatePullTuning(CombatPullTuningFixture tuning, ICollection<string> errors)
+    {
+        if (tuning.ProximityThreatInitial <= 0)
+        {
+            errors.Add("proximity_threat_initial must be positive.");
+        }
+
+        if (tuning.SocialAssistPulseSeconds <= 0)
+        {
+            errors.Add("social_assist_pulse_seconds must be positive.");
+        }
+
+        if (tuning.SocialAssistRadiusMeters <= 0)
+        {
+            errors.Add("social_assist_radius_meters must be positive.");
+        }
+
+        if (tuning.AssistThreatInitial <= 0)
+        {
+            errors.Add("assist_threat_initial must be positive.");
+        }
+    }
+
+    private static void ValidateLeashTuning(CombatLeashTuningFixture tuning, ICollection<string> errors)
+    {
+        if (tuning.LeashDistanceMeters <= 0 ||
+            tuning.PathFailureGraceSeconds <= 0 ||
+            tuning.PathPendingGraceSeconds <= 0 ||
+            tuning.PathStatusSampleSeconds <= 0 ||
+            tuning.LeashThreatMemorySeconds <= 0 ||
+            tuning.LeashReAggroDistanceMeters <= 0)
+        {
+            errors.Add("leash tuning values must be positive.");
+        }
+    }
+
+    private static void ValidateSocialAssistProfiles(
+        IEnumerable<CombatSocialAssistProfileFixture> profiles,
+        CombatPullTuningFixture pullTuning,
+        ICollection<string> errors)
+    {
+        var seen = new HashSet<string>(StringComparer.Ordinal);
+        var hasDefault = false;
+
+        foreach (var profile in profiles)
+        {
+            RequireUniqueId(profile.Id, "social assist profile", seen, errors);
+            RequireText(profile.SocialLinkGroupId, $"{profile.Id}.social_link_group_id", errors);
+            RequireText(profile.AssistFactionFilter, $"{profile.Id}.assist_faction_filter", errors);
+            RequireText(profile.AssistEncounterFilter, $"{profile.Id}.assist_encounter_filter", errors);
+
+            if (profile.AssistRadiusMeters <= 0)
+            {
+                errors.Add($"{profile.Id}: assist_radius_meters must be positive.");
+            }
+
+            if (profile.AssistThreatInitial <= 0)
+            {
+                errors.Add($"{profile.Id}: assist_threat_initial must be positive.");
+            }
+
+            if (profile.AssistOrderIndex < 0)
+            {
+                errors.Add($"{profile.Id}: assist_order_index must not be negative.");
+            }
+
+            if (string.Equals(profile.Id, "VampireCourt_T1_DefaultSocial", StringComparison.Ordinal))
+            {
+                hasDefault = true;
+                if (profile.AssistThreatInitial != pullTuning.AssistThreatInitial ||
+                    Math.Abs(profile.AssistRadiusMeters - pullTuning.SocialAssistRadiusMeters) > 0.000001d)
+                {
+                    errors.Add("VampireCourt_T1_DefaultSocial must mirror default social assist radius and threat tuning.");
+                }
+            }
+        }
+
+        if (!hasDefault)
+        {
+            errors.Add("Missing required social assist profile: VampireCourt_T1_DefaultSocial.");
+        }
     }
 
     private static void ValidateActors(IEnumerable<CombatActorFixture> actors, ICollection<string> errors)

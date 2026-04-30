@@ -4,6 +4,50 @@
   "sourceDocument": "design/gdd/combat-core.md:394-430; production/sprints/sprint-1.md:72-108",
   "prototypeHauntBand": "PrototypeHauntBand_T1=1-10",
   "combatTickRateHz": 50,
+  "targetingTuning": {
+    "targetAcquireRadiusMeters": 35.0,
+    "combatQueryBufferSize": 64,
+    "losOccluderLayerMaskT1": [
+      "worldSolid",
+      "closedDoor",
+      "largeProp"
+    ],
+    "nonBlockingLayersT1": [
+      "combatActor",
+      "triggerOnly",
+      "interactableSoft",
+      "vfx"
+    ]
+  },
+  "pullTuning": {
+    "proximityThreatInitial": 25,
+    "socialAssistPulseSeconds": 2.0,
+    "socialAssistRadiusMeters": 12.0,
+    "assistThreatInitial": 25
+  },
+  "leashTuning": {
+    "leashDistanceMeters": 35.0,
+    "pathFailureGraceSeconds": 1.0,
+    "pathPendingGraceSeconds": 1.0,
+    "pathStatusSampleSeconds": 0.25,
+    "leashThreatMemorySeconds": 30.0,
+    "leashReAggroDistanceMeters": 20.0
+  },
+  "socialAssistProfiles": [
+    {
+      "id": "VampireCourt_T1_DefaultSocial",
+      "socialLinkGroupId": "VampireCourt_Haunt_Default_T1",
+      "encounterGroupId": "SoloTrash_EvenCon_T1",
+      "assistEnabled": true,
+      "assistRadiusMeters": 12.0,
+      "assistThreatInitial": 25,
+      "assistRequiresLosToPrimary": true,
+      "assistRequiresLosToTarget": true,
+      "assistFactionFilter": "SameFactionOrExplicitAlly",
+      "assistEncounterFilter": "SameEncounterOrSharedSocialGroup",
+      "assistOrderIndex": 0
+    }
+  ],
   "actorFixtures": [
     {
       "id": "Cleric_Low_T1",
