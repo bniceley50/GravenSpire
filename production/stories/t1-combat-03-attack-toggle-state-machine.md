@@ -1,6 +1,6 @@
 # T1-COMBAT-03 - Attack Toggle State Machine
 
-**Status:** Implemented + Verified; awaiting /story-done
+**Status:** Complete
 **Sprint:** 1
 **Priority:** Must Have
 **Layer:** Gameplay / Combat Core
@@ -67,9 +67,13 @@ Result: PASS, 43 total, 43 passed, 0 failed. Evidence: `tests/evidence/T1-COMBAT
 ## Completion Notes
 
 **Completed**: 2026-04-30
-**Verdict**: IMPLEMENTED + VERIFIED; awaiting `/story-done`
-**Baseline**: commit `99a26a0` before this approved batch
-**Criteria**: 4/4 covered for this story boundary: `H-CCOM-AA-01`, `H-CCOM-AA-03`, `H-CCOM-MED-01` edge precondition, and `H-CCOM-HUD-04` edge precondition.
-**Deferred/Untested Criteria**: Full melee tick damage, full med regen behavior, and final HUD presentation remain downstream by sprint plan.
-**Test Evidence**: Stage 2 TRX passed 43/43 at `tests/evidence/T1-COMBAT-03/t1-combat-03-stage2.trx:276`; command/counter summary is in `tests/evidence/T1-COMBAT-03/verification.md:10-16`.
-**Scope Notes**: No sprint-status, session-state, ADR, GDD, fixture-data, or standing deferral files were changed in this `/dev-story` batch.
+**Verdict**: COMPLETE WITH NOTES
+**Implementation Baseline**: commit `57286cb51b576744c49f98a91753042118fbaf81` (`Implement T1-COMBAT-03: Attack Toggle State Machine`)
+**Closure Baseline**: commit `57286cb51b576744c49f98a91753042118fbaf81` before this approved `/story-done` closure batch
+**Criteria**: 4/4 passing. `H-CCOM-AA-01`, `H-CCOM-AA-03`, `H-CCOM-MED-01` edge precondition, and `H-CCOM-HUD-04` edge precondition all have file:line evidence in `## Acceptance Criteria Coverage`.
+**Deferred/Untested Criteria**: None for this story boundary. Full melee tick damage, full med regen behavior, final HUD presentation, kill credit, save barriers, death payloads, profiled feel evidence, and architecture scan tooling remain downstream by sprint plan.
+**Test Evidence**: Stage 2 TRX passed 43/43 at `tests/evidence/T1-COMBAT-03/t1-combat-03-stage2.trx:276`; verification summary is in `tests/evidence/T1-COMBAT-03/verification.md:10-16`; live closure rerun passed 43/43 with `dotnet test tests\Gravenspire.Combat.Tests.csproj --no-restore --logger "console;verbosity=minimal"`.
+**GDD/ADR Deviations**: None blocking. No ADR metadata was changed. `docs/architecture/control-manifest.md` is absent and was treated as advisory per the `/story-done` prompt.
+**Scope Notes**: Negative T1 scope grep passed on the changed story, implementation, test, and evidence files with zero matches; `src/networking` is absent. Closure edits are limited to the approved story, sprint-status, and active session-state files.
+**Review Gates**: Lean `/story-done` closure; QA and lead-programmer subagents skipped by review mode. Story, sprint status, and session state updated in the approved closure batch.
+**Forced Completion**: No.
