@@ -5,8 +5,8 @@
 
 ## Current Task
 
-`T1-COMBAT-01` is closed via `/story-done` with verdict `COMPLETE WITH NOTES`.
-Next work is `/dev-story T1-COMBAT-02-targeting-and-hostile-actor-claim`.
+`T1-COMBAT-02` is closed via `/story-done` with verdict `COMPLETE WITH NOTES`.
+Next work is `/dev-story T1-COMBAT-03-attack-toggle-state-machine`.
 
 ## Status
 
@@ -59,10 +59,11 @@ Next work is `/dev-story T1-COMBAT-02-targeting-and-hostile-actor-claim`.
 - ✅ Combat Core D012 amendment APPROVED 2026-04-27 after full `/design-review design/gdd/combat-core.md --depth full`: six specialist passes, zero blockers, three non-blocking recommendations. D012's two gates are now satisfied: pinned-engine validation plus Combat Core revision/re-review. `/sprint-plan new` is unblocked for the T1 combat sprint.
 - ✅ Codex PR #1 (`codex/dotnet-format-setup` → `main`) merged into `main`; follow-up cleanup commit `ce634c3` recorded.
 - ✅ Sprint 1 story `T1-COMBAT-01` closed via `/story-done` 2026-04-28 with verdict **COMPLETE WITH NOTES**. Evidence: Stage 2 TRX 15/15 PASS, Stage 3 rerun TRX 15/15 PASS, and AC trace in [production/stories/t1-combat-01-cleric-base-combat-actor-fixture-hydration.md](../stories/t1-combat-01-cleric-base-combat-actor-fixture-hydration.md).
+- ✅ Sprint 1 story `T1-COMBAT-02` closed via `/story-done` 2026-04-30 with verdict **COMPLETE WITH NOTES**. Evidence: Stage 2 TRX 27/27 PASS, Stage 3 rerun TRX 27/27 PASS, live closure rerun 27/27 PASS, negative T1 scope grep clean except the known README ban line, and AC trace in [production/stories/t1-combat-02-targeting-and-hostile-actor-claim.md](../stories/t1-combat-02-targeting-and-hostile-actor-claim.md). `production/sprint-status.yaml` now records 2/13 Sprint 1 stories done.
 
 ## Files Being Worked On
 
-- **Active:** T1-COMBAT-02 targeting and hostile actor claim — run `/dev-story T1-COMBAT-02-targeting-and-hostile-actor-claim`.
+- **Active:** T1-COMBAT-03 attack toggle state machine - run `/dev-story T1-COMBAT-03-attack-toggle-state-machine`.
 - Combat Feel Prototype: [prototypes/combat-feel/](../../prototypes/combat-feel/) — pinned-engine headline pass complete; prototype code remains throwaway evidence artifact.
 - Combat Feel Prototype README: [prototypes/combat-feel/README.md](../../prototypes/combat-feel/README.md) — prototype question, success/failure criteria, loop spec, controls, run notes
 - Inventory & Item Economy: [design/gdd/inventory-item-economy.md](../../design/gdd/inventory-item-economy.md) — design draft, **NEEDS REVISION**, blocker 1 repaired, remaining blockers tracked in `INV-OQ-05`
@@ -93,6 +94,8 @@ Next work is `/dev-story T1-COMBAT-02-targeting-and-hostile-actor-claim`.
 - Mana-restore 1:1 linear fill now depends on Combat Core's med-break regen tick contract; Layer 1 HUD must consume Combat Core state rather than inventing separate fill timing.
 - ADR-0003 / D009 status metadata still says `Proposed`; `T1-COMBAT-01` honored the `CombatProgressionBaselineSnapshot` contract but did not rewrite ADR metadata during closure.
 - `H-CCOM-F2B` fixture extremes are validated by `T1-COMBAT-01`; seeded melee formula execution remains owned by `T1-COMBAT-04`.
+- Creature / Enemy AI still owns actual return-to-anchor movement and NavMeshAgent behavior; `T1-COMBAT-02` supplies Combat Core leash hooks and test doubles only.
+- Optional deferred lesson capture remains open for the `[GLOBAL][CI]` `git diff --check` line-ending warning pattern if it repeats outside `T1-COMBAT-02`.
 - Remaining game-concept project-killer risk: `design/gdd/game-concept.md:304` asks whether kills shifting faction control feel meaningful at the five-minute scale. Needs a later separate `/prototype faction-feel`.
 - Zone definition = Addressable streaming group boundary; `unity-addressables-specialist` must configure streaming groups
 - 26 MVP systems is large scope for a solo first-time dev — every design decision should keep asking "is this actually needed for Tier 1?"
@@ -100,7 +103,7 @@ Next work is `/dev-story T1-COMBAT-02-targeting-and-hostile-actor-claim`.
 
 ## Next Skill to Run
 
-- **Run `/dev-story T1-COMBAT-02-targeting-and-hostile-actor-claim`** for the next Sprint 1 combat story.
+- **Run `/dev-story T1-COMBAT-03-attack-toggle-state-machine`** for the next Sprint 1 combat story.
 - Later: run Inventory implementation pre-spec to close `INV-OQ-05`, then rerun `/design-review design/gdd/inventory-item-economy.md --depth full`.
 - Codex PR #1 is merged; no Codex follow-up pending in this active state file.
 
@@ -114,3 +117,14 @@ Next work is `/dev-story T1-COMBAT-02-targeting-and-hostile-actor-claim`.
 - Tech debt logged: None.
 - Carried forward: ADR-0003 / D009 status metadata cleanup; `H-CCOM-F2B` seeded melee formula execution in `T1-COMBAT-04`.
 - Next recommended: `/dev-story T1-COMBAT-02-targeting-and-hostile-actor-claim`.
+
+## Session Extract - /story-done 2026-04-30
+
+- Story: [production/stories/t1-combat-02-targeting-and-hostile-actor-claim.md](../stories/t1-combat-02-targeting-and-hostile-actor-claim.md) - T1-COMBAT-02 Targeting and Hostile Actor Claim.
+- Verdict: COMPLETE WITH NOTES.
+- Criteria: 11/11 passing; `H-CCOM-WS-01`, `H-CCOM-WS-02`, `H-CCOM-WS-03`, `H-CCOM-TGT-01`, `H-CCOM-PULL-01`, `H-CCOM-PULL-02`, `H-CCOM-PULL-03`, `H-CCOM-PULL-04`, `H-CCOM-LEASH-01`, `H-CCOM-LEASH-02`, and `H-CCOM-ART-01` all have file:line evidence in the story AC trace.
+- Evidence: `tests/evidence/T1-COMBAT-02/t1-combat-02-stage2.trx` 27/27 PASS; `tests/evidence/T1-COMBAT-02/t1-combat-02-stage3-rerun.trx` 27/27 PASS; verification summary at [tests/evidence/T1-COMBAT-02/verification.md](../../tests/evidence/T1-COMBAT-02/verification.md); live closure rerun passed 27/27 with `dotnet test tests\Gravenspire.Combat.Tests.csproj --no-restore --logger "console;verbosity=minimal"`.
+- State updates: story status set to Complete; `production/sprint-status.yaml` marks `T1-COMBAT-02` done, records 2/13 Sprint 1 stories done, and surfaces `T1-COMBAT-03` as next active.
+- Tech debt logged: None.
+- Carried forward: ADR-0003 / D009 status metadata cleanup; `H-CCOM-F2B` seeded melee formula execution in `T1-COMBAT-04`; Creature / Enemy AI return-to-anchor/NavMeshAgent movement implementation; optional deferred `[GLOBAL][CI] git diff --check` lesson capture.
+- Next recommended: `/dev-story T1-COMBAT-03-attack-toggle-state-machine`.

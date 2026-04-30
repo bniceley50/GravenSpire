@@ -1,6 +1,6 @@
 # T1-COMBAT-02 - Targeting and Hostile Actor Claim
 
-**Status:** Implemented + Verified; awaiting `/story-done`
+**Status:** Complete
 **Sprint:** 1
 **Priority:** Must Have
 **Layer:** Gameplay / Combat Core
@@ -76,23 +76,27 @@ Result: PASS, 27 total, 27 passed, 0 failed. Evidence: `tests/evidence/T1-COMBAT
 
 ## Story Status
 
-`T1-COMBAT-02` is implemented and verified. It is ready for `/story-done` to perform closure review, sprint-status update, any approved session-state update, and the final closure commit.
+`T1-COMBAT-02` is complete. `/story-done` closed the story with verdict `COMPLETE WITH NOTES` after verifying the acceptance trace, Stage 2 TRX evidence, Stage 3 rerun TRX evidence, negative T1 scope scan, and a live 27/27 `dotnet test` rerun.
 
 ## Blockers / Carried Forward
 
 - ADR-0003 / D009 status metadata still says `Proposed` (`docs/architecture/adr-0003-progression-baseline-snapshot-contract.md:3-4`; `DECISIONS.md:222-225`). This remains carried forward from `T1-COMBAT-01` and is not closed by targeting/pull/leash work.
+- `H-CCOM-F2B` seeded melee formula execution remains owned by `T1-COMBAT-04`; targeting/pull/leash work does not close formula execution.
 - Creature / Enemy AI still owns actual return-to-anchor movement and NavMeshAgent behavior. This story supplies Combat Core leash hooks and test doubles only.
 - Attack toggle remains off-by-contract on pull, but the actual Attack toggle state machine belongs to `T1-COMBAT-03`.
 - Melee, casting, tactical instants, med/sit regen, HUD state, kill credit, save barriers, death payloads, profiled combat-feel evidence, and forbidden-pattern analyzer execution remain owned by later Sprint 1 stories.
+- Optional deferred lesson capture remains open for the `[GLOBAL][CI]` `git diff --check` line-ending warning pattern if it repeats outside this story.
 
 ## Completion Notes
 
-**Implemented**: 2026-04-30
+**Completed**: 2026-04-30
+**Verdict**: COMPLETE WITH NOTES
 **Stage 1+2 Baseline**: commit `f88571795ab2b8eabb30aa395a08bb7536e46eb2` (`Implement T1-COMBAT-02 Stage 1+2: targeting + pull + leash + zone gate`)
-**Criteria**: 11/11 covered for this story surface. `H-CCOM-WS-01`, `H-CCOM-WS-02`, `H-CCOM-WS-03`, `H-CCOM-TGT-01`, `H-CCOM-PULL-01`, `H-CCOM-PULL-02`, `H-CCOM-PULL-03`, `H-CCOM-PULL-04`, `H-CCOM-LEASH-01`, `H-CCOM-LEASH-02`, and `H-CCOM-ART-01` all have file:line evidence in `## Acceptance Criteria Coverage`.
+**Closure Baseline**: commit `c2793a21d8766ad2f8ce6331dca4dcdd850b62ec` (`Implement T1-COMBAT-02 Stage 3: story file + rerun evidence`)
+**Criteria**: 11/11 passing. `H-CCOM-WS-01`, `H-CCOM-WS-02`, `H-CCOM-WS-03`, `H-CCOM-TGT-01`, `H-CCOM-PULL-01`, `H-CCOM-PULL-02`, `H-CCOM-PULL-03`, `H-CCOM-PULL-04`, `H-CCOM-LEASH-01`, `H-CCOM-LEASH-02`, and `H-CCOM-ART-01` all have file:line evidence in `## Acceptance Criteria Coverage`.
 **Deferred/Untested Criteria**: None for this story. Creature / Enemy AI movement implementation is outside this story and represented with path-probe fakes.
-**Test Evidence**: Stage 2 TRX passed 27/27 at `tests/evidence/T1-COMBAT-02/t1-combat-02-stage2.trx:179-180`; Stage 3 rerun TRX passed 27/27 at `tests/evidence/T1-COMBAT-02/t1-combat-02-stage3-rerun.trx:179-180`.
-**GDD/ADR Deviations**: None blocking. No ADR metadata was changed.
-**Scope Notes**: `production/sprint-status.yaml` and `production/session-state/active.md` were not edited. `/story-done` owns closure status.
-**Review Gates**: `/dev-story` implementation + evidence boundary only; `/story-done` closure still pending.
+**Test Evidence**: Stage 2 TRX passed 27/27 at `tests/evidence/T1-COMBAT-02/t1-combat-02-stage2.trx:179-180`; Stage 3 rerun TRX passed 27/27 at `tests/evidence/T1-COMBAT-02/t1-combat-02-stage3-rerun.trx:179-180`; live closure rerun passed 27/27 with `dotnet test tests\Gravenspire.Combat.Tests.csproj --no-restore --logger "console;verbosity=minimal"`.
+**GDD/ADR Deviations**: None blocking. No ADR metadata was changed. `docs/architecture/control-manifest.md` is absent and was treated as advisory per the `/story-done` prompt.
+**Scope Notes**: Negative T1 scope grep passed with only the known ban-line hit at `assets/data/combat/README.md:22`. Creature / Enemy AI movement implementation remains downstream; this story supplies Combat Core leash hooks and pure-domain test fakes only.
+**Review Gates**: Lean `/story-done` closure; QA and lead-programmer subagents skipped by review mode. Story, sprint status, and session state updated in the approved closure batch.
 **Forced Completion**: No.
