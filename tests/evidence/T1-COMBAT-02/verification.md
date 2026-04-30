@@ -5,7 +5,7 @@
 **Date:** 2026-04-30
 **Git baseline:** `565ee2682ca681b47401c66a6f98a7c0780687c6`
 **Fixture set:** `CombatPrototypeSpellProfileSet_T1@2026-04-28-stage1`
-**Status:** Stage 2 PASS; Stage 3 story handoff and rerun pending a separate commit boundary
+**Status:** Stage 2 PASS and Stage 3 PASS; awaiting `/story-done` closure
 
 ## Stage 2 Command
 
@@ -58,12 +58,24 @@ git diff --check
 
 Result: PASS with line-ending normalization warnings only for touched text files; no whitespace errors.
 
-## Stage 3 Pending
+## Stage 3 Command
 
-Stage 3 still needs:
+```powershell
+dotnet test tests\Gravenspire.Combat.Tests.csproj --logger "trx;LogFileName=t1-combat-02-stage3-rerun.trx" --results-directory "tests\evidence\T1-COMBAT-02"
+```
 
-- `production/stories/t1-combat-02-targeting-and-hostile-actor-claim.md`
-- `tests/evidence/T1-COMBAT-02/t1-combat-02-stage3-rerun.trx`
-- A Stage 3 section appended to this file
+Result: PASS, 27 total, 27 passed, 0 failed. Machine-readable evidence is in `tests/evidence/T1-COMBAT-02/t1-combat-02-stage3-rerun.trx:179-180`.
+
+## Stage 3 Story Handoff
+
+The story handoff file is `production/stories/t1-combat-02-targeting-and-hostile-actor-claim.md`.
+
+- Story status boundary: `production/stories/t1-combat-02-targeting-and-hostile-actor-claim.md:3`.
+- Acceptance criteria trace begins at `production/stories/t1-combat-02-targeting-and-hostile-actor-claim.md:43`.
+- Runnable evidence begins at `production/stories/t1-combat-02-targeting-and-hostile-actor-claim.md:59`.
+- Carried-forward blockers begin at `production/stories/t1-combat-02-targeting-and-hostile-actor-claim.md:81`.
+- Completion notes begin at `production/stories/t1-combat-02-targeting-and-hostile-actor-claim.md:88`.
+
+## Boundary Notes
 
 `production/sprint-status.yaml`, `production/session-state/active.md`, and ADR-0003/D009 metadata remain untouched by this `/dev-story` boundary.

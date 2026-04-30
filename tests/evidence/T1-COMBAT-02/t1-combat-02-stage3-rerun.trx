@@ -1,0 +1,189 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TestRun id="f4a9c124-6641-4095-bc0f-2e5500afc265" name="brian@BRIAN 2026-04-30 09:01:04" runUser="BRIAN\brian" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
+  <Times creation="2026-04-30T09:01:04.6881138-04:00" queuing="2026-04-30T09:01:04.6881140-04:00" start="2026-04-30T09:01:04.2848573-04:00" finish="2026-04-30T09:01:04.7081141-04:00" />
+  <TestSettings name="default" id="d6ca9319-b0fc-4927-a499-e83e42b8ea72">
+    <Deployment runDeploymentRoot="brian_BRIAN_2026-04-30_09_01_04" />
+  </TestSettings>
+  <Results>
+    <UnitTestResult executionId="30634078-f242-4540-9625-d80381760b83" testId="10713985-d7d6-30bf-3ee2-5dfc0ecc66c3" testName="test_combat_actor_hydration_rejects_missing_baseline_snapshot" computerName="BRIAN" duration="00:00:00.0003800" startTime="2026-04-30T09:01:04.6278130-04:00" endTime="2026-04-30T09:01:04.6281927-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="30634078-f242-4540-9625-d80381760b83" />
+    <UnitTestResult executionId="4e4c802f-2b0a-43d7-b754-99c6ae49b83f" testId="38742b76-5145-41c4-946f-5a2aa209a875" testName="test_combat_fixture_package_validates_required_t1_rows" computerName="BRIAN" duration="00:00:00.0035560" startTime="2026-04-30T09:01:04.6602928-04:00" endTime="2026-04-30T09:01:04.6638489-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="4e4c802f-2b0a-43d7-b754-99c6ae49b83f" />
+    <UnitTestResult executionId="7aaf0f3a-4408-466e-a879-bfd68d55f2ee" testId="bb8dc6f4-1ae0-aced-345b-a1c6887f9fd7" testName="test_combat_actor_hydration_accepts_valid_cleric_mid_baseline" computerName="BRIAN" duration="00:00:00.0368760" startTime="2026-04-30T09:01:04.5892133-04:00" endTime="2026-04-30T09:01:04.6260625-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="7aaf0f3a-4408-466e-a879-bfd68d55f2ee" />
+    <UnitTestResult executionId="a114de94-19cd-4afa-953d-11149d2c903c" testId="1791f5b3-5e24-0819-55f9-1dbf5d2c44b5" testName="test_combat_actor_state_has_no_unity_scene_object_fields" computerName="BRIAN" duration="00:00:00.0003140" startTime="2026-04-30T09:01:04.6556057-04:00" endTime="2026-04-30T09:01:04.6559192-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="a114de94-19cd-4afa-953d-11149d2c903c" />
+    <UnitTestResult executionId="d92c1c8b-bb4a-436d-880d-fd8e825624c5" testId="53728362-84cd-7548-bf24-25b503edc85b" testName="test_combat_actor_state_contains_required_runtime_and_stable_fields" computerName="BRIAN" duration="00:00:00.0003390" startTime="2026-04-30T09:01:04.6552618-04:00" endTime="2026-04-30T09:01:04.6556003-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="d92c1c8b-bb4a-436d-880d-fd8e825624c5" />
+    <UnitTestResult executionId="d8a3af3d-66d9-4dc5-a7d0-4abc75b6c2c4" testId="266bd731-d588-a80c-eacd-29ab739a2cd1" testName="test_combat_fixture_loader_resolves_spells_tactical_instants_and_encounters" computerName="BRIAN" duration="00:00:00.0007200" startTime="2026-04-30T09:01:04.6423377-04:00" endTime="2026-04-30T09:01:04.6430580-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="d8a3af3d-66d9-4dc5-a7d0-4abc75b6c2c4" />
+    <UnitTestResult executionId="4eebbfd5-ad53-4961-b097-094afda735a3" testId="2110dbca-f3ef-dc2c-8c82-2d0dd5997da9" testName="test_combat_clock_reset_returns_known_tick" computerName="BRIAN" duration="00:00:00.0001240" startTime="2026-04-30T09:01:04.6580504-04:00" endTime="2026-04-30T09:01:04.6581745-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="4eebbfd5-ad53-4961-b097-094afda735a3" />
+    <UnitTestResult executionId="008191d1-2e82-4ce9-8ef2-6c7e83c27d88" testId="bd7e0408-3a77-bf6f-de7e-e05f6c4b76a7" testName="test_los_query_contract_blocks_only_t1_occluder_layers_and_reports_buffer_overflow" computerName="BRIAN" duration="00:00:00.0020640" startTime="2026-04-30T09:01:04.6496357-04:00" endTime="2026-04-30T09:01:04.6516991-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="008191d1-2e82-4ce9-8ef2-6c7e83c27d88" />
+    <UnitTestResult executionId="695c37f2-ea3f-4866-88cd-fa8f9e7b3bfa" testId="6b443170-429b-457b-6f92-d34edf1c5007" testName="test_social_assist_joins_eligible_actors_in_deterministic_order_with_default_threat" computerName="BRIAN" duration="00:00:00.0009090" startTime="2026-04-30T09:01:04.6530031-04:00" endTime="2026-04-30T09:01:04.6539118-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="695c37f2-ea3f-4866-88cd-fa8f9e7b3bfa" />
+    <UnitTestResult executionId="868b7e95-bd01-4def-8f5e-40aa8e8f8e32" testId="06c39495-a345-6c2f-adc5-af2e65ea0594" testName="test_social_assist_pulses_are_bounded_and_join_once_per_pull_episode" computerName="BRIAN" duration="00:00:00.0006210" startTime="2026-04-30T09:01:04.6539195-04:00" endTime="2026-04-30T09:01:04.6545406-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="868b7e95-bd01-4def-8f5e-40aa8e8f8e32" />
+    <UnitTestResult executionId="1d896b4c-13fe-439c-9eaf-8529846b96a3" testId="f0d5177a-e97c-d50d-f458-8f7bac4f52bc" testName="test_target_selection_filters_dead_out_of_radius_blocked_los_and_orders_deterministically" computerName="BRIAN" duration="00:00:00.0002080" startTime="2026-04-30T09:01:04.6545477-04:00" endTime="2026-04-30T09:01:04.6547558-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="1d896b4c-13fe-439c-9eaf-8529846b96a3" />
+    <UnitTestResult executionId="f3aad73f-902c-4ed9-b38c-a157810637c6" testId="0c860a0f-52ea-c4f2-d829-13733bfc3183" testName="test_zone_transition_clears_transient_combat_state_and_blocks_incoming_zone_results" computerName="BRIAN" duration="00:00:00.0004380" startTime="2026-04-30T09:01:04.6547622-04:00" endTime="2026-04-30T09:01:04.6552003-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="f3aad73f-902c-4ed9-b38c-a157810637c6" />
+    <UnitTestResult executionId="77ae9203-b9b2-4c4f-9034-07ff59713fca" testId="6b7c1f71-5e0b-e619-c3a2-80a9a674d6f5" testName="test_combat_fixture_package_declares_default_social_assist_profile" computerName="BRIAN" duration="00:00:00.0007630" startTime="2026-04-30T09:01:04.6582263-04:00" endTime="2026-04-30T09:01:04.6589885-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="77ae9203-b9b2-4c4f-9034-07ff59713fca" />
+    <UnitTestResult executionId="9531bf9c-e3e1-4abe-88c7-27e0b74d9b6b" testId="8f874cde-082c-7895-5ff6-5c9a8b22eaec" testName="test_combat_actor_hydration_rejects_dead_current_health_without_death_handoff" computerName="BRIAN" duration="00:00:00.0011740" startTime="2026-04-30T09:01:04.6266269-04:00" endTime="2026-04-30T09:01:04.6278006-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="9531bf9c-e3e1-4abe-88c7-27e0b74d9b6b" />
+    <UnitTestResult executionId="4c29ab37-460e-4e81-86bb-7f3da9bdb566" testId="f370e923-3d1c-0b1f-475c-90253f167f9c" testName="test_combat_fixture_package_resolves_targeting_pull_and_leash_tuning" computerName="BRIAN" duration="00:00:00.0008750" startTime="2026-04-30T09:01:04.6594100-04:00" endTime="2026-04-30T09:01:04.6602848-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="4c29ab37-460e-4e81-86bb-7f3da9bdb566" />
+    <UnitTestResult executionId="b8d13497-c108-4171-bd05-c72f24656c25" testId="154d7153-cb1b-f71d-e606-63633464063a" testName="test_body_pull_initializes_threat_and_pivot_signal_without_warning_affordances" computerName="BRIAN" duration="00:00:00.0047520" startTime="2026-04-30T09:01:04.6431561-04:00" endTime="2026-04-30T09:01:04.6479077-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="b8d13497-c108-4171-bd05-c72f24656c25" />
+    <UnitTestResult executionId="01da4223-5ed2-4a50-b062-259bf071afd9" testId="90583ee3-46fc-7f9b-dfe6-31a5296a3684" testName="test_combat_clock_rejects_invalid_tick_rate" computerName="BRIAN" duration="00:00:00.0014710" startTime="2026-04-30T09:01:04.6565718-04:00" endTime="2026-04-30T09:01:04.6580429-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="01da4223-5ed2-4a50-b062-259bf071afd9" />
+    <UnitTestResult executionId="ffbe0f39-00bb-4370-ab51-d1557c74f6e9" testId="a98270b6-3be0-ac77-57fe-95b162720f3c" testName="test_combat_fixture_loader_exposes_source_ref_aliases_for_downstream_validation" computerName="BRIAN" duration="00:00:00.0010320" startTime="2026-04-30T09:01:04.6290496-04:00" endTime="2026-04-30T09:01:04.6300819-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="ffbe0f39-00bb-4370-ab51-d1557c74f6e9" />
+    <UnitTestResult executionId="0747e964-454a-48fc-9e8c-04a7b81e918f" testId="48510470-e43e-af14-e67a-0936ddabfdcc" testName="test_combat_fixture_validator_rejects_missing_required_rows" computerName="BRIAN" duration="00:00:00.0007490" startTime="2026-04-30T09:01:04.6638582-04:00" endTime="2026-04-30T09:01:04.6646074-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="0747e964-454a-48fc-9e8c-04a7b81e918f" />
+    <UnitTestResult executionId="bf8d8a5a-cbc1-4402-b54d-0b71713a5965" testId="a3feacce-9d27-6f92-1f81-e196edaf7e5f" testName="test_combat_clock_advance_ticks_uses_fixed_duration" computerName="BRIAN" duration="00:00:00.0005150" startTime="2026-04-30T09:01:04.6560510-04:00" endTime="2026-04-30T09:01:04.6565655-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="bf8d8a5a-cbc1-4402-b54d-0b71713a5965" />
+    <UnitTestResult executionId="3e640dc0-be6b-49d3-a6c8-0e896b95b066" testId="741b39a7-a224-087a-4da7-d30dea041ad0" testName="test_haunt_zone_gate_enables_claim_targeting_and_pull" computerName="BRIAN" duration="00:00:00.0003420" startTime="2026-04-30T09:01:04.6492835-04:00" endTime="2026-04-30T09:01:04.6496255-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="3e640dc0-be6b-49d3-a6c8-0e896b95b066" />
+    <UnitTestResult executionId="b711f67e-6765-4a8d-a417-ec7a58b70189" testId="de8ee3a3-9174-40d5-2212-68f9a477a22a" testName="test_city_hub_zone_disables_targeting_claim_threat_damage_and_kill_credit" computerName="BRIAN" duration="00:00:00.0013490" startTime="2026-04-30T09:01:04.6479221-04:00" endTime="2026-04-30T09:01:04.6492705-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="b711f67e-6765-4a8d-a417-ec7a58b70189" />
+    <UnitTestResult executionId="da1bc09d-9c2b-4fb0-8590-1fde60bf8032" testId="0609f7c7-6951-db49-ce69-ea2ba5bad7c0" testName="test_reaggro_requires_active_memory_distance_los_and_expiry_clears_threat" computerName="BRIAN" duration="00:00:00.0004950" startTime="2026-04-30T09:01:04.6525029-04:00" endTime="2026-04-30T09:01:04.6529973-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="da1bc09d-9c2b-4fb0-8590-1fde60bf8032" />
+    <UnitTestResult executionId="e6c9e6c4-55a0-47fb-acc3-b590dd51d544" testId="07b3e8a3-fa79-9867-6c2d-09f8c62b4af9" testName="test_path_failure_enters_leashing_after_grace_and_requests_return_to_anchor" computerName="BRIAN" duration="00:00:00.0007880" startTime="2026-04-30T09:01:04.6517082-04:00" endTime="2026-04-30T09:01:04.6524957-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="e6c9e6c4-55a0-47fb-acc3-b590dd51d544" />
+    <UnitTestResult executionId="dfbdf5ad-12b6-42d7-b76d-a8f96b8b7c1e" testId="8cb1d39d-b99a-87af-34ee-20bd0cf34e93" testName="test_combat_fixture_loader_keeps_fixture_tuning_values_out_of_production_logic" computerName="BRIAN" duration="00:00:00.0122350" startTime="2026-04-30T09:01:04.6300900-04:00" endTime="2026-04-30T09:01:04.6423245-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="dfbdf5ad-12b6-42d7-b76d-a8f96b8b7c1e" />
+    <UnitTestResult executionId="e0979cd4-da2f-4caa-8cd9-3d89bff6770f" testId="7e83c692-4866-4e8e-1f06-6afdc03fe9f9" testName="test_combat_actor_state_rejects_transient_threat_table_negative_values" computerName="BRIAN" duration="00:00:00.0000850" startTime="2026-04-30T09:01:04.6559251-04:00" endTime="2026-04-30T09:01:04.6560100-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="e0979cd4-da2f-4caa-8cd9-3d89bff6770f" />
+    <UnitTestResult executionId="fda7f523-22a8-4943-a6a7-e79b71d91f82" testId="cf622bc6-ba9f-8306-05b4-a05cbcfe5e6f" testName="test_combat_fixture_package_resolves_cleric_mid_t1_design_values" computerName="BRIAN" duration="00:00:00.0004070" startTime="2026-04-30T09:01:04.6589963-04:00" endTime="2026-04-30T09:01:04.6594031-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="fda7f523-22a8-4943-a6a7-e79b71d91f82" />
+  </Results>
+  <TestDefinitions>
+    <UnitTest name="test_los_query_contract_blocks_only_t1_occluder_layers_and_reports_buffer_overflow" storage="n:\gravenspire\tests\bin\debug\net8.0\gravenspire.combat.tests.dll" id="bd7e0408-3a77-bf6f-de7e-e05f6c4b76a7">
+      <Execution id="008191d1-2e82-4ce9-8ef2-6c7e83c27d88" />
+      <TestMethod codeBase="N:\GravenSpire\tests\bin\Debug\net8.0\Gravenspire.Combat.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Gravenspire.Tests.Integration.Gameplay.Combat.CombatTargetingPullLeashTest" name="test_los_query_contract_blocks_only_t1_occluder_layers_and_reports_buffer_overflow" />
+    </UnitTest>
+    <UnitTest name="test_target_selection_filters_dead_out_of_radius_blocked_los_and_orders_deterministically" storage="n:\gravenspire\tests\bin\debug\net8.0\gravenspire.combat.tests.dll" id="f0d5177a-e97c-d50d-f458-8f7bac4f52bc">
+      <Execution id="1d896b4c-13fe-439c-9eaf-8529846b96a3" />
+      <TestMethod codeBase="N:\GravenSpire\tests\bin\Debug\net8.0\Gravenspire.Combat.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Gravenspire.Tests.Integration.Gameplay.Combat.CombatTargetingPullLeashTest" name="test_target_selection_filters_dead_out_of_radius_blocked_los_and_orders_deterministically" />
+    </UnitTest>
+    <UnitTest name="test_social_assist_pulses_are_bounded_and_join_once_per_pull_episode" storage="n:\gravenspire\tests\bin\debug\net8.0\gravenspire.combat.tests.dll" id="06c39495-a345-6c2f-adc5-af2e65ea0594">
+      <Execution id="868b7e95-bd01-4def-8f5e-40aa8e8f8e32" />
+      <TestMethod codeBase="N:\GravenSpire\tests\bin\Debug\net8.0\Gravenspire.Combat.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Gravenspire.Tests.Integration.Gameplay.Combat.CombatTargetingPullLeashTest" name="test_social_assist_pulses_are_bounded_and_join_once_per_pull_episode" />
+    </UnitTest>
+    <UnitTest name="test_combat_fixture_package_resolves_targeting_pull_and_leash_tuning" storage="n:\gravenspire\tests\bin\debug\net8.0\gravenspire.combat.tests.dll" id="f370e923-3d1c-0b1f-475c-90253f167f9c">
+      <Execution id="4c29ab37-460e-4e81-86bb-7f3da9bdb566" />
+      <TestMethod codeBase="N:\GravenSpire\tests\bin\Debug\net8.0\Gravenspire.Combat.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Gravenspire.Tests.Unit.Gameplay.Combat.CombatFixtureValidationTest" name="test_combat_fixture_package_resolves_targeting_pull_and_leash_tuning" />
+    </UnitTest>
+    <UnitTest name="test_social_assist_joins_eligible_actors_in_deterministic_order_with_default_threat" storage="n:\gravenspire\tests\bin\debug\net8.0\gravenspire.combat.tests.dll" id="6b443170-429b-457b-6f92-d34edf1c5007">
+      <Execution id="695c37f2-ea3f-4866-88cd-fa8f9e7b3bfa" />
+      <TestMethod codeBase="N:\GravenSpire\tests\bin\Debug\net8.0\Gravenspire.Combat.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Gravenspire.Tests.Integration.Gameplay.Combat.CombatTargetingPullLeashTest" name="test_social_assist_joins_eligible_actors_in_deterministic_order_with_default_threat" />
+    </UnitTest>
+    <UnitTest name="test_combat_actor_hydration_accepts_valid_cleric_mid_baseline" storage="n:\gravenspire\tests\bin\debug\net8.0\gravenspire.combat.tests.dll" id="bb8dc6f4-1ae0-aced-345b-a1c6887f9fd7">
+      <Execution id="7aaf0f3a-4408-466e-a879-bfd68d55f2ee" />
+      <TestMethod codeBase="N:\GravenSpire\tests\bin\Debug\net8.0\Gravenspire.Combat.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Gravenspire.Tests.Integration.Gameplay.Combat.CombatActorHydrationTest" name="test_combat_actor_hydration_accepts_valid_cleric_mid_baseline" />
+    </UnitTest>
+    <UnitTest name="test_combat_fixture_validator_rejects_missing_required_rows" storage="n:\gravenspire\tests\bin\debug\net8.0\gravenspire.combat.tests.dll" id="48510470-e43e-af14-e67a-0936ddabfdcc">
+      <Execution id="0747e964-454a-48fc-9e8c-04a7b81e918f" />
+      <TestMethod codeBase="N:\GravenSpire\tests\bin\Debug\net8.0\Gravenspire.Combat.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Gravenspire.Tests.Unit.Gameplay.Combat.CombatFixtureValidationTest" name="test_combat_fixture_validator_rejects_missing_required_rows" />
+    </UnitTest>
+    <UnitTest name="test_haunt_zone_gate_enables_claim_targeting_and_pull" storage="n:\gravenspire\tests\bin\debug\net8.0\gravenspire.combat.tests.dll" id="741b39a7-a224-087a-4da7-d30dea041ad0">
+      <Execution id="3e640dc0-be6b-49d3-a6c8-0e896b95b066" />
+      <TestMethod codeBase="N:\GravenSpire\tests\bin\Debug\net8.0\Gravenspire.Combat.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Gravenspire.Tests.Integration.Gameplay.Combat.CombatTargetingPullLeashTest" name="test_haunt_zone_gate_enables_claim_targeting_and_pull" />
+    </UnitTest>
+    <UnitTest name="test_combat_fixture_loader_resolves_spells_tactical_instants_and_encounters" storage="n:\gravenspire\tests\bin\debug\net8.0\gravenspire.combat.tests.dll" id="266bd731-d588-a80c-eacd-29ab739a2cd1">
+      <Execution id="d8a3af3d-66d9-4dc5-a7d0-4abc75b6c2c4" />
+      <TestMethod codeBase="N:\GravenSpire\tests\bin\Debug\net8.0\Gravenspire.Combat.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Gravenspire.Tests.Integration.Gameplay.Combat.CombatFixtureLoadingTest" name="test_combat_fixture_loader_resolves_spells_tactical_instants_and_encounters" />
+    </UnitTest>
+    <UnitTest name="test_combat_clock_rejects_invalid_tick_rate" storage="n:\gravenspire\tests\bin\debug\net8.0\gravenspire.combat.tests.dll" id="90583ee3-46fc-7f9b-dfe6-31a5296a3684">
+      <Execution id="01da4223-5ed2-4a50-b062-259bf071afd9" />
+      <TestMethod codeBase="N:\GravenSpire\tests\bin\Debug\net8.0\Gravenspire.Combat.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Gravenspire.Tests.Unit.Gameplay.Combat.CombatClockTest" name="test_combat_clock_rejects_invalid_tick_rate" />
+    </UnitTest>
+    <UnitTest name="test_combat_actor_state_contains_required_runtime_and_stable_fields" storage="n:\gravenspire\tests\bin\debug\net8.0\gravenspire.combat.tests.dll" id="53728362-84cd-7548-bf24-25b503edc85b">
+      <Execution id="d92c1c8b-bb4a-436d-880d-fd8e825624c5" />
+      <TestMethod codeBase="N:\GravenSpire\tests\bin\Debug\net8.0\Gravenspire.Combat.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Gravenspire.Tests.Unit.Gameplay.Combat.CombatActorStateTest" name="test_combat_actor_state_contains_required_runtime_and_stable_fields" />
+    </UnitTest>
+    <UnitTest name="test_city_hub_zone_disables_targeting_claim_threat_damage_and_kill_credit" storage="n:\gravenspire\tests\bin\debug\net8.0\gravenspire.combat.tests.dll" id="de8ee3a3-9174-40d5-2212-68f9a477a22a">
+      <Execution id="b711f67e-6765-4a8d-a417-ec7a58b70189" />
+      <TestMethod codeBase="N:\GravenSpire\tests\bin\Debug\net8.0\Gravenspire.Combat.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Gravenspire.Tests.Integration.Gameplay.Combat.CombatTargetingPullLeashTest" name="test_city_hub_zone_disables_targeting_claim_threat_damage_and_kill_credit" />
+    </UnitTest>
+    <UnitTest name="test_combat_fixture_package_resolves_cleric_mid_t1_design_values" storage="n:\gravenspire\tests\bin\debug\net8.0\gravenspire.combat.tests.dll" id="cf622bc6-ba9f-8306-05b4-a05cbcfe5e6f">
+      <Execution id="fda7f523-22a8-4943-a6a7-e79b71d91f82" />
+      <TestMethod codeBase="N:\GravenSpire\tests\bin\Debug\net8.0\Gravenspire.Combat.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Gravenspire.Tests.Unit.Gameplay.Combat.CombatFixtureValidationTest" name="test_combat_fixture_package_resolves_cleric_mid_t1_design_values" />
+    </UnitTest>
+    <UnitTest name="test_body_pull_initializes_threat_and_pivot_signal_without_warning_affordances" storage="n:\gravenspire\tests\bin\debug\net8.0\gravenspire.combat.tests.dll" id="154d7153-cb1b-f71d-e606-63633464063a">
+      <Execution id="b8d13497-c108-4171-bd05-c72f24656c25" />
+      <TestMethod codeBase="N:\GravenSpire\tests\bin\Debug\net8.0\Gravenspire.Combat.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Gravenspire.Tests.Integration.Gameplay.Combat.CombatTargetingPullLeashTest" name="test_body_pull_initializes_threat_and_pivot_signal_without_warning_affordances" />
+    </UnitTest>
+    <UnitTest name="test_combat_actor_hydration_rejects_missing_baseline_snapshot" storage="n:\gravenspire\tests\bin\debug\net8.0\gravenspire.combat.tests.dll" id="10713985-d7d6-30bf-3ee2-5dfc0ecc66c3">
+      <Execution id="30634078-f242-4540-9625-d80381760b83" />
+      <TestMethod codeBase="N:\GravenSpire\tests\bin\Debug\net8.0\Gravenspire.Combat.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Gravenspire.Tests.Integration.Gameplay.Combat.CombatActorHydrationTest" name="test_combat_actor_hydration_rejects_missing_baseline_snapshot" />
+    </UnitTest>
+    <UnitTest name="test_combat_clock_reset_returns_known_tick" storage="n:\gravenspire\tests\bin\debug\net8.0\gravenspire.combat.tests.dll" id="2110dbca-f3ef-dc2c-8c82-2d0dd5997da9">
+      <Execution id="4eebbfd5-ad53-4961-b097-094afda735a3" />
+      <TestMethod codeBase="N:\GravenSpire\tests\bin\Debug\net8.0\Gravenspire.Combat.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Gravenspire.Tests.Unit.Gameplay.Combat.CombatClockTest" name="test_combat_clock_reset_returns_known_tick" />
+    </UnitTest>
+    <UnitTest name="test_combat_fixture_loader_keeps_fixture_tuning_values_out_of_production_logic" storage="n:\gravenspire\tests\bin\debug\net8.0\gravenspire.combat.tests.dll" id="8cb1d39d-b99a-87af-34ee-20bd0cf34e93">
+      <Execution id="dfbdf5ad-12b6-42d7-b76d-a8f96b8b7c1e" />
+      <TestMethod codeBase="N:\GravenSpire\tests\bin\Debug\net8.0\Gravenspire.Combat.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Gravenspire.Tests.Integration.Gameplay.Combat.CombatFixtureLoadingTest" name="test_combat_fixture_loader_keeps_fixture_tuning_values_out_of_production_logic" />
+    </UnitTest>
+    <UnitTest name="test_zone_transition_clears_transient_combat_state_and_blocks_incoming_zone_results" storage="n:\gravenspire\tests\bin\debug\net8.0\gravenspire.combat.tests.dll" id="0c860a0f-52ea-c4f2-d829-13733bfc3183">
+      <Execution id="f3aad73f-902c-4ed9-b38c-a157810637c6" />
+      <TestMethod codeBase="N:\GravenSpire\tests\bin\Debug\net8.0\Gravenspire.Combat.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Gravenspire.Tests.Integration.Gameplay.Combat.CombatTargetingPullLeashTest" name="test_zone_transition_clears_transient_combat_state_and_blocks_incoming_zone_results" />
+    </UnitTest>
+    <UnitTest name="test_combat_actor_state_has_no_unity_scene_object_fields" storage="n:\gravenspire\tests\bin\debug\net8.0\gravenspire.combat.tests.dll" id="1791f5b3-5e24-0819-55f9-1dbf5d2c44b5">
+      <Execution id="a114de94-19cd-4afa-953d-11149d2c903c" />
+      <TestMethod codeBase="N:\GravenSpire\tests\bin\Debug\net8.0\Gravenspire.Combat.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Gravenspire.Tests.Unit.Gameplay.Combat.CombatActorStateTest" name="test_combat_actor_state_has_no_unity_scene_object_fields" />
+    </UnitTest>
+    <UnitTest name="test_reaggro_requires_active_memory_distance_los_and_expiry_clears_threat" storage="n:\gravenspire\tests\bin\debug\net8.0\gravenspire.combat.tests.dll" id="0609f7c7-6951-db49-ce69-ea2ba5bad7c0">
+      <Execution id="da1bc09d-9c2b-4fb0-8590-1fde60bf8032" />
+      <TestMethod codeBase="N:\GravenSpire\tests\bin\Debug\net8.0\Gravenspire.Combat.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Gravenspire.Tests.Integration.Gameplay.Combat.CombatTargetingPullLeashTest" name="test_reaggro_requires_active_memory_distance_los_and_expiry_clears_threat" />
+    </UnitTest>
+    <UnitTest name="test_combat_fixture_package_validates_required_t1_rows" storage="n:\gravenspire\tests\bin\debug\net8.0\gravenspire.combat.tests.dll" id="38742b76-5145-41c4-946f-5a2aa209a875">
+      <Execution id="4e4c802f-2b0a-43d7-b754-99c6ae49b83f" />
+      <TestMethod codeBase="N:\GravenSpire\tests\bin\Debug\net8.0\Gravenspire.Combat.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Gravenspire.Tests.Unit.Gameplay.Combat.CombatFixtureValidationTest" name="test_combat_fixture_package_validates_required_t1_rows" />
+    </UnitTest>
+    <UnitTest name="test_combat_actor_state_rejects_transient_threat_table_negative_values" storage="n:\gravenspire\tests\bin\debug\net8.0\gravenspire.combat.tests.dll" id="7e83c692-4866-4e8e-1f06-6afdc03fe9f9">
+      <Execution id="e0979cd4-da2f-4caa-8cd9-3d89bff6770f" />
+      <TestMethod codeBase="N:\GravenSpire\tests\bin\Debug\net8.0\Gravenspire.Combat.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Gravenspire.Tests.Unit.Gameplay.Combat.CombatActorStateTest" name="test_combat_actor_state_rejects_transient_threat_table_negative_values" />
+    </UnitTest>
+    <UnitTest name="test_combat_clock_advance_ticks_uses_fixed_duration" storage="n:\gravenspire\tests\bin\debug\net8.0\gravenspire.combat.tests.dll" id="a3feacce-9d27-6f92-1f81-e196edaf7e5f">
+      <Execution id="bf8d8a5a-cbc1-4402-b54d-0b71713a5965" />
+      <TestMethod codeBase="N:\GravenSpire\tests\bin\Debug\net8.0\Gravenspire.Combat.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Gravenspire.Tests.Unit.Gameplay.Combat.CombatClockTest" name="test_combat_clock_advance_ticks_uses_fixed_duration" />
+    </UnitTest>
+    <UnitTest name="test_combat_fixture_package_declares_default_social_assist_profile" storage="n:\gravenspire\tests\bin\debug\net8.0\gravenspire.combat.tests.dll" id="6b7c1f71-5e0b-e619-c3a2-80a9a674d6f5">
+      <Execution id="77ae9203-b9b2-4c4f-9034-07ff59713fca" />
+      <TestMethod codeBase="N:\GravenSpire\tests\bin\Debug\net8.0\Gravenspire.Combat.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Gravenspire.Tests.Unit.Gameplay.Combat.CombatFixtureValidationTest" name="test_combat_fixture_package_declares_default_social_assist_profile" />
+    </UnitTest>
+    <UnitTest name="test_path_failure_enters_leashing_after_grace_and_requests_return_to_anchor" storage="n:\gravenspire\tests\bin\debug\net8.0\gravenspire.combat.tests.dll" id="07b3e8a3-fa79-9867-6c2d-09f8c62b4af9">
+      <Execution id="e6c9e6c4-55a0-47fb-acc3-b590dd51d544" />
+      <TestMethod codeBase="N:\GravenSpire\tests\bin\Debug\net8.0\Gravenspire.Combat.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Gravenspire.Tests.Integration.Gameplay.Combat.CombatTargetingPullLeashTest" name="test_path_failure_enters_leashing_after_grace_and_requests_return_to_anchor" />
+    </UnitTest>
+    <UnitTest name="test_combat_fixture_loader_exposes_source_ref_aliases_for_downstream_validation" storage="n:\gravenspire\tests\bin\debug\net8.0\gravenspire.combat.tests.dll" id="a98270b6-3be0-ac77-57fe-95b162720f3c">
+      <Execution id="ffbe0f39-00bb-4370-ab51-d1557c74f6e9" />
+      <TestMethod codeBase="N:\GravenSpire\tests\bin\Debug\net8.0\Gravenspire.Combat.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Gravenspire.Tests.Integration.Gameplay.Combat.CombatFixtureLoadingTest" name="test_combat_fixture_loader_exposes_source_ref_aliases_for_downstream_validation" />
+    </UnitTest>
+    <UnitTest name="test_combat_actor_hydration_rejects_dead_current_health_without_death_handoff" storage="n:\gravenspire\tests\bin\debug\net8.0\gravenspire.combat.tests.dll" id="8f874cde-082c-7895-5ff6-5c9a8b22eaec">
+      <Execution id="9531bf9c-e3e1-4abe-88c7-27e0b74d9b6b" />
+      <TestMethod codeBase="N:\GravenSpire\tests\bin\Debug\net8.0\Gravenspire.Combat.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Gravenspire.Tests.Integration.Gameplay.Combat.CombatActorHydrationTest" name="test_combat_actor_hydration_rejects_dead_current_health_without_death_handoff" />
+    </UnitTest>
+  </TestDefinitions>
+  <TestEntries>
+    <TestEntry testId="10713985-d7d6-30bf-3ee2-5dfc0ecc66c3" executionId="30634078-f242-4540-9625-d80381760b83" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="38742b76-5145-41c4-946f-5a2aa209a875" executionId="4e4c802f-2b0a-43d7-b754-99c6ae49b83f" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="bb8dc6f4-1ae0-aced-345b-a1c6887f9fd7" executionId="7aaf0f3a-4408-466e-a879-bfd68d55f2ee" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="1791f5b3-5e24-0819-55f9-1dbf5d2c44b5" executionId="a114de94-19cd-4afa-953d-11149d2c903c" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="53728362-84cd-7548-bf24-25b503edc85b" executionId="d92c1c8b-bb4a-436d-880d-fd8e825624c5" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="266bd731-d588-a80c-eacd-29ab739a2cd1" executionId="d8a3af3d-66d9-4dc5-a7d0-4abc75b6c2c4" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="2110dbca-f3ef-dc2c-8c82-2d0dd5997da9" executionId="4eebbfd5-ad53-4961-b097-094afda735a3" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="bd7e0408-3a77-bf6f-de7e-e05f6c4b76a7" executionId="008191d1-2e82-4ce9-8ef2-6c7e83c27d88" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="6b443170-429b-457b-6f92-d34edf1c5007" executionId="695c37f2-ea3f-4866-88cd-fa8f9e7b3bfa" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="06c39495-a345-6c2f-adc5-af2e65ea0594" executionId="868b7e95-bd01-4def-8f5e-40aa8e8f8e32" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="f0d5177a-e97c-d50d-f458-8f7bac4f52bc" executionId="1d896b4c-13fe-439c-9eaf-8529846b96a3" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="0c860a0f-52ea-c4f2-d829-13733bfc3183" executionId="f3aad73f-902c-4ed9-b38c-a157810637c6" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="6b7c1f71-5e0b-e619-c3a2-80a9a674d6f5" executionId="77ae9203-b9b2-4c4f-9034-07ff59713fca" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="8f874cde-082c-7895-5ff6-5c9a8b22eaec" executionId="9531bf9c-e3e1-4abe-88c7-27e0b74d9b6b" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="f370e923-3d1c-0b1f-475c-90253f167f9c" executionId="4c29ab37-460e-4e81-86bb-7f3da9bdb566" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="154d7153-cb1b-f71d-e606-63633464063a" executionId="b8d13497-c108-4171-bd05-c72f24656c25" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="90583ee3-46fc-7f9b-dfe6-31a5296a3684" executionId="01da4223-5ed2-4a50-b062-259bf071afd9" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="a98270b6-3be0-ac77-57fe-95b162720f3c" executionId="ffbe0f39-00bb-4370-ab51-d1557c74f6e9" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="48510470-e43e-af14-e67a-0936ddabfdcc" executionId="0747e964-454a-48fc-9e8c-04a7b81e918f" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="a3feacce-9d27-6f92-1f81-e196edaf7e5f" executionId="bf8d8a5a-cbc1-4402-b54d-0b71713a5965" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="741b39a7-a224-087a-4da7-d30dea041ad0" executionId="3e640dc0-be6b-49d3-a6c8-0e896b95b066" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="de8ee3a3-9174-40d5-2212-68f9a477a22a" executionId="b711f67e-6765-4a8d-a417-ec7a58b70189" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="0609f7c7-6951-db49-ce69-ea2ba5bad7c0" executionId="da1bc09d-9c2b-4fb0-8590-1fde60bf8032" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="07b3e8a3-fa79-9867-6c2d-09f8c62b4af9" executionId="e6c9e6c4-55a0-47fb-acc3-b590dd51d544" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="8cb1d39d-b99a-87af-34ee-20bd0cf34e93" executionId="dfbdf5ad-12b6-42d7-b76d-a8f96b8b7c1e" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="7e83c692-4866-4e8e-1f06-6afdc03fe9f9" executionId="e0979cd4-da2f-4caa-8cd9-3d89bff6770f" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="cf622bc6-ba9f-8306-05b4-a05cbcfe5e6f" executionId="fda7f523-22a8-4943-a6a7-e79b71d91f82" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+  </TestEntries>
+  <TestLists>
+    <TestList name="Results Not in a List" id="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestList name="All Loaded Results" id="19431567-8539-422a-85d7-44ee4e166bda" />
+  </TestLists>
+  <ResultSummary outcome="Completed">
+    <Counters total="27" executed="27" passed="27" failed="0" error="0" timeout="0" aborted="0" inconclusive="0" passedButRunAborted="0" notRunnable="0" notExecuted="0" disconnected="0" warning="0" completed="0" inProgress="0" pending="0" />
+    <Output>
+      <StdOut>NUnit Adapter 4.6.0.0: Test execution started&#xD;
+Running all tests in N:\GravenSpire\tests\bin\Debug\net8.0\Gravenspire.Combat.Tests.dll&#xD;
+   NUnit3TestExecutor discovered 27 of 27 NUnit test cases using Current Discovery mode, Non-Explicit run&#xD;
+NUnit Adapter 4.6.0.0: Test execution complete&#xD;
+</StdOut>
+    </Output>
+  </ResultSummary>
+</TestRun>
