@@ -21,6 +21,16 @@ Promote repeating lessons to `CLAUDE-patterns.md` (cross-cutting) or a
 
 ## Entries (newest first)
 
+### 2026-04-30 — [GLOBAL][CI][SCOPE] Promote staged hygiene and T1 negative-scope checks to hook
+
+**Context:** Sprint 1 Combat Core implementation repeated the same local gates across `T1-COMBAT-01` through `T1-COMBAT-05`: `git diff --check` caught or confirmed whitespace/conflict-marker hygiene, and manual negative T1 scope greps repeatedly protected the offline single-player tier from FishNet, networking, server authority, PvP, companion, future-class, live-LLM, Unity frame-time, and wall-clock-time drift. The pattern has crossed the threshold where relying on manual recall is weaker than making the gate structural.
+
+**Lesson:** Repeated pre-commit hygiene that protects project scope should become a local hook once it is stable and low-noise. The hook must run on staged files only, avoid broad tree scans, and stay tier-aware so T1 exclusions can be revised when a future DECISIONS.md tier-transition entry changes the allowed surface.
+
+**Evidence:** `.githooks/pre-commit`; `.githooks/README.md`; `tests/evidence/T1-COMBAT-01/verification.md`; `tests/evidence/T1-COMBAT-02/verification.md`; `tests/evidence/T1-COMBAT-03/verification.md`; `tests/evidence/T1-COMBAT-04/verification.md`; `tests/evidence/T1-COMBAT-05/verification.md`.
+
+**Promotion status:** [PROMOTED to .githooks/pre-commit 2026-04-30]
+
 ### 2026-04-28 — [GLOBAL][TEST] Use the narrowest real runner for runnable domain tests
 
 **Context:** `T1-COMBAT-01` Stage 1 created pure C# Combat Core domain code and NUnit-style test intent before a Unity project shell existed. Stage 2 needed runnable verification without absorbing Unity bootstrap scope into the story. The selected harness was a small `tests/Gravenspire.Combat.Tests.csproj` bridge that compiles `src/gameplay/combat/**` plus the existing unit/integration tests and runs them with `dotnet test`, while Unity Test Runner remains the correct path for later MonoBehaviour, scene, and PlayMode-dependent code.

@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+set -e
+
+# Gravenspire T1 pre-commit gate.
+# Promotes the repeated local lessons that every story needs whitespace hygiene
+# and a staged-file negative scope check before commit.
+# Tier-transition maintenance: when DECISIONS.md D003 is superseded for T2,
+# remove FishNet, networking, and server authority from the deny list below.
+
+git diff --cached --check
+
+deny_pattern='FishNet|\bnetworking\b|server authority|\bPvP\b|companion|\bWarrior\b|\bEnchanter\b|OpenAI|Anthropic|Time\.deltaTime|DateTime\.Now|DateTime\.UtcNow'
+violations=0
+
+while IFS= read -r -d '' staged_file; do
+    case "$staged_file" in
+        src/*.cs|tests/*.cs)
+            if matches=$(git show ":$staged_file" 2>/dev/null | grep -nE "$deny_pattern"); then
+                while IFS= read -r match; do
+                    printf '%s:%s\n' "$staged_file" "$match"
+                done <<< "$matches"
+                violations=1
+            fi
+            ;;
+    esac
+done < <(git diff --cached --name-only --diff-filter=ACMR -z)
+
+if [ "$violations" -ne 0 ]; then
+    echo "[pre-commit] T1 scope violation detected. See AGENTS.md §6 and DECISIONS.md D003."
+    exit 1
+fi
+
+echo "[pre-commit] OK"
