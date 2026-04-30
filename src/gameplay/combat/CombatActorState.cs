@@ -61,7 +61,43 @@ public enum CombatState
     /// <summary>
     /// Actor is dead and cannot perform combat actions.
     /// </summary>
-    Dead
+    Dead,
+
+    /// <summary>
+    /// Actor has had a cast interrupted and is waiting for recovery routing.
+    /// </summary>
+    Interrupted,
+
+    /// <summary>
+    /// Actor is in post-cast or post-cancel recovery.
+    /// </summary>
+    Recovery
+}
+
+/// <summary>
+/// Combat-owned cast runtime substate carried on the actor without owning spellbook slots.
+/// </summary>
+public enum CombatCastRuntimeState
+{
+    /// <summary>
+    /// Actor has no active Combat-owned cast runtime.
+    /// </summary>
+    None,
+
+    /// <summary>
+    /// Actor is channeling a slow cast.
+    /// </summary>
+    Casting,
+
+    /// <summary>
+    /// Actor has had the current cast interrupted.
+    /// </summary>
+    Interrupted,
+
+    /// <summary>
+    /// Actor is blocked by post-cast, post-cancel, or post-interrupt recovery.
+    /// </summary>
+    Recovery
 }
 
 /// <summary>
@@ -441,6 +477,36 @@ public sealed record CombatActorState
     public IReadOnlyDictionary<string, int> ThreatTable { get; }
 
     /// <summary>
+    /// Combat-owned cast runtime substate. Spellbook and memorization ownership remain downstream.
+    /// </summary>
+    public CombatCastRuntimeState CastRuntimeState { get; init; } = CombatCastRuntimeState.None;
+
+    /// <summary>
+    /// Transient active cast id supplied by the caller for deterministic lifecycle correlation.
+    /// </summary>
+    public string? ActiveCastId { get; init; }
+
+    /// <summary>
+    /// Active spell profile id being executed by Combat Core, when any.
+    /// </summary>
+    public string? ActiveCastSpellId { get; init; }
+
+    /// <summary>
+    /// Optional transient target combat actor id for the active cast.
+    /// </summary>
+    public string? ActiveCastTargetCombatActorId { get; init; }
+
+    /// <summary>
+    /// Cast progress in combat-clock seconds for HUD and lifecycle consumers.
+    /// </summary>
+    public double CastProgressSeconds { get; init; }
+
+    /// <summary>
+    /// Remaining recovery time in combat-clock seconds after cast completion, cancellation, or interruption.
+    /// </summary>
+    public double CastRecoveryRemainingSeconds { get; init; }
+
+    /// <summary>
     /// True when Combat may treat the actor as alive for runtime transitions.
     /// </summary>
     public bool IsAlive => LifeState == CombatActorLifeState.Alive && CurrentHealth > 0;
@@ -518,6 +584,17 @@ public sealed record CombatActorState
             {
                 errors.Add("threat_table values must not be negative.");
             }
+        }
+
+        if (CastProgressSeconds < 0 || CastRecoveryRemainingSeconds < 0)
+        {
+            errors.Add("cast progress and recovery remaining seconds must not be negative.");
+        }
+
+        if (CastRuntimeState != CombatCastRuntimeState.None)
+        {
+            RequireNonEmpty(ActiveCastId ?? string.Empty, "active_cast_id", errors);
+            RequireNonEmpty(ActiveCastSpellId ?? string.Empty, "active_cast_spell_id", errors);
         }
 
         return errors.Count == 0 ? CombatActorValidationResult.Valid : CombatActorValidationResult.Invalid(errors);

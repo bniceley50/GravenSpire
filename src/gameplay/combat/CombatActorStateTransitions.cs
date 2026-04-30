@@ -110,6 +110,168 @@ public static class CombatActorStateTransitions
         return Copy(actor, targetCombatActorId: null, replaceTarget: true, threatTable: new Dictionary<string, int>(StringComparer.Ordinal));
     }
 
+    /// <summary>
+    /// Begins a Combat-owned slow cast on the actor.
+    /// </summary>
+    public static CombatActorState BeginCast(
+        this CombatActorState actor,
+        string activeCastId,
+        string spellId,
+        string? targetCombatActorId)
+    {
+        ArgumentNullException.ThrowIfNull(actor);
+        RequireText(activeCastId, nameof(activeCastId));
+        RequireText(spellId, nameof(spellId));
+
+        return actor.WithCombatState(CombatState.Casting) with
+        {
+            CastRuntimeState = CombatCastRuntimeState.Casting,
+            ActiveCastId = activeCastId,
+            ActiveCastSpellId = spellId,
+            ActiveCastTargetCombatActorId = targetCombatActorId,
+            CastProgressSeconds = 0d,
+            CastRecoveryRemainingSeconds = 0d
+        };
+    }
+
+    /// <summary>
+    /// Updates cast progress in Combat-owned simulation seconds.
+    /// </summary>
+    public static CombatActorState WithCastProgress(this CombatActorState actor, double castProgressSeconds)
+    {
+        ArgumentNullException.ThrowIfNull(actor);
+        if (castProgressSeconds < 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(castProgressSeconds), "Cast progress cannot be negative.");
+        }
+
+        return actor with { CastProgressSeconds = castProgressSeconds };
+    }
+
+    /// <summary>
+    /// Marks the active cast as interrupted before recovery begins.
+    /// </summary>
+    public static CombatActorState MarkCastInterrupted(this CombatActorState actor, double recoveryRemainingSeconds)
+    {
+        ArgumentNullException.ThrowIfNull(actor);
+        if (recoveryRemainingSeconds < 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(recoveryRemainingSeconds), "Recovery remaining cannot be negative.");
+        }
+
+        return actor.WithCombatState(CombatState.Interrupted) with
+        {
+            CastRuntimeState = CombatCastRuntimeState.Interrupted,
+            ActiveCastId = actor.ActiveCastId,
+            ActiveCastSpellId = actor.ActiveCastSpellId,
+            ActiveCastTargetCombatActorId = actor.ActiveCastTargetCombatActorId,
+            CastProgressSeconds = actor.CastProgressSeconds,
+            CastRecoveryRemainingSeconds = recoveryRemainingSeconds
+        };
+    }
+
+    /// <summary>
+    /// Moves the active cast runtime into post-cast, post-cancel, or post-interrupt recovery.
+    /// </summary>
+    public static CombatActorState BeginCastRecovery(this CombatActorState actor, double recoveryRemainingSeconds)
+    {
+        ArgumentNullException.ThrowIfNull(actor);
+        if (recoveryRemainingSeconds < 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(recoveryRemainingSeconds), "Recovery remaining cannot be negative.");
+        }
+
+        return actor.WithCombatState(CombatState.Recovery) with
+        {
+            CastRuntimeState = CombatCastRuntimeState.Recovery,
+            ActiveCastId = actor.ActiveCastId,
+            ActiveCastSpellId = actor.ActiveCastSpellId,
+            ActiveCastTargetCombatActorId = actor.ActiveCastTargetCombatActorId,
+            CastProgressSeconds = actor.CastProgressSeconds,
+            CastRecoveryRemainingSeconds = recoveryRemainingSeconds
+        };
+    }
+
+    /// <summary>
+    /// Updates current mana while preserving any Combat-owned cast runtime fields.
+    /// </summary>
+    public static CombatActorState WithCurrentMana(this CombatActorState actor, int currentMana)
+    {
+        ArgumentNullException.ThrowIfNull(actor);
+        if (currentMana < 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(currentMana), "Current mana cannot be negative.");
+        }
+
+        if (currentMana > actor.MaxMana)
+        {
+            throw new ArgumentOutOfRangeException(nameof(currentMana), "Current mana cannot exceed max mana.");
+        }
+
+        return CopyWithCastRuntime(actor, currentMana: currentMana);
+    }
+
+    /// <summary>
+    /// Clears Combat-owned cast runtime fields after recovery has ended.
+    /// </summary>
+    public static CombatActorState ClearCastRuntime(this CombatActorState actor, CombatState nextCombatState)
+    {
+        ArgumentNullException.ThrowIfNull(actor);
+        return actor.WithCombatState(nextCombatState) with
+        {
+            CastRuntimeState = CombatCastRuntimeState.None,
+            ActiveCastId = null,
+            ActiveCastSpellId = null,
+            ActiveCastTargetCombatActorId = null,
+            CastProgressSeconds = 0d,
+            CastRecoveryRemainingSeconds = 0d
+        };
+    }
+
+    private static CombatActorState CopyWithCastRuntime(CombatActorState actor, int? currentMana = null)
+    {
+        return new CombatActorState(
+            actor.CombatActorId,
+            actor.ActorKind,
+            actor.StableSourceRef,
+            actor.FactionId,
+            actor.ZoneId,
+            actor.Level,
+            actor.MaxHealth,
+            actor.CurrentHealth,
+            actor.MaxMana,
+            currentMana ?? actor.CurrentMana,
+            actor.ArmorClass,
+            actor.AttackPower,
+            actor.WeaponBaseDamage,
+            actor.AttackSkill,
+            actor.DefenseSkill,
+            actor.WeaponDelaySeconds,
+            actor.MeleeRangeMeters,
+            actor.SpellRangeMeters,
+            actor.CombatState,
+            actor.LifeState,
+            actor.TargetCombatActorId,
+            actor.CombatSortKey,
+            actor.ThreatTable) with
+        {
+            CastRuntimeState = actor.CastRuntimeState,
+            ActiveCastId = actor.ActiveCastId,
+            ActiveCastSpellId = actor.ActiveCastSpellId,
+            ActiveCastTargetCombatActorId = actor.ActiveCastTargetCombatActorId,
+            CastProgressSeconds = actor.CastProgressSeconds,
+            CastRecoveryRemainingSeconds = actor.CastRecoveryRemainingSeconds
+        };
+    }
+
+    private static void RequireText(string value, string parameterName)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            throw new ArgumentException("Cast runtime identifiers cannot be empty.", parameterName);
+        }
+    }
+
     private static CombatActorState Copy(
         CombatActorState actor,
         CombatState? combatState = null,
