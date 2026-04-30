@@ -222,7 +222,7 @@ serialized; unresolved barriers fail the write loudly with
 ## D009 — ADR-0003 Progression Baseline Snapshot Contract
 
 **Date:** 2026-04-26
-**Status:** Proposed
+**Status:** Locked
 **Context:** Character Progression round-4 review exposed that the current
 `ProgressionBaselineSnapshot(current_level, permanent_max_health,
 permanent_max_mana, spell_eligibility_tier)` wording was too broad and

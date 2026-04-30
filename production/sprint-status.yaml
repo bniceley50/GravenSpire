@@ -10,12 +10,12 @@ updated: "2026-04-30"
 branch: "main"
 head: "57286cb"
 qa_plan: "production/qa/plans/qa-plan-sprint-20260428.md"
-implementation_gate: "T1-COMBAT-04 closed by /story-done. Sprint progress: 4/13 done. Next active gate: /dev-story T1-COMBAT-05-slow-cast-framework."
-progress: "4/13 done"
-completed_stories: 4
+implementation_gate: "T1-COMBAT-05 closed by /story-done. Sprint progress: 5/13 done. Next active gate: /dev-story T1-COMBAT-06-tactical-cleric-instants-fixture-loaded-values."
+progress: "5/13 done"
+completed_stories: 5
 total_stories: 13
-next_active_story: "T1-COMBAT-05"
-next_active_command: "/dev-story T1-COMBAT-05-slow-cast-framework"
+next_active_story: "T1-COMBAT-06"
+next_active_command: "/dev-story T1-COMBAT-06-tactical-cleric-instants-fixture-loaded-values"
 
 stories:
   - id: "T1-COMBAT-01"
@@ -58,11 +58,11 @@ stories:
     name: "Slow cast framework"
     file: "production/stories/t1-combat-05-slow-cast-framework.md"
     priority: must-have
-    status: ready-for-dev
+    status: done
     owner: ""
     estimate_days: 1.5
-    blocker: "Depends on T1-COMBAT-03. T1-COMBAT-04 is complete; this is now the next sequential story."
-    completed: ""
+    blocker: ""
+    completed: "2026-04-30"
   - id: "T1-COMBAT-06"
     name: "Tactical Cleric instants using fixture-loaded numeric values"
     file: "production/stories/t1-combat-06-tactical-cleric-instants-fixture-loaded-values.md"
@@ -70,7 +70,7 @@ stories:
     status: ready-for-dev
     owner: ""
     estimate_days: 1.5
-    blocker: "Depends on T1-COMBAT-05."
+    blocker: ""
     completed: ""
   - id: "T1-COMBAT-07"
     name: "Med/sit regen and combat-exit timing"

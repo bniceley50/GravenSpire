@@ -1,6 +1,6 @@
 # T1-COMBAT-05 - Slow Cast Framework
 
-**Status:** Implemented + Verified; awaiting `/story-done`
+**Status:** Complete
 **Sprint:** 1
 **Priority:** Must Have
 **Layer:** Gameplay / Combat Core
@@ -61,12 +61,26 @@ Result: PASS, 71 total, 71 passed, 0 failed. Evidence: `tests/evidence/T1-COMBAT
 
 ## Story Status
 
-`T1-COMBAT-05` is implemented and verified. It is awaiting `/story-done` for closure, sprint status update, and active session-state update.
+`T1-COMBAT-05` is complete via `/story-done`; sprint status, active session state, and the approved ADR-0003/D009 metadata ride-along were updated in the closure batch.
 
 ## Blockers / Carried Forward
 
-- ADR-0003 / D009 status metadata remains unchanged by request.
+- ADR-0003 / D009 status metadata cleanup was closed in this `/story-done` batch as an approved metadata-only ride-along.
 - Tactical Cleric instant execution remains owned by `T1-COMBAT-06`.
 - Med/sit regen and combat-exit timing remain owned by `T1-COMBAT-07`.
 - HUD presentation, kill credit, save barriers, death payloads, profiled feel evidence, and architecture scan tooling remain owned by later Sprint 1 stories.
 - `.claude/skills/dev-story/SKILL.md:75` now appears stale relative to three Sprint 1 precedents where `/dev-story` creates the story handoff artifact from the sprint plan. Treat as a non-blocking lesson candidate for a later `/skill-improve` task, not as part of this implementation batch.
+
+## Completion Notes
+
+**Completed**: 2026-04-30
+**Verdict**: COMPLETE WITH NOTES
+**Implementation Baseline**: commit `ac8dceff038bc0ccbc725adfa64e56fc4ea82d5d` (`Implement T1-COMBAT-05: Slow Cast Framework`)
+**Closure Baseline**: commit `d1533ad7f97665053216d1809058ccacb6d4b439` before this approved `/story-done` closure batch
+**Criteria**: 8/8 story checks covered. `H-CCOM-CAST-01`, `H-CCOM-CAST-02`, `H-CCOM-CAST-03`, `H-CCOM-CAST-04`, `H-CCOM-CAST-05`, `H-CCOM-F4`, `H-CCOM-IF-01`, and same-tick completion-before-interrupt priority all have file:line evidence in `## Acceptance Criteria Coverage`.
+**Deferred/Untested Criteria**: None for this story boundary. Tactical instant execution, med/sit regen and combat-exit timing, HUD presentation, kill credit, save barriers, death payloads, profiled feel evidence, and architecture scan tooling remain downstream by sprint plan.
+**Test Evidence**: Stage 2 TRX passed 71/71 at `tests/evidence/T1-COMBAT-05/t1-combat-05-stage2.trx:444`; verification summary is in `tests/evidence/T1-COMBAT-05/verification.md:10-31`; live closure rerun passed 71/71 with `dotnet test tests\Gravenspire.Combat.Tests.csproj --no-restore --logger "console;verbosity=minimal"`.
+**GDD/ADR Deviations**: None blocking. The approved ADR-0003/D009 metadata ride-along changed ADR-0003 status from Proposed to Accepted and DECISIONS.md D009 status from Proposed to Locked; D007, D008, D010, and D011 remain Proposed pending their respective validation gates.
+**Scope Notes**: Negative T1 scope grep passed on the changed implementation, test, story, and evidence files with zero matches for the requested forbidden terms. Closure edits are limited to the approved story, sprint-status, active session-state, ADR-0003, and DECISIONS.md files.
+**Review Gates**: Lean `/story-done` closure; QA and lead-programmer subagents skipped by review mode. Story, sprint status, active session state, and metadata-only ADR/D009 status fields updated in the approved closure batch.
+**Forced Completion**: No.

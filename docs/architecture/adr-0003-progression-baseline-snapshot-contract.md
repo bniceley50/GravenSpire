@@ -1,7 +1,7 @@
 # ADR-0003: Progression Baseline Snapshot Contract
 
 ## Status
-Proposed
+Accepted
 
 ## Date
 2026-04-26
