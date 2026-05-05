@@ -10,12 +10,12 @@ updated: "2026-04-30"
 branch: "main"
 head: "57286cb"
 qa_plan: "production/qa/plans/qa-plan-sprint-20260428.md"
-implementation_gate: "T1-COMBAT-08 closed by /story-done. Sprint progress: 8/13 done. Next active gate: /dev-story T1-COMBAT-09a-npc-death-playerkillcreditevent-emission."
-progress: "8/13 done"
-completed_stories: 8
+implementation_gate: "T1-COMBAT-09b closed by /story-done. Sprint progress: 9/13 done. Next active gate: /dev-story T1-COMBAT-09c-player-death-payload-stub-reserved-integration."
+progress: "9/13 done"
+completed_stories: 9
 total_stories: 13
-next_active_story: "T1-COMBAT-09a"
-next_active_command: "/dev-story T1-COMBAT-09a-npc-death-playerkillcreditevent-emission"
+next_active_story: "T1-COMBAT-09c"
+next_active_command: "/dev-story T1-COMBAT-09c-player-death-payload-stub-reserved-integration"
 
 stories:
   - id: "T1-COMBAT-01"
@@ -103,11 +103,11 @@ stories:
     name: "Same-frame save barrier integration for kill-credit consistency"
     file: "production/stories/t1-combat-09b-same-frame-save-barrier-kill-credit-consistency.md"
     priority: must-have
-    status: ready-for-dev
+    status: done
     owner: ""
     estimate_days: 2.0
     blocker: "Depends on T1-COMBAT-09a and Character Progression lookup fixture data."
-    completed: ""
+    completed: "2026-04-30"
   - id: "T1-COMBAT-09c"
     name: "Player death payload narrowing as stub-only reserved integration point"
     file: "production/stories/t1-combat-09c-player-death-payload-stub-reserved-integration.md"

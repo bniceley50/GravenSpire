@@ -161,7 +161,7 @@ onboarding brief (delivered 2026-04-22).
 ## D007 — ADR-0001 XP Source Lifecycle Registry
 
 **Date:** 2026-04-26
-**Status:** Proposed
+**Status:** Locked
 **Context:** Character Progression round-4 review exposed that XP source
 lookup, lifecycle tokens, repeatability classes, and NPC-owned source
 lifecycle durability were being designed inline in GDD prose without an
@@ -191,7 +191,7 @@ remains unchanged.
 ## D008 — ADR-0002 Save Stability Barrier Protocol
 
 **Date:** 2026-04-26
-**Status:** Proposed
+**Status:** Locked
 **Context:** Character Progression and Save/Load round-4 review exposed that
 same-frame kill/save races need one architecture-level save-readiness protocol,
 not per-GDD prose. `ProgressionSaveBarrier` and

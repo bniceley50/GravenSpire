@@ -1,7 +1,7 @@
 # ADR-0001: XP Source Lifecycle Registry
 
 ## Status
-Proposed
+Accepted
 
 ## Date
 2026-04-26

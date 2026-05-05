@@ -5,8 +5,8 @@
 
 ## Current Task
 
-`T1-COMBAT-08` is closed via `/story-done` with verdict `COMPLETE WITH NOTES`.
-Next work is `/dev-story T1-COMBAT-09a-npc-death-playerkillcreditevent-emission`.
+`T1-COMBAT-09b` is closed via `/story-done` with verdict `COMPLETE WITH NOTES`.
+Next work is `/dev-story T1-COMBAT-09c-player-death-payload-stub-reserved-integration`.
 
 ## Status
 
@@ -66,10 +66,11 @@ Next work is `/dev-story T1-COMBAT-09a-npc-death-playerkillcreditevent-emission`
 - ✅ Sprint 1 story `T1-COMBAT-06` closed via `/story-done` 2026-04-30 with verdict **COMPLETE WITH NOTES**. Evidence: Stage 2 TRX 81/81 PASS, hardcoded-tuning gate PASS, negative T1 scope grep clean, and AC trace in [production/stories/t1-combat-06-tactical-cleric-instants-fixture-loaded-values.md](../stories/t1-combat-06-tactical-cleric-instants-fixture-loaded-values.md). `production/sprint-status.yaml` now records 6/13 Sprint 1 stories done.
 - ✅ Sprint 1 story `T1-COMBAT-07` closed via `/story-done` 2026-04-30 with verdict **COMPLETE WITH NOTES**. Evidence: Stage 2 TRX 92/92 PASS, hardcoded-tuning gate PASS, negative T1 scope grep clean, composition verification clean, cast-and-sit policy documented, and AC trace in [production/stories/t1-combat-07-med-sit-regen-combat-exit-timing.md](../stories/t1-combat-07-med-sit-regen-combat-exit-timing.md). `production/sprint-status.yaml` now records 7/13 Sprint 1 stories done.
 - ✅ Sprint 1 story `T1-COMBAT-08` closed via `/story-done` 2026-04-30 with verdict **COMPLETE WITH NOTES**. Evidence: Stage 2 TRX 106/106 PASS, UI seam guards held, raw numeric threat excluded from shipping HUD output, no misleading no-target Attack ON pulse, composition verification clean, and AC trace in [production/stories/t1-combat-08-attack-on-hud-state-signal-hookup.md](../stories/t1-combat-08-attack-on-hud-state-signal-hookup.md). `production/sprint-status.yaml` now records 8/13 Sprint 1 stories done.
+- ✅ Sprint 1 story `T1-COMBAT-09b` closed via `/story-done` 2026-04-30 with verdict **COMPLETE WITH NOTES**. Evidence: Stage 2 TRX 124/124 PASS, frozen `PlayerKillCreditEvent` invariant held, Character Progression boundary scan clean, no-byte unresolved-barrier assertion held, prior 113-test regression check passed, and AC trace in [production/stories/t1-combat-09b-same-frame-save-barrier-kill-credit-consistency.md](../stories/t1-combat-09b-same-frame-save-barrier-kill-credit-consistency.md). ADR-0001/D007 and ADR-0002/D008 metadata cleanup was closed in the same approved ride-along. `production/sprint-status.yaml` now records 9/13 Sprint 1 stories done.
 
 ## Files Being Worked On
 
-- **Active:** T1-COMBAT-09a NPC death resolution + unchanged PlayerKillCreditEvent emission - run `/dev-story T1-COMBAT-09a-npc-death-playerkillcreditevent-emission`.
+- **Active:** T1-COMBAT-09c player death payload stub reserved integration point - run `/dev-story T1-COMBAT-09c-player-death-payload-stub-reserved-integration`.
 - Combat Feel Prototype: [prototypes/combat-feel/](../../prototypes/combat-feel/) — pinned-engine headline pass complete; prototype code remains throwaway evidence artifact.
 - Combat Feel Prototype README: [prototypes/combat-feel/README.md](../../prototypes/combat-feel/README.md) — prototype question, success/failure criteria, loop spec, controls, run notes
 - Inventory & Item Economy: [design/gdd/inventory-item-economy.md](../../design/gdd/inventory-item-economy.md) — design draft, **NEEDS REVISION**, blocker 1 repaired, remaining blockers tracked in `INV-OQ-05`
@@ -99,7 +100,7 @@ Next work is `/dev-story T1-COMBAT-09a-npc-death-playerkillcreditevent-emission`
 - Technical-artist validation items accumulated in art bible (URP SSS cost model, decal projector perf, camera-stack isolation for corpse-run desat, GPU instancing behavior, etc.) — consolidated in art-bible.md Document Status header
 - T1-COMBAT-07 now provides the Combat Core med-break regen tick contract; Layer 1 HUD must consume Combat Core state rather than inventing separate fill timing.
 - T1-COMBAT-08 now provides the Combat Core HUD-safe projection seam; Layer 1 HUD must consume categorical threat and explicit Attack ON/OFF state rather than exposing raw threat or inventing parallel combat state.
-- T1-COMBAT-09a starts the kill-credit chain (`09a` -> `09b` -> `09c`, 3.75d total). `09a` is the narrow NPC death + `PlayerKillCreditEvent` emission slice where existing infrastructure should mostly hold; `09b`'s 2.0d save-barrier integration remains the genuine documented Sprint 1 unknown.
+- T1-COMBAT-09b closed the documented save-barrier integration unknown; T1-COMBAT-09c is next and will introduce the first write of the held feel-review policy at `production/qa/combat/feel-review-09c-player-death.md`.
 - ADR-0003 / D009 status metadata cleanup is closed as of the T1-COMBAT-05 `/story-done` ride-along: ADR-0003 is `Accepted`, and DECISIONS.md D009 is `Locked`. Justification: T1-COMBAT-01 closure commit `565ee26` has been on `main` since 2026-04-28; `CombatProgressionBaselineSnapshot` is consumed by production `CombatActorHydrator` at `src/gameplay/combat/CombatActorHydrator.cs:55`, `src/gameplay/combat/CombatActorHydrator.cs:61-68`, and `src/gameplay/combat/CombatActorHydrator.cs:104-126`; T1-COMBAT-01 verification cites ADR-0003 coverage at `tests/evidence/T1-COMBAT-01/verification.md:31`.
 - `H-CCOM-F2B` fixture extremes are validated by `T1-COMBAT-01`; seeded melee formula execution is validated by `T1-COMBAT-04`.
 - Creature / Enemy AI still owns actual return-to-anchor movement and NavMeshAgent behavior; `T1-COMBAT-02` supplies Combat Core leash hooks and test doubles only.
@@ -111,7 +112,7 @@ Next work is `/dev-story T1-COMBAT-09a-npc-death-playerkillcreditevent-emission`
 
 ## Next Skill to Run
 
-- **Run `/dev-story T1-COMBAT-09a-npc-death-playerkillcreditevent-emission`** for the next Sprint 1 combat story. `T1-COMBAT-08` is closed, so NPC death resolution + unchanged `PlayerKillCreditEvent` emission is now unblocked as the next sequential story.
+- **Run `/dev-story T1-COMBAT-09c-player-death-payload-stub-reserved-integration`** for the next Sprint 1 combat story. `T1-COMBAT-09b` is closed, so player death payload narrowing as a stub-only reserved integration point is now surfaced as the next active story.
 - Later: run Inventory implementation pre-spec to close `INV-OQ-05`, then rerun `/design-review design/gdd/inventory-item-economy.md --depth full`.
 - Codex PR #1 is merged; no Codex follow-up pending in this active state file.
 
@@ -208,3 +209,20 @@ Next work is `/dev-story T1-COMBAT-09a-npc-death-playerkillcreditevent-emission`
 - Tech debt logged: None.
 - Carried forward: kill-credit chain (`T1-COMBAT-09a`/`T1-COMBAT-09b`/`T1-COMBAT-09c`), save barriers (`T1-COMBAT-09b`), death payloads (`T1-COMBAT-09c`), profiled feel evidence (`T1-COMBAT-10`), architecture scan tooling (`T1-COMBAT-11`), and final Layer 1 HUD visual treatment remain owned by later explicit stories. `T1-COMBAT-09b`'s 2.0d save-barrier integration remains the documented Sprint 1 unknown.
 - Next recommended: `/dev-story T1-COMBAT-09a-npc-death-playerkillcreditevent-emission`.
+
+## Session Extract - /story-done 2026-04-30 (T1-COMBAT-09b)
+
+- Story: [production/stories/t1-combat-09b-same-frame-save-barrier-kill-credit-consistency.md](../stories/t1-combat-09b-same-frame-save-barrier-kill-credit-consistency.md) - T1-COMBAT-09b Same-Frame Save Barrier Kill-Credit Consistency.
+- Verdict: COMPLETE WITH NOTES.
+- Criteria: 9/9 covered; `H-CCOM-KILL-01` acknowledgement behavior, `H-CPRO-XP-02`, `H-CPRO-XP-03`, `H-CPRO-XP-09`, `H-CPRO-XP-14`, `H-CPRO-SL-06`, `H-CPRO-CB-01`, ADR-0001, and ADR-0002 all have file:line evidence in the story AC trace.
+- Evidence: `tests/evidence/T1-COMBAT-09b/t1-combat-09b-stage2.trx:762` 124/124 PASS; verification summary at [tests/evidence/T1-COMBAT-09b/verification.md](../../tests/evidence/T1-COMBAT-09b/verification.md).
+- Frozen-event invariant: `PlayerKillCreditEvent` remained unchanged from the 09a baseline `b2fe66f`; `git diff --exit-code b2fe66f -- src/gameplay/combat/events/CombatDeathEvents.cs` returned zero diff, and the contract remains four fields at `src/gameplay/combat/events/CombatDeathEvents.cs:16`.
+- Boundary scan: Character Progression reads only `defeated_source_ref`, `zoneId`, `faction_id`, and `kill_weight_seed` from the approved Combat kill-credit event, then uses progression-owned lookup, snapshot, and dedupe registry state.
+- No-byte assertion: grouped save attempts make zero writer calls when any required barrier is unresolved, covered by `tests/integration/core/save/save_grouped_barrier_consistency_test.cs:33` and `tests/integration/gameplay/progression/progression_save_barrier_kill_credit_consistency_test.cs:58`.
+- Regression check: prior 09a TRX comparison passed with `old_total=113 old_passed=113 new_total=124 missing_old_passed=0`.
+- Architectural milestone: this is the first Sprint 1 implementation batch crossing `src/gameplay/progression/`, `src/gameplay/npc/`, and `src/core/save/` simultaneously while keeping Combat, Progression, NPC, and Save surfaces narrow and one-way.
+- ADR ride-along: ADR-0001 and ADR-0002 status changed from Proposed to Accepted; DECISIONS.md D007 and D008 status changed from Proposed to Locked. This is metadata-only and validated by T1-COMBAT-09b implementation commit `617a431`.
+- State updates: story status set to Complete; `production/sprint-status.yaml` marks `T1-COMBAT-09b` done, records 9/13 Sprint 1 stories done, and surfaces `T1-COMBAT-09c` as next active.
+- Tech debt logged: None.
+- Carried forward: player death payload narrowing (`T1-COMBAT-09c`), profiled combat-feel evidence (`T1-COMBAT-10`), forbidden-pattern compliance scan/analyzer (`T1-COMBAT-11`), and final Layer 1 HUD visual treatment. `T1-COMBAT-09c` will introduce the first write of the held feel-review policy at `production/qa/combat/feel-review-09c-player-death.md`.
+- Next recommended: `/dev-story T1-COMBAT-09c-player-death-payload-stub-reserved-integration`.

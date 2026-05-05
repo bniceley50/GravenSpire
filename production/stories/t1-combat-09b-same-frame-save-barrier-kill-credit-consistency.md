@@ -1,6 +1,6 @@
 # T1-COMBAT-09b - Same-Frame Save Barrier Kill-Credit Consistency
 
-**Status:** Implemented + Verified; awaiting `/story-done`
+**Status:** Complete
 **Sprint:** 1
 **Priority:** Must Have
 **Layer:** Gameplay / Combat Core + Character Progression + NPC System + Save/Load
@@ -72,10 +72,25 @@ Result: PASS, 124 total, 124 passed, 0 failed. Evidence: `tests/evidence/T1-COMB
 
 ## Story Status
 
-`T1-COMBAT-09b` is implemented and verified, awaiting `/story-done`.
+`T1-COMBAT-09b` is complete.
 
 ## Blockers / Carried Forward
 
 - Player death event payload narrowing remains owned by `T1-COMBAT-09c`.
 - Profiled combat-feel evidence remains owned by `T1-COMBAT-10`.
 - Forbidden-pattern compliance scan/analyzer remains owned by `T1-COMBAT-11`.
+
+## Completion Notes
+
+**Completed:** 2026-04-30
+**Verdict:** COMPLETE WITH NOTES
+**Criteria:** 9/9 covered: `H-CCOM-KILL-01` acknowledgement behavior; `H-CPRO-XP-02`; `H-CPRO-XP-03`; `H-CPRO-XP-09`; `H-CPRO-XP-14`; `H-CPRO-SL-06`; `H-CPRO-CB-01`; ADR-0001; ADR-0002.
+**Test Evidence:** `tests/evidence/T1-COMBAT-09b/t1-combat-09b-stage2.trx:762` records 124 total / 124 passed / 0 failed; `tests/evidence/T1-COMBAT-09b/verification.md` records the verification summary.
+**Frozen Event Invariant:** `PlayerKillCreditEvent` remained unchanged from 09a baseline `b2fe66f`; `git diff --exit-code b2fe66f -- src/gameplay/combat/events/CombatDeathEvents.cs` returned zero diff, and the event remains four fields at `src/gameplay/combat/events/CombatDeathEvents.cs:16`.
+**Boundary Scan:** Character Progression reads only `defeated_source_ref`, `zoneId`, `faction_id`, and `kill_weight_seed` from the Combat kill-credit event, with source-scan coverage at `tests/unit/gameplay/progression/character_progression_kill_credit_processor_test.cs:85` and recorded reads in `tests/evidence/T1-COMBAT-09b/verification.md:17`.
+**No-Bytes Assertion:** unresolved grouped save barriers keep writer call count at zero, anchored by `tests/integration/core/save/save_grouped_barrier_consistency_test.cs:33` and `tests/integration/gameplay/progression/progression_save_barrier_kill_credit_consistency_test.cs:58`; production writer call is after all barriers are stable at `src/core/save/GroupedSaveAttemptCoordinator.cs:75`.
+**Regression Check:** prior 09a TRX regression check passed with `old_total=113 old_passed=113 new_total=124 missing_old_passed=0`, recorded at `tests/evidence/T1-COMBAT-09b/verification.md:76`.
+**ADR Ride-Along:** ADR-0001 and ADR-0002 moved to `Accepted`; DECISIONS.md D007 and D008 moved to `Locked`. This is metadata-only and validated by T1-COMBAT-09b implementation commit `617a431`.
+**Code Review:** Lean-mode gates skipped per `/story-done` rules.
+**Tech Debt Logged:** None.
+**Blockers Carried Forward:** `T1-COMBAT-09c` player death event payload narrowing, `T1-COMBAT-10` profiled combat-feel evidence, and `T1-COMBAT-11` forbidden-pattern compliance scan/analyzer.

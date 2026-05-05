@@ -1,7 +1,7 @@
 # ADR-0002: Save Stability Barrier Protocol
 
 ## Status
-Proposed
+Accepted
 
 ## Date
 2026-04-26
