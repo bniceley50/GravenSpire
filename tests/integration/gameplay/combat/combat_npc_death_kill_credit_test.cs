@@ -145,6 +145,71 @@ public sealed class CombatNpcDeathKillCreditTest
         Assert.That(result.KillCreditEvent.zoneId, Is.EqualTo("Haunt_Prototype_T1"));
     }
 
+    [Test]
+    public void test_kill_resolution_holds_kill_credit_until_progression_acknowledges()
+    {
+        var phase = new CombatKillResolutionPhase();
+        var player = CreatePlayer();
+        var defeated = CreateDefeatedSpawnHostile()
+            .SetThreat(player.CombatActorId, 25);
+        var progressionSink = new TestAcknowledgementSink(
+            "CharacterProgressionAwardSnapshot",
+            CombatKillCreditAcknowledgementStatus.Pending);
+        var npcSink = new TestAcknowledgementSink(
+            "NpcSourceLifecycle",
+            CombatKillCreditAcknowledgementStatus.Acknowledged);
+
+        var result = phase.ResolveWithAcknowledgements(
+            new CombatKillResolutionRequest(defeated, player, KillWeightSeed()),
+            new ICombatKillCreditAcknowledgementSink[] { progressionSink, npcSink });
+
+        Assert.That(result.Resolution.Processed, Is.True);
+        Assert.That(result.Resolution.KillCreditEvent, Is.Not.Null);
+        Assert.That(result.HoldStatus.HasHeldKillCreditEvent, Is.True);
+        Assert.That(result.HoldStatus.IsAcknowledged, Is.False);
+        Assert.That(result.HoldStatus.PendingAcknowledgements, Is.EqualTo(new[] { "CharacterProgressionAwardSnapshot" }));
+        Assert.That(result.HoldStatus.HeldKillCreditEvent!.defeated_source_ref, Is.EqualTo(defeated.StableSourceRef));
+
+        var holdId = result.HoldStatus.HoldId!;
+        Assert.That(phase.AcknowledgeHeldKillCredit(holdId, "CharacterProgressionAwardSnapshot"), Is.True);
+
+        var released = phase.GetHeldKillCreditStatus(holdId);
+        Assert.That(released.HasHeldKillCreditEvent, Is.False);
+        Assert.That(released.IsAcknowledged, Is.True);
+        Assert.That(released.PendingAcknowledgements, Is.Empty);
+    }
+
+    [Test]
+    public void test_repeat_kill_resolution_does_not_reemit_held_kill_credit()
+    {
+        var phase = new CombatKillResolutionPhase();
+        var player = CreatePlayer();
+        var defeated = CreateDefeatedSpawnHostile()
+            .SetThreat(player.CombatActorId, 25);
+        var progressionSink = new TestAcknowledgementSink(
+            "CharacterProgressionAwardSnapshot",
+            CombatKillCreditAcknowledgementStatus.Pending);
+        var npcSink = new TestAcknowledgementSink(
+            "NpcSourceLifecycle",
+            CombatKillCreditAcknowledgementStatus.Acknowledged);
+
+        var first = phase.ResolveWithAcknowledgements(
+            new CombatKillResolutionRequest(defeated, player, KillWeightSeed()),
+            new ICombatKillCreditAcknowledgementSink[] { progressionSink, npcSink });
+        var second = phase.ResolveWithAcknowledgements(
+            new CombatKillResolutionRequest(defeated, player, KillWeightSeed()),
+            new ICombatKillCreditAcknowledgementSink[] { progressionSink, npcSink });
+
+        Assert.That(first.Resolution.KillCreditEvent, Is.Not.Null);
+        Assert.That(first.HoldStatus.HasHeldKillCreditEvent, Is.True);
+        Assert.That(second.Resolution.Processed, Is.False);
+        Assert.That(second.Resolution.KillCreditEvent, Is.Null);
+
+        var held = phase.GetHeldKillCreditStatus(first.HoldStatus.HoldId!);
+        Assert.That(held.HasHeldKillCreditEvent, Is.True);
+        Assert.That(held.PendingAcknowledgements, Is.EqualTo(new[] { "CharacterProgressionAwardSnapshot" }));
+    }
+
     private static double KillWeightSeed()
     {
         return LoadPackage().EncounterFixtures.Single(encounter => encounter.Id == "SoloTrash_EvenCon_T1").KillWeightSeed;
@@ -245,5 +310,29 @@ public sealed class CombatNpcDeathKillCreditTest
             CombatActorLifeState.Dead,
             null,
             $"{combatActorId}-sort");
+    }
+
+    private sealed class TestAcknowledgementSink : ICombatKillCreditAcknowledgementSink
+    {
+        private readonly CombatKillCreditAcknowledgementStatus status;
+
+        public TestAcknowledgementSink(string consumerName, CombatKillCreditAcknowledgementStatus status)
+        {
+            ConsumerName = consumerName;
+            this.status = status;
+        }
+
+        public string ConsumerName { get; }
+
+        public CombatKillCreditAcknowledgement Acknowledge(PlayerKillCreditEvent killCreditEvent)
+        {
+            Assert.That(killCreditEvent.defeated_source_ref, Is.Not.Null);
+            return status switch
+            {
+                CombatKillCreditAcknowledgementStatus.Acknowledged => CombatKillCreditAcknowledgement.Acknowledged(ConsumerName),
+                CombatKillCreditAcknowledgementStatus.Rejected => CombatKillCreditAcknowledgement.Rejected(ConsumerName, "test rejection"),
+                _ => CombatKillCreditAcknowledgement.Pending(ConsumerName)
+            };
+        }
     }
 }
