@@ -10,12 +10,12 @@ updated: "2026-04-30"
 branch: "main"
 head: "57286cb"
 qa_plan: "production/qa/plans/qa-plan-sprint-20260428.md"
-implementation_gate: "T1-COMBAT-09b closed by /story-done. Sprint progress: 9/13 done. Next active gate: /dev-story T1-COMBAT-09c-player-death-payload-stub-reserved-integration."
-progress: "9/13 done"
-completed_stories: 9
+implementation_gate: "T1-COMBAT-09c closed by /story-done. Sprint progress: 10/13 done. Next active gate: /dev-story T1-COMBAT-10-smoke-profiled-evidence-loop."
+progress: "10/13 done"
+completed_stories: 10
 total_stories: 13
-next_active_story: "T1-COMBAT-09c"
-next_active_command: "/dev-story T1-COMBAT-09c-player-death-payload-stub-reserved-integration"
+next_active_story: "T1-COMBAT-10"
+next_active_command: "/dev-story T1-COMBAT-10-smoke-profiled-evidence-loop"
 
 stories:
   - id: "T1-COMBAT-01"
@@ -94,11 +94,11 @@ stories:
     name: "NPC death resolution + unchanged PlayerKillCreditEvent emission"
     file: "production/stories/t1-combat-09a-npc-death-playerkillcreditevent-emission.md"
     priority: must-have
-    status: ready-for-dev
+    status: done
     owner: ""
     estimate_days: 1.0
     blocker: "Depends on T1-COMBAT-04 and T1-COMBAT-06."
-    completed: ""
+    completed: "2026-04-30"
   - id: "T1-COMBAT-09b"
     name: "Same-frame save barrier integration for kill-credit consistency"
     file: "production/stories/t1-combat-09b-same-frame-save-barrier-kill-credit-consistency.md"
@@ -112,11 +112,11 @@ stories:
     name: "Player death payload narrowing as stub-only reserved integration point"
     file: "production/stories/t1-combat-09c-player-death-payload-stub-reserved-integration.md"
     priority: must-have
-    status: ready-for-dev
+    status: done
     owner: ""
     estimate_days: 0.75
     blocker: "Depends on T1-COMBAT-01 and T1-COMBAT-04."
-    completed: ""
+    completed: "2026-04-30"
   - id: "T1-COMBAT-10"
     name: "Minimal smoke/profiled evidence loop for validated combat feel"
     file: "production/stories/t1-combat-10-smoke-profiled-evidence-loop.md"

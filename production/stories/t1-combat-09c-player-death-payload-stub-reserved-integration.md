@@ -1,6 +1,6 @@
 # T1-COMBAT-09c - Player Death Payload Stub Reserved Integration
 
-**Status:** Implemented + Verified; awaiting `/story-done`
+**Status:** Complete
 **Sprint:** 1
 **Priority:** Must Have
 **Layer:** Gameplay / Combat Core
@@ -66,7 +66,7 @@ Result: PASS, 133 total, 133 passed, 0 failed. Evidence: `tests/evidence/T1-COMB
 
 ## Story Status
 
-`T1-COMBAT-09c` is implemented and verified, awaiting `/story-done`.
+`T1-COMBAT-09c` is complete.
 
 ## Blockers / Carried Forward
 
@@ -74,3 +74,19 @@ Result: PASS, 133 total, 133 passed, 0 failed. Evidence: `tests/evidence/T1-COMB
 - Human qualitative playtest notes for the death moment remain pending in `production/qa/combat/feel-review-09c-player-death.md`.
 - Profiled combat-feel evidence remains owned by `T1-COMBAT-10`.
 - Forbidden-pattern compliance scan/analyzer remains owned by `T1-COMBAT-11`.
+
+## Completion Notes
+
+**Completed:** 2026-04-30
+**Verdict:** COMPLETE WITH NOTES
+**Criteria:** 5/5 covered: `H-CCOM-DEATH-01`, `H-CCOM-DEATH-02`, `H-CCOM-DEATH-03`, `H-CCOM-SL-01`, and `H-CCOM-SL-03`.
+**Test Evidence:** `tests/evidence/T1-COMBAT-09c/t1-combat-09c-stage2.trx:816` records 133 total / 133 passed / 0 failed; `tests/evidence/T1-COMBAT-09c/verification.md` records the verification summary.
+**Frozen Event Invariant:** `PlayerKillCreditEvent` remained unchanged from the `b2fe66f` baseline; the event remains four fields at `src/gameplay/combat/events/CombatDeathEvents.cs:16`, and `git diff b2fe66f -- src\gameplay\combat\events\CombatDeathEvents.cs` showed only the additive `PlayerDeathEvent` block.
+**PlayerDeathEvent Shape:** `PlayerDeathEvent` is exactly six fields at `src/gameplay/combat/events/CombatDeathEvents.cs:25`: `death_context_id`, `local_character_id`, `zoneId`, `death_position`, `killer_source_ref`, and `death_cause_type`.
+**Persistence Projection Shape:** `CombatPersistenceProjection` exposes exactly four read-only fields at `src/gameplay/combat/persistence/CombatPersistenceProjection.cs:24`: `current_health`, `current_mana`, `combat_life_state`, and optional `pending_death_handoff_payload`.
+**Death & Corpse Recovery Scope:** Stub-only discipline held. Scope scan found zero matches for `corpse`, `respawn`, `resurrection`, `xp_loss`, `corpse_run`, or `corpse_recovery` in the 09c production files.
+**09b Save Coordinator:** `SaveStabilityBarrierProtocol.cs` and `GroupedSaveAttemptCoordinator.cs` remained unchanged from commit `617a431` by `git diff --exit-code 617a431 -- src\core\save\SaveStabilityBarrierProtocol.cs src\core\save\GroupedSaveAttemptCoordinator.cs`.
+**Held-Policy Artifact:** `production/qa/combat/feel-review-09c-player-death.md` is durable story evidence with implementation-perspective sections, human playtest prompts, and `<!-- HUMAN PLAYTEST PENDING -->`; no agent-issued slice verdict.
+**Code Review:** Lean-mode gates skipped per `/story-done` rules.
+**Tech Debt Logged:** None.
+**Blockers Carried Forward:** Death & Corpse Recovery remains unauthored; human qualitative death-moment playtest remains pending for the slice review; `T1-COMBAT-10` owns profiled feel evidence and the Unity harness per held policy; `T1-COMBAT-11` owns forbidden-pattern scan/analyzer and triggers the hard-stop before slice review.
