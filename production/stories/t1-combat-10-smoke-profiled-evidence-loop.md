@@ -1,6 +1,6 @@
 # T1-COMBAT-10 - Smoke/Profiled Evidence Loop
 
-**Status:** Implemented + Verified; awaiting `/story-done`
+**Status:** Complete
 **Sprint:** 1
 **Priority:** Must Have
 **Layer:** Gameplay / Combat Core
@@ -81,7 +81,7 @@ Result: PASS, 133 total, 133 passed, 0 failed.
 
 ## Story Status
 
-`T1-COMBAT-10` is implemented and verified, but not yet closed. `/story-done` should mark it `Complete` with the verdict `COMPLETE WITH NOTES - quantitative ACs failed; metrics surfaced for slice review`.
+`T1-COMBAT-10` is complete with notes. The notes are quantitative AC failures, not procedural carry-forward only.
 
 ## Blockers / Carried Forward
 
@@ -91,7 +91,8 @@ Result: PASS, 133 total, 133 passed, 0 failed.
 
 ## Completion Notes
 
-**Planned `/story-done` verdict:** COMPLETE WITH NOTES - quantitative ACs failed; metrics surfaced for slice review.
+**Completed:** 2026-05-05
+**Verdict:** COMPLETE WITH NOTES - quantitative ACs failed; metrics surfaced for slice review.
 **Quantitative failures:** `H-CCOM-FEEL-01` and `H-CCOM-FEEL-03` failed-as-measured.
 **Production tuning:** Not performed.
 **Next discrete activity after closure:** slice review session, not `/dev-story T1-COMBAT-11`.

@@ -6,16 +6,16 @@ goal: "Implement the minimum production T1 Combat Core slice that reproduces the
 start: "2026-04-28"
 end: "2026-06-05"
 generated: "2026-04-28"
-updated: "2026-04-30"
+updated: "2026-05-05"
 branch: "main"
-head: "57286cb"
+head: "fd33281"
 qa_plan: "production/qa/plans/qa-plan-sprint-20260428.md"
-implementation_gate: "T1-COMBAT-09c closed by /story-done. Sprint progress: 10/13 done. Next active gate: /dev-story T1-COMBAT-10-smoke-profiled-evidence-loop."
-progress: "10/13 done"
-completed_stories: 10
+implementation_gate: "T1-COMBAT-10 closed by /story-done with quantitative AC failures surfaced. Sprint progress: 11/13 done. Next active gate: slice review session before T1-COMBAT-11."
+progress: "11/13 done"
+completed_stories: 11
 total_stories: 13
-next_active_story: "T1-COMBAT-10"
-next_active_command: "/dev-story T1-COMBAT-10-smoke-profiled-evidence-loop"
+next_active_story: "T1-SLICE-REVIEW"
+next_active_command: "Run slice review session; T1-COMBAT-11 holds until Green/Yellow/Red verdict."
 
 stories:
   - id: "T1-COMBAT-01"
@@ -121,11 +121,11 @@ stories:
     name: "Minimal smoke/profiled evidence loop for validated combat feel"
     file: "production/stories/t1-combat-10-smoke-profiled-evidence-loop.md"
     priority: must-have
-    status: ready-for-dev
+    status: done
     owner: ""
     estimate_days: 2.0
-    blocker: "Depends on T1-COMBAT-01 through T1-COMBAT-09c."
-    completed: ""
+    blocker: "Closed with notes: H-CCOM-FEEL-01 and H-CCOM-FEEL-03 failed-as-measured; slice review owns verdict."
+    completed: "2026-05-05"
   - id: "T1-COMBAT-11"
     name: "Forbidden-pattern compliance scan/analyzer"
     file: "production/stories/t1-combat-11-forbidden-pattern-compliance-scan-analyzer.md"

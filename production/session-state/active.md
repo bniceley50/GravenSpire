@@ -1,12 +1,12 @@
 # Active Session State
 
-**Last Updated:** 2026-04-30
+**Last Updated:** 2026-05-05
 **Project Stage:** Pre-Production — Sprint 1 Implementation
 
 ## Current Task
 
-`T1-COMBAT-09c` is closed via `/story-done` with verdict `COMPLETE WITH NOTES`.
-Next work is `/dev-story T1-COMBAT-10-smoke-profiled-evidence-loop`.
+`T1-COMBAT-10` is closed via `/story-done` with verdict `COMPLETE WITH NOTES`.
+Next work is the slice review session. `T1-COMBAT-11` holds until the Green/Yellow/Red verdict is issued.
 
 ## Status
 
@@ -68,10 +68,11 @@ Next work is `/dev-story T1-COMBAT-10-smoke-profiled-evidence-loop`.
 - ✅ Sprint 1 story `T1-COMBAT-08` closed via `/story-done` 2026-04-30 with verdict **COMPLETE WITH NOTES**. Evidence: Stage 2 TRX 106/106 PASS, UI seam guards held, raw numeric threat excluded from shipping HUD output, no misleading no-target Attack ON pulse, composition verification clean, and AC trace in [production/stories/t1-combat-08-attack-on-hud-state-signal-hookup.md](../stories/t1-combat-08-attack-on-hud-state-signal-hookup.md). `production/sprint-status.yaml` now records 8/13 Sprint 1 stories done.
 - ✅ Sprint 1 story `T1-COMBAT-09b` closed via `/story-done` 2026-04-30 with verdict **COMPLETE WITH NOTES**. Evidence: Stage 2 TRX 124/124 PASS, frozen `PlayerKillCreditEvent` invariant held, Character Progression boundary scan clean, no-byte unresolved-barrier assertion held, prior 113-test regression check passed, and AC trace in [production/stories/t1-combat-09b-same-frame-save-barrier-kill-credit-consistency.md](../stories/t1-combat-09b-same-frame-save-barrier-kill-credit-consistency.md). ADR-0001/D007 and ADR-0002/D008 metadata cleanup was closed in the same approved ride-along. `production/sprint-status.yaml` now records 9/13 Sprint 1 stories done.
 - ✅ Sprint 1 story `T1-COMBAT-09c` closed via `/story-done` 2026-04-30 with verdict **COMPLETE WITH NOTES**. Evidence: Stage 2 TRX 133/133 PASS, `PlayerKillCreditEvent` frozen-event invariant held, six-field `PlayerDeathEvent` schema verified, four-field `CombatPersistenceProjection` whitelist verified, Death & Corpse Recovery scope guards held, 09b save coordinator unchanged, and AC trace in [production/stories/t1-combat-09c-player-death-payload-stub-reserved-integration.md](../stories/t1-combat-09c-player-death-payload-stub-reserved-integration.md). The held-policy first artifact is now durable at [production/qa/combat/feel-review-09c-player-death.md](../qa/combat/feel-review-09c-player-death.md). `production/sprint-status.yaml` now records 10/13 Sprint 1 stories done.
+- ✅ Sprint 1 story `T1-COMBAT-10` closed via `/story-done` 2026-05-05 with verdict **COMPLETE WITH NOTES**. Evidence: headless JSONL harness at [prototypes/combat-slice-T1/Harness/CombatSliceHarness.cs](../../prototypes/combat-slice-T1/Harness/CombatSliceHarness.cs), JSONL evidence at [tests/evidence/T1-COMBAT-10/profiled-combat-slice.jsonl](../../tests/evidence/T1-COMBAT-10/profiled-combat-slice.jsonl), verification summary at [tests/evidence/T1-COMBAT-10/verification.md](../../tests/evidence/T1-COMBAT-10/verification.md), and slice-review input at [production/qa/combat/t1-combat-10-profiled-evidence-summary.md](../qa/combat/t1-combat-10-profiled-evidence-summary.md). `H-CCOM-FEEL-01` failed-as-measured with `20/20` solo-trash wins vs. the `55-85%` target; `H-CCOM-FEEL-03` failed-as-measured with `5/10` dangerous two-trash outcomes vs. the `>=8/10` target. Production was not tuned. `production/sprint-status.yaml` now records 11/13 Sprint 1 stories done and surfaces slice review as the next gate.
 
 ## Files Being Worked On
 
-- **Active:** T1-COMBAT-10 profiled feel evidence loop - run `/dev-story T1-COMBAT-10-smoke-profiled-evidence-loop`.
+- **Active:** Slice review session. Read `production/qa/combat/t1-combat-10-profiled-evidence-summary.md` alongside qualitative human play and issue Green/Yellow/Red before any further `/dev-story`.
 - Combat Feel Prototype: [prototypes/combat-feel/](../../prototypes/combat-feel/) — pinned-engine headline pass complete; prototype code remains throwaway evidence artifact.
 - Combat Feel Prototype README: [prototypes/combat-feel/README.md](../../prototypes/combat-feel/README.md) — prototype question, success/failure criteria, loop spec, controls, run notes
 - Inventory & Item Economy: [design/gdd/inventory-item-economy.md](../../design/gdd/inventory-item-economy.md) — design draft, **NEEDS REVISION**, blocker 1 repaired, remaining blockers tracked in `INV-OQ-05`
@@ -102,6 +103,7 @@ Next work is `/dev-story T1-COMBAT-10-smoke-profiled-evidence-loop`.
 - T1-COMBAT-07 now provides the Combat Core med-break regen tick contract; Layer 1 HUD must consume Combat Core state rather than inventing separate fill timing.
 - T1-COMBAT-08 now provides the Combat Core HUD-safe projection seam; Layer 1 HUD must consume categorical threat and explicit Attack ON/OFF state rather than exposing raw threat or inventing parallel combat state.
 - T1-COMBAT-09c closed the player death payload stub and first held-policy feel-review artifact at `production/qa/combat/feel-review-09c-player-death.md`; human qualitative death-moment playtest remains pending for the slice review session.
+- T1-COMBAT-10 closed the profiled evidence loop and surfaced quantitative combat-feel gaps: solo trash is too safe (`20/20` wins) and two-trash overpull is insufficiently punishing (`5/10` dangerous outcomes). Treat these as slice-review inputs, not as bugs fixed in T1-COMBAT-10.
 - ADR-0003 / D009 status metadata cleanup is closed as of the T1-COMBAT-05 `/story-done` ride-along: ADR-0003 is `Accepted`, and DECISIONS.md D009 is `Locked`. Justification: T1-COMBAT-01 closure commit `565ee26` has been on `main` since 2026-04-28; `CombatProgressionBaselineSnapshot` is consumed by production `CombatActorHydrator` at `src/gameplay/combat/CombatActorHydrator.cs:55`, `src/gameplay/combat/CombatActorHydrator.cs:61-68`, and `src/gameplay/combat/CombatActorHydrator.cs:104-126`; T1-COMBAT-01 verification cites ADR-0003 coverage at `tests/evidence/T1-COMBAT-01/verification.md:31`.
 - `H-CCOM-F2B` fixture extremes are validated by `T1-COMBAT-01`; seeded melee formula execution is validated by `T1-COMBAT-04`.
 - Creature / Enemy AI still owns actual return-to-anchor movement and NavMeshAgent behavior; `T1-COMBAT-02` supplies Combat Core leash hooks and test doubles only.
@@ -113,7 +115,7 @@ Next work is `/dev-story T1-COMBAT-10-smoke-profiled-evidence-loop`.
 
 ## Next Skill to Run
 
-- **Run `/dev-story T1-COMBAT-10-smoke-profiled-evidence-loop`** for the next Sprint 1 combat story. `T1-COMBAT-09c` is closed, so profiled feel evidence and the Unity harness per held policy are now surfaced as the next active story.
+- **Run the slice review session next.** Read `production/qa/combat/t1-combat-10-profiled-evidence-summary.md` and issue the Green/Yellow/Red verdict in `production/qa/combat/feel-review-T1-slice.md`. `T1-COMBAT-11` holds until that verdict is issued.
 - Later: run Inventory implementation pre-spec to close `INV-OQ-05`, then rerun `/design-review design/gdd/inventory-item-economy.md --depth full`.
 - Codex PR #1 is merged; no Codex follow-up pending in this active state file.
 
@@ -243,3 +245,15 @@ Next work is `/dev-story T1-COMBAT-10-smoke-profiled-evidence-loop`.
 - Carried forward: human qualitative death-moment playtest pending for the slice review; `T1-COMBAT-10` owns profiled feel evidence and the Unity harness per held policy; `T1-COMBAT-11` owns forbidden-pattern scan/analyzer and is the hard-stop trigger before slice review. ADR-0004/D010 and ADR-0005/D011 remain Proposed pending their future-sprint validation gates.
 - Sprint note: Sprint 1 implementation is 10/13 done. Two fresh implementation stories remain: `T1-COMBAT-10` and `T1-COMBAT-11`. After `T1-COMBAT-11` closes, no further `/dev-story` work should run until the slice review session produces `production/qa/combat/feel-review-T1-slice.md` and Brian issues the Green/Yellow/Red verdict.
 - Next recommended: `/dev-story T1-COMBAT-10-smoke-profiled-evidence-loop`.
+
+## Session Extract - /story-done 2026-05-05 (T1-COMBAT-10)
+
+- Story: [production/stories/t1-combat-10-smoke-profiled-evidence-loop.md](../stories/t1-combat-10-smoke-profiled-evidence-loop.md) - T1-COMBAT-10 Smoke/Profiled Evidence Loop.
+- Verdict: COMPLETE WITH NOTES - quantitative ACs failed; metrics surfaced for slice review.
+- Criteria: `H-CCOM-FEEL-02`, `H-CCOM-FEEL-04`, `H-CCOM-ART-02`, `H-CCOM-AUD-01`, and `H-CCOM-SCOPE-01` passed. `H-CCOM-FEEL-01` failed-as-measured with `20/20` solo-trash wins vs. the `55-85%` target. `H-CCOM-FEEL-03` failed-as-measured with `5/10` dangerous two-trash outcomes vs. the `>=8/10` target.
+- Evidence: JSONL at [tests/evidence/T1-COMBAT-10/profiled-combat-slice.jsonl](../../tests/evidence/T1-COMBAT-10/profiled-combat-slice.jsonl); verification summary at [tests/evidence/T1-COMBAT-10/verification.md](../../tests/evidence/T1-COMBAT-10/verification.md); slice-review input at [production/qa/combat/t1-combat-10-profiled-evidence-summary.md](../qa/combat/t1-combat-10-profiled-evidence-summary.md).
+- Verification: `dotnet test tests\Gravenspire.Combat.Tests.csproj --logger "console;verbosity=minimal"` passed 133/133; `git diff --exit-code 6875672 -- src/ tests/Gravenspire.Combat.Tests.csproj tests/unit tests/integration` returned empty; structural scan found zero Combat-owned visual/audio matches; harness T1 scope grep returned zero matches; `git diff --check` and `bash .githooks/pre-commit` passed.
+- State updates: story status set to Complete; `production/sprint-status.yaml` marks `T1-COMBAT-10` done, records 11/13 Sprint 1 stories done, and surfaces the slice review session as the next active gate.
+- Tech debt logged: None.
+- Carried forward: slice review session must run next and produce `production/qa/combat/feel-review-T1-slice.md` with Green/Yellow/Red verdict. `T1-COMBAT-11` holds until that verdict is issued.
+- Next recommended: slice review session; do not run `/dev-story T1-COMBAT-11` before the verdict.
