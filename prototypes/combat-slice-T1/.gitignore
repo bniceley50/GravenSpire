@@ -1,0 +1,6 @@
+Harness/bin/
+Harness/obj/
+*.user
+*.suo
+*.tmp
+*.log
