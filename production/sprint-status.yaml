@@ -9,15 +9,15 @@ generated: "2026-05-06"
 updated: "2026-05-06"
 branch: "main"
 head: "8885d2e"
-qa_plan: ""
+qa_plan: "production/qa/plans/qa-plan-sprint-1-5-20260506.md"
 plan: "production/sprints/sprint-1-5.md"
 slice_review: "production/qa/combat/feel-review-T1-slice.md"
-implementation_gate: "Sprint 1.5 plan committed at 8885d2e. Required next gate: /qa-plan sprint before any implementation; then baseline dotnet test before /dev-story T1.5-COMBAT-00."
+implementation_gate: "Sprint 1.5 QA plan committed at b6297b4. Required next gate: baseline regression dotnet test 133/133, then /dev-story T1.5-COMBAT-00 (Endurance contract lock)."
 progress: "0/7 done"
 completed_stories: 0
 total_stories: 7
-next_active_story: "SPRINT-1.5-QA-PLAN"
-next_active_command: "Run /qa-plan sprint for Sprint 1.5; do not start /dev-story until the QA plan exists."
+next_active_story: "T1.5-COMBAT-00"
+next_active_command: "Run baseline regression `dotnet test tests/Gravenspire.Combat.Tests.csproj --logger \"console;verbosity=minimal\"` to confirm 133/133, then /dev-story T1.5-COMBAT-00-endurance-contract-lock."
 
 carryover:
   t1_combat_11_story_file: "Absent; create or recover before T1-COMBAT-11 implementation."
@@ -31,7 +31,7 @@ stories:
     status: blocked
     owner: ""
     estimate_days: 1.0
-    blocker: "Requires Sprint 1.5 QA plan and baseline regression before implementation."
+    blocker: "Requires baseline regression check before implementation."
     completed: ""
   - id: "T1.5-COMBAT-01"
     name: "Endurance state, persistence, HUD signal"
@@ -40,7 +40,7 @@ stories:
     status: blocked
     owner: ""
     estimate_days: 1.25
-    blocker: "Depends on T1.5-COMBAT-00 and Sprint 1.5 QA plan."
+    blocker: "Depends on T1.5-COMBAT-00."
     completed: ""
   - id: "T1.5-COMBAT-02"
     name: "Physical instant conversion"
