@@ -241,6 +241,8 @@ public sealed class CombatMeleeResolver
             lifeState,
             target.TargetCombatActorId,
             target.CombatSortKey,
-            target.ThreatTable);
+            target.ThreatTable,
+            maxEndurance: target.MaxEndurance,
+            currentEndurance: target.CurrentEndurance);
     }
 }

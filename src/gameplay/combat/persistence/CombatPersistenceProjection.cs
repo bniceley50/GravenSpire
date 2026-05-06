@@ -12,11 +12,13 @@ public sealed class CombatPersistenceProjection
     private CombatPersistenceProjection(
         int currentHealth,
         int currentMana,
+        int currentEndurance,
         CombatActorLifeState combatLifeState,
         PlayerDeathEvent? pendingDeathHandoffPayload)
     {
         current_health = currentHealth;
         current_mana = currentMana;
+        current_endurance = currentEndurance;
         combat_life_state = combatLifeState;
         pending_death_handoff_payload = pendingDeathHandoffPayload;
     }
@@ -24,6 +26,8 @@ public sealed class CombatPersistenceProjection
     public int current_health { get; }
 
     public int current_mana { get; }
+
+    public int current_endurance { get; }
 
     public CombatActorLifeState combat_life_state { get; }
 
@@ -42,6 +46,7 @@ public sealed class CombatPersistenceProjection
         return new CombatPersistenceProjection(
             player.CurrentHealth,
             player.CurrentMana,
+            player.CurrentEndurance,
             player.LifeState,
             pendingDeathHandoffPayload);
     }

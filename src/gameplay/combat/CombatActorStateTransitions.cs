@@ -212,6 +212,25 @@ public static class CombatActorStateTransitions
     }
 
     /// <summary>
+    /// Updates current Endurance while preserving any Combat-owned cast runtime fields.
+    /// </summary>
+    public static CombatActorState WithCurrentEndurance(this CombatActorState actor, int currentEndurance)
+    {
+        ArgumentNullException.ThrowIfNull(actor);
+        if (currentEndurance < 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(currentEndurance), "Current Endurance cannot be negative.");
+        }
+
+        if (currentEndurance > actor.MaxEndurance)
+        {
+            throw new ArgumentOutOfRangeException(nameof(currentEndurance), "Current Endurance cannot exceed max Endurance.");
+        }
+
+        return CopyWithCastRuntime(actor, currentEndurance: currentEndurance);
+    }
+
+    /// <summary>
     /// Clears Combat-owned cast runtime fields after recovery has ended.
     /// </summary>
     public static CombatActorState ClearCastRuntime(this CombatActorState actor, CombatState nextCombatState)
@@ -266,7 +285,9 @@ public static class CombatActorStateTransitions
             lifeState,
             actor.TargetCombatActorId,
             actor.CombatSortKey,
-            actor.ThreatTable) with
+            actor.ThreatTable,
+            maxEndurance: actor.MaxEndurance,
+            currentEndurance: actor.CurrentEndurance) with
         {
             CastRuntimeState = actor.CastRuntimeState,
             ActiveCastId = actor.ActiveCastId,
@@ -293,7 +314,10 @@ public static class CombatActorStateTransitions
             : actor;
     }
 
-    private static CombatActorState CopyWithCastRuntime(CombatActorState actor, int? currentMana = null)
+    private static CombatActorState CopyWithCastRuntime(
+        CombatActorState actor,
+        int? currentMana = null,
+        int? currentEndurance = null)
     {
         return new CombatActorState(
             actor.CombatActorId,
@@ -318,7 +342,9 @@ public static class CombatActorStateTransitions
             actor.LifeState,
             actor.TargetCombatActorId,
             actor.CombatSortKey,
-            actor.ThreatTable) with
+            actor.ThreatTable,
+            maxEndurance: actor.MaxEndurance,
+            currentEndurance: currentEndurance ?? actor.CurrentEndurance) with
         {
             CastRuntimeState = actor.CastRuntimeState,
             ActiveCastId = actor.ActiveCastId,
@@ -367,6 +393,8 @@ public static class CombatActorStateTransitions
             actor.LifeState,
             replaceTarget ? targetCombatActorId : actor.TargetCombatActorId,
             actor.CombatSortKey,
-            threatTable ?? actor.ThreatTable);
+            threatTable ?? actor.ThreatTable,
+            maxEndurance: actor.MaxEndurance,
+            currentEndurance: actor.CurrentEndurance);
     }
 }

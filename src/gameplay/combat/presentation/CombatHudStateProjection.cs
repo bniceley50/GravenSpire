@@ -32,6 +32,14 @@ public enum CombatHudCastCategory
     Recovery
 }
 
+public enum CombatHudEnduranceCategory
+{
+    Unavailable,
+    Empty,
+    Available,
+    Full
+}
+
 public sealed record CombatHudResourceSnapshot(
     int Current,
     int Max);
@@ -52,6 +60,7 @@ public sealed record CombatHudCastSnapshot(
 public sealed record CombatHudStateSnapshot(
     CombatHudResourceSnapshot Health,
     CombatHudResourceSnapshot Mana,
+    CombatHudEnduranceCategory Endurance,
     CombatHudTargetSnapshot? Target,
     CombatHudCastSnapshot Cast,
     bool AttackOn,
@@ -97,6 +106,7 @@ public static class CombatHudStateProjection
         return new CombatHudStateSnapshot(
             new CombatHudResourceSnapshot(request.Player.CurrentHealth, request.Player.MaxHealth),
             new CombatHudResourceSnapshot(request.Player.CurrentMana, request.Player.MaxMana),
+            ProjectEndurance(request.Player),
             ProjectTarget(request.Target),
             ProjectCast(request.Player, request.CastProgress),
             request.AttackState.IsAttackOn,
@@ -211,6 +221,23 @@ public static class CombatHudStateProjection
                 target.MaxHealth,
                 target.IsAlive,
                 target.ActorKind == CombatActorKind.NPC);
+    }
+
+    private static CombatHudEnduranceCategory ProjectEndurance(CombatActorState player)
+    {
+        if (player.MaxEndurance <= 0)
+        {
+            return CombatHudEnduranceCategory.Unavailable;
+        }
+
+        if (player.CurrentEndurance <= 0)
+        {
+            return CombatHudEnduranceCategory.Empty;
+        }
+
+        return player.CurrentEndurance >= player.MaxEndurance
+            ? CombatHudEnduranceCategory.Full
+            : CombatHudEnduranceCategory.Available;
     }
 
     private static CombatHudCastSnapshot ProjectCast(

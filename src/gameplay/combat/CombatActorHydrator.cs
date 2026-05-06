@@ -10,7 +10,10 @@ namespace Gravenspire.Gameplay.Combat;
 /// <summary>
 /// Combat-owned current resource state supplied during actor hydration.
 /// </summary>
-public sealed record CombatResourceHydrationState(int CurrentHealth, int CurrentMana);
+public sealed record CombatResourceHydrationState(
+    int CurrentHealth,
+    int CurrentMana,
+    int CurrentEndurance = 0);
 
 /// <summary>
 /// Runtime context required to build a player combat actor from fixtures and progression baseline data.
@@ -19,7 +22,8 @@ public sealed record CombatActorHydrationInput(
     string CombatActorId,
     string ZoneId,
     string CombatSortKey,
-    CombatResourceHydrationState? CurrentResources = null);
+    CombatResourceHydrationState? CurrentResources = null,
+    int MaxEndurance = 0);
 
 /// <summary>
 /// Result of a combat actor hydration attempt.
@@ -92,9 +96,10 @@ public sealed class CombatActorHydrator
 
         var resources = input.CurrentResources ?? new CombatResourceHydrationState(
             snapshot.PermanentMaxHealth,
-            snapshot.PermanentMaxMana);
+            snapshot.PermanentMaxMana,
+            input.MaxEndurance);
 
-        ValidateCurrentResources(resources, snapshot, errors);
+        ValidateCurrentResources(resources, snapshot, input.MaxEndurance, errors);
 
         if (errors.Count > 0)
         {
@@ -123,7 +128,9 @@ public sealed class CombatActorHydrator
             CombatState.OutOfCombat,
             CombatActorLifeState.Alive,
             null,
-            input.CombatSortKey);
+            input.CombatSortKey,
+            maxEndurance: input.MaxEndurance,
+            currentEndurance: resources.CurrentEndurance);
 
         var actorValidation = actor.Validate();
         if (!actorValidation.IsValid)
@@ -186,11 +193,17 @@ public sealed class CombatActorHydrator
         {
             errors.Add("combat_sort_key is required.");
         }
+
+        if (input.MaxEndurance < 0)
+        {
+            errors.Add("max_endurance must not be negative.");
+        }
     }
 
     private static void ValidateCurrentResources(
         CombatResourceHydrationState resources,
         CombatProgressionBaselineSnapshot snapshot,
+        int maxEndurance,
         ICollection<string> errors)
     {
         if (resources.CurrentHealth <= 0)
@@ -211,6 +224,16 @@ public sealed class CombatActorHydrator
         if (resources.CurrentMana > snapshot.PermanentMaxMana)
         {
             errors.Add("current_mana must not exceed CombatProgressionBaselineSnapshot.permanent_max_mana.");
+        }
+
+        if (resources.CurrentEndurance < 0)
+        {
+            errors.Add("current_endurance must not be negative.");
+        }
+
+        if (resources.CurrentEndurance > maxEndurance)
+        {
+            errors.Add("current_endurance must not exceed max_endurance.");
         }
     }
 }

@@ -333,7 +333,9 @@ public sealed record CombatActorState
         CombatActorLifeState lifeState,
         string? targetCombatActorId,
         string combatSortKey,
-        IReadOnlyDictionary<string, int>? threatTable = null)
+        IReadOnlyDictionary<string, int>? threatTable = null,
+        int maxEndurance = 0,
+        int currentEndurance = 0)
     {
         CombatActorId = combatActorId;
         ActorKind = actorKind;
@@ -345,6 +347,8 @@ public sealed record CombatActorState
         CurrentHealth = currentHealth;
         MaxMana = maxMana;
         CurrentMana = currentMana;
+        MaxEndurance = maxEndurance;
+        CurrentEndurance = currentEndurance;
         ArmorClass = armorClass;
         AttackPower = attackPower;
         WeaponBaseDamage = weaponBaseDamage;
@@ -412,8 +416,18 @@ public sealed record CombatActorState
     public int CurrentMana { get; }
 
     /// <summary>
-    /// Actor armor class fixture value.
+    /// Combat-owned maximum Endurance for physical instant pacing.
     /// </summary>
+    public int MaxEndurance { get; }
+
+    /// <summary>
+    /// Combat-owned current Endurance for physical instant pacing.
+    /// </summary>
+    public int CurrentEndurance { get; }
+
+    /// <summary>
+     /// Actor armor class fixture value.
+     /// </summary>
     public int ArmorClass { get; }
 
     /// <summary>
@@ -576,6 +590,21 @@ public sealed record CombatActorState
         if (CurrentMana > MaxMana)
         {
             errors.Add("current_mana must not exceed max_mana.");
+        }
+
+        if (MaxEndurance < 0)
+        {
+            errors.Add("max_endurance must not be negative.");
+        }
+
+        if (CurrentEndurance < 0)
+        {
+            errors.Add("current_endurance must not be negative.");
+        }
+
+        if (CurrentEndurance > MaxEndurance)
+        {
+            errors.Add("current_endurance must not exceed max_endurance.");
         }
 
         if (ArmorClass < 0 || AttackPower < 0 || WeaponBaseDamage < 0 || AttackSkill < 0 || DefenseSkill < 0)

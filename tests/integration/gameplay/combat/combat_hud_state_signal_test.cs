@@ -38,6 +38,7 @@ public sealed class CombatHudStateSignalTest
         Assert.That(snapshot.Health.Max, Is.EqualTo(140));
         Assert.That(snapshot.Mana.Current, Is.EqualTo(180));
         Assert.That(snapshot.Mana.Max, Is.EqualTo(180));
+        Assert.That(snapshot.Endurance, Is.EqualTo(CombatHudEnduranceCategory.Full));
         Assert.That(snapshot.Target!.TargetCombatActorId, Is.EqualTo(hostile.CombatActorId));
         Assert.That(snapshot.Target.IsHostile, Is.True);
         Assert.That(snapshot.Cast.Category, Is.EqualTo(CombatHudCastCategory.Casting));
@@ -210,7 +211,9 @@ public sealed class CombatHudStateSignalTest
             CombatState.OutOfCombat,
             CombatActorLifeState.Alive,
             null,
-            "player-local-character-1");
+            "player-local-character-1",
+            maxEndurance: 80,
+            currentEndurance: 80);
     }
 
     private static CombatActorState CreateHostile(string combatActorId, string sortKey)

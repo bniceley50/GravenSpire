@@ -19,9 +19,11 @@ public sealed class CombatPersistenceProjectionTest
             .ToArray();
         var names = properties.Select(property => property.Name).ToArray();
 
+        Assert.That(properties, Has.Length.EqualTo(5));
         Assert.That(names, Is.EqualTo(new[]
         {
             "combat_life_state",
+            "current_endurance",
             "current_health",
             "current_mana",
             "pending_death_handoff_payload"
@@ -40,7 +42,7 @@ public sealed class CombatPersistenceProjectionTest
     [Test]
     public void test_projection_reads_player_resources_life_state_and_optional_death_handoff()
     {
-        var player = CreatePlayer(currentHealth: 0, currentMana: 42, lifeState: CombatActorLifeState.Dead);
+        var player = CreatePlayer(currentHealth: 0, currentMana: 42, currentEndurance: 23, lifeState: CombatActorLifeState.Dead);
         var payload = new PlayerDeathEvent(
             "DCTX-test",
             "local-character-1",
@@ -53,6 +55,7 @@ public sealed class CombatPersistenceProjectionTest
 
         Assert.That(projection.current_health, Is.EqualTo(0));
         Assert.That(projection.current_mana, Is.EqualTo(42));
+        Assert.That(projection.current_endurance, Is.EqualTo(23));
         Assert.That(projection.combat_life_state, Is.EqualTo(CombatActorLifeState.Dead));
         Assert.That(projection.pending_death_handoff_payload, Is.SameAs(payload));
     }
@@ -77,6 +80,7 @@ public sealed class CombatPersistenceProjectionTest
     private static CombatActorState CreatePlayer(
         int currentHealth = 140,
         int currentMana = 180,
+        int currentEndurance = 80,
         CombatActorLifeState lifeState = CombatActorLifeState.Alive)
     {
         return new CombatActorState(
@@ -101,6 +105,8 @@ public sealed class CombatPersistenceProjectionTest
             currentHealth > 0 ? CombatState.OutOfCombat : CombatState.Dead,
             lifeState,
             null,
-            "player-local-character-1");
+            "player-local-character-1",
+            maxEndurance: 80,
+            currentEndurance: currentEndurance);
     }
 }

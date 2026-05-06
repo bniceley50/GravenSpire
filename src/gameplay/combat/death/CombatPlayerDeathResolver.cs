@@ -123,7 +123,9 @@ public sealed class CombatPlayerDeathResolver
             CombatActorLifeState.Dead,
             targetCombatActorId: null,
             player.CombatSortKey,
-            threatTable: new Dictionary<string, int>(StringComparer.Ordinal));
+            threatTable: new Dictionary<string, int>(StringComparer.Ordinal),
+            maxEndurance: player.MaxEndurance,
+            currentEndurance: player.CurrentEndurance);
     }
 
     private static void ValidateRequest(CombatPlayerDeathResolutionRequest request)
