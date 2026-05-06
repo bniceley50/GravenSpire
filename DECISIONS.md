@@ -368,3 +368,44 @@ T1 sprint planning is unblocked once Combat Core revision passes
 **See also:** `production/prototypes/combat-feel-report.md`;
 `prototypes/combat-feel/README.md`; `design/gdd/combat-core.md`;
 `design/gdd/game-concept.md`; commits `7add6ee` through `83598de`.
+
+---
+
+## D013 — ADR-0006 Endurance Resource Model
+
+**Date:** 2026-05-06
+**Status:** Proposed
+**Context:** The T1 combat slice review committed at `4edf2f9` recorded Brian's
+Yellow verdict and identified a harder resource-model finding: Bash and future
+physical instants should move off mana onto a quiet Endurance resource, while
+`Smite of Authority` and `Defensive Prayer` remain mana-based Cleric abilities.
+The finding is captured in `production/qa/combat/feel-review-T1-slice.md:54`
+through `production/qa/combat/feel-review-T1-slice.md:58`, and Brian's verdict
+prose requires Endurance to support physical pacing without becoming an
+action-rotation bar at `production/qa/combat/feel-review-T1-slice.md:80`.
+Combat Core's current tactical instant contract still describes authored mana
+costs for all tactical instants in `design/gdd/combat-core.md:148` through
+`design/gdd/combat-core.md:152` and `design/gdd/combat-core.md:746` through
+`design/gdd/combat-core.md:747`.
+**Decision:** Create
+`docs/architecture/adr-0006-endurance-resource-model.md` as the proposed
+Endurance contract for Sprint 1.5. ADR-0006 defines physical-only Endurance
+scope, quiet HUD/save discipline, resource split rules for Bash/future physical
+instants, and explicit carveouts keeping `Smite of Authority` and
+`Defensive Prayer` mana-based.
+**Consequences:**
+- T1.5-COMBAT-00 authors the contract only; it does not implement Endurance,
+  change fixtures, amend GDD acceptance criteria, or tune combat feel.
+- T1.5-COMBAT-01 should validate the Combat Core actor-state, persistence, and
+  HUD-projection portions of ADR-0006 while keeping the ADR/D-entry proposed.
+- T1.5-COMBAT-02 should validate the physical-instant resource split. If that
+  implementation holds, the closure batch may move ADR-0006 from Proposed to
+  Accepted and this D013 entry from Proposed to Locked.
+- T1-COMBAT-11 should treat ADR-0006's banned Endurance patterns as scan input
+  after the contract and implementation stories land.
+**See also:**
+`docs/architecture/adr-0006-endurance-resource-model.md`;
+`production/qa/combat/feel-review-T1-slice.md`;
+`production/sprints/sprint-1-5.md`;
+`production/qa/plans/qa-plan-sprint-1-5-20260506.md`;
+`design/gdd/combat-core.md`.
