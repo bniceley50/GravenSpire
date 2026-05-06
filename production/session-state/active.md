@@ -1,12 +1,13 @@
 # Active Session State
 
-**Last Updated:** 2026-05-05
-**Project Stage:** Pre-Production — Sprint 1 Implementation
+**Last Updated:** 2026-05-06
+**Project Stage:** Pre-Production — Sprint 1.5 Planning / QA Gate
 
 ## Current Task
 
-`T1-COMBAT-10` is closed via `/story-done` with verdict `COMPLETE WITH NOTES`.
-Next work is the slice review session. `T1-COMBAT-11` holds until the Green/Yellow/Red verdict is issued.
+Sprint 1.5 is active at the QA planning gate. The Sprint 1.5 plan is committed at `8885d2e`, and the next required action is `/qa-plan sprint` before any `/dev-story` implementation.
+
+After the Sprint 1.5 QA plan exists and the baseline regression passes, the first implementation story is `/dev-story T1.5-COMBAT-00-endurance-contract-lock`.
 
 ## Status
 
@@ -69,10 +70,12 @@ Next work is the slice review session. `T1-COMBAT-11` holds until the Green/Yell
 - ✅ Sprint 1 story `T1-COMBAT-09b` closed via `/story-done` 2026-04-30 with verdict **COMPLETE WITH NOTES**. Evidence: Stage 2 TRX 124/124 PASS, frozen `PlayerKillCreditEvent` invariant held, Character Progression boundary scan clean, no-byte unresolved-barrier assertion held, prior 113-test regression check passed, and AC trace in [production/stories/t1-combat-09b-same-frame-save-barrier-kill-credit-consistency.md](../stories/t1-combat-09b-same-frame-save-barrier-kill-credit-consistency.md). ADR-0001/D007 and ADR-0002/D008 metadata cleanup was closed in the same approved ride-along. `production/sprint-status.yaml` now records 9/13 Sprint 1 stories done.
 - ✅ Sprint 1 story `T1-COMBAT-09c` closed via `/story-done` 2026-04-30 with verdict **COMPLETE WITH NOTES**. Evidence: Stage 2 TRX 133/133 PASS, `PlayerKillCreditEvent` frozen-event invariant held, six-field `PlayerDeathEvent` schema verified, four-field `CombatPersistenceProjection` whitelist verified, Death & Corpse Recovery scope guards held, 09b save coordinator unchanged, and AC trace in [production/stories/t1-combat-09c-player-death-payload-stub-reserved-integration.md](../stories/t1-combat-09c-player-death-payload-stub-reserved-integration.md). The held-policy first artifact is now durable at [production/qa/combat/feel-review-09c-player-death.md](../qa/combat/feel-review-09c-player-death.md). `production/sprint-status.yaml` now records 10/13 Sprint 1 stories done.
 - ✅ Sprint 1 story `T1-COMBAT-10` closed via `/story-done` 2026-05-05 with verdict **COMPLETE WITH NOTES**. Evidence: headless JSONL harness at [prototypes/combat-slice-T1/Harness/CombatSliceHarness.cs](../../prototypes/combat-slice-T1/Harness/CombatSliceHarness.cs), JSONL evidence at [tests/evidence/T1-COMBAT-10/profiled-combat-slice.jsonl](../../tests/evidence/T1-COMBAT-10/profiled-combat-slice.jsonl), verification summary at [tests/evidence/T1-COMBAT-10/verification.md](../../tests/evidence/T1-COMBAT-10/verification.md), and slice-review input at [production/qa/combat/t1-combat-10-profiled-evidence-summary.md](../qa/combat/t1-combat-10-profiled-evidence-summary.md). `H-CCOM-FEEL-01` failed-as-measured with `20/20` solo-trash wins vs. the `55-85%` target; `H-CCOM-FEEL-03` failed-as-measured with `5/10` dangerous two-trash outcomes vs. the `>=8/10` target. Production was not tuned. `production/sprint-status.yaml` now records 11/13 Sprint 1 stories done and surfaces slice review as the next gate.
+- ✅ T1 combat slice review verdict committed 2026-05-06 at `4edf2f9`: **Yellow**. Architecture held; sprint-1.5 scope is combat-feel correction, including quiet Endurance, FEEL-03 overpull danger, and FEEL-01 target revalidation.
+- ✅ Sprint 1.5 plan committed 2026-05-06 at `8885d2e`: [production/sprints/sprint-1-5.md](../sprints/sprint-1-5.md). Required next gate is `/qa-plan sprint`.
 
 ## Files Being Worked On
 
-- **Active:** Slice review session. Read `production/qa/combat/t1-combat-10-profiled-evidence-summary.md` alongside qualitative human play and issue Green/Yellow/Red before any further `/dev-story`.
+- **Active:** Sprint 1.5 QA planning gate. Run `/qa-plan sprint` using [production/sprints/sprint-1-5.md](../sprints/sprint-1-5.md). Do not start `/dev-story` until the QA plan exists and the baseline regression passes.
 - Combat Feel Prototype: [prototypes/combat-feel/](../../prototypes/combat-feel/) — pinned-engine headline pass complete; prototype code remains throwaway evidence artifact.
 - Combat Feel Prototype README: [prototypes/combat-feel/README.md](../../prototypes/combat-feel/README.md) — prototype question, success/failure criteria, loop spec, controls, run notes
 - Inventory & Item Economy: [design/gdd/inventory-item-economy.md](../../design/gdd/inventory-item-economy.md) — design draft, **NEEDS REVISION**, blocker 1 repaired, remaining blockers tracked in `INV-OQ-05`
@@ -102,8 +105,10 @@ Next work is the slice review session. `T1-COMBAT-11` holds until the Green/Yell
 - Technical-artist validation items accumulated in art bible (URP SSS cost model, decal projector perf, camera-stack isolation for corpse-run desat, GPU instancing behavior, etc.) — consolidated in art-bible.md Document Status header
 - T1-COMBAT-07 now provides the Combat Core med-break regen tick contract; Layer 1 HUD must consume Combat Core state rather than inventing separate fill timing.
 - T1-COMBAT-08 now provides the Combat Core HUD-safe projection seam; Layer 1 HUD must consume categorical threat and explicit Attack ON/OFF state rather than exposing raw threat or inventing parallel combat state.
-- T1-COMBAT-09c closed the player death payload stub and first held-policy feel-review artifact at `production/qa/combat/feel-review-09c-player-death.md`; human qualitative death-moment playtest remains pending for the slice review session.
+- T1-COMBAT-09c closed the player death payload stub and first held-policy feel-review artifact at `production/qa/combat/feel-review-09c-player-death.md`; human qualitative death-moment playtest remains pending as a Sprint 1.5 carryover.
 - T1-COMBAT-10 closed the profiled evidence loop and surfaced quantitative combat-feel gaps: solo trash is too safe (`20/20` wins) and two-trash overpull is insufficiently punishing (`5/10` dangerous outcomes). Treat these as slice-review inputs, not as bugs fixed in T1-COMBAT-10.
+- Sprint 1.5 plan is committed at `8885d2e`; `production/sprint-status.yaml` now points at `/qa-plan sprint` as the active gate.
+- `production/stories/t1-combat-11-forbidden-pattern-compliance-scan-analyzer.md` is referenced by Sprint 1 and Sprint 1.5 planning but is currently absent; create or recover it before T1-COMBAT-11 implementation.
 - ADR-0003 / D009 status metadata cleanup is closed as of the T1-COMBAT-05 `/story-done` ride-along: ADR-0003 is `Accepted`, and DECISIONS.md D009 is `Locked`. Justification: T1-COMBAT-01 closure commit `565ee26` has been on `main` since 2026-04-28; `CombatProgressionBaselineSnapshot` is consumed by production `CombatActorHydrator` at `src/gameplay/combat/CombatActorHydrator.cs:55`, `src/gameplay/combat/CombatActorHydrator.cs:61-68`, and `src/gameplay/combat/CombatActorHydrator.cs:104-126`; T1-COMBAT-01 verification cites ADR-0003 coverage at `tests/evidence/T1-COMBAT-01/verification.md:31`.
 - `H-CCOM-F2B` fixture extremes are validated by `T1-COMBAT-01`; seeded melee formula execution is validated by `T1-COMBAT-04`.
 - Creature / Enemy AI still owns actual return-to-anchor movement and NavMeshAgent behavior; `T1-COMBAT-02` supplies Combat Core leash hooks and test doubles only.
@@ -115,9 +120,18 @@ Next work is the slice review session. `T1-COMBAT-11` holds until the Green/Yell
 
 ## Next Skill to Run
 
-- **Run the slice review session next.** Read `production/qa/combat/t1-combat-10-profiled-evidence-summary.md` and issue the Green/Yellow/Red verdict in `production/qa/combat/feel-review-T1-slice.md`. `T1-COMBAT-11` holds until that verdict is issued.
+- **Run `/qa-plan sprint` for Sprint 1.5 next.** Use [production/sprints/sprint-1-5.md](../sprints/sprint-1-5.md) as the source; do not begin `/dev-story T1.5-COMBAT-00-endurance-contract-lock` until the QA plan exists.
+- After `/qa-plan sprint`: run baseline `dotnet test tests/Gravenspire.Combat.Tests.csproj`, then `/dev-story T1.5-COMBAT-00-endurance-contract-lock`.
 - Later: run Inventory implementation pre-spec to close `INV-OQ-05`, then rerun `/design-review design/gdd/inventory-item-economy.md --depth full`.
 - Codex PR #1 is merged; no Codex follow-up pending in this active state file.
+
+## Session Extract - Sprint 1 Closeout / Sprint 1.5 Planning 2026-05-06
+
+- Slice review: [production/qa/combat/feel-review-T1-slice.md](../qa/combat/feel-review-T1-slice.md) committed at `4edf2f9` with Brian's verdict **Yellow**.
+- Sprint 1.5 plan: [production/sprints/sprint-1-5.md](../sprints/sprint-1-5.md) committed at `8885d2e`.
+- Sprint 1.5 scope: quiet Endurance resource-model addition, Bash/physical instant conversion, FEEL-03 overpull tuning, FEEL-01 target revalidation, T1-COMBAT-11 carryover, and profiled rerun evidence.
+- Carryover: `production/stories/t1-combat-11-forbidden-pattern-compliance-scan-analyzer.md` is currently absent and must be created or recovered before T1-COMBAT-11 implementation; [production/qa/combat/feel-review-09c-player-death.md](../qa/combat/feel-review-09c-player-death.md) still has HUMAN PLAYTEST PENDING.
+- State update: `production/sprint-status.yaml` and this active state now point at `/qa-plan sprint` as the required next gate.
 
 ## Session Extract - /story-done 2026-04-28
 
