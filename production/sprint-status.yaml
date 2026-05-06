@@ -12,12 +12,12 @@ head: "8885d2e"
 qa_plan: "production/qa/plans/qa-plan-sprint-1-5-20260506.md"
 plan: "production/sprints/sprint-1-5.md"
 slice_review: "production/qa/combat/feel-review-T1-slice.md"
-implementation_gate: "Sprint 1.5 QA plan committed at b6297b4. Required next gate: baseline regression dotnet test 133/133, then /dev-story T1.5-COMBAT-00 (Endurance contract lock)."
-progress: "0/7 done"
-completed_stories: 0
+implementation_gate: "T1.5-COMBAT-00 closed by /story-done. Sprint 1.5 progress: 1/7 done. Next active gate: /dev-story T1.5-COMBAT-01-endurance-state-hud-save-projection. T1.5-COMBAT-04 also unblocked from T1.5-COMBAT-00 dependency for optional parallel work."
+progress: "1/7 done"
+completed_stories: 1
 total_stories: 7
-next_active_story: "T1.5-COMBAT-00"
-next_active_command: "Run baseline regression `dotnet test tests/Gravenspire.Combat.Tests.csproj --logger \"console;verbosity=minimal\"` to confirm 133/133, then /dev-story T1.5-COMBAT-00-endurance-contract-lock."
+next_active_story: "T1.5-COMBAT-01"
+next_active_command: "/dev-story T1.5-COMBAT-01-endurance-state-hud-save-projection"
 
 carryover:
   t1_combat_11_story_file: "Absent; create or recover before T1-COMBAT-11 implementation."
@@ -28,19 +28,19 @@ stories:
     name: "Endurance contract lock"
     file: "production/stories/t1-5-combat-00-endurance-contract-lock.md"
     priority: must-have
-    status: blocked
+    status: done
     owner: ""
     estimate_days: 1.0
-    blocker: "Requires baseline regression check before implementation."
-    completed: ""
+    blocker: ""
+    completed: "2026-05-06"
   - id: "T1.5-COMBAT-01"
     name: "Endurance state, persistence, HUD signal"
     file: "production/stories/t1-5-combat-01-endurance-state-persistence-hud-signal.md"
     priority: must-have
-    status: blocked
+    status: ready-for-dev
     owner: ""
     estimate_days: 1.25
-    blocker: "Depends on T1.5-COMBAT-00."
+    blocker: "All dependencies satisfied. Next active story."
     completed: ""
   - id: "T1.5-COMBAT-02"
     name: "Physical instant conversion"
@@ -64,10 +64,10 @@ stories:
     name: "FEEL-01 target revalidation"
     file: "production/stories/t1-5-combat-04-feel-01-target-revalidation.md"
     priority: must-have
-    status: blocked
+    status: ready-for-dev
     owner: ""
     estimate_days: 1.0
-    blocker: "Depends on T1.5-COMBAT-00; can run in parallel with implementation after the Endurance contract lock."
+    blocker: "Dependencies satisfied. Parallelizable with T1.5-COMBAT-01 / T1.5-COMBAT-02 / T1.5-COMBAT-03."
     completed: ""
   - id: "T1-COMBAT-11"
     name: "Forbidden-pattern compliance scan/analyzer"

@@ -1,13 +1,13 @@
 # Active Session State
 
 **Last Updated:** 2026-05-06
-**Project Stage:** Pre-Production — Sprint 1.5 — Pre-Implementation
+**Project Stage:** Pre-Production — Sprint 1.5 — Implementation
 
 ## Current Task
 
-Sprint 1.5 is active at the pre-implementation boundary. The Sprint 1.5 plan is committed at `8885d2e`, and the Sprint 1.5 QA plan is committed at `b6297b4` in [production/qa/plans/qa-plan-sprint-1-5-20260506.md](../qa/plans/qa-plan-sprint-1-5-20260506.md).
+Sprint 1.5 is active in implementation. `T1.5-COMBAT-00` closed via `/story-done` with verdict **COMPLETE WITH NOTES**, establishing D013 and ADR-0006 as Proposed Endurance contract artifacts.
 
-The next required gate is baseline regression: `dotnet test tests\Gravenspire.Combat.Tests.csproj --logger "console;verbosity=minimal"`. If it confirms the expected `133/133` pass, run `/dev-story T1.5-COMBAT-00-endurance-contract-lock`. Sprint 1.5 story files are still forward-looking and are created during their `/dev-story` runs.
+The next critical-path story is `/dev-story T1.5-COMBAT-01-endurance-state-hud-save-projection`. `T1.5-COMBAT-04` is also unblocked from the `T1.5-COMBAT-00` dependency and can run as optional parallel design work. Sprint 1.5 story files remain forward-looking until their `/dev-story` runs.
 
 ## Status
 
@@ -73,10 +73,11 @@ The next required gate is baseline regression: `dotnet test tests\Gravenspire.Co
 - ✅ T1 combat slice review verdict committed 2026-05-06 at `4edf2f9`: **Yellow**. Architecture held; sprint-1.5 scope is combat-feel correction, including quiet Endurance, FEEL-03 overpull danger, and FEEL-01 target revalidation.
 - ✅ Sprint 1.5 plan committed 2026-05-06 at `8885d2e`: [production/sprints/sprint-1-5.md](../sprints/sprint-1-5.md).
 - ✅ Sprint 1.5 QA plan committed 2026-05-06 at `b6297b4`: [production/qa/plans/qa-plan-sprint-1-5-20260506.md](../qa/plans/qa-plan-sprint-1-5-20260506.md). Required next gate is baseline regression before `/dev-story T1.5-COMBAT-00-endurance-contract-lock`.
+- ✅ Sprint 1.5 story `T1.5-COMBAT-00` closed via `/story-done` 2026-05-06 with verdict **COMPLETE WITH NOTES**. Commit `c2487fc` lands D013 and ADR-0006 as Proposed; the status ride-along to D013 Locked / ADR-0006 Accepted is scheduled for `T1.5-COMBAT-02` closure after physical instant conversion validates the contract.
 
 ## Files Being Worked On
 
-- **Active:** Sprint 1.5 pre-implementation gate. Run baseline regression `dotnet test tests\Gravenspire.Combat.Tests.csproj --logger "console;verbosity=minimal"` before `/dev-story T1.5-COMBAT-00-endurance-contract-lock`. Sprint 1.5 story files remain forward-looking and are created during their `/dev-story` runs.
+- **Active:** Sprint 1.5 implementation. Next critical path: `/dev-story T1.5-COMBAT-01-endurance-state-hud-save-projection`. Optional parallel design work: `/dev-story T1.5-COMBAT-04-feel-01-target-revalidation`.
 - Combat Feel Prototype: [prototypes/combat-feel/](../../prototypes/combat-feel/) — pinned-engine headline pass complete; prototype code remains throwaway evidence artifact.
 - Combat Feel Prototype README: [prototypes/combat-feel/README.md](../../prototypes/combat-feel/README.md) — prototype question, success/failure criteria, loop spec, controls, run notes
 - Inventory & Item Economy: [design/gdd/inventory-item-economy.md](../../design/gdd/inventory-item-economy.md) — design draft, **NEEDS REVISION**, blocker 1 repaired, remaining blockers tracked in `INV-OQ-05`
@@ -108,7 +109,7 @@ The next required gate is baseline regression: `dotnet test tests\Gravenspire.Co
 - T1-COMBAT-08 now provides the Combat Core HUD-safe projection seam; Layer 1 HUD must consume categorical threat and explicit Attack ON/OFF state rather than exposing raw threat or inventing parallel combat state.
 - T1-COMBAT-09c closed the player death payload stub and first held-policy feel-review artifact at `production/qa/combat/feel-review-09c-player-death.md`; human qualitative death-moment playtest remains pending as a Sprint 1.5 carryover.
 - T1-COMBAT-10 closed the profiled evidence loop and surfaced quantitative combat-feel gaps: solo trash is too safe (`20/20` wins) and two-trash overpull is insufficiently punishing (`5/10` dangerous outcomes). Treat these as slice-review inputs, not as bugs fixed in T1-COMBAT-10.
-- Sprint 1.5 QA plan is committed at `b6297b4`; `production/sprint-status.yaml` now points at baseline regression as the active gate and `T1.5-COMBAT-00` as the next ready-for-dev story.
+- T1.5-COMBAT-00 is closed; `production/sprint-status.yaml` now records Sprint 1.5 progress as 1/7 done and surfaces `T1.5-COMBAT-01` as the next active story.
 - `production/stories/t1-combat-11-forbidden-pattern-compliance-scan-analyzer.md` is referenced by Sprint 1 and Sprint 1.5 planning but is currently absent; create or recover it before T1-COMBAT-11 implementation.
 - ADR-0003 / D009 status metadata cleanup is closed as of the T1-COMBAT-05 `/story-done` ride-along: ADR-0003 is `Accepted`, and DECISIONS.md D009 is `Locked`. Justification: T1-COMBAT-01 closure commit `565ee26` has been on `main` since 2026-04-28; `CombatProgressionBaselineSnapshot` is consumed by production `CombatActorHydrator` at `src/gameplay/combat/CombatActorHydrator.cs:55`, `src/gameplay/combat/CombatActorHydrator.cs:61-68`, and `src/gameplay/combat/CombatActorHydrator.cs:104-126`; T1-COMBAT-01 verification cites ADR-0003 coverage at `tests/evidence/T1-COMBAT-01/verification.md:31`.
 - `H-CCOM-F2B` fixture extremes are validated by `T1-COMBAT-01`; seeded melee formula execution is validated by `T1-COMBAT-04`.
@@ -121,8 +122,8 @@ The next required gate is baseline regression: `dotnet test tests\Gravenspire.Co
 
 ## Next Skill to Run
 
-- **Run baseline regression for Sprint 1.5 next:** `dotnet test tests\Gravenspire.Combat.Tests.csproj --logger "console;verbosity=minimal"`. Confirm the expected `133/133` pass before starting implementation.
-- After baseline regression passes: run `/dev-story T1.5-COMBAT-00-endurance-contract-lock`.
+- **Run `/dev-story T1.5-COMBAT-01-endurance-state-hud-save-projection` next.**
+- Optional parallel work: `/dev-story T1.5-COMBAT-04-feel-01-target-revalidation`.
 - Later: run Inventory implementation pre-spec to close `INV-OQ-05`, then rerun `/design-review design/gdd/inventory-item-economy.md --depth full`.
 - Codex PR #1 is merged; no Codex follow-up pending in this active state file.
 
@@ -134,6 +135,18 @@ The next required gate is baseline regression: `dotnet test tests\Gravenspire.Co
 - Sprint 1.5 scope: quiet Endurance resource-model addition, Bash/physical instant conversion, FEEL-03 overpull tuning, FEEL-01 target revalidation, T1-COMBAT-11 carryover, and profiled rerun evidence.
 - Carryover: `production/stories/t1-combat-11-forbidden-pattern-compliance-scan-analyzer.md` is currently absent and must be created or recovered before T1-COMBAT-11 implementation; [production/qa/combat/feel-review-09c-player-death.md](../qa/combat/feel-review-09c-player-death.md) still has HUMAN PLAYTEST PENDING.
 - State update: `production/sprint-status.yaml` and this active state now point at baseline regression as the required next gate, then `/dev-story T1.5-COMBAT-00-endurance-contract-lock`.
+
+## Session Extract - /story-done 2026-05-06 (T1.5-COMBAT-00)
+
+- Story: [production/stories/t1-5-combat-00-endurance-contract-lock.md](../stories/t1-5-combat-00-endurance-contract-lock.md) - T1.5-COMBAT-00 Endurance Contract Lock.
+- Verdict: COMPLETE WITH NOTES.
+- Criteria: 5/5 covered; `QA-00-01`, `QA-00-02`, `QA-00-03`, `QA-00-04`, and `QA-00-05` all have file:line evidence in the story AC trace.
+- Evidence: [tests/evidence/T1.5-COMBAT-00/verification.md](../../tests/evidence/T1.5-COMBAT-00/verification.md) records D013 Proposed, ADR-0006 Proposed, carveout naming, banned-pattern enumeration, empty no-code diff, 133/133 baseline regression, and hook smoke.
+- State updates: story status set to Complete; `production/sprint-status.yaml` marks `T1.5-COMBAT-00` done, records 1/7 Sprint 1.5 stories done, and surfaces `T1.5-COMBAT-01` as next active. `T1.5-COMBAT-04` is also unblocked for optional parallel design work.
+- ADR ride-along marker: ADR-0006 / D013 status ride-along is scheduled at `T1.5-COMBAT-02` closure after physical instant conversion validates the contract. That closure batch should include both metadata flips as narrow status-only changes: ADR-0006 Proposed -> Accepted and D013 Proposed -> Locked, mirroring the T1-COMBAT-09b ride-along precedent for D007/D008.
+- Tech debt logged: None.
+- Carried forward: `T1-COMBAT-11` story file is still absent and must be created or recovered before that story's `/dev-story`; [production/qa/combat/feel-review-09c-player-death.md](../qa/combat/feel-review-09c-player-death.md) remains HUMAN PLAYTEST PENDING.
+- Next recommended: `/dev-story T1.5-COMBAT-01-endurance-state-hud-save-projection`.
 
 ## Session Extract - /story-done 2026-04-28
 
