@@ -6,18 +6,18 @@ goal: "Correct the Yellow slice-review findings without reopening the Combat Cor
 start: "2026-05-06"
 end: "2026-05-21"
 generated: "2026-05-06"
-updated: "2026-05-06"
+updated: "2026-05-07"
 branch: "main"
 head: "8885d2e"
 qa_plan: "production/qa/plans/qa-plan-sprint-1-5-20260506.md"
 plan: "production/sprints/sprint-1-5.md"
 slice_review: "production/qa/combat/feel-review-T1-slice.md"
-implementation_gate: "T1.5-COMBAT-00 closed by /story-done. Sprint 1.5 progress: 1/7 done. Next active gate: /dev-story T1.5-COMBAT-01-endurance-state-hud-save-projection. T1.5-COMBAT-04 also unblocked from T1.5-COMBAT-00 dependency for optional parallel work."
-progress: "1/7 done"
-completed_stories: 1
+implementation_gate: "T1.5-COMBAT-01 closed by /story-done. Sprint 1.5 progress: 2/7 done. Next active gate: /dev-story T1.5-COMBAT-02-physical-instant-conversion. T1.5-COMBAT-04 remains unblocked for optional parallel design work."
+progress: "2/7 done"
+completed_stories: 2
 total_stories: 7
-next_active_story: "T1.5-COMBAT-01"
-next_active_command: "/dev-story T1.5-COMBAT-01-endurance-state-hud-save-projection"
+next_active_story: "T1.5-COMBAT-02"
+next_active_command: "/dev-story T1.5-COMBAT-02-physical-instant-conversion"
 
 carryover:
   t1_combat_11_story_file: "Absent; create or recover before T1-COMBAT-11 implementation."
@@ -35,21 +35,21 @@ stories:
     completed: "2026-05-06"
   - id: "T1.5-COMBAT-01"
     name: "Endurance state, persistence, HUD signal"
-    file: "production/stories/t1-5-combat-01-endurance-state-persistence-hud-signal.md"
+    file: "production/stories/t1-5-combat-01-endurance-state-hud-save-projection.md"
     priority: must-have
-    status: ready-for-dev
+    status: done
     owner: ""
     estimate_days: 1.25
-    blocker: "All dependencies satisfied. Next active story."
-    completed: ""
+    blocker: ""
+    completed: "2026-05-07"
   - id: "T1.5-COMBAT-02"
     name: "Physical instant conversion"
     file: "production/stories/t1-5-combat-02-physical-instant-conversion.md"
     priority: must-have
-    status: blocked
+    status: ready-for-dev
     owner: ""
     estimate_days: 1.25
-    blocker: "Depends on T1.5-COMBAT-01."
+    blocker: "All dependencies satisfied. Next critical path."
     completed: ""
   - id: "T1.5-COMBAT-03"
     name: "FEEL-03 overpull tuning"

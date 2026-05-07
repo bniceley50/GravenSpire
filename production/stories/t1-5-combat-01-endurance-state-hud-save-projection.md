@@ -1,6 +1,6 @@
 # T1.5-COMBAT-01 - Endurance State, HUD, Save Projection
 
-**Status:** Implemented + Verified; awaiting `/story-done`
+**Status:** Complete
 **Sprint:** 1.5
 **Priority:** Must Have
 **Layer:** Gameplay / Combat Core
@@ -112,7 +112,7 @@ Source trace: `production/sprints/sprint-1-5.md:99` through
 
 ## Story Status
 
-`T1.5-COMBAT-01` is implemented and verified, awaiting `/story-done`.
+`T1.5-COMBAT-01` is complete.
 
 ## Blockers / Carried Forward
 
@@ -120,3 +120,67 @@ Source trace: `production/sprints/sprint-1-5.md:99` through
   Smite of Authority / Defensive Prayer mana carveout tests.
 - ADR-0006 and D013 remain Proposed until the physical-instant conversion
   validates the remaining resource-split contract.
+
+## Completion Notes
+
+**Completed:** 2026-05-07
+**Verdict:** COMPLETE WITH NOTES - code + persistence + HUD signal landed;
+production source unfrozen at `d6c8e08`; `139/139` tests pass.
+
+**QA evidence summary:**
+
+- `QA-01-01` Endurance actor state validates and clamps: PASS. Evidence:
+  `src/gameplay/combat/CombatActorState.cs:421`,
+  `src/gameplay/combat/CombatActorState.cs:607`,
+  `src/gameplay/combat/CombatActorStateTransitions.cs:217`,
+  `tests/unit/gameplay/combat/combat_endurance_state_test.cs:14`, and TRX row
+  `tests/evidence/T1.5-COMBAT-01/t1-5-combat-01-stage2.trx:37`.
+- `QA-01-02` Combat persistence whitelist adds exactly Endurance: PASS.
+  Evidence: `src/gameplay/combat/persistence/CombatPersistenceProjection.cs:30`,
+  `src/gameplay/combat/persistence/CombatPersistenceProjection.cs:49`,
+  `tests/unit/gameplay/combat/combat_persistence_projection_test.cs:22`,
+  `tests/unit/gameplay/combat/combat_endurance_state_test.cs:35`, and TRX row
+  `tests/evidence/T1.5-COMBAT-01/t1-5-combat-01-stage2.trx:54`.
+- `QA-01-03` Persistence still excludes transient combat state: PASS.
+  Evidence: `src/gameplay/combat/persistence/CombatPersistenceProjection.cs:24`
+  through `src/gameplay/combat/persistence/CombatPersistenceProjection.cs:32`,
+  `tests/unit/gameplay/combat/combat_endurance_state_test.cs:56`, and TRX row
+  `tests/evidence/T1.5-COMBAT-01/t1-5-combat-01-stage2.trx:98`.
+- `QA-01-04` HUD projection exposes quiet Endurance: PASS. Evidence:
+  `src/gameplay/combat/presentation/CombatHudStateProjection.cs:35`,
+  `src/gameplay/combat/presentation/CombatHudStateProjection.cs:63`,
+  `src/gameplay/combat/presentation/CombatHudStateProjection.cs:226`,
+  `tests/unit/gameplay/combat/combat_endurance_state_test.cs:75`,
+  `tests/integration/gameplay/combat/combat_hud_state_signal_test.cs:41`, and
+  TRX row `tests/evidence/T1.5-COMBAT-01/t1-5-combat-01-stage2.trx:63`.
+- `QA-01-05` No `src/ui/**` dependency introduced: PASS. Evidence:
+  `tests/evidence/T1.5-COMBAT-01/verification.md:84` through
+  `tests/evidence/T1.5-COMBAT-01/verification.md:106`,
+  `tests/unit/gameplay/combat/combat_endurance_state_test.cs:94`, and TRX row
+  `tests/evidence/T1.5-COMBAT-01/t1-5-combat-01-stage2.trx:33`.
+- `QA-01-06` ADR-0003 non-constraint preserved: PASS. Evidence:
+  `src/gameplay/combat/CombatProgressionBaselineSnapshot.cs:37` through
+  `src/gameplay/combat/CombatProgressionBaselineSnapshot.cs:42`,
+  `production/sprints/sprint-1-5.md:14`,
+  `tests/unit/gameplay/combat/combat_endurance_state_test.cs:115`, and TRX row
+  `tests/evidence/T1.5-COMBAT-01/t1-5-combat-01-stage2.trx:130`.
+
+**Frozen-contracts confirmation:** `PlayerKillCreditEvent`, `PlayerDeathEvent`,
+`CombatActorDeathEvent`, and `CombatProgressionBaselineSnapshot` are unchanged.
+Verification: `tests/evidence/T1.5-COMBAT-01/verification.md:57` through
+`tests/evidence/T1.5-COMBAT-01/verification.md:82`.
+
+**Quiet Endurance discipline:** HUD output is categorical via
+`CombatHudEnduranceCategory`, with zero `pulse`, `combo`, `rotation`, or
+`priority` patterns in the gameplay HUD projection. Verification:
+`tests/evidence/T1.5-COMBAT-01/verification.md:84` through
+`tests/evidence/T1.5-COMBAT-01/verification.md:106`.
+
+**Carry-forward:** D013 and ADR-0006 remain Proposed. The status flip
+(D013 Proposed -> Locked, ADR-0006 Proposed -> Accepted) remains scheduled as a
+metadata ride-along at `T1.5-COMBAT-02` closure after physical instant conversion
+validates the resource-split contract. This forward marker was already recorded
+at `T1.5-COMBAT-00` closure in
+`production/stories/t1-5-combat-00-endurance-contract-lock.md:117` through
+`production/stories/t1-5-combat-00-endurance-contract-lock.md:120` and
+`production/session-state/active.md:146`.

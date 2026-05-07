@@ -1,13 +1,13 @@
 # Active Session State
 
-**Last Updated:** 2026-05-06
+**Last Updated:** 2026-05-07
 **Project Stage:** Pre-Production — Sprint 1.5 — Implementation
 
 ## Current Task
 
-Sprint 1.5 is active in implementation. `T1.5-COMBAT-00` closed via `/story-done` with verdict **COMPLETE WITH NOTES**, establishing D013 and ADR-0006 as Proposed Endurance contract artifacts.
+Sprint 1.5 is active in implementation. `T1.5-COMBAT-01` closed via `/story-done` with verdict **COMPLETE WITH NOTES**, landing Endurance state, the five-field combat persistence projection, and the categorical gameplay HUD signal.
 
-The next critical-path story is `/dev-story T1.5-COMBAT-01-endurance-state-hud-save-projection`. `T1.5-COMBAT-04` is also unblocked from the `T1.5-COMBAT-00` dependency and can run as optional parallel design work. Sprint 1.5 story files remain forward-looking until their `/dev-story` runs.
+The next critical-path story is `/dev-story T1.5-COMBAT-02-physical-instant-conversion`. `T1.5-COMBAT-04` remains unblocked for optional parallel design work.
 
 ## Status
 
@@ -74,10 +74,11 @@ The next critical-path story is `/dev-story T1.5-COMBAT-01-endurance-state-hud-s
 - ✅ Sprint 1.5 plan committed 2026-05-06 at `8885d2e`: [production/sprints/sprint-1-5.md](../sprints/sprint-1-5.md).
 - ✅ Sprint 1.5 QA plan committed 2026-05-06 at `b6297b4`: [production/qa/plans/qa-plan-sprint-1-5-20260506.md](../qa/plans/qa-plan-sprint-1-5-20260506.md). Required next gate is baseline regression before `/dev-story T1.5-COMBAT-00-endurance-contract-lock`.
 - ✅ Sprint 1.5 story `T1.5-COMBAT-00` closed via `/story-done` 2026-05-06 with verdict **COMPLETE WITH NOTES**. Commit `c2487fc` lands D013 and ADR-0006 as Proposed; the status ride-along to D013 Locked / ADR-0006 Accepted is scheduled for `T1.5-COMBAT-02` closure after physical instant conversion validates the contract.
+- ✅ Sprint 1.5 story `T1.5-COMBAT-01` closed via `/story-done` 2026-05-07 with verdict **COMPLETE WITH NOTES**. Commit `d6c8e08` lands Endurance state, combat persistence projection expanded to five fields, and categorical `CombatHudEnduranceCategory` HUD signaling; production source is unfrozen for this story and `dotnet test tests\Gravenspire.Combat.Tests.csproj --logger "console;verbosity=minimal"` passes 139/139.
 
 ## Files Being Worked On
 
-- **Active:** Sprint 1.5 implementation. Next critical path: `/dev-story T1.5-COMBAT-01-endurance-state-hud-save-projection`. Optional parallel design work: `/dev-story T1.5-COMBAT-04-feel-01-target-revalidation`.
+- **Active:** Sprint 1.5 implementation. Next critical path: `/dev-story T1.5-COMBAT-02-physical-instant-conversion`. Optional parallel design work: `/dev-story T1.5-COMBAT-04-feel-01-target-revalidation`.
 - Combat Feel Prototype: [prototypes/combat-feel/](../../prototypes/combat-feel/) — pinned-engine headline pass complete; prototype code remains throwaway evidence artifact.
 - Combat Feel Prototype README: [prototypes/combat-feel/README.md](../../prototypes/combat-feel/README.md) — prototype question, success/failure criteria, loop spec, controls, run notes
 - Inventory & Item Economy: [design/gdd/inventory-item-economy.md](../../design/gdd/inventory-item-economy.md) — design draft, **NEEDS REVISION**, blocker 1 repaired, remaining blockers tracked in `INV-OQ-05`
@@ -109,7 +110,7 @@ The next critical-path story is `/dev-story T1.5-COMBAT-01-endurance-state-hud-s
 - T1-COMBAT-08 now provides the Combat Core HUD-safe projection seam; Layer 1 HUD must consume categorical threat and explicit Attack ON/OFF state rather than exposing raw threat or inventing parallel combat state.
 - T1-COMBAT-09c closed the player death payload stub and first held-policy feel-review artifact at `production/qa/combat/feel-review-09c-player-death.md`; human qualitative death-moment playtest remains pending as a Sprint 1.5 carryover.
 - T1-COMBAT-10 closed the profiled evidence loop and surfaced quantitative combat-feel gaps: solo trash is too safe (`20/20` wins) and two-trash overpull is insufficiently punishing (`5/10` dangerous outcomes). Treat these as slice-review inputs, not as bugs fixed in T1-COMBAT-10.
-- T1.5-COMBAT-00 is closed; `production/sprint-status.yaml` now records Sprint 1.5 progress as 1/7 done and surfaces `T1.5-COMBAT-01` as the next active story.
+- T1.5-COMBAT-01 is closed; `production/sprint-status.yaml` now records Sprint 1.5 progress as 2/7 done and surfaces `T1.5-COMBAT-02` as the next active story.
 - `production/stories/t1-combat-11-forbidden-pattern-compliance-scan-analyzer.md` is referenced by Sprint 1 and Sprint 1.5 planning but is currently absent; create or recover it before T1-COMBAT-11 implementation.
 - ADR-0003 / D009 status metadata cleanup is closed as of the T1-COMBAT-05 `/story-done` ride-along: ADR-0003 is `Accepted`, and DECISIONS.md D009 is `Locked`. Justification: T1-COMBAT-01 closure commit `565ee26` has been on `main` since 2026-04-28; `CombatProgressionBaselineSnapshot` is consumed by production `CombatActorHydrator` at `src/gameplay/combat/CombatActorHydrator.cs:55`, `src/gameplay/combat/CombatActorHydrator.cs:61-68`, and `src/gameplay/combat/CombatActorHydrator.cs:104-126`; T1-COMBAT-01 verification cites ADR-0003 coverage at `tests/evidence/T1-COMBAT-01/verification.md:31`.
 - `H-CCOM-F2B` fixture extremes are validated by `T1-COMBAT-01`; seeded melee formula execution is validated by `T1-COMBAT-04`.
@@ -122,7 +123,7 @@ The next critical-path story is `/dev-story T1.5-COMBAT-01-endurance-state-hud-s
 
 ## Next Skill to Run
 
-- **Run `/dev-story T1.5-COMBAT-01-endurance-state-hud-save-projection` next.**
+- **Run `/dev-story T1.5-COMBAT-02-physical-instant-conversion` next.**
 - Optional parallel work: `/dev-story T1.5-COMBAT-04-feel-01-target-revalidation`.
 - Later: run Inventory implementation pre-spec to close `INV-OQ-05`, then rerun `/design-review design/gdd/inventory-item-economy.md --depth full`.
 - Codex PR #1 is merged; no Codex follow-up pending in this active state file.
@@ -147,6 +148,18 @@ The next critical-path story is `/dev-story T1.5-COMBAT-01-endurance-state-hud-s
 - Tech debt logged: None.
 - Carried forward: `T1-COMBAT-11` story file is still absent and must be created or recovered before that story's `/dev-story`; [production/qa/combat/feel-review-09c-player-death.md](../qa/combat/feel-review-09c-player-death.md) remains HUMAN PLAYTEST PENDING.
 - Next recommended: `/dev-story T1.5-COMBAT-01-endurance-state-hud-save-projection`.
+
+## Session Extract - /story-done 2026-05-07 (T1.5-COMBAT-01)
+
+- Story: [production/stories/t1-5-combat-01-endurance-state-hud-save-projection.md](../stories/t1-5-combat-01-endurance-state-hud-save-projection.md) - T1.5-COMBAT-01 Endurance State, HUD, Save Projection.
+- Verdict: COMPLETE WITH NOTES.
+- Criteria: 6/6 covered; `QA-01-01`, `QA-01-02`, `QA-01-03`, `QA-01-04`, `QA-01-05`, and `QA-01-06` all have file:line evidence in the story AC trace and completion notes.
+- Evidence: [tests/evidence/T1.5-COMBAT-01/verification.md](../../tests/evidence/T1.5-COMBAT-01/verification.md) records the 139/139 regression pass, six QA PASS rows, frozen event/baseline checks, quiet HUD/UI checks, T1 negative-scope pass, prior 133-test continuity, and final hygiene proof. TRX counter is at [tests/evidence/T1.5-COMBAT-01/t1-5-combat-01-stage2.trx](../../tests/evidence/T1.5-COMBAT-01/t1-5-combat-01-stage2.trx).
+- State updates: story status set to Complete; `production/sprint-status.yaml` marks `T1.5-COMBAT-01` done, records 2/7 Sprint 1.5 stories done, corrects the `T1.5-COMBAT-01` row file path to the actual story artifact, and surfaces `T1.5-COMBAT-02` as next active. `T1.5-COMBAT-04` remains unblocked for optional parallel design work.
+- ADR ride-along marker: ADR-0006 / D013 status ride-along remains scheduled at `T1.5-COMBAT-02` closure after physical instant conversion validates the resource split. The chain is recorded in the prior `T1.5-COMBAT-00` closure extract from commit `5e59344` and this story's Completion Notes.
+- Tech debt logged: sprint-status routing drift was corrected for `T1.5-COMBAT-01`; no other story-row path drift was fixed in this batch.
+- Carried forward: `T1-COMBAT-11` story file is still absent and must be created or recovered before that story's `/dev-story`; [production/qa/combat/feel-review-09c-player-death.md](../qa/combat/feel-review-09c-player-death.md) remains HUMAN PLAYTEST PENDING.
+- Next recommended: `/dev-story T1.5-COMBAT-02-physical-instant-conversion`.
 
 ## Session Extract - /story-done 2026-04-28
 
