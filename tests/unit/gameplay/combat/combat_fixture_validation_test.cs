@@ -154,6 +154,36 @@ public sealed class CombatFixtureValidationTest
     }
 
     [Test]
+    public void test_qa_03_04_overpull_tuning_uses_dedicated_trash_fixture_without_retargeting_solo_trash()
+    {
+        var package = LoadPackage();
+
+        Assert.That(package.FixtureSetVersion, Is.EqualTo("CombatPrototypeSpellProfileSet_T1@2026-05-07-t1-5-combat-03"));
+
+        var soloTrash = package.EncounterFixtures.Single(encounter => encounter.Id == "SoloTrash_EvenCon_T1");
+        var overpull = package.EncounterFixtures.Single(encounter => encounter.Id == "TwoTrash_Overpull_T1");
+        var sharedTrash = package.ActorFixtures.Single(actor => actor.Id == "Trash_Mid_T1");
+        var overpullTrash = package.ActorFixtures.Single(actor => actor.Id == "Trash_Mid_Overpull_T1");
+
+        Assert.That(soloTrash.ActorFixtureIds, Is.EqualTo(new[]
+        {
+            "Cleric_Mid_T1",
+            "Trash_Mid_T1"
+        }));
+        Assert.That(overpull.ActorFixtureIds, Is.EqualTo(new[]
+        {
+            "Cleric_Mid_T1",
+            "Trash_Mid_Overpull_T1",
+            "Trash_Mid_Overpull_T1"
+        }));
+        Assert.That(overpullTrash.MaxHealth, Is.EqualTo(sharedTrash.MaxHealth));
+        Assert.That(overpullTrash.ArmorClass, Is.EqualTo(sharedTrash.ArmorClass));
+        Assert.That(overpullTrash.AttackPower, Is.GreaterThan(sharedTrash.AttackPower));
+        Assert.That(overpullTrash.WeaponBaseDamage, Is.GreaterThan(sharedTrash.WeaponBaseDamage));
+        Assert.That(overpullTrash.AttackSkill, Is.GreaterThan(sharedTrash.AttackSkill));
+    }
+
+    [Test]
     public void test_combat_fixture_validator_rejects_missing_tactical_instant_ability_profile_fields()
     {
         var package = LoadPackage() with

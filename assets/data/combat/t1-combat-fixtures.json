@@ -1,7 +1,7 @@
 {
   "fixtureSetId": "CombatPrototypeSpellProfileSet_T1",
-  "fixtureSetVersion": "CombatPrototypeSpellProfileSet_T1@2026-04-28-stage1",
-  "sourceDocument": "design/gdd/combat-core.md:394-430; production/sprints/sprint-1.md:72-108",
+  "fixtureSetVersion": "CombatPrototypeSpellProfileSet_T1@2026-05-07-t1-5-combat-03",
+  "sourceDocument": "design/gdd/combat-core.md:394-430; production/sprints/sprint-1.md:72-108; production/sprints/sprint-1-5.md:180-214",
   "prototypeHauntBand": "PrototypeHauntBand_T1=1-10",
   "combatTickRateHz": 50,
   "targetingTuning": {
@@ -154,6 +154,27 @@
       "stableSourceAliases": [
         "source_spawn_ref:SoloTrash_EvenCon_T1",
         "source_spawn_ref:DenseCamp_Trash_T1"
+      ]
+    },
+    {
+      "id": "Trash_Mid_Overpull_T1",
+      "actorKind": "npc",
+      "encounterRole": "Trash",
+      "level": 5,
+      "maxHealth": 120,
+      "maxMana": 0,
+      "armorClass": 30,
+      "attackPower": 38,
+      "weaponBaseDamage": 10,
+      "attackSkill": 36,
+      "defenseSkill": 30,
+      "weaponDelaySeconds": 3.0,
+      "meleeRangeMeters": 2.0,
+      "spellRangeMeters": 0.0,
+      "factionId": "VampireCourt_T1",
+      "stableSourceAliases": [
+        "source_spawn_ref:TwoTrash_A_T1",
+        "source_spawn_ref:TwoTrash_B_T1"
       ]
     },
     {
@@ -493,8 +514,8 @@
       "id": "TwoTrash_Overpull_T1",
       "actorFixtureIds": [
         "Cleric_Mid_T1",
-        "Trash_Mid_T1",
-        "Trash_Mid_T1"
+        "Trash_Mid_Overpull_T1",
+        "Trash_Mid_Overpull_T1"
       ],
       "killWeightSeed": 1.25,
       "sourceRefAliases": [
