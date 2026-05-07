@@ -21,10 +21,18 @@ public enum CombatTacticalAbilityEffectType
     InterruptCurrentChannel
 }
 
+public enum CombatTacticalAbilityResourceKind
+{
+    Physical,
+    Magical
+}
+
 public sealed record CombatTacticalAbilityProfile(
     string AbilityId,
     double CastTimeSeconds,
+    CombatTacticalAbilityResourceKind ResourceKind,
     int CostMana,
+    int CostEndurance,
     double CooldownSeconds,
     double RangeMeters,
     bool RequiresTarget,
@@ -58,7 +66,9 @@ public sealed record CombatTacticalAbilityProfile(
         return new CombatTacticalAbilityProfile(
             fixture.Id,
             fixture.CastTimeSeconds,
+            fixture.ResourceKind ?? throw new ArgumentException("ability profile resource_kind is required.", nameof(fixture)),
             fixture.CostMana,
+            fixture.CostEndurance,
             fixture.CooldownSeconds,
             fixture.RangeMeters,
             fixture.RequiresTarget,

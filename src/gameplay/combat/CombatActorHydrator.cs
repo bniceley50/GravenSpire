@@ -94,12 +94,15 @@ public sealed class CombatActorHydrator
             return CombatActorHydrationResult.Failure(errors);
         }
 
+        var maxEndurance = input.MaxEndurance > 0
+            ? input.MaxEndurance
+            : fixture.MaxEndurance;
         var resources = input.CurrentResources ?? new CombatResourceHydrationState(
             snapshot.PermanentMaxHealth,
             snapshot.PermanentMaxMana,
-            input.MaxEndurance);
+            maxEndurance);
 
-        ValidateCurrentResources(resources, snapshot, input.MaxEndurance, errors);
+        ValidateCurrentResources(resources, snapshot, maxEndurance, errors);
 
         if (errors.Count > 0)
         {
@@ -129,7 +132,7 @@ public sealed class CombatActorHydrator
             CombatActorLifeState.Alive,
             null,
             input.CombatSortKey,
-            maxEndurance: input.MaxEndurance,
+            maxEndurance: maxEndurance,
             currentEndurance: resources.CurrentEndurance);
 
         var actorValidation = actor.Validate();

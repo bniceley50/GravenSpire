@@ -23,7 +23,9 @@ public sealed class CombatTacticalClericInstantsTest
         var result = resolver.Resolve(Request("ability-activation-1", player, hostile, profile, new CombatTick(10, 0.2d)));
 
         Assert.That(result.Outcome, Is.EqualTo(CombatInstantAbilityOutcome.Resolved));
+        Assert.That(profile.ResourceKind, Is.EqualTo(CombatTacticalAbilityResourceKind.Magical));
         Assert.That(result.Caster.CurrentMana, Is.EqualTo(170));
+        Assert.That(result.Caster.CurrentEndurance, Is.EqualTo(80));
         Assert.That(result.Caster.CombatState, Is.EqualTo(CombatState.OutOfCombat));
         Assert.That(result.Caster.CastRuntimeState, Is.EqualTo(CombatCastRuntimeState.None));
         Assert.That(result.TargetAfterResolution!.CurrentHealth, Is.EqualTo(104));
@@ -32,6 +34,109 @@ public sealed class CombatTacticalClericInstantsTest
         Assert.That(result.AbilityEvents.OfType<AbilityResolvedEvent>().Single().ManaSpent, Is.EqualTo(10));
         Assert.That(result.AbilityEvents.OfType<AbilityResolvedEvent>().Single().AppliedEffects.Single().Damage, Is.EqualTo(16));
         Assert.That(result.CastEvents, Is.Empty);
+    }
+
+    [Test]
+    public void test_qa_02_01_bash_spends_endurance_and_leaves_mana_unchanged()
+    {
+        var resolver = new CombatInstantAbilityResolver();
+        var hostile = CreateHostile("combat-hostile-1", "hostile-001");
+        var player = CreatePlayer(currentEndurance: 80).WithTarget(hostile.CombatActorId);
+        var bash = Profile("Bash_T1_Prototype");
+
+        var result = resolver.Resolve(Request("ability-activation-1", player, hostile, bash, new CombatTick(20, 0.4d), distanceMetersToTarget: 1.5d));
+
+        Assert.That(bash.ResourceKind, Is.EqualTo(CombatTacticalAbilityResourceKind.Physical));
+        Assert.That(result.Outcome, Is.EqualTo(CombatInstantAbilityOutcome.Resolved));
+        Assert.That(result.Caster.CurrentMana, Is.EqualTo(player.CurrentMana));
+        Assert.That(result.Caster.CurrentEndurance, Is.EqualTo(70));
+        Assert.That(result.TargetAfterResolution!.CurrentHealth, Is.EqualTo(109));
+        Assert.That(result.CooldownEndsTick, Is.EqualTo(520));
+        Assert.That(result.AbilityEvents.OfType<AbilityResolvedEvent>().Single().ManaSpent, Is.EqualTo(0));
+    }
+
+    [Test]
+    public void test_qa_02_02_bash_rejects_insufficient_endurance_without_spend_or_cooldown()
+    {
+        var resolver = new CombatInstantAbilityResolver();
+        var hostile = CreateHostile("combat-hostile-1", "hostile-001");
+        var player = CreatePlayer(currentEndurance: 9).WithTarget(hostile.CombatActorId);
+        var bash = Profile("Bash_T1_Prototype");
+
+        var result = resolver.Resolve(Request("ability-activation-1", player, hostile, bash, new CombatTick(20, 0.4d), distanceMetersToTarget: 1.5d));
+
+        Assert.That(result.Outcome, Is.EqualTo(CombatInstantAbilityOutcome.Rejected));
+        Assert.That(result.Caster.CurrentMana, Is.EqualTo(player.CurrentMana));
+        Assert.That(result.Caster.CurrentEndurance, Is.EqualTo(9));
+        Assert.That(result.TargetAfterResolution, Is.SameAs(hostile));
+        Assert.That(result.CooldownEndsTick, Is.Null);
+        Assert.That(result.RejectionReasons, Has.Some.Contains("Caster does not have enough Endurance."));
+        Assert.That(result.AbilityEvents.OfType<AbilityRejectedEvent>().Single().RejectionReasons, Has.Some.Contains("Caster does not have enough Endurance."));
+    }
+
+    [Test]
+    public void test_qa_02_03_smite_remains_mana_based_and_ignores_endurance()
+    {
+        var hostile = CreateHostile("combat-hostile-1", "hostile-001");
+        var smite = Profile("SmiteOfAuthority_T1_Prototype");
+        var zeroEndurancePlayer = CreatePlayer(currentEndurance: 0).WithTarget(hostile.CombatActorId);
+
+        var resolved = new CombatInstantAbilityResolver()
+            .Resolve(Request("ability-activation-1", zeroEndurancePlayer, hostile, smite, new CombatTick(10, 0.2d)));
+
+        Assert.That(smite.ResourceKind, Is.EqualTo(CombatTacticalAbilityResourceKind.Magical));
+        Assert.That(resolved.Outcome, Is.EqualTo(CombatInstantAbilityOutcome.Resolved));
+        Assert.That(resolved.Caster.CurrentMana, Is.EqualTo(170));
+        Assert.That(resolved.Caster.CurrentEndurance, Is.EqualTo(0));
+        Assert.That(resolved.TargetAfterResolution!.CurrentHealth, Is.EqualTo(104));
+        Assert.That(resolved.CooldownEndsTick, Is.EqualTo(360));
+        Assert.That(resolved.CastEvents, Is.Empty);
+        Assert.That(resolved.AbilityEvents.OfType<AbilityResolvedEvent>().Single().ManaSpent, Is.EqualTo(10));
+
+        var lowManaPlayer = CreatePlayer(currentMana: 9, currentEndurance: 80).WithTarget(hostile.CombatActorId);
+        var rejected = new CombatInstantAbilityResolver()
+            .Resolve(Request("ability-activation-2", lowManaPlayer, hostile, smite, new CombatTick(11, 0.22d)));
+
+        Assert.That(rejected.Outcome, Is.EqualTo(CombatInstantAbilityOutcome.Rejected));
+        Assert.That(rejected.Caster.CurrentMana, Is.EqualTo(9));
+        Assert.That(rejected.Caster.CurrentEndurance, Is.EqualTo(80));
+        Assert.That(rejected.TargetAfterResolution, Is.SameAs(hostile));
+        Assert.That(rejected.CooldownEndsTick, Is.Null);
+        Assert.That(rejected.RejectionReasons, Has.Some.Contains("Caster does not have enough mana."));
+        Assert.That(rejected.AbilityEvents.OfType<AbilityRejectedEvent>().Single().RejectionReasons, Has.Some.Contains("Caster does not have enough mana."));
+    }
+
+    [Test]
+    public void test_qa_02_04_defensive_prayer_remains_mana_based_and_ignores_endurance()
+    {
+        var prayer = Profile("DefensivePrayer_T1_Prototype");
+        var zeroEndurancePlayer = CreatePlayer(currentEndurance: 0);
+
+        var resolved = new CombatInstantAbilityResolver()
+            .Resolve(Request("ability-activation-1", zeroEndurancePlayer, target: null, prayer, new CombatTick(40, 0.8d)));
+
+        Assert.That(prayer.ResourceKind, Is.EqualTo(CombatTacticalAbilityResourceKind.Magical));
+        Assert.That(resolved.Outcome, Is.EqualTo(CombatInstantAbilityOutcome.Resolved));
+        Assert.That(resolved.Caster.CurrentMana, Is.EqualTo(155));
+        Assert.That(resolved.Caster.CurrentEndurance, Is.EqualTo(0));
+        Assert.That(resolved.TargetAfterResolution, Is.Null);
+        Assert.That(resolved.AppliedEffects.Single().EffectType, Is.EqualTo(CombatTacticalAbilityEffectType.SelfBuff));
+        Assert.That(resolved.CooldownEndsTick, Is.EqualTo(1540));
+        Assert.That(resolved.CastEvents, Is.Empty);
+        Assert.That(resolved.AbilityEvents.OfType<AbilityResolvedEvent>().Single().ManaSpent, Is.EqualTo(25));
+
+        var lowManaPlayer = CreatePlayer(currentMana: 24, currentEndurance: 80);
+        var rejected = new CombatInstantAbilityResolver()
+            .Resolve(Request("ability-activation-2", lowManaPlayer, target: null, prayer, new CombatTick(41, 0.82d)));
+
+        Assert.That(rejected.Outcome, Is.EqualTo(CombatInstantAbilityOutcome.Rejected));
+        Assert.That(rejected.Caster.CurrentMana, Is.EqualTo(24));
+        Assert.That(rejected.Caster.CurrentEndurance, Is.EqualTo(80));
+        Assert.That(rejected.TargetAfterResolution, Is.Null);
+        Assert.That(rejected.AppliedEffects, Is.Empty);
+        Assert.That(rejected.CooldownEndsTick, Is.Null);
+        Assert.That(rejected.RejectionReasons, Has.Some.Contains("Caster does not have enough mana."));
+        Assert.That(rejected.AbilityEvents.OfType<AbilityRejectedEvent>().Single().RejectionReasons, Has.Some.Contains("Caster does not have enough mana."));
     }
 
     [Test]
@@ -66,6 +171,8 @@ public sealed class CombatTacticalClericInstantsTest
         var result = resolver.Resolve(Request("ability-activation-1", player, channelingHostile, bash, new CombatTick(25, 0.5d), distanceMetersToTarget: 1.5d));
 
         Assert.That(result.Outcome, Is.EqualTo(CombatInstantAbilityOutcome.Resolved));
+        Assert.That(result.Caster.CurrentMana, Is.EqualTo(player.CurrentMana));
+        Assert.That(result.Caster.CurrentEndurance, Is.EqualTo(70));
         Assert.That(result.TargetAfterResolution!.CastRuntimeState, Is.EqualTo(CombatCastRuntimeState.Recovery));
         Assert.That(result.TargetAfterResolution.CastRecoveryRemainingSeconds, Is.EqualTo(1.0d).Within(0.000001d));
         Assert.That(result.CastEvents.OfType<CastCancelledEvent>().Single().CancelSource, Is.EqualTo("Bash_T1_Prototype"));
@@ -91,7 +198,9 @@ public sealed class CombatTacticalClericInstantsTest
         var result = resolver.Resolve(Request("ability-activation-1", player, target: null, prayer, new CombatTick(40, 0.8d)));
 
         Assert.That(result.Outcome, Is.EqualTo(CombatInstantAbilityOutcome.Resolved));
+        Assert.That(prayer.ResourceKind, Is.EqualTo(CombatTacticalAbilityResourceKind.Magical));
         Assert.That(result.Caster.CurrentMana, Is.EqualTo(155));
+        Assert.That(result.Caster.CurrentEndurance, Is.EqualTo(80));
         Assert.That(result.Caster.CastRuntimeState, Is.EqualTo(CombatCastRuntimeState.None));
         Assert.That(result.TargetAfterResolution, Is.Null);
         var selfBuff = result.AppliedEffects.Single();
@@ -163,7 +272,12 @@ public sealed class CombatTacticalClericInstantsTest
         return gate;
     }
 
-    private static CombatActorState CreatePlayer(string zoneId = "Haunt_Prototype_T1")
+    private static CombatActorState CreatePlayer(
+        string zoneId = "Haunt_Prototype_T1",
+        int maxMana = 180,
+        int currentMana = 180,
+        int maxEndurance = 80,
+        int currentEndurance = 80)
     {
         return new CombatActorState(
             "combat-player-1",
@@ -174,8 +288,8 @@ public sealed class CombatTacticalClericInstantsTest
             5,
             140,
             140,
-            180,
-            180,
+            maxMana,
+            currentMana,
             35,
             25,
             8,
@@ -187,7 +301,9 @@ public sealed class CombatTacticalClericInstantsTest
             CombatState.OutOfCombat,
             CombatActorLifeState.Alive,
             null,
-            "player-local-character-1");
+            "player-local-character-1",
+            maxEndurance: maxEndurance,
+            currentEndurance: currentEndurance);
     }
 
     private static CombatActorState CreateHostile(string combatActorId, string sortKey)

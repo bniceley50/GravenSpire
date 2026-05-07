@@ -115,7 +115,7 @@ public sealed class CombatInstantAbilityResolver
         var abilityEvents = new List<ICombatAbilityLifecycleEvent> { activated };
         var castEvents = new List<ICombatCastLifecycleEvent>();
         var appliedEffects = new List<CombatAppliedAbilityEffect>();
-        var caster = request.Caster.WithCurrentMana(request.Caster.CurrentMana - request.Profile.CostMana);
+        var caster = SpendAbilityResource(request.Caster, request.Profile);
         var target = request.Target;
 
         foreach (var effect in request.Profile.Effects)
@@ -202,6 +202,7 @@ public sealed class CombatInstantAbilityResolver
         }
 
         if (request.Profile.CostMana < 0 ||
+            request.Profile.CostEndurance < 0 ||
             request.Profile.CooldownSeconds <= 0 ||
             request.Profile.RangeMeters < 0)
         {
@@ -219,9 +220,16 @@ public sealed class CombatInstantAbilityResolver
             errors.Add("Caster is already casting or recovering.");
         }
 
-        if (request.Caster.CurrentMana < request.Profile.CostMana)
+        if (request.Profile.ResourceKind == CombatTacticalAbilityResourceKind.Magical &&
+            request.Caster.CurrentMana < request.Profile.CostMana)
         {
             errors.Add("Caster does not have enough mana.");
+        }
+
+        if (request.Profile.ResourceKind == CombatTacticalAbilityResourceKind.Physical &&
+            request.Caster.CurrentEndurance < request.Profile.CostEndurance)
+        {
+            errors.Add("Caster does not have enough Endurance.");
         }
 
         if (!request.ZoneGate.CanRunHostileCombat(request.Caster.ZoneId))
@@ -293,6 +301,15 @@ public sealed class CombatInstantAbilityResolver
         }
 
         return target.WithCurrentHealthAfterAbilityDamage(RequiredDamage(effect));
+    }
+
+    private static CombatActorState SpendAbilityResource(
+        CombatActorState caster,
+        CombatTacticalAbilityProfile profile)
+    {
+        return profile.ResourceKind == CombatTacticalAbilityResourceKind.Physical
+            ? caster.WithCurrentEndurance(caster.CurrentEndurance - profile.CostEndurance)
+            : caster.WithCurrentMana(caster.CurrentMana - profile.CostMana);
     }
 
     private static int RequiredDamage(CombatTacticalAbilityEffectProfile effect)

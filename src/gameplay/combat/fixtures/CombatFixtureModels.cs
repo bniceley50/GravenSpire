@@ -127,6 +127,12 @@ public sealed record CombatActorFixture
     public int MaxMana { get; init; }
 
     /// <summary>
+    /// Fixture maximum Endurance for physical instant pacing.
+    /// </summary>
+    [System.Text.Json.Serialization.JsonPropertyName("max_endurance")]
+    public int MaxEndurance { get; init; }
+
+    /// <summary>
     /// Fixture armor class.
     /// </summary>
     public int ArmorClass { get; init; }
@@ -378,9 +384,20 @@ public sealed record CombatSpellFixture
     public string EffectType { get; init; } = string.Empty;
 
     /// <summary>
+    /// Optional tactical-instant resource branch for legacy banded rows.
+    /// </summary>
+    [System.Text.Json.Serialization.JsonPropertyName("resource_kind")]
+    public CombatTacticalAbilityResourceKind? ResourceKind { get; init; }
+
+    /// <summary>
     /// Mana cost values by fixture band.
     /// </summary>
     public List<CombatBandValue> ManaCostByBand { get; init; } = new();
+
+    /// <summary>
+    /// Endurance cost values by fixture band.
+    /// </summary>
+    public List<CombatBandValue> EnduranceCostByBand { get; init; } = new();
 
     /// <summary>
     /// Primary effect values by fixture band.
@@ -424,10 +441,22 @@ public sealed record CombatTacticalInstantAbilityProfileFixture
     public double CastTimeSeconds { get; init; }
 
     /// <summary>
+    /// Fixture-owned resource branch for this tactical instant profile.
+    /// </summary>
+    [System.Text.Json.Serialization.JsonPropertyName("resource_kind")]
+    public CombatTacticalAbilityResourceKind? ResourceKind { get; init; }
+
+    /// <summary>
     /// Fixture-owned mana cost.
     /// </summary>
     [System.Text.Json.Serialization.JsonPropertyName("cost_mana")]
     public int CostMana { get; init; }
+
+    /// <summary>
+    /// Fixture-owned Endurance cost.
+    /// </summary>
+    [System.Text.Json.Serialization.JsonPropertyName("cost_endurance")]
+    public int CostEndurance { get; init; }
 
     /// <summary>
     /// Fixture-owned transient cooldown length.

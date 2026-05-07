@@ -26,11 +26,16 @@ public sealed class CombatFixtureValidationTest
     {
         var package = LoadPackage();
 
+        var clericLow = package.ActorFixtures.Single(actor => actor.Id == "Cleric_Low_T1");
         var clericMid = package.ActorFixtures.Single(actor => actor.Id == "Cleric_Mid_T1");
+        var clericTop = package.ActorFixtures.Single(actor => actor.Id == "Cleric_Top_T1");
 
         Assert.That(clericMid.Level, Is.EqualTo(5));
         Assert.That(clericMid.MaxHealth, Is.EqualTo(140));
         Assert.That(clericMid.MaxMana, Is.EqualTo(180));
+        Assert.That(clericLow.MaxEndurance, Is.EqualTo(80));
+        Assert.That(clericMid.MaxEndurance, Is.EqualTo(80));
+        Assert.That(clericTop.MaxEndurance, Is.EqualTo(80));
         Assert.That(clericMid.ArmorClass, Is.EqualTo(35));
         Assert.That(clericMid.AttackPower, Is.EqualTo(25));
         Assert.That(clericMid.WeaponDelaySeconds, Is.EqualTo(2.8d).Within(0.000001d));
@@ -100,7 +105,9 @@ public sealed class CombatFixtureValidationTest
         var prayer = package.TacticalInstantAbilityProfiles.Single(profile => profile.Id == "DefensivePrayer_T1_Prototype");
 
         Assert.That(smite.CastTimeSeconds, Is.EqualTo(0d));
+        Assert.That(smite.ResourceKind, Is.EqualTo(CombatTacticalAbilityResourceKind.Magical));
         Assert.That(smite.CostMana, Is.EqualTo(10));
+        Assert.That(smite.CostEndurance, Is.EqualTo(0));
         Assert.That(smite.CooldownSeconds, Is.EqualTo(7.0d).Within(0.000001d));
         Assert.That(smite.Effects.Single().EffectType, Is.EqualTo(CombatTacticalAbilityEffectTypes.DirectDamage));
         Assert.That(smite.Effects.Single().DamageByBand.Single(value => value.Band == "Mid").Value, Is.EqualTo(16));
@@ -110,12 +117,40 @@ public sealed class CombatFixtureValidationTest
             CombatTacticalAbilityEffectTypes.DirectDamage,
             CombatTacticalAbilityEffectTypes.InterruptCurrentChannel
         }));
+        Assert.That(bash.ResourceKind, Is.EqualTo(CombatTacticalAbilityResourceKind.Physical));
+        Assert.That(bash.CostMana, Is.EqualTo(0));
+        Assert.That(bash.CostEndurance, Is.EqualTo(10));
         Assert.That(bash.Effects.Single(effect => effect.EffectType == CombatTacticalAbilityEffectTypes.InterruptCurrentChannel).InterruptSeconds, Is.EqualTo(1.0d).Within(0.000001d));
 
         Assert.That(prayer.RequiresTarget, Is.False);
         Assert.That(prayer.RequiresLineOfSight, Is.False);
+        Assert.That(prayer.ResourceKind, Is.EqualTo(CombatTacticalAbilityResourceKind.Magical));
+        Assert.That(prayer.CostMana, Is.EqualTo(25));
+        Assert.That(prayer.CostEndurance, Is.EqualTo(0));
         Assert.That(prayer.Effects.Single().EffectType, Is.EqualTo(CombatTacticalAbilityEffectTypes.SelfBuff));
         Assert.That(prayer.Effects.Single().DurationSeconds, Is.EqualTo(8.0d).Within(0.000001d));
+    }
+
+    [Test]
+    public void test_combat_fixture_package_declares_legacy_tactical_instant_resource_split()
+    {
+        var package = LoadPackage();
+
+        var smite = package.TacticalInstantFixtures.Single(profile => profile.Id == "SmiteOfAuthority_T1_Prototype");
+        var bash = package.TacticalInstantFixtures.Single(profile => profile.Id == "Bash_T1_Prototype");
+        var prayer = package.TacticalInstantFixtures.Single(profile => profile.Id == "DefensivePrayer_T1_Prototype");
+
+        Assert.That(smite.ResourceKind, Is.EqualTo(CombatTacticalAbilityResourceKind.Magical));
+        Assert.That(smite.ManaCostByBand.Single(value => value.Band == "Mid").Value, Is.EqualTo(10));
+        Assert.That(smite.EnduranceCostByBand, Is.Empty);
+
+        Assert.That(bash.ResourceKind, Is.EqualTo(CombatTacticalAbilityResourceKind.Physical));
+        Assert.That(bash.ManaCostByBand, Is.Empty);
+        Assert.That(bash.EnduranceCostByBand.Single(value => value.Band == "Mid").Value, Is.EqualTo(10));
+
+        Assert.That(prayer.ResourceKind, Is.EqualTo(CombatTacticalAbilityResourceKind.Magical));
+        Assert.That(prayer.ManaCostByBand.Single(value => value.Band == "Mid").Value, Is.EqualTo(25));
+        Assert.That(prayer.EnduranceCostByBand, Is.Empty);
     }
 
     [Test]
@@ -135,7 +170,7 @@ public sealed class CombatFixtureValidationTest
         var validation = new CombatFixtureValidator().Validate(package);
 
         Assert.That(validation.IsValid, Is.False);
-        Assert.That(validation.Errors, Has.Some.Contains("SmiteOfAuthority_T1_Prototype: cost_mana must be positive."));
+        Assert.That(validation.Errors, Has.Some.Contains("SmiteOfAuthority_T1_Prototype: resource_kind is required."));
         Assert.That(validation.Errors, Has.Some.Contains("SmiteOfAuthority_T1_Prototype: cooldown_seconds must be positive."));
         Assert.That(validation.Errors, Has.Some.Contains("SmiteOfAuthority_T1_Prototype: at least one declared ability effect is required."));
         Assert.That(validation.Errors, Has.Some.Contains("Missing required tactical instant ability profile: Bash_T1_Prototype"));
@@ -153,6 +188,7 @@ public sealed class CombatFixtureValidationTest
                 {
                     Id = "SmiteOfAuthority_T1_Prototype",
                     CastTimeSeconds = 0d,
+                    ResourceKind = CombatTacticalAbilityResourceKind.Magical,
                     CostMana = 10,
                     CooldownSeconds = 7.0d,
                     RangeMeters = 30.0d,
@@ -168,7 +204,8 @@ public sealed class CombatFixtureValidationTest
                 {
                     Id = "Bash_T1_Prototype",
                     CastTimeSeconds = 0d,
-                    CostMana = 10,
+                    ResourceKind = CombatTacticalAbilityResourceKind.Physical,
+                    CostEndurance = 10,
                     CooldownSeconds = 10.0d,
                     RangeMeters = 2.0d,
                     Effects = new()
@@ -183,6 +220,7 @@ public sealed class CombatFixtureValidationTest
                 {
                     Id = "DefensivePrayer_T1_Prototype",
                     CastTimeSeconds = 0d,
+                    ResourceKind = CombatTacticalAbilityResourceKind.Magical,
                     CostMana = 25,
                     CooldownSeconds = 30.0d,
                     RangeMeters = 0d,
@@ -205,6 +243,79 @@ public sealed class CombatFixtureValidationTest
         Assert.That(validation.Errors, Has.Some.Contains("SmiteOfAuthority_T1_Prototype: direct damage values are required."));
         Assert.That(validation.Errors, Has.Some.Contains("Bash_T1_Prototype: interrupt_current_channel requires positive interrupt_seconds."));
         Assert.That(validation.Errors, Has.Some.Contains("DefensivePrayer_T1_Prototype: self_buff requires positive duration_seconds."));
+    }
+
+    [Test]
+    public void test_qa_02_05_validator_rejects_physical_instant_with_mana_cost()
+    {
+        var package = LoadPackage();
+        var bash = package.TacticalInstantAbilityProfiles.Single(profile => profile.Id == "Bash_T1_Prototype") with
+        {
+            CostMana = 10
+        };
+        package = package with
+        {
+            TacticalInstantAbilityProfiles = package.TacticalInstantAbilityProfiles
+                .Select(profile => profile.Id == "Bash_T1_Prototype" ? bash : profile)
+                .ToList()
+        };
+
+        var validation = new CombatFixtureValidator().Validate(package);
+
+        Assert.That(validation.IsValid, Is.False);
+        Assert.That(validation.Errors, Has.Some.Contains("Bash_T1_Prototype: physical tactical instant profiles must not declare cost_mana."));
+
+        var legacyBash = LoadPackage().TacticalInstantFixtures.Single(profile => profile.Id == "Bash_T1_Prototype") with
+        {
+            ManaCostByBand = new()
+            {
+                new CombatBandValue { Band = "Mid", Value = 10 }
+            }
+        };
+        var legacyPackage = LoadPackage() with
+        {
+            TacticalInstantFixtures = LoadPackage().TacticalInstantFixtures
+                .Select(profile => profile.Id == "Bash_T1_Prototype" ? legacyBash : profile)
+                .ToList()
+        };
+
+        var legacyValidation = new CombatFixtureValidator().Validate(legacyPackage);
+
+        Assert.That(legacyValidation.IsValid, Is.False);
+        Assert.That(legacyValidation.Errors, Has.Some.Contains("Bash_T1_Prototype: physical tactical instant fixtures must not declare manaCostByBand."));
+    }
+
+    [Test]
+    public void test_qa_02_06_validator_rejects_magical_instant_without_mana_cost()
+    {
+        var package = LoadPackage();
+        var smite = package.TacticalInstantAbilityProfiles.Single(profile => profile.Id == "SmiteOfAuthority_T1_Prototype") with
+        {
+            CostMana = 0
+        };
+        package = package with
+        {
+            TacticalInstantAbilityProfiles = package.TacticalInstantAbilityProfiles
+                .Select(profile => profile.Id == "SmiteOfAuthority_T1_Prototype" ? smite : profile)
+                .ToList()
+        };
+
+        var validation = new CombatFixtureValidator().Validate(package);
+
+        Assert.That(validation.IsValid, Is.False);
+        Assert.That(validation.Errors, Has.Some.Contains("SmiteOfAuthority_T1_Prototype: cost_mana must be positive for magical tactical instant profiles."));
+    }
+
+    [Test]
+    public void test_qa_02_07_resource_split_adds_no_durable_combat_actor_id_surface()
+    {
+        var profileProperties = typeof(CombatTacticalAbilityProfile).GetProperties().Select(property => property.Name);
+        var resultProperties = typeof(CombatInstantAbilityResult).GetProperties().Select(property => property.Name);
+        var appliedEffectProperties = typeof(CombatAppliedAbilityEffect).GetProperties().Select(property => property.Name);
+
+        Assert.That(profileProperties.Any(IsDurableCombatActorIdentityName), Is.False);
+        Assert.That(resultProperties.Any(IsDurableCombatActorIdentityName), Is.False);
+        Assert.That(appliedEffectProperties.Any(IsDurableCombatActorIdentityName), Is.False);
     }
 
     [Test]
@@ -275,5 +386,13 @@ public sealed class CombatFixtureValidationTest
         }
 
         throw new DirectoryNotFoundException("Unable to locate repository root for combat fixture tests.");
+    }
+
+    private static bool IsDurableCombatActorIdentityName(string name)
+    {
+        return name.Contains("combat_actor_id", StringComparison.OrdinalIgnoreCase) ||
+            string.Equals(name, "CombatActorId", StringComparison.Ordinal) ||
+            string.Equals(name, "CasterCombatActorId", StringComparison.Ordinal) ||
+            string.Equals(name, "TargetCombatActorId", StringComparison.Ordinal);
     }
 }

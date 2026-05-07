@@ -243,6 +243,11 @@ public sealed class CombatFixtureValidator
                 errors.Add($"{actor.Id}: max_mana must not be negative.");
             }
 
+            if (actor.MaxEndurance < 0)
+            {
+                errors.Add($"{actor.Id}: max_endurance must not be negative.");
+            }
+
             if (actor.ActorKind == CombatActorKind.Player && string.IsNullOrWhiteSpace(actor.ClassId))
             {
                 errors.Add($"{actor.Id}: player fixtures require class_id.");
@@ -293,7 +298,7 @@ public sealed class CombatFixtureValidator
                 errors.Add($"{spell.Id}: tactical instant fixtures must declare zero cast time.");
             }
 
-            ValidateBandValues(spell.Id, "mana cost", spell.ManaCostByBand, errors);
+            ValidateSpellResourceRows(spell, requireZeroCast, errors);
             ValidateBandValues(spell.Id, "effect value", spell.EffectValueByBand, errors);
 
             if (spell.CooldownSeconds is < 0 || spell.DurationSeconds is < 0 || spell.InterruptSeconds is < 0)
@@ -305,6 +310,46 @@ public sealed class CombatFixtureValidator
             {
                 errors.Add($"{spell.Id}: damage reduction must be a ratio from zero to one.");
             }
+        }
+    }
+
+    private static void ValidateSpellResourceRows(
+        CombatSpellFixture spell,
+        bool requireZeroCast,
+        ICollection<string> errors)
+    {
+        if (!requireZeroCast)
+        {
+            ValidateBandValues(spell.Id, "mana cost", spell.ManaCostByBand, errors);
+            if (spell.EnduranceCostByBand.Count != 0)
+            {
+                errors.Add($"{spell.Id}: slow spell fixtures must not declare enduranceCostByBand.");
+            }
+
+            return;
+        }
+
+        if (spell.ResourceKind is null)
+        {
+            errors.Add($"{spell.Id}: resource_kind is required for tactical instant fixtures.");
+            return;
+        }
+
+        if (spell.ResourceKind == CombatTacticalAbilityResourceKind.Physical)
+        {
+            ValidateBandValues(spell.Id, "Endurance cost", spell.EnduranceCostByBand, errors);
+            if (spell.ManaCostByBand.Count != 0)
+            {
+                errors.Add($"{spell.Id}: physical tactical instant fixtures must not declare manaCostByBand.");
+            }
+
+            return;
+        }
+
+        ValidateBandValues(spell.Id, "mana cost", spell.ManaCostByBand, errors);
+        if (spell.EnduranceCostByBand.Count != 0)
+        {
+            errors.Add($"{spell.Id}: magical tactical instant fixtures must not declare enduranceCostByBand.");
         }
     }
 
@@ -322,9 +367,33 @@ public sealed class CombatFixtureValidator
                 errors.Add($"{profile.Id}: tactical instant ability profile must declare zero cast time.");
             }
 
-            if (profile.CostMana <= 0)
+            if (profile.ResourceKind is null)
             {
-                errors.Add($"{profile.Id}: cost_mana must be positive.");
+                errors.Add($"{profile.Id}: resource_kind is required.");
+            }
+            else if (profile.ResourceKind == CombatTacticalAbilityResourceKind.Physical)
+            {
+                if (profile.CostEndurance <= 0)
+                {
+                    errors.Add($"{profile.Id}: cost_endurance must be positive for physical tactical instant profiles.");
+                }
+
+                if (profile.CostMana != 0)
+                {
+                    errors.Add($"{profile.Id}: physical tactical instant profiles must not declare cost_mana.");
+                }
+            }
+            else
+            {
+                if (profile.CostMana <= 0)
+                {
+                    errors.Add($"{profile.Id}: cost_mana must be positive for magical tactical instant profiles.");
+                }
+
+                if (profile.CostEndurance != 0)
+                {
+                    errors.Add($"{profile.Id}: magical tactical instant profiles must not declare cost_endurance.");
+                }
             }
 
             if (profile.CooldownSeconds <= 0)

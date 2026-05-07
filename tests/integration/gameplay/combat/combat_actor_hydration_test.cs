@@ -40,7 +40,48 @@ public sealed class CombatActorHydrationTest
         Assert.That(result.Actor.CurrentHealth, Is.EqualTo(140));
         Assert.That(result.Actor.MaxMana, Is.EqualTo(180));
         Assert.That(result.Actor.CurrentMana, Is.EqualTo(180));
+        Assert.That(result.Actor.MaxEndurance, Is.EqualTo(80));
+        Assert.That(result.Actor.CurrentEndurance, Is.EqualTo(80));
         Assert.That(result.Actor.CombatState, Is.EqualTo(CombatState.OutOfCombat));
+    }
+
+    [Test]
+    public void test_combat_actor_hydration_uses_fixture_endurance_for_all_cleric_bands()
+    {
+        var package = LoadPackage();
+        var clericFixtures = package.ActorFixtures
+            .Where(actor => string.Equals(actor.ClassId, "Cleric", StringComparison.Ordinal))
+            .ToArray();
+
+        Assert.That(clericFixtures.Select(actor => actor.Id), Is.EquivalentTo(new[]
+        {
+            "Cleric_Low_T1",
+            "Cleric_Mid_T1",
+            "Cleric_Top_T1"
+        }));
+
+        foreach (var fixture in clericFixtures)
+        {
+            var snapshot = new CombatProgressionBaselineSnapshot(
+                "local-character-1",
+                "Cleric",
+                fixture.Level,
+                fixture.MaxHealth,
+                fixture.MaxMana,
+                1,
+                10,
+                CombatProgressionBaselineProducedFor.InitialHydration);
+            var input = new CombatActorHydrationInput(
+                $"combat-player-{fixture.Id}",
+                "Haunt_Prototype_T1",
+                fixture.Id);
+
+            var result = new CombatActorHydrator().HydratePlayerActor(snapshot, fixture, input);
+
+            Assert.That(result.Succeeded, Is.True, string.Join(Environment.NewLine, result.Errors));
+            Assert.That(result.Actor!.MaxEndurance, Is.EqualTo(80), fixture.Id);
+            Assert.That(result.Actor.CurrentEndurance, Is.EqualTo(80), fixture.Id);
+        }
     }
 
     [Test]
@@ -77,7 +118,7 @@ public sealed class CombatActorHydrationTest
             "combat-player-1",
             "Haunt_Prototype_T1",
             "player-local-character-1",
-            new CombatResourceHydrationState(0, clericMid.MaxMana));
+            new CombatResourceHydrationState(0, clericMid.MaxMana, clericMid.MaxEndurance));
 
         var result = new CombatActorHydrator().HydratePlayerActor(snapshot, clericMid, input);
 

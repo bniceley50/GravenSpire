@@ -57,6 +57,7 @@
       "level": 1,
       "maxHealth": 80,
       "maxMana": 100,
+      "max_endurance": 80,
       "armorClass": 20,
       "attackPower": 10,
       "weaponBaseDamage": 4,
@@ -78,6 +79,7 @@
       "level": 5,
       "maxHealth": 140,
       "maxMana": 180,
+      "max_endurance": 80,
       "armorClass": 35,
       "attackPower": 25,
       "weaponBaseDamage": 8,
@@ -99,6 +101,7 @@
       "level": 10,
       "maxHealth": 220,
       "maxMana": 300,
+      "max_endurance": 80,
       "armorClass": 55,
       "attackPower": 45,
       "weaponBaseDamage": 12,
@@ -276,6 +279,7 @@
       "fixtureKind": "tactical_instant",
       "castTimeSeconds": 0.0,
       "recoverySeconds": 0.0,
+      "resource_kind": "magical",
       "effectType": "hostile_direct_damage",
       "manaCostByBand": [
         {
@@ -312,8 +316,9 @@
       "fixtureKind": "tactical_instant",
       "castTimeSeconds": 0.0,
       "recoverySeconds": 0.0,
+      "resource_kind": "physical",
       "effectType": "hostile_direct_damage_interrupt_current_channel",
-      "manaCostByBand": [
+      "enduranceCostByBand": [
         {
           "band": "Low",
           "value": 10
@@ -349,6 +354,7 @@
       "fixtureKind": "tactical_instant",
       "castTimeSeconds": 0.0,
       "recoverySeconds": 0.0,
+      "resource_kind": "magical",
       "effectType": "self_buff_damage_reduction",
       "manaCostByBand": [
         {
@@ -387,6 +393,7 @@
     {
       "id": "SmiteOfAuthority_T1_Prototype",
       "castTimeSeconds": 0.0,
+      "resource_kind": "magical",
       "cost_mana": 10,
       "cooldown_seconds": 7.0,
       "range_meters": 30.0,
@@ -415,7 +422,8 @@
     {
       "id": "Bash_T1_Prototype",
       "castTimeSeconds": 0.0,
-      "cost_mana": 10,
+      "resource_kind": "physical",
+      "cost_endurance": 10,
       "cooldown_seconds": 10.0,
       "range_meters": 2.0,
       "requires_target": true,
@@ -447,6 +455,7 @@
     {
       "id": "DefensivePrayer_T1_Prototype",
       "castTimeSeconds": 0.0,
+      "resource_kind": "magical",
       "cost_mana": 25,
       "cooldown_seconds": 30.0,
       "range_meters": 0.0,

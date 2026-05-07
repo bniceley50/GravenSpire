@@ -21,7 +21,9 @@ public sealed class CombatTacticalAbilityProfileTest
 
         Assert.That(profile.AbilityId, Is.EqualTo("SmiteOfAuthority_T1_Prototype"));
         Assert.That(profile.CastTimeSeconds, Is.EqualTo(0d));
+        Assert.That(profile.ResourceKind, Is.EqualTo(CombatTacticalAbilityResourceKind.Magical));
         Assert.That(profile.CostMana, Is.EqualTo(10));
+        Assert.That(profile.CostEndurance, Is.EqualTo(0));
         Assert.That(profile.CooldownSeconds, Is.EqualTo(7.0d).Within(0.000001d));
         Assert.That(profile.RangeMeters, Is.EqualTo(30.0d).Within(0.000001d));
         Assert.That(profile.RequiresTarget, Is.True);
@@ -38,7 +40,9 @@ public sealed class CombatTacticalAbilityProfileTest
 
         var profile = CombatTacticalAbilityProfile.FromFixture(bashFixture, "Mid");
 
-        Assert.That(profile.CostMana, Is.EqualTo(10));
+        Assert.That(profile.ResourceKind, Is.EqualTo(CombatTacticalAbilityResourceKind.Physical));
+        Assert.That(profile.CostMana, Is.EqualTo(0));
+        Assert.That(profile.CostEndurance, Is.EqualTo(10));
         Assert.That(profile.CooldownSeconds, Is.EqualTo(10.0d).Within(0.000001d));
         Assert.That(profile.RangeMeters, Is.EqualTo(2.0d).Within(0.000001d));
         Assert.That(profile.Effects.Select(effect => effect.EffectType), Is.EqualTo(new[]
