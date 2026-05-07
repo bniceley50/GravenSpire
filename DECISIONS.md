@@ -374,7 +374,7 @@ T1 sprint planning is unblocked once Combat Core revision passes
 ## D013 — ADR-0006 Endurance Resource Model
 
 **Date:** 2026-05-06
-**Status:** Proposed
+**Status:** Locked
 **Context:** The T1 combat slice review committed at `4edf2f9` recorded Brian's
 Yellow verdict and identified a harder resource-model finding: Bash and future
 physical instants should move off mana onto a quiet Endurance resource, while

@@ -1,6 +1,6 @@
 # T1.5-COMBAT-02 - Physical Instant Conversion
 
-**Status:** Implemented + Verified; awaiting `/story-done`
+**Status:** Complete
 **Sprint:** 1.5
 **Priority:** Must Have
 **Layer:** Gameplay / Combat Core
@@ -12,8 +12,8 @@
 
 ## Scope
 
-This story validates ADR-0006's physical-instant resource split while keeping
-ADR-0006 and D013 Proposed until `/story-done`.
+This story validates ADR-0006's physical-instant resource split. During
+implementation, ADR-0006 and D013 remained Proposed until `/story-done`.
 
 - Convert Bash from mana spend to Endurance spend.
 - Add fixture schema support for `resource_kind` and `cost_endurance`.
@@ -73,7 +73,7 @@ Source trace: `production/sprints/sprint-1-5.md:139` through
 - `PlayerDeathEvent` remains unchanged.
 - `CombatActorDeathEvent` remains unchanged.
 - `CombatProgressionBaselineSnapshot` remains Endurance-free.
-- D013 remains Proposed; ADR-0006 remains Proposed until `/story-done`.
+- D013 is Locked; ADR-0006 is Accepted through the `/story-done` ride-along.
 
 ## Acceptance Criteria Coverage
 
@@ -99,12 +99,50 @@ Source trace: `production/sprints/sprint-1-5.md:139` through
 
 ## Story Status
 
-`T1.5-COMBAT-02` is implemented and verified, awaiting `/story-done`.
+`T1.5-COMBAT-02` is complete.
 
 ## Blockers / Carried Forward
 
-- `/story-done` owns the ADR-0006 Proposed -> Accepted and D013 Proposed ->
-  Locked ride-along if closure evidence accepts this implementation.
+- ADR-0006 Proposed -> Accepted and D013 Proposed -> Locked completed in this
+  `/story-done` closure.
+- `AbilityResolvedEvent` remains `ManaSpent`-only; Bash proves Endurance spend
+  through state/result behavior while resolved-event payload semantics stay a
+  `T1-COMBAT-11` scan input.
+- `fixtureSetVersion` bump is deferred to `T1.5-COMBAT-03`, the next
+  fixture-touching story.
+- QA plan wording that says "cooldown/global recovery" for `QA-02-01` is
+  deferred to the next QA plan iteration; implementation currently exposes
+  resolver-local cooldown.
 - `T1.5-COMBAT-03` owns FEEL-03 overpull tuning.
 - `T1-COMBAT-11` owns the forbidden-pattern scan including ADR-0006 Endurance
   banned patterns.
+
+## Completion Notes
+
+**Completed:** 2026-05-07
+**Verdict:** COMPLETE WITH NOTES
+**Criteria:** 7/7 QA-02 cases covered, plus 2 blocker regression tests added
+for legacy tactical instant fixture data and all-band Cleric Endurance
+hydration.
+**Test Evidence:** `tests/evidence/T1.5-COMBAT-02/verification.md:32` through
+`tests/evidence/T1.5-COMBAT-02/verification.md:38` record all QA-02 PASS rows;
+`tests/evidence/T1.5-COMBAT-02/t1-5-combat-02-stage2.trx:906` records
+`148/148` passing. Direct test anchors: `QA-02-01` through `QA-02-04` at
+`tests/integration/gameplay/combat/combat_tactical_cleric_instants_test.cs:40`,
+`:59`, `:78`, and `:110`; `QA-02-05` through `QA-02-07` at
+`tests/unit/gameplay/combat/combat_fixture_validation_test.cs:249`, `:289`,
+and `:310`; legacy fixture regression at
+`tests/unit/gameplay/combat/combat_fixture_validation_test.cs:135`; all-band
+hydration regression at
+`tests/integration/gameplay/combat/combat_actor_hydration_test.cs:52`.
+**Code Review:** Complete. `/code-review 9aacee0` approved with P3 suggestions
+only; both P3s are intentionally deferred outside this closure batch.
+**ADR Ride-Along:** ADR-0006 moved from Proposed to Accepted, and D013 moved
+from Proposed to Locked. The ADR pre-authorizes this closure transition at
+`docs/architecture/adr-0006-endurance-resource-model.md:123` through
+`docs/architecture/adr-0006-endurance-resource-model.md:127`, contingent on
+`T1.5-COMBAT-01` and `T1.5-COMBAT-02` holding.
+**Deviations:** Non-blocking carryovers remain: `AbilityResolvedEvent.ManaSpent`
+payload semantics for `T1-COMBAT-11`, fixture package version bump for
+`T1.5-COMBAT-03`, and QA plan cooldown/global-recovery wording for the next QA
+plan iteration.

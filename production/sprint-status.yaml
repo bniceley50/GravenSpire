@@ -8,18 +8,21 @@ end: "2026-05-21"
 generated: "2026-05-06"
 updated: "2026-05-07"
 branch: "main"
-head: "8885d2e"
+head: "9aacee0"
 qa_plan: "production/qa/plans/qa-plan-sprint-1-5-20260506.md"
 plan: "production/sprints/sprint-1-5.md"
 slice_review: "production/qa/combat/feel-review-T1-slice.md"
-implementation_gate: "T1.5-COMBAT-01 closed by /story-done. Sprint 1.5 progress: 2/7 done. Next active gate: /dev-story T1.5-COMBAT-02-physical-instant-conversion. T1.5-COMBAT-04 remains unblocked for optional parallel design work."
-progress: "2/7 done"
-completed_stories: 2
+implementation_gate: "T1.5-COMBAT-02 closed by /story-done. Sprint 1.5 progress: 3/7 done. Next active gate: /dev-story T1.5-COMBAT-03-feel-03-overpull-tuning. T1.5-COMBAT-04 remains unblocked for optional parallel design work."
+progress: "3/7 done"
+completed_stories: 3
 total_stories: 7
-next_active_story: "T1.5-COMBAT-02"
-next_active_command: "/dev-story T1.5-COMBAT-02-physical-instant-conversion"
+next_active_story: "T1.5-COMBAT-03"
+next_active_command: "/dev-story T1.5-COMBAT-03-feel-03-overpull-tuning"
 
 carryover:
+  ability_resolved_event_payload: "AbilityResolvedEvent remains ManaSpent-only; carry to T1-COMBAT-11 forbidden-pattern scan input."
+  fixture_set_version: "Bump fixtureSetVersion in T1.5-COMBAT-03, the next fixture-touching story."
+  qa_02_01_wording: "Clarify cooldown versus global recovery wording in the next QA plan iteration."
   t1_combat_11_story_file: "Absent; create or recover before T1-COMBAT-11 implementation."
   feel_review_09c: "HUMAN PLAYTEST PENDING; deferrable carryover."
 
@@ -46,19 +49,19 @@ stories:
     name: "Physical instant conversion"
     file: "production/stories/t1-5-combat-02-physical-instant-conversion.md"
     priority: must-have
-    status: ready-for-dev
+    status: done
     owner: ""
     estimate_days: 1.25
-    blocker: "All dependencies satisfied. Next critical path."
-    completed: ""
+    blocker: ""
+    completed: "2026-05-07"
   - id: "T1.5-COMBAT-03"
     name: "FEEL-03 overpull tuning"
     file: "production/stories/t1-5-combat-03-feel-03-overpull-tuning.md"
     priority: must-have
-    status: blocked
+    status: ready-for-dev
     owner: ""
     estimate_days: 1.25
-    blocker: "Depends on T1.5-COMBAT-02."
+    blocker: "All dependencies satisfied. Next critical path. Also owns deferred fixtureSetVersion bump from T1.5-COMBAT-02 code review."
     completed: ""
   - id: "T1.5-COMBAT-04"
     name: "FEEL-01 target revalidation"
@@ -76,7 +79,7 @@ stories:
     status: blocked
     owner: ""
     estimate_days: 1.0
-    blocker: "Depends on T1.5-COMBAT-02; referenced story file is currently absent and must be created or recovered before implementation."
+    blocker: "T1.5-COMBAT-02 dependency satisfied; referenced story file is currently absent and must be created or recovered before implementation."
     completed: ""
   - id: "T1.5-COMBAT-05"
     name: "Profiled rerun + slice evidence summary"
