@@ -1,6 +1,6 @@
 # T1.5-COMBAT-03 - FEEL-03 Overpull Tuning
 
-**Status:** Implemented + Verified; awaiting `/story-done`
+**Status:** Complete
 **Sprint:** 1.5
 **Priority:** Must Have
 **Layer:** Gameplay / Combat Feel Fixtures
@@ -86,10 +86,40 @@ Forbidden knobs:
 
 ## Story Status
 
-`T1.5-COMBAT-03` is implemented and verified, awaiting `/story-done`.
+`T1.5-COMBAT-03` is complete.
 
 ## Blockers / Carried Forward
 
 - `T1.5-COMBAT-04` still owns FEEL-01 target revalidation. This story records
   the current FEEL-01 row as failed, but does not solve or redefine it.
 - `T1-COMBAT-11` still owns the forbidden-pattern compliance scan/analyzer.
+
+## Completion Notes
+
+**Completed:** 2026-05-08
+**Verdict:** COMPLETE WITH NOTES
+**Criteria:** 5/5 QA-03 cases covered.
+**Test Evidence:** `tests/evidence/T1.5-COMBAT-03/verification.md:20` through
+`tests/evidence/T1.5-COMBAT-03/verification.md:28` record the `148/148`
+baseline, `149/149` post-change regression, scoped pre-commit pass,
+post-commit evidence-origin pass, and all QA-03 PASS rows. JSONL ground truth
+is `tests/evidence/T1.5-COMBAT-03/profiled-combat-slice.jsonl:3`, which
+records `TwoTrash_Overpull_T1`, `build_sha=e7233b5`, `result=pass`,
+`dangerous_outcomes=9`, `losses=5`, and `wins=5`; line `:2` records
+`NamedSoloBlock_T1` passing with `dangerous_outcomes=8`, and line `:4` records
+`MedBreak_Pacing_T1` passing with `seconds_to_70_mana=72`.
+**Implementation Provenance:** `e7233b5` is the implementation and
+metric-capture commit for the JSONL rows. `1935515` is the follow-up
+SHA-drift fix on `origin/main` that restored evidence reproducibility after
+the pre-commit harness run captured the parent SHA. Verified on 2026-05-08 via
+`git rev-parse HEAD`, `git rev-parse origin/main`, and
+`git show --format=fuller --no-patch 1935515`.
+**Code Review:** Complete. `/code-review` approved `1935515`; the SHA-drift
+follow-up is treated as part of the closure-eligible implementation chain.
+**Deviations:** FEEL-01 target revalidation remains owned by
+`T1.5-COMBAT-04`. `AbilityResolvedEvent.ManaSpent` payload semantics and
+Endurance forbidden-pattern scan coverage remain `T1-COMBAT-11` inputs.
+QA-02-01 cooldown/global-recovery wording remains deferred to the next QA plan
+iteration. `T1-COMBAT-11` story-file recovery and `09c` human playtest remain
+open carryovers. The pre-commit SHA-drift workflow lesson should be captured
+before `T1.5-COMBAT-05`, the next harness-touching story.

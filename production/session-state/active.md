@@ -1,13 +1,13 @@
 # Active Session State
 
-**Last Updated:** 2026-05-07
+**Last Updated:** 2026-05-08
 **Project Stage:** Pre-Production — Sprint 1.5 — Implementation
 
 ## Current Task
 
-Sprint 1.5 is active in implementation. `T1.5-COMBAT-02` closed via `/story-done` with verdict **COMPLETE WITH NOTES**, landing physical-instant Endurance conversion and validating ADR-0006's resource split.
+Sprint 1.5 is active in implementation. `T1.5-COMBAT-03` closed via `/story-done` with verdict **COMPLETE WITH NOTES**, landing FEEL-03 overpull tuning and preserving the evidence-provenance distinction between implementation commit `e7233b5` and SHA-drift fix commit `1935515`.
 
-The next critical-path story is `/dev-story T1.5-COMBAT-03-feel-03-overpull-tuning`. `T1.5-COMBAT-04` remains unblocked for optional parallel design work.
+The next active story is `/dev-story T1.5-COMBAT-04-feel-01-target-revalidation`. `T1-COMBAT-11` still needs story-file recovery before implementation; `T1.5-COMBAT-05` remains blocked on `03`, `04`, and `11`.
 
 ## Status
 
@@ -76,10 +76,11 @@ The next critical-path story is `/dev-story T1.5-COMBAT-03-feel-03-overpull-tuni
 - ✅ Sprint 1.5 story `T1.5-COMBAT-00` closed via `/story-done` 2026-05-06 with verdict **COMPLETE WITH NOTES**. Commit `c2487fc` lands D013 and ADR-0006 as Proposed; the status ride-along to D013 Locked / ADR-0006 Accepted is scheduled for `T1.5-COMBAT-02` closure after physical instant conversion validates the contract.
 - ✅ Sprint 1.5 story `T1.5-COMBAT-01` closed via `/story-done` 2026-05-07 with verdict **COMPLETE WITH NOTES**. Commit `d6c8e08` lands Endurance state, combat persistence projection expanded to five fields, and categorical `CombatHudEnduranceCategory` HUD signaling; production source is unfrozen for this story and `dotnet test tests\Gravenspire.Combat.Tests.csproj --logger "console;verbosity=minimal"` passes 139/139.
 - ✅ Sprint 1.5 story `T1.5-COMBAT-02` closed via `/story-done` 2026-05-07 with verdict **COMPLETE WITH NOTES**. Commit `9aacee0` lands Bash Endurance spend, Smite/Defensive Prayer mana carveouts, resource_kind/cost_endurance fixture schema support across both tactical instant surfaces, all-band Cleric Endurance hydration, 7 QA-02 cases, and 2 blocker regression tests; `dotnet test tests\Gravenspire.Combat.Tests.csproj` passes 148/148. ADR-0006 is now Accepted and D013 is now Locked.
+- ✅ Sprint 1.5 story `T1.5-COMBAT-03` closed via `/story-done` 2026-05-08 with verdict **COMPLETE WITH NOTES**. Commit `e7233b5` lands FEEL-03 overpull tuning and JSONL metrics with `TwoTrash_Overpull_T1` at `dangerous_outcomes=9`; commit `1935515` is the SHA-drift follow-up now on `origin/main` that regenerated the JSONL at `HEAD=e7233b5` for reproducibility. `dotnet test tests\Gravenspire.Combat.Tests.csproj` passes 149/149.
 
 ## Files Being Worked On
 
-- **Active:** Sprint 1.5 implementation. Next critical path: `/dev-story T1.5-COMBAT-03-feel-03-overpull-tuning`. Optional parallel design work: `/dev-story T1.5-COMBAT-04-feel-01-target-revalidation`.
+- **Active:** Sprint 1.5 implementation. Next critical path: `/dev-story T1.5-COMBAT-04-feel-01-target-revalidation`. `T1-COMBAT-11` remains blocked on story-file recovery; `T1.5-COMBAT-05` remains blocked on `03`, `04`, and `11`.
 - Combat Feel Prototype: [prototypes/combat-feel/](../../prototypes/combat-feel/) — pinned-engine headline pass complete; prototype code remains throwaway evidence artifact.
 - Combat Feel Prototype README: [prototypes/combat-feel/README.md](../../prototypes/combat-feel/README.md) — prototype question, success/failure criteria, loop spec, controls, run notes
 - Inventory & Item Economy: [design/gdd/inventory-item-economy.md](../../design/gdd/inventory-item-economy.md) — design draft, **NEEDS REVISION**, blocker 1 repaired, remaining blockers tracked in `INV-OQ-05`
@@ -111,9 +112,10 @@ The next critical-path story is `/dev-story T1.5-COMBAT-03-feel-03-overpull-tuni
 - T1-COMBAT-08 now provides the Combat Core HUD-safe projection seam; Layer 1 HUD must consume categorical threat and explicit Attack ON/OFF state rather than exposing raw threat or inventing parallel combat state.
 - T1-COMBAT-09c closed the player death payload stub and first held-policy feel-review artifact at `production/qa/combat/feel-review-09c-player-death.md`; human qualitative death-moment playtest remains pending as a Sprint 1.5 carryover.
 - T1-COMBAT-10 closed the profiled evidence loop and surfaced quantitative combat-feel gaps: solo trash is too safe (`20/20` wins) and two-trash overpull is insufficiently punishing (`5/10` dangerous outcomes). Treat these as slice-review inputs, not as bugs fixed in T1-COMBAT-10.
-- T1.5-COMBAT-02 is closed; `production/sprint-status.yaml` now records Sprint 1.5 progress as 3/7 done and surfaces `T1.5-COMBAT-03` as the next active story.
+- T1.5-COMBAT-03 is closed; `production/sprint-status.yaml` now records Sprint 1.5 progress as 4/7 done and surfaces `T1.5-COMBAT-04` as the next active story.
 - `AbilityResolvedEvent` remains `ManaSpent`-only after the physical resource split; carry this semantic gap to `T1-COMBAT-11` as a forbidden-pattern/static-scan input.
-- T1.5-COMBAT-02 `/code-review` P3s are intentionally deferred: `fixtureSetVersion` bump belongs in `T1.5-COMBAT-03`, and QA-02-01 "cooldown/global recovery" wording belongs in the next QA plan iteration.
+- T1.5-COMBAT-02 `/code-review` P3 wording for QA-02-01 "cooldown/global recovery" remains deferred to the next QA plan iteration.
+- T1.5-COMBAT-03 surfaced a workflow lesson: harness evidence captured before commit can record the parent commit SHA. Capture the pre-commit-SHA-drift lesson before `T1.5-COMBAT-05`, the next harness-touching story.
 - `production/stories/t1-combat-11-forbidden-pattern-compliance-scan-analyzer.md` is referenced by Sprint 1 and Sprint 1.5 planning but is currently absent; create or recover it before T1-COMBAT-11 implementation.
 - ADR-0003 / D009 status metadata cleanup is closed as of the T1-COMBAT-05 `/story-done` ride-along: ADR-0003 is `Accepted`, and DECISIONS.md D009 is `Locked`. Justification: T1-COMBAT-01 closure commit `565ee26` has been on `main` since 2026-04-28; `CombatProgressionBaselineSnapshot` is consumed by production `CombatActorHydrator` at `src/gameplay/combat/CombatActorHydrator.cs:55`, `src/gameplay/combat/CombatActorHydrator.cs:61-68`, and `src/gameplay/combat/CombatActorHydrator.cs:104-126`; T1-COMBAT-01 verification cites ADR-0003 coverage at `tests/evidence/T1-COMBAT-01/verification.md:31`.
 - `H-CCOM-F2B` fixture extremes are validated by `T1-COMBAT-01`; seeded melee formula execution is validated by `T1-COMBAT-04`.
@@ -126,8 +128,8 @@ The next critical-path story is `/dev-story T1.5-COMBAT-03-feel-03-overpull-tuni
 
 ## Next Skill to Run
 
-- **Run `/dev-story T1.5-COMBAT-03-feel-03-overpull-tuning` next.**
-- Optional parallel work: `/dev-story T1.5-COMBAT-04-feel-01-target-revalidation`.
+- **Run `/dev-story T1.5-COMBAT-04-feel-01-target-revalidation` next.**
+- Parallelizable recovery work: create or recover `production/stories/t1-combat-11-forbidden-pattern-compliance-scan-analyzer.md` before `/dev-story T1-COMBAT-11`.
 - Later: run Inventory implementation pre-spec to close `INV-OQ-05`, then rerun `/design-review design/gdd/inventory-item-economy.md --depth full`.
 - Codex PR #1 is merged; no Codex follow-up pending in this active state file.
 
@@ -175,6 +177,18 @@ The next critical-path story is `/dev-story T1.5-COMBAT-03-feel-03-overpull-tuni
 - Tech debt logged: None in `docs/tech-debt-register.md`; P3 review findings are deferred in sprint/session carryover instead of smuggled into closure.
 - Carried forward: `AbilityResolvedEvent.ManaSpent`-only payload semantics for `T1-COMBAT-11`; `fixtureSetVersion` bump for `T1.5-COMBAT-03`; QA-02-01 cooldown/global-recovery wording for the next QA plan iteration; `T1-COMBAT-11` story file remains absent and must be created or recovered before that story's `/dev-story`; [production/qa/combat/feel-review-09c-player-death.md](../qa/combat/feel-review-09c-player-death.md) remains HUMAN PLAYTEST PENDING.
 - Next recommended: `/dev-story T1.5-COMBAT-03-feel-03-overpull-tuning`.
+
+## Session Extract - /story-done 2026-05-08 (T1.5-COMBAT-03)
+
+- Story: [production/stories/t1-5-combat-03-feel-03-overpull-tuning.md](../stories/t1-5-combat-03-feel-03-overpull-tuning.md) - T1.5-COMBAT-03 FEEL-03 Overpull Tuning.
+- Verdict: COMPLETE WITH NOTES.
+- Criteria: 5/5 QA-03 cases covered; `QA-03-01` through `QA-03-05` all have file:line evidence in the story completion notes and verification summary.
+- Evidence: [tests/evidence/T1.5-COMBAT-03/verification.md](../../tests/evidence/T1.5-COMBAT-03/verification.md) records the 148/148 baseline, 149/149 post-change regression, scoped pre-commit pass, post-commit evidence-origin pass, and all QA-03 PASS rows. [tests/evidence/T1.5-COMBAT-03/profiled-combat-slice.jsonl](../../tests/evidence/T1.5-COMBAT-03/profiled-combat-slice.jsonl) line 3 is the JSONL ground truth for `TwoTrash_Overpull_T1`: `build_sha=e7233b5`, `result=pass`, `dangerous_outcomes=9`, `losses=5`, `wins=5`.
+- Implementation commits: `e7233b5` is the implementation and metric-capture commit for FEEL-03 tuning. `1935515` is the follow-up SHA-drift fix and current `origin/main` head; it regenerated JSONL at `HEAD=e7233b5` so `git checkout e7233b5` plus the harness rerun reproduces the committed rows.
+- State updates: story status set to Complete; `production/sprint-status.yaml` marks `T1.5-COMBAT-03` done, records 4/7 Sprint 1.5 stories done, and surfaces `T1.5-COMBAT-04` as the next active story.
+- Deviations: FEEL-01 remains failed-as-measured in the T1.5-COMBAT-03 JSONL and is intentionally owned by `T1.5-COMBAT-04`; no new human Green/Yellow/Red verdict was written.
+- Carried forward: `AbilityResolvedEvent.ManaSpent`-only payload semantics for `T1-COMBAT-11`; QA-02-01 cooldown/global-recovery wording for the next QA plan iteration; `T1-COMBAT-11` story file remains absent and must be created or recovered before that story's `/dev-story`; [production/qa/combat/feel-review-09c-player-death.md](../qa/combat/feel-review-09c-player-death.md) remains HUMAN PLAYTEST PENDING; pre-commit-SHA-drift workflow lesson should be captured before `T1.5-COMBAT-05`.
+- Next recommended: `/dev-story T1.5-COMBAT-04-feel-01-target-revalidation`.
 
 ## Session Extract - /story-done 2026-04-28
 

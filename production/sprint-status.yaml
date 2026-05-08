@@ -6,25 +6,25 @@ goal: "Correct the Yellow slice-review findings without reopening the Combat Cor
 start: "2026-05-06"
 end: "2026-05-21"
 generated: "2026-05-06"
-updated: "2026-05-07"
+updated: "2026-05-08"
 branch: "main"
-head: "9aacee0"
+head: "1935515"
 qa_plan: "production/qa/plans/qa-plan-sprint-1-5-20260506.md"
 plan: "production/sprints/sprint-1-5.md"
 slice_review: "production/qa/combat/feel-review-T1-slice.md"
-implementation_gate: "T1.5-COMBAT-02 closed by /story-done. Sprint 1.5 progress: 3/7 done. Next active gate: /dev-story T1.5-COMBAT-03-feel-03-overpull-tuning. T1.5-COMBAT-04 remains unblocked for optional parallel design work."
-progress: "3/7 done"
-completed_stories: 3
+implementation_gate: "T1.5-COMBAT-03 closed by /story-done. Sprint 1.5 progress: 4/7 done. Next active gate: /dev-story T1.5-COMBAT-04-feel-01-target-revalidation. T1-COMBAT-11 remains blocked on story-file recovery; T1.5-COMBAT-05 remains blocked on 04 and 11."
+progress: "4/7 done"
+completed_stories: 4
 total_stories: 7
-next_active_story: "T1.5-COMBAT-03"
-next_active_command: "/dev-story T1.5-COMBAT-03-feel-03-overpull-tuning"
+next_active_story: "T1.5-COMBAT-04"
+next_active_command: "/dev-story T1.5-COMBAT-04-feel-01-target-revalidation"
 
 carryover:
   ability_resolved_event_payload: "AbilityResolvedEvent remains ManaSpent-only; carry to T1-COMBAT-11 forbidden-pattern scan input."
-  fixture_set_version: "Bump fixtureSetVersion in T1.5-COMBAT-03, the next fixture-touching story."
   qa_02_01_wording: "Clarify cooldown versus global recovery wording in the next QA plan iteration."
   t1_combat_11_story_file: "Absent; create or recover before T1-COMBAT-11 implementation."
   feel_review_09c: "HUMAN PLAYTEST PENDING; deferrable carryover."
+  pre_commit_sha_drift: "Harness evidence captured before commit can record the parent SHA; capture the workflow lesson before T1.5-COMBAT-05."
 
 stories:
   - id: "T1.5-COMBAT-00"
@@ -58,11 +58,11 @@ stories:
     name: "FEEL-03 overpull tuning"
     file: "production/stories/t1-5-combat-03-feel-03-overpull-tuning.md"
     priority: must-have
-    status: ready-for-dev
+    status: done
     owner: ""
     estimate_days: 1.25
-    blocker: "All dependencies satisfied. Next critical path. Also owns deferred fixtureSetVersion bump from T1.5-COMBAT-02 code review."
-    completed: ""
+    blocker: ""
+    completed: "2026-05-08"
   - id: "T1.5-COMBAT-04"
     name: "FEEL-01 target revalidation"
     file: "production/stories/t1-5-combat-04-feel-01-target-revalidation.md"
