@@ -8,16 +8,16 @@ end: "2026-05-21"
 generated: "2026-05-06"
 updated: "2026-05-08"
 branch: "main"
-head: "1935515"
+head: "f3a4a36"
 qa_plan: "production/qa/plans/qa-plan-sprint-1-5-20260506.md"
 plan: "production/sprints/sprint-1-5.md"
 slice_review: "production/qa/combat/feel-review-T1-slice.md"
-implementation_gate: "T1.5-COMBAT-03 closed by /story-done. Sprint 1.5 progress: 4/7 done. Next active gate: /dev-story T1.5-COMBAT-04-feel-01-target-revalidation. T1-COMBAT-11 remains blocked on story-file recovery; T1.5-COMBAT-05 remains blocked on 04 and 11."
-progress: "4/7 done"
-completed_stories: 4
+implementation_gate: "T1.5-COMBAT-04 closed by /story-done. Sprint 1.5 progress: 5/7 done. Next active gate: recover production/stories/t1-combat-11-forbidden-pattern-compliance-scan-analyzer.md from the Sprint 1 plan before /dev-story T1-COMBAT-11. T1.5-COMBAT-05 remains blocked on T1-COMBAT-11."
+progress: "5/7 done"
+completed_stories: 5
 total_stories: 7
-next_active_story: "T1.5-COMBAT-04"
-next_active_command: "/dev-story T1.5-COMBAT-04-feel-01-target-revalidation"
+next_active_story: "T1-COMBAT-11"
+next_active_command: "Recover production/stories/t1-combat-11-forbidden-pattern-compliance-scan-analyzer.md from production/sprints/sprint-1.md:577-610, then run /dev-story T1-COMBAT-11-forbidden-pattern-compliance-scan-analyzer"
 
 carryover:
   ability_resolved_event_payload: "AbilityResolvedEvent remains ManaSpent-only; carry to T1-COMBAT-11 forbidden-pattern scan input."
@@ -25,6 +25,8 @@ carryover:
   t1_combat_11_story_file: "Absent; create or recover before T1-COMBAT-11 implementation."
   feel_review_09c: "HUMAN PLAYTEST PENDING; deferrable carryover."
   pre_commit_sha_drift: "Harness evidence captured before commit can record the parent SHA; capture the workflow lesson before T1.5-COMBAT-05."
+  verification_grep_output_excerpt: "Artifact-authoring polish: future grep classification tables should include a command-output excerpt or explicit categorical-coverage note."
+  verification_prototype_log_inline_citation: "Artifact-authoring polish: future verification rows should inline-cite prototype rerun log paths when the story body also cites them."
 
 stories:
   - id: "T1.5-COMBAT-00"
@@ -67,11 +69,11 @@ stories:
     name: "FEEL-01 target revalidation"
     file: "production/stories/t1-5-combat-04-feel-01-target-revalidation.md"
     priority: must-have
-    status: ready-for-dev
+    status: done
     owner: ""
     estimate_days: 1.0
-    blocker: "Dependencies satisfied. Parallelizable with T1.5-COMBAT-01 / T1.5-COMBAT-02 / T1.5-COMBAT-03."
-    completed: ""
+    blocker: ""
+    completed: "2026-05-08"
   - id: "T1-COMBAT-11"
     name: "Forbidden-pattern compliance scan/analyzer"
     file: "production/stories/t1-combat-11-forbidden-pattern-compliance-scan-analyzer.md"
@@ -88,5 +90,5 @@ stories:
     status: blocked
     owner: ""
     estimate_days: 1.25
-    blocker: "Depends on T1.5-COMBAT-03, T1.5-COMBAT-04, and T1-COMBAT-11."
+    blocker: "Depends on T1-COMBAT-11."
     completed: ""

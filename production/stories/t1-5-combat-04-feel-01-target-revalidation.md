@@ -1,6 +1,6 @@
 # T1.5-COMBAT-04 - FEEL-01 Target Revalidation
 
-**Status:** Implemented + Verified; awaiting `/story-done`
+**Status:** Complete
 **Sprint:** 1.5
 **Priority:** Must Have
 **Layer:** Gameplay / Combat Feel Contract
@@ -88,7 +88,7 @@ overpull danger surface and is not redefined by this story.
 
 ## Story Status
 
-`T1.5-COMBAT-04` is implemented and verified, awaiting `/story-done`.
+`T1.5-COMBAT-04` is complete.
 
 ## Blockers / Carried Forward
 
@@ -97,3 +97,31 @@ overpull danger surface and is not redefined by this story.
 - Disadvantage-state solo-trash vulnerability remains a future acceptance-
   criteria candidate, not a Sprint 1.5 implementation requirement.
 - `T1-COMBAT-11` remains blocked on story-file recovery.
+
+## Completion Notes
+
+**Completed:** 2026-05-08
+**Verdict:** COMPLETE WITH NOTES
+**Criteria:** 5/5 QA-04 cases covered.
+**Test Evidence:** `tests/evidence/T1.5-COMBAT-04/verification.md:18` through
+`tests/evidence/T1.5-COMBAT-04/verification.md:22` record all QA-04 PASS rows.
+Current target updates are anchored at
+`tests/evidence/T1.5-COMBAT-04/verification.md:24` through
+`tests/evidence/T1.5-COMBAT-04/verification.md:31`; QA-04-04 old-target and
+FEEL-01 reference classification is anchored at
+`tests/evidence/T1.5-COMBAT-04/verification.md:33` through
+`tests/evidence/T1.5-COMBAT-04/verification.md:63`.
+**Implementation Provenance:** `bd6c81b` is the implementation commit that
+landed D014, the Combat Core FEEL-01 target update, the performance README
+target update, this story file, and the initial verification artifact.
+`f3a4a36` is the review-driven follow-up that classified ADR-0005 and
+ADR-0006 FEEL-01 references in the verification artifact.
+**Code Review:** Complete. `/code-review bd6c81b` returned APPROVED WITH
+SUGGESTIONS: no S1/S2 blockers, one S3 compliance gap fixed by `f3a4a36`, and
+two S3 artifact-polish suggestions deferred.
+**Deviations:** No fixture data, harness code, sprint-status, active-session,
+ADR, or GDD changes were made in the implementation/follow-up commits beyond
+the approved Design/Contract surface. Deferred artifact-authoring polish:
+include command output excerpts under future grep classification tables and
+inline-cite prototype rerun log paths in verification rows when the story body
+also cites them.
