@@ -45,6 +45,8 @@ Classification:
 | `DECISIONS.md:420`, `DECISIONS.md:447`, `DECISIONS.md:466` | Superseded-rationale | D014 must name the old target to document what changed and why. |
 | `design/gdd/combat-core.md:429`, `design/gdd/combat-core.md:559`, `design/gdd/combat-core.md:801` | Updated current target | These are the design-source lines changed to `90-100%` / `0.90-1.00`. |
 | `tests/performance/README.md:7` | Updated current target | The spelled-out `55-85 percent` reference is now `90-100 percent`. |
+| `docs/architecture/adr-0005-progression-pacing-fixture-contracts.md:67`, `docs/architecture/adr-0005-progression-pacing-fixture-contracts.md:373` | Architectural fixture reference | ADR-0005 names `SoloTrash_EvenCon_T1` as a Combat fixture dependency for progression pacing; it does not encode the FEEL-01 target value and should not change in this story. |
+| `docs/architecture/adr-0006-endurance-resource-model.md:42` | Architectural out-of-scope note | ADR-0006 names FEEL-01/FEEL-03 only to state that the Endurance contract does not tune those targets; it does not encode a target value. |
 | `assets/data/combat/t1-combat-fixtures.json:511` | Deferred to `T1.5-COMBAT-05` | Fixture/harness labels are outside this Design/Contract batch; D014 assigns machine-readable target/output-label updates to the profiled rerun story. |
 | `production/sprints/sprint-1.md:563` | Historical sprint plan | Sprint 1 plan remains historical; not a current target source after D014. |
 | `production/sprints/sprint-1-5.md:219` | Historical task framing | Sprint 1.5 correctly records that this story decides whether the old target remains, changes, or gains caveats. |
