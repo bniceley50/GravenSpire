@@ -292,8 +292,8 @@ The compliance gate must name and evaluate each pattern below.
   `dotnet test tests\Gravenspire.Combat.Tests.csproj` or through a documented
   local command in `tests/evidence/T1-COMBAT-11/verification.md`.
 - [x] `AC-11-12` Evidence output: `tests/evidence/T1-COMBAT-11/verification.md`
-  records the command, commit/build SHA, source pattern set, scanner output
-  summary, failure-fixture result, and final pass/fail status.
+  records the command, implementation/commit SHA, source pattern set, scanner
+  output summary, failure-fixture result, and final pass/fail status.
 
 ## Acceptance Criteria Coverage
 
@@ -345,5 +345,5 @@ T1-COMBAT-11 compliance scanner gate.
 
 ## Story Status
 
-`T1-COMBAT-11` is implemented and verified, awaiting `/code-review` and
-`/story-done`.
+`T1-COMBAT-11` is implemented and verified after the `/code-review` follow-up,
+awaiting `/story-done`.

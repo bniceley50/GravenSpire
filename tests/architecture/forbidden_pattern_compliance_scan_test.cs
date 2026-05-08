@@ -886,8 +886,8 @@ public sealed class ForbiddenPatternComplianceScanTest
         return new[]
         {
             @"ProgressionPacingFixtureSet_T1[\s\S]{0,400}(?:[""']?fixture_kind[""']?\s*[:=]\s*(?:null|[""']{2})|fixture_kind_missing|missing_fixture_kind|ambiguous_fixture_kind)",
-            @"ProgressionPacingFixtureSet_T1[\s\S]{0,400}[""']?fixture_kind[""']?\s*[:=]\s*[""']?(?:LegalKillCreditRoute|FormulaOnly|SyntheticEventTransaction|InvalidDataValidation)[""']?[\s\S]{0,160}[""']?fixture_kind[""']?\s*[:=]",
-            @"ProgressionPacingFixtureSet_T1[\s\S]{0,400}(?:LegalKillCreditRoute\s*\|\s*FormulaOnly|SyntheticEventTransaction\s*\|\s*InvalidDataValidation)"
+            @"ProgressionPacingFixtureSet_T1[\s\S]{0,400}[""']?fixture_kind[""']?\s*[:=]\s*[""']?(?:LegalKillCreditRoute|FormulaOnly|SyntheticEventTransaction|InvalidDataValidation|ProfileRunSpec)[""']?[\s\S]{0,160}[""']?fixture_kind[""']?\s*[:=]",
+            @"ProgressionPacingFixtureSet_T1[\s\S]{0,400}(?:LegalKillCreditRoute|FormulaOnly|SyntheticEventTransaction|InvalidDataValidation|ProfileRunSpec)\s*\|\s*(?:LegalKillCreditRoute|FormulaOnly|SyntheticEventTransaction|InvalidDataValidation|ProfileRunSpec)"
         };
     }
 
@@ -936,7 +936,7 @@ public sealed class ForbiddenPatternComplianceScanTest
                 {
                   "schema": "ProgressionPacingFixtureSet_T1",
                   "rows": [
-                    { "id": "bad", "fixture_kind": "LegalKillCreditRoute", "fixture_kind": "FormulaOnly" }
+                    { "id": "bad", "fixture_kind": "ProfileRunSpec | FormulaOnly" }
                   ]
                 }
                 """)

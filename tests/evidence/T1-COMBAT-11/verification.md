@@ -2,6 +2,14 @@
 
 ## Baseline And Test Gate
 
+Reviewed follow-up commit:
+
+```powershell
+git rev-parse f4f191a
+```
+
+Result: `f4f191a7c5587696067d5b3bc9a9e85560bfc21d`.
+
 Reviewed implementation commit:
 
 ```powershell
@@ -10,13 +18,21 @@ git rev-parse 0e603a7
 
 Result: `0e603a7f5aa87d19d9ddc6b25f78e104ac48ff75`.
 
-Parent baseline:
+Implementation parent baseline:
 
 ```powershell
 git rev-parse 0e603a7^
 ```
 
 Result: `015d417daa449e1c1f51fa7b53051fbfbab621cb`.
+
+Follow-up parent:
+
+```powershell
+git rev-parse f4f191a^
+```
+
+Result: `0e603a7f5aa87d19d9ddc6b25f78e104ac48ff75`.
 
 Engine version: Unity 6.3 LTS per `.claude/docs/technical-preferences.md`.
 Fixture-set version: N/A; this story does not tune or execute combat fixture
@@ -41,7 +57,7 @@ bridge rather than as a separate CLI or Roslyn analyzer.
 | --- | --- | --- |
 | `docs/registry/architecture.yaml:481` through `docs/registry/architecture.yaml:704` | Ingested + evaluated | `tests/architecture/forbidden_pattern_compliance_scan_test.cs:16` through `tests/architecture/forbidden_pattern_compliance_scan_test.cs:38` lists the expected registry IDs; `tests/architecture/forbidden_pattern_compliance_scan_test.cs:358` through `tests/architecture/forbidden_pattern_compliance_scan_test.cs:381` maps each id to an explicit evaluator; parser starts at `tests/architecture/forbidden_pattern_compliance_scan_test.cs:656`. |
 | `docs/architecture/adr-0006-endurance-resource-model.md:79` through `docs/architecture/adr-0006-endurance-resource-model.md:90` | Addendum | `tests/architecture/forbidden_pattern_compliance_scan_test.cs:40` through `tests/architecture/forbidden_pattern_compliance_scan_test.cs:47` names the ADR-0006 quiet-Endurance addendum patterns; evaluator dispatch is at `tests/architecture/forbidden_pattern_compliance_scan_test.cs:587` through `tests/architecture/forbidden_pattern_compliance_scan_test.cs:618`. |
-| `tests/architecture/README.md:5` through `tests/architecture/README.md:16` | Scope policy | `tests/architecture/forbidden_pattern_compliance_scan_test.cs:99` through `tests/architecture/forbidden_pattern_compliance_scan_test.cs:110` implements the T1 scope negative scan over production source/data only; regex helper starts at `tests/architecture/forbidden_pattern_compliance_scan_test.cs:805`. |
+| `tests/architecture/README.md:5` through `tests/architecture/README.md:16` | Scope policy | `tests/architecture/forbidden_pattern_compliance_scan_test.cs:99` through `tests/architecture/forbidden_pattern_compliance_scan_test.cs:110` implements the T1 scope negative scan over production source/data only; line-match helpers start at `tests/architecture/forbidden_pattern_compliance_scan_test.cs:760`, whole-file helpers start at `tests/architecture/forbidden_pattern_compliance_scan_test.cs:780`, and `ContainsAny` starts at `tests/architecture/forbidden_pattern_compliance_scan_test.cs:801`. |
 | Registry status drift | Known carryover | `tests/architecture/forbidden_pattern_compliance_scan_test.cs:73` through `tests/architecture/forbidden_pattern_compliance_scan_test.cs:95` reports `proposed` registry rows whose governing ADRs are already `Accepted`; drift does not downgrade enforcement. |
 
 ## Per-Pattern Scanner Output
@@ -50,7 +66,7 @@ The scanner builds `ComplianceResult` rows at
 `tests/architecture/forbidden_pattern_compliance_scan_test.cs:332` through
 `tests/architecture/forbidden_pattern_compliance_scan_test.cs:355`. Current
 post-review scanner states in this follow-up diff for the implementation chain
-rooted at `0e603a7f5aa87d19d9ddc6b25f78e104ac48ff75`:
+reviewed at `f4f191a7c5587696067d5b3bc9a9e85560bfc21d`:
 
 | Pattern | State | Evaluator evidence |
 | --- | --- | --- |
@@ -64,16 +80,16 @@ rooted at `0e603a7f5aa87d19d9ddc6b25f78e104ac48ff75`:
 | `combat_consuming_visible_level` | KNOWN-CARRYOVER | `EvaluateCombatConsumingVisibleLevel`, `tests/architecture/forbidden_pattern_compliance_scan_test.cs:465` |
 | `ui_or_spell_consumer_reading_combat_snapshot` | KNOWN-CARRYOVER | `EvaluateUiOrSpellConsumerReadingCombatSnapshot`, `tests/architecture/forbidden_pattern_compliance_scan_test.cs:478` |
 | `consumer_mutating_progression_snapshot` | KNOWN-CARRYOVER | `EvaluateConsumerMutatingProgressionSnapshot`, `tests/architecture/forbidden_pattern_compliance_scan_test.cs:486` |
-| `save_load_generating_local_character_id` | KNOWN-CARRYOVER | `EvaluateSaveLoadGeneratingLocalCharacterId`, `tests/architecture/forbidden_pattern_compliance_scan_test.cs:501` |
-| `first_save_seed_only_without_required_materialization` | KNOWN-CARRYOVER | `EvaluateFirstSaveSeedOnlyWithoutRequiredMaterialization`, `tests/architecture/forbidden_pattern_compliance_scan_test.cs:511`; whole-file forbidden terms at `tests/architecture/forbidden_pattern_compliance_scan_test.cs:872` |
-| `first_load_synthesizing_progression_state` | KNOWN-CARRYOVER | `EvaluateFirstLoadSynthesizingProgressionState`, `tests/architecture/forbidden_pattern_compliance_scan_test.cs:518` |
-| `rematerializing_existing_record_on_load` | KNOWN-CARRYOVER | `EvaluateRematerializingExistingRecordOnLoad`, `tests/architecture/forbidden_pattern_compliance_scan_test.cs:528` |
-| `local_character_id_derived_from_player_authored_data` | KNOWN-CARRYOVER | `EvaluateLocalCharacterIdDerivedFromPlayerAuthoredData`, `tests/architecture/forbidden_pattern_compliance_scan_test.cs:536` |
-| `synthetic_fixture_as_pacing_evidence` | KNOWN-CARRYOVER | `EvaluateSyntheticFixtureAsPacingEvidence`, `tests/architecture/forbidden_pattern_compliance_scan_test.cs:544` |
-| `profiled_pacing_without_preflight` | KNOWN-CARRYOVER | `EvaluateProfiledPacingWithoutPreflight`, `tests/architecture/forbidden_pattern_compliance_scan_test.cs:554` |
-| `legal_pacing_fixture_without_adr0001_lookup` | KNOWN-CARRYOVER | `EvaluateLegalPacingFixtureWithoutAdr0001Lookup`, `tests/architecture/forbidden_pattern_compliance_scan_test.cs:564` |
-| `lockout_route_projected_as_repeatable` | KNOWN-CARRYOVER | `EvaluateLockoutRouteProjectedAsRepeatable`, `tests/architecture/forbidden_pattern_compliance_scan_test.cs:573` |
-| `pacing_fixture_with_ambiguous_kind` | KNOWN-CARRYOVER | `EvaluatePacingFixtureWithAmbiguousKind`, `tests/architecture/forbidden_pattern_compliance_scan_test.cs:582`; whole-file forbidden terms at `tests/architecture/forbidden_pattern_compliance_scan_test.cs:884` |
+| `save_load_generating_local_character_id` | PASS | `EvaluateSaveLoadGeneratingLocalCharacterId`, `tests/architecture/forbidden_pattern_compliance_scan_test.cs:501` |
+| `first_save_seed_only_without_required_materialization` | PASS | `EvaluateFirstSaveSeedOnlyWithoutRequiredMaterialization`, `tests/architecture/forbidden_pattern_compliance_scan_test.cs:511`; whole-file forbidden terms at `tests/architecture/forbidden_pattern_compliance_scan_test.cs:872` |
+| `first_load_synthesizing_progression_state` | PASS | `EvaluateFirstLoadSynthesizingProgressionState`, `tests/architecture/forbidden_pattern_compliance_scan_test.cs:518` |
+| `rematerializing_existing_record_on_load` | PASS | `EvaluateRematerializingExistingRecordOnLoad`, `tests/architecture/forbidden_pattern_compliance_scan_test.cs:528` |
+| `local_character_id_derived_from_player_authored_data` | PASS | `EvaluateLocalCharacterIdDerivedFromPlayerAuthoredData`, `tests/architecture/forbidden_pattern_compliance_scan_test.cs:536` |
+| `synthetic_fixture_as_pacing_evidence` | PASS | `EvaluateSyntheticFixtureAsPacingEvidence`, `tests/architecture/forbidden_pattern_compliance_scan_test.cs:544` |
+| `profiled_pacing_without_preflight` | PASS | `EvaluateProfiledPacingWithoutPreflight`, `tests/architecture/forbidden_pattern_compliance_scan_test.cs:554` |
+| `legal_pacing_fixture_without_adr0001_lookup` | PASS | `EvaluateLegalPacingFixtureWithoutAdr0001Lookup`, `tests/architecture/forbidden_pattern_compliance_scan_test.cs:564` |
+| `lockout_route_projected_as_repeatable` | PASS | `EvaluateLockoutRouteProjectedAsRepeatable`, `tests/architecture/forbidden_pattern_compliance_scan_test.cs:573` |
+| `pacing_fixture_with_ambiguous_kind` | PASS | `EvaluatePacingFixtureWithAmbiguousKind`, `tests/architecture/forbidden_pattern_compliance_scan_test.cs:582`; whole-file forbidden terms at `tests/architecture/forbidden_pattern_compliance_scan_test.cs:884` |
 | `endurance_action_rotation_bar` | PASS | ADR-0006 addendum evaluator, `tests/architecture/forbidden_pattern_compliance_scan_test.cs:591` |
 | `endurance_hud_prominence_above_mana` | PASS | ADR-0006 addendum evaluator, `tests/architecture/forbidden_pattern_compliance_scan_test.cs:596` |
 | `endurance_pulse_combo_celebratory_treatment` | PASS | ADR-0006 addendum evaluator, `tests/architecture/forbidden_pattern_compliance_scan_test.cs:601` |
