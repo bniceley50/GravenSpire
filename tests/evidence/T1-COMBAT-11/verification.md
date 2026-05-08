@@ -2,37 +2,18 @@
 
 ## Baseline And Test Gate
 
-Reviewed follow-up commit:
+Commit chain verified with:
 
 ```powershell
-git rev-parse f4f191a
+git rev-parse 015d417 0e603a7 f4f191a 5bbc665
 ```
 
-Result: `f4f191a7c5587696067d5b3bc9a9e85560bfc21d`.
-
-Reviewed implementation commit:
-
-```powershell
-git rev-parse 0e603a7
-```
-
-Result: `0e603a7f5aa87d19d9ddc6b25f78e104ac48ff75`.
-
-Implementation parent baseline:
-
-```powershell
-git rev-parse 0e603a7^
-```
-
-Result: `015d417daa449e1c1f51fa7b53051fbfbab621cb`.
-
-Follow-up parent:
-
-```powershell
-git rev-parse f4f191a^
-```
-
-Result: `0e603a7f5aa87d19d9ddc6b25f78e104ac48ff75`.
+| Commit | Role | Verification status |
+| --- | --- | --- |
+| `015d417daa449e1c1f51fa7b53051fbfbab621cb` | Story-file recovery scaffold and implementation parent baseline | Named so the implementation baseline is distinct from implementation evidence. |
+| `0e603a7f5aa87d19d9ddc6b25f78e104ac48ff75` | Initial T1-COMBAT-11 implementation | Reviewed implementation commit; added the scanner, story trace, and first verification artifact. |
+| `f4f191a7c5587696067d5b3bc9a9e85560bfc21d` | First `/code-review` follow-up | Resolves the first review pass after `0e603a7`; parent is `0e603a7f5aa87d19d9ddc6b25f78e104ac48ff75`. |
+| `5bbc66559e1d7c7718837b0d15f960a32646454e` | Second `/code-review` follow-up and latest committed review-fix head | Closure-eligible scanner/evidence state before this provenance-only correction; resolves the residual AC-11-07 false-pass and evidence-provenance/table drift after `f4f191a`; parent is `f4f191a7c5587696067d5b3bc9a9e85560bfc21d`. |
 
 Engine version: Unity 6.3 LTS per `.claude/docs/technical-preferences.md`.
 Fixture-set version: N/A; this story does not tune or execute combat fixture
@@ -66,7 +47,8 @@ The scanner builds `ComplianceResult` rows at
 `tests/architecture/forbidden_pattern_compliance_scan_test.cs:332` through
 `tests/architecture/forbidden_pattern_compliance_scan_test.cs:355`. Current
 post-review scanner states in this follow-up diff for the implementation chain
-reviewed at `f4f191a7c5587696067d5b3bc9a9e85560bfc21d`:
+reviewed through latest committed review-fix head
+`5bbc66559e1d7c7718837b0d15f960a32646454e`:
 
 | Pattern | State | Evaluator evidence |
 | --- | --- | --- |
