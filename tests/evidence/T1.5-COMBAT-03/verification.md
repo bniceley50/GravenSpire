@@ -1,6 +1,6 @@
 # T1.5-COMBAT-03 Verification
 
-**Date:** 2026-05-07
+**Date:** 2026-05-08
 **Story:** `production/stories/t1-5-combat-03-feel-03-overpull-tuning.md`
 **Verdict:** IMPLEMENTED + VERIFIED; awaiting `/story-done`
 
@@ -8,7 +8,7 @@
 
 ```powershell
 dotnet test tests\Gravenspire.Combat.Tests.csproj --logger "console;verbosity=minimal"
-dotnet run --project prototypes\combat-slice-T1\Harness\CombatSliceHarness.csproj -- --evidence-story T1.5-COMBAT-03 --timestamp 2026-05-07T00:00:00-04:00
+dotnet run --project prototypes\combat-slice-T1\Harness\CombatSliceHarness.csproj -- --evidence-story T1.5-COMBAT-03 --timestamp 2026-05-08T00:00:00-04:00
 # Scoped pre-commit: set GIT_INDEX_FILE to a temp index, read HEAD,
 # add only the intended T1.5-COMBAT-03 files, then run bash .githooks/pre-commit.
 ```
@@ -20,6 +20,7 @@ dotnet run --project prototypes\combat-slice-T1\Harness\CombatSliceHarness.cspro
 | Baseline regression before edits | PASS | `148/148` tests passed before implementation. |
 | Post-change regression | PASS | `149/149` tests passed after implementation with `dotnet test tests\Gravenspire.Combat.Tests.csproj --logger "console;verbosity=minimal"`. |
 | Scoped pre-commit gate | PASS | `.githooks/pre-commit` passed against a temporary index containing only the intended T1.5-COMBAT-03 files. |
+| Post-commit evidence origin | PASS | `profiled-combat-slice.jsonl` was regenerated at `HEAD=e7233b5` on 2026-05-08 so every row now records `build_sha=e7233b5`; metrics remained deterministic from the pre-commit run. |
 | `QA-03-01` Two-trash overpull rerun | PASS | `profiled-combat-slice.jsonl:3` records `TwoTrash_Overpull_T1`, `result=pass`, `dangerous_outcomes=9`, `losses=5`, `wins=5`. |
 | `QA-03-02` Named solo-block regression | PASS | `profiled-combat-slice.jsonl:2` records `NamedSoloBlock_T1`, `result=pass`, `losses=5`, `flees=3`, `dangerous_outcomes=8`. |
 | `QA-03-03` Med-break pacing regression | PASS | `profiled-combat-slice.jsonl:4` records `MedBreak_Pacing_T1`, `result=pass`, `seconds_to_70_mana=72`, `regen_ticks=12`. |

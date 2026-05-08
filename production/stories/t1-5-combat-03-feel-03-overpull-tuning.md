@@ -76,9 +76,10 @@ Forbidden knobs:
   `dotnet test tests\Gravenspire.Combat.Tests.csproj --logger "console;verbosity=minimal"`
   passed `149/149`.
 - Profiled run:
-  `dotnet run --project prototypes\combat-slice-T1\Harness\CombatSliceHarness.csproj -- --evidence-story T1.5-COMBAT-03 --timestamp 2026-05-07T00:00:00-04:00`
-  exited `0` and wrote
-  `tests/evidence/T1.5-COMBAT-03/profiled-combat-slice.jsonl`.
+  `dotnet run --project prototypes\combat-slice-T1\Harness\CombatSliceHarness.csproj -- --evidence-story T1.5-COMBAT-03 --timestamp 2026-05-08T00:00:00-04:00`
+  exited `0` at `HEAD=e7233b5` and wrote
+  `tests/evidence/T1.5-COMBAT-03/profiled-combat-slice.jsonl` with
+  `build_sha=e7233b5`.
 - Scoped pre-commit gate:
   `.githooks/pre-commit` passed against a temporary index containing only the
   intended T1.5-COMBAT-03 files.
