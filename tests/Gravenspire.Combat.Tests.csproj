@@ -18,6 +18,7 @@
     <Compile Include="..\src\gameplay\progression\**\*.cs" Link="src\gameplay\progression\%(RecursiveDir)%(Filename)%(Extension)" />
     <Compile Include="..\src\gameplay\npc\**\*.cs" Link="src\gameplay\npc\%(RecursiveDir)%(Filename)%(Extension)" />
     <Compile Include="..\src\core\save\**\*.cs" Link="src\core\save\%(RecursiveDir)%(Filename)%(Extension)" />
+    <Compile Include="architecture\*.cs" Link="tests\architecture\%(Filename)%(Extension)" />
     <Compile Include="unit\gameplay\combat\*.cs" Link="tests\unit\gameplay\combat\%(Filename)%(Extension)" />
     <Compile Include="unit\gameplay\progression\*.cs" Link="tests\unit\gameplay\progression\%(Filename)%(Extension)" />
     <Compile Include="integration\gameplay\combat\*.cs" Link="tests\integration\gameplay\combat\%(Filename)%(Extension)" />

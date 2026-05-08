@@ -1,6 +1,6 @@
 # T1-COMBAT-11 - Forbidden-Pattern Compliance Scan/Analyzer
 
-**Status:** ready-for-dev
+**Status:** Implemented + Verified; awaiting `/story-done`
 **Sprint:** 1 carryover into Sprint 1.5
 **Priority:** Must Have
 **Layer:** Architecture / Static Compliance
@@ -108,6 +108,30 @@ The implementation should produce a durable local gate, not a one-off manual
 grep transcript. It may be grep/static-scan based if the checks are
 deterministic, named, and tested. It should promote to a Roslyn analyzer only
 for patterns where text scanning cannot reliably avoid false passes.
+
+## Implementation Trace
+
+- `tests/architecture/forbidden_pattern_compliance_scan_test.cs` implements the
+  T1-COMBAT-11 compliance gate as deterministic NUnit architecture tests.
+- `tests/Gravenspire.Combat.Tests.csproj` explicitly includes
+  `tests/architecture/*.cs`, keeping the scanner inside the existing local
+  combat test bridge.
+- The scanner ingests every registered forbidden pattern from
+  `docs/registry/architecture.yaml`, maps each registry id to an explicit
+  evaluator, then adds the ADR-0006 Endurance addendum because the registry has
+  not yet absorbed those patterns.
+- Registry status drift is reported as `KNOWN-CARRYOVER` when a registry row is
+  still `proposed` but the governing ADR is already `Accepted`; the scanner
+  does not downgrade the pattern.
+- Real violation scans are path-scoped to production source/data surfaces.
+  Documentation, evidence, and prototype text are not treated as production
+  failures; production data scans cover `assets/data/**/*.json` rather than only
+  current combat fixture JSON.
+- Frozen event and snapshot contracts use reflection checks where possible.
+- `AbilityResolvedEvent.ManaSpent` is classified as `KNOWN-CARRYOVER` in the
+  current state. It becomes a failure only if shipping production consumers
+  treat the mana-only payload as universal resource-spend evidence or if the
+  physical-resource guard / Bash carryover coverage disappears.
 
 ## Minimum Forbidden-Pattern Coverage
 
@@ -230,63 +254,63 @@ The compliance gate must name and evaluate each pattern below.
 
 ## Acceptance Criteria
 
-- [ ] `AC-11-01` Architecture source ingestion: the scanner reads or mirrors the
+- [x] `AC-11-01` Architecture source ingestion: the scanner reads or mirrors the
   registered forbidden-pattern list from `docs/registry/architecture.yaml:481`
   through `docs/registry/architecture.yaml:704`, and names each checked pattern
   in output.
-- [ ] `AC-11-02` T1 scope scan: the gate detects forbidden networking, server,
+- [x] `AC-11-02` T1 scope scan: the gate detects forbidden networking, server,
   PvP, companion, future-class, live-LLM, and account-authority terms in T1
   production combat surfaces while avoiding test fixture false positives.
-- [ ] `AC-11-03` Combat/Progression/NPC boundary scan: the gate covers
+- [x] `AC-11-03` Combat/Progression/NPC boundary scan: the gate covers
   `combat_actor_id` identity misuse, live NPC XP lookup after death, and
   Character Progression attempts to expand `PlayerKillCreditEvent`.
-- [ ] `AC-11-04` Save/Load barrier scan: the gate covers direct downstream reads,
+- [x] `AC-11-04` Save/Load barrier scan: the gate covers direct downstream reads,
   unbounded barrier waits, partial group serialization, and unresolved barrier
   byte writes.
-- [ ] `AC-11-05` Progression snapshot scan: the gate covers generic all-consumer
+- [x] `AC-11-05` Progression snapshot scan: the gate covers generic all-consumer
   baseline snapshots, illegal `visible_level` or XP/spell fields in Combat
   hydration, non-Combat reads of `CombatProgressionBaselineSnapshot`, and
   consumer mutation of progression read models.
-- [ ] `AC-11-06` First-save/first-load scan: the gate covers illegal
+- [x] `AC-11-06` First-save/first-load scan: the gate covers illegal
   `local_character_id` generation or derivation, seed-only first save,
   synthesized progression state on load, and re-materialization of initialized
   records.
-- [ ] `AC-11-07` Pacing fixture scan: the gate covers synthetic fixture misuse,
+- [x] `AC-11-07` Pacing fixture scan: the gate covers synthetic fixture misuse,
   profiled pacing without preflight, legal route bypass of ADR-0001 lookup, and
   ambiguous `fixture_kind`.
-- [ ] `AC-11-08` Endurance scan: the gate covers ADR-0006 action-rotation,
+- [x] `AC-11-08` Endurance scan: the gate covers ADR-0006 action-rotation,
   HUD-prominence, pulse/combo, per-ability shipping callout, and
   combat-rotation-fast regeneration forbidden patterns.
-- [ ] `AC-11-09` Ability resolved-event scan: the gate inspects
+- [x] `AC-11-09` Ability resolved-event scan: the gate inspects
   `AbilityResolvedEvent.ManaSpent`, classifies the current payload semantics,
   and fails only if shipping consumers treat the mana-only payload as universal
   Endurance spend evidence.
-- [ ] `AC-11-10` Failure fixture: a deliberate forbidden-pattern sample under a
+- [x] `AC-11-10` Failure fixture: a deliberate forbidden-pattern sample under a
   test/tool fixture path is caught by the scanner without adding forbidden
   content to production source.
-- [ ] `AC-11-11` Local gate integration: the compliance check runs either through
+- [x] `AC-11-11` Local gate integration: the compliance check runs either through
   `dotnet test tests\Gravenspire.Combat.Tests.csproj` or through a documented
   local command in `tests/evidence/T1-COMBAT-11/verification.md`.
-- [ ] `AC-11-12` Evidence output: `tests/evidence/T1-COMBAT-11/verification.md`
+- [x] `AC-11-12` Evidence output: `tests/evidence/T1-COMBAT-11/verification.md`
   records the command, commit/build SHA, source pattern set, scanner output
   summary, failure-fixture result, and final pass/fail status.
 
-## Acceptance Criteria Coverage Plan
+## Acceptance Criteria Coverage
 
-| AC | Planned Evidence |
-| --- | --- |
-| `AC-11-01` | Scanner output lists every registered pattern name from `docs/registry/architecture.yaml:481-704`. |
-| `AC-11-02` | Static scan test with at least one allowed test fixture and one caught forbidden sample for T1 scope terms. |
-| `AC-11-03` | Static scan test over production `src/gameplay/combat/**`, `src/gameplay/progression/**`, and `src/gameplay/npc/**`. |
-| `AC-11-04` | Static scan or analyzer test over `src/core/save/**`, progression save barrier code, and NPC lifecycle barrier code. |
-| `AC-11-05` | Schema/static scan over `CombatProgressionBaselineSnapshot` and non-Combat consumer namespaces. |
-| `AC-11-06` | Static scan over Save/Load and Progression paths for identity generation, synthesis, and re-materialization terms. |
-| `AC-11-07` | Static scan over pacing fixture/data paths and evidence-generation paths. |
-| `AC-11-08` | Static scan over gameplay HUD/presentation, ability, regen, and fixture paths for ADR-0006 quiet-Endurance terms. |
-| `AC-11-09` | Analyzer row or verification table classifies `AbilityResolvedEvent.ManaSpent` as PASS, KNOWN-CARRYOVER, or FAIL with rationale. |
-| `AC-11-10` | Failure-fixture test proves a deliberately banned sample is detected. |
-| `AC-11-11` | TRX row or documented command output proves the local gate ran. |
-| `AC-11-12` | Verification artifact includes command, SHA, pattern-set source, result summary, and pass/fail status. |
+| AC | Status | Evidence |
+| --- | --- | --- |
+| `AC-11-01` | Covered | `test_ac_11_01_registry_and_adr0006_addendum_patterns_are_named_and_evaluated` verifies the registry pattern list, explicit evaluator map, ADR-0006 addendum list, and accepted-ADR registry-status drift classification. |
+| `AC-11-02` | Covered | `test_ac_11_02_t1_scope_terms_are_absent_from_production_surfaces_and_failure_sample_is_caught` scans production Combat source and production JSON data only, with a path-labelled test fixture sample proving detection. |
+| `AC-11-03` | Covered | `test_ac_11_03_combat_progression_npc_identity_boundaries_hold` verifies `PlayerKillCreditEvent` shape, non-Combat absence of `combat_actor_id`, approved Progression field reads, and no live NPC dependency. |
+| `AC-11-04` | Covered | `test_ac_11_04_save_load_barrier_boundaries_hold` verifies the grouped save coordinator fails before writer calls and has no unbounded wait calls in `src/core/save/**`. |
+| `AC-11-05` | Covered | `test_ac_11_05_progression_snapshot_boundaries_hold` verifies `CombatProgressionBaselineSnapshot` shape and prevents generic baseline / non-Combat snapshot consumers. |
+| `AC-11-06` | Covered | `test_ac_11_06_first_save_and_identity_boundaries_hold` scans Save/Load and Progression paths for illegal local-character-id generation, first-load synthesis, and re-materialization terms. |
+| `AC-11-07` | Covered | `test_ac_11_07_progression_pacing_fixture_boundaries_hold` scans production source plus all production JSON data for synthetic pacing evidence misuse and proves a deliberate synthetic sample is caught. |
+| `AC-11-08` | Covered | `test_ac_11_08_quiet_endurance_boundaries_hold` scans production Combat source/data for ADR-0006 quiet-Endurance forbidden patterns with Endurance-scoped regexes. |
+| `AC-11-09` | Covered | `test_ac_11_09_ability_resolved_event_payload_is_known_carryover_not_universal_spend` classifies current `AbilityResolvedEvent.ManaSpent` semantics as `KNOWN-CARRYOVER` and fails if shipping consumers read it as universal spend or if the physical-resource guard disappears. |
+| `AC-11-10` | Covered | `test_ac_11_10_deliberate_failure_samples_are_caught_without_production_mutation` proves path-labelled `tests/architecture/fixtures/**` failure samples are caught and absent from production text. |
+| `AC-11-11` | Covered | `tests/Gravenspire.Combat.Tests.csproj` includes `architecture/*.cs`; `dotnet test tests\Gravenspire.Combat.Tests.csproj --logger "console;verbosity=minimal"` passed `159/159`. |
+| `AC-11-12` | Covered | `tests/evidence/T1-COMBAT-11/verification.md` records the command, base SHA, source pattern set, pass/fail summary, and file:line evidence. |
 
 ## Test Evidence Required
 
@@ -301,6 +325,15 @@ command must be recorded in `tests/evidence/T1-COMBAT-11/verification.md`, and
 `dotnet test tests\Gravenspire.Combat.Tests.csproj --logger "console;verbosity=minimal"`
 must still pass as the regression gate.
 
+Implementation gate used:
+
+```powershell
+dotnet test tests\Gravenspire.Combat.Tests.csproj --logger "console;verbosity=minimal"
+```
+
+Result: PASS, `159/159`. The `10` added architecture tests are the
+T1-COMBAT-11 compliance scanner gate.
+
 ## Done Definition
 
 - The compliance check names each forbidden pattern checked and whether it
@@ -312,4 +345,5 @@ must still pass as the regression gate.
 
 ## Story Status
 
-`T1-COMBAT-11` is ready for `/dev-story` after this recovered story file lands.
+`T1-COMBAT-11` is implemented and verified, awaiting `/code-review` and
+`/story-done`.
