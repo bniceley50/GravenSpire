@@ -304,13 +304,13 @@ The compliance gate must name and evaluate each pattern below.
 | `AC-11-03` | Covered | `test_ac_11_03_combat_progression_npc_identity_boundaries_hold` verifies `PlayerKillCreditEvent` shape, non-Combat absence of `combat_actor_id`, approved Progression field reads, and no live NPC dependency. |
 | `AC-11-04` | Covered | `test_ac_11_04_save_load_barrier_boundaries_hold` verifies the grouped save coordinator fails before writer calls and has no unbounded wait calls in `src/core/save/**`. |
 | `AC-11-05` | Covered | `test_ac_11_05_progression_snapshot_boundaries_hold` verifies `CombatProgressionBaselineSnapshot` shape and prevents generic baseline / non-Combat snapshot consumers. |
-| `AC-11-06` | Covered | `test_ac_11_06_first_save_and_identity_boundaries_hold` scans Save/Load and Progression paths for illegal local-character-id generation, first-load synthesis, and re-materialization terms. |
-| `AC-11-07` | Covered | `test_ac_11_07_progression_pacing_fixture_boundaries_hold` scans production source plus all production JSON data for synthetic pacing evidence misuse and proves a deliberate synthetic sample is caught. |
+| `AC-11-06` | Covered | `test_ac_11_06_first_save_and_identity_boundaries_hold` scans Save/Load and Progression paths for illegal local-character-id generation, first-load synthesis, re-materialization terms, and seed-only first-save materialization bypass patterns. |
+| `AC-11-07` | Covered | `test_ac_11_07_progression_pacing_fixture_boundaries_hold` scans production source plus all production JSON data for synthetic pacing evidence misuse, then uses whole-file matching for ambiguous multi-line `fixture_kind` cases. |
 | `AC-11-08` | Covered | `test_ac_11_08_quiet_endurance_boundaries_hold` scans production Combat source/data for ADR-0006 quiet-Endurance forbidden patterns with Endurance-scoped regexes. |
 | `AC-11-09` | Covered | `test_ac_11_09_ability_resolved_event_payload_is_known_carryover_not_universal_spend` classifies current `AbilityResolvedEvent.ManaSpent` semantics as `KNOWN-CARRYOVER` and fails if shipping consumers read it as universal spend or if the physical-resource guard disappears. |
 | `AC-11-10` | Covered | `test_ac_11_10_deliberate_failure_samples_are_caught_without_production_mutation` proves path-labelled `tests/architecture/fixtures/**` failure samples are caught and absent from production text. |
 | `AC-11-11` | Covered | `tests/Gravenspire.Combat.Tests.csproj` includes `architecture/*.cs`; `dotnet test tests\Gravenspire.Combat.Tests.csproj --logger "console;verbosity=minimal"` passed `159/159`. |
-| `AC-11-12` | Covered | `tests/evidence/T1-COMBAT-11/verification.md` records the command, base SHA, source pattern set, pass/fail summary, and file:line evidence. |
+| `AC-11-12` | Covered | `tests/evidence/T1-COMBAT-11/verification.md` records the command, implementation/commit SHA, source pattern set, per-pattern pass/fail/known-carryover table, and file:line evidence. |
 
 ## Test Evidence Required
 

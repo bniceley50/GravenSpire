@@ -242,11 +242,12 @@ public sealed class ForbiddenPatternComplianceScanTest
         });
         AssertNoMatches("first load synthesizing progression state", files, new[]
         {
-            @"starting_class_id",
-            @"StartingClass",
+            @"(?:first\s+load|continue|load).{0,120}starting_class_id",
+            @"starting_class_id.{0,120}(?:first\s+load|continue|load)",
             @"Synthesiz(?:e|ing).*CharacterProgressionSaveState",
             @"Re[-]?materializ(?:e|ing)"
         });
+        AssertNoWholeFileMatches("seed-only first-save materialization bypass", files, FirstSaveSeedOnlyForbiddenTerms());
     }
 
     [Test]
@@ -255,6 +256,7 @@ public sealed class ForbiddenPatternComplianceScanTest
         var productionFiles = ProductionSourceAndDataFiles();
 
         AssertNoMatches("synthetic pacing evidence misuse", productionFiles, PacingForbiddenTerms());
+        AssertNoWholeFileMatches("ambiguous pacing fixture kind", ProductionDataFiles(), PacingFixtureKindForbiddenTerms());
 
         Assert.That(ContainsAny("SyntheticEventTransaction used as XP/hour evidence", new[] { @"\bSyntheticEventTransaction\b" }), Is.True);
     }
@@ -316,6 +318,8 @@ public sealed class ForbiddenPatternComplianceScanTest
         Assert.That(FindMatches(new[] { samplesById["progression_snapshot"] }, new[] { @"(?<!Combat)\bProgressionBaselineSnapshot\b", @"visible_level", @"spell_eligibility_tier" }), Is.Not.Empty);
         Assert.That(FindMatches(new[] { samplesById["quiet_endurance"] }, QuietEnduranceForbiddenTerms()), Is.Not.Empty);
         Assert.That(FindMatches(new[] { samplesById["pacing"] }, PacingForbiddenTerms()), Is.Not.Empty);
+        Assert.That(FindWholeFileMatches(new[] { samplesById["first_save_seed_only"] }, FirstSaveSeedOnlyForbiddenTerms()), Is.Not.Empty);
+        Assert.That(FindWholeFileMatches(new[] { samplesById["ambiguous_fixture_kind"] }, PacingFixtureKindForbiddenTerms()), Is.Not.Empty);
 
         var productionFiles = ProductionSourceAndDataFiles();
         var productionText = string.Join(Environment.NewLine, productionFiles.Select(file => file.Text));
@@ -506,19 +510,17 @@ public sealed class ForbiddenPatternComplianceScanTest
 
     private static ComplianceState EvaluateFirstSaveSeedOnlyWithoutRequiredMaterialization()
     {
-        var groupedBarrierTest = ReadText("tests/integration/core/save/save_grouped_barrier_consistency_test.cs");
-        return PassIf(
-            groupedBarrierTest.Contains("CharacterProgressionSaveState", StringComparison.Ordinal) &&
-            groupedBarrierTest.Contains("NpcSourceLifecycleRecord", StringComparison.Ordinal) &&
-            EvaluatePartialGroupPayloadSerialization() != ComplianceState.Fail);
+        return PassIfNoWholeFileMatches(
+            SourceFiles("src/core/save", "src/gameplay/progression"),
+            FirstSaveSeedOnlyForbiddenTerms());
     }
 
     private static ComplianceState EvaluateFirstLoadSynthesizingProgressionState()
     {
         return PassIfNoMatches(SourceFiles("src/core/save", "src/gameplay/progression"), new[]
         {
-            @"starting_class_id",
-            @"StartingClass",
+            @"(?:first\s+load|continue|load).{0,120}starting_class_id",
+            @"starting_class_id.{0,120}(?:first\s+load|continue|load)",
             @"Synthesiz(?:e|ing).*CharacterProgressionSaveState"
         });
     }
@@ -579,11 +581,7 @@ public sealed class ForbiddenPatternComplianceScanTest
 
     private static ComplianceState EvaluatePacingFixtureWithAmbiguousKind()
     {
-        return PassIfNoMatches(ProductionDataFiles(), new[]
-        {
-            @"ProgressionPacingFixtureSet_T1[\s\S]{0,400}(?:fixture_kind\s*:\s*(?:null|[""']{2})|ambiguous_fixture_kind)",
-            @"ProgressionPacingFixtureSet_T1[\s\S]{0,400}(?:fixture_kind_missing|missing_fixture_kind)"
-        });
+        return PassIfNoWholeFileMatches(ProductionDataFiles(), PacingFixtureKindForbiddenTerms());
     }
 
     private static ComplianceState EvaluateAdr0006AddendumPattern(string patternId)
@@ -753,6 +751,12 @@ public sealed class ForbiddenPatternComplianceScanTest
         Assert.That(matches, Is.Empty, $"{label}:{Environment.NewLine}{FormatMatches(matches)}");
     }
 
+    private static void AssertNoWholeFileMatches(string label, IReadOnlyList<SourceFile> files, IReadOnlyList<string> patterns)
+    {
+        var matches = FindWholeFileMatches(files, patterns);
+        Assert.That(matches, Is.Empty, $"{label}:{Environment.NewLine}{FormatMatches(matches)}");
+    }
+
     private static IReadOnlyList<SourceMatch> FindMatches(IReadOnlyList<SourceFile> files, IReadOnlyList<string> patterns)
     {
         return files
@@ -773,6 +777,27 @@ public sealed class ForbiddenPatternComplianceScanTest
         }
     }
 
+    private static IReadOnlyList<SourceMatch> FindWholeFileMatches(IReadOnlyList<SourceFile> files, IReadOnlyList<string> patterns)
+    {
+        return files
+            .SelectMany(file => patterns.SelectMany(pattern => FindWholeFileMatches(file, pattern)))
+            .ToArray();
+    }
+
+    private static IEnumerable<SourceMatch> FindWholeFileMatches(SourceFile file, string pattern)
+    {
+        var regex = new Regex(pattern, RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.Singleline);
+        foreach (Match match in regex.Matches(file.Text))
+        {
+            var lineNumber = file.Text.Take(match.Index).Count(character => character == '\n') + 1;
+            var lineText = file.Text
+                .Split(new[] { "\r\n", "\n" }, StringSplitOptions.None)
+                .ElementAtOrDefault(lineNumber - 1)?
+                .Trim() ?? string.Empty;
+            yield return new SourceMatch(file.RelativePath, lineNumber, pattern, lineText);
+        }
+    }
+
     private static bool ContainsAny(string text, IReadOnlyList<string> patterns)
     {
         return patterns.Any(pattern => Regex.IsMatch(text, pattern, RegexOptions.IgnoreCase | RegexOptions.CultureInvariant));
@@ -786,6 +811,11 @@ public sealed class ForbiddenPatternComplianceScanTest
     private static ComplianceState PassIfNoMatches(IReadOnlyList<SourceFile> files, IReadOnlyList<string> patterns)
     {
         return FindMatches(files, patterns).Count == 0 ? ComplianceState.Pass : ComplianceState.Fail;
+    }
+
+    private static ComplianceState PassIfNoWholeFileMatches(IReadOnlyList<SourceFile> files, IReadOnlyList<string> patterns)
+    {
+        return FindWholeFileMatches(files, patterns).Count == 0 ? ComplianceState.Pass : ComplianceState.Fail;
     }
 
     private static string FormatMatches(IReadOnlyList<SourceMatch> matches)
@@ -835,8 +865,29 @@ public sealed class ForbiddenPatternComplianceScanTest
             @"ProfiledPacing.*WithoutPreflight",
             @"PacingMathPreflight.*missing",
             @"LegalKillCreditRoute.*bypass",
-            @"RespawnLockout.{0,160}(?:continuous|repeatable|XP/hour|xp_per_hour)",
-            @"ProgressionPacingFixtureSet_T1[\s\S]{0,400}(?:fixture_kind_missing|missing_fixture_kind|ambiguous_fixture_kind)"
+            @"RespawnLockout.{0,160}(?:continuous|repeatable|XP/hour|xp_per_hour)"
+        };
+    }
+
+    private static string[] FirstSaveSeedOnlyForbiddenTerms()
+    {
+        return new[]
+        {
+            @"FirstSave.{0,240}(?:seed[-_ ]?only|InitialCharacterRecord\s+only|without\s+.*CharacterProgressionSaveState)",
+            @"SaveWriteConfirmed.{0,240}(?:without|before).{0,120}(?:FirstSaveMaterialization|CharacterProgressionSaveState)",
+            @"FirstSaveMaterialization.{0,160}(?:bypass|skip|disabled|not\s+required)",
+            @"CharacterProgressionSaveState.{0,160}(?:synthesiz|materializ).{0,160}(?:first\s+load|continue|load)",
+            @"starting_class_id.{0,160}(?:synthesiz|materializ).{0,160}CharacterProgressionSaveState"
+        };
+    }
+
+    private static string[] PacingFixtureKindForbiddenTerms()
+    {
+        return new[]
+        {
+            @"ProgressionPacingFixtureSet_T1[\s\S]{0,400}(?:[""']?fixture_kind[""']?\s*[:=]\s*(?:null|[""']{2})|fixture_kind_missing|missing_fixture_kind|ambiguous_fixture_kind)",
+            @"ProgressionPacingFixtureSet_T1[\s\S]{0,400}[""']?fixture_kind[""']?\s*[:=]\s*[""']?(?:LegalKillCreditRoute|FormulaOnly|SyntheticEventTransaction|InvalidDataValidation)[""']?[\s\S]{0,160}[""']?fixture_kind[""']?\s*[:=]",
+            @"ProgressionPacingFixtureSet_T1[\s\S]{0,400}(?:LegalKillCreditRoute\s*\|\s*FormulaOnly|SyntheticEventTransaction\s*\|\s*InvalidDataValidation)"
         };
     }
 
@@ -875,7 +926,20 @@ public sealed class ForbiddenPatternComplianceScanTest
                 "Endurance combo meter with per-ability Endurance callout"),
             new SourceFile(
                 "tests/architecture/fixtures/pacing.txt",
-                "SyntheticEventTransaction used as XP/hour evidence")
+                "SyntheticEventTransaction used as XP/hour evidence"),
+            new SourceFile(
+                "tests/architecture/fixtures/first_save_seed_only.txt",
+                "FirstSave writes InitialCharacterRecord only without CharacterProgressionSaveState"),
+            new SourceFile(
+                "tests/architecture/fixtures/ambiguous_fixture_kind.json",
+                """
+                {
+                  "schema": "ProgressionPacingFixtureSet_T1",
+                  "rows": [
+                    { "id": "bad", "fixture_kind": "LegalKillCreditRoute", "fixture_kind": "FormulaOnly" }
+                  ]
+                }
+                """)
         };
     }
 
