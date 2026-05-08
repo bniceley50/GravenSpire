@@ -4,7 +4,7 @@ Use this tree for deterministic harness code that supports profiled combat-feel 
 
 Sprint 1 profile scenarios:
 
-- `SoloTrash_EvenCon_T1`: 20 seeded trials; Cleric wins 55-85 percent and ends below either 80 percent health or 60 percent mana on mean result.
+- `SoloTrash_EvenCon_T1`: 20 seeded clean-state trials; Cleric wins 90-100 percent and ends below either 80 percent health or 60 percent mana on mean result.
 - `NamedSoloBlock_T1`: 10 seeded trials; Cleric loses or must flee at least 8 out of 10.
 - `TwoTrash_Overpull_T1`: 10 seeded trials; Cleric loses, flees, or survives below threshold at least 8 out of 10.
 - `MedBreakRecovery_T1`: below 35 percent mana to 70 percent mana within 60-120 seconds after combat exit.

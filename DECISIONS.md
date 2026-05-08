@@ -409,3 +409,68 @@ instants, and explicit carveouts keeping `Smite of Authority` and
 `production/sprints/sprint-1-5.md`;
 `production/qa/plans/qa-plan-sprint-1-5-20260506.md`;
 `design/gdd/combat-core.md`.
+
+---
+
+## D014 — FEEL-01 Clean-State Solo Trash Target Revalidated
+
+**Date:** 2026-05-08
+**Status:** Locked
+**Context:** `H-CCOM-FEEL-01` originally expected `SoloTrash_EvenCon_T1` to
+land inside a `55-85%` Cleric win-rate band. T1-COMBAT-10 measured `20/20`
+solo-trash wins against that target in
+`tests/evidence/T1-COMBAT-10/profiled-combat-slice.jsonl:1` and summarized
+the failure in `tests/evidence/T1-COMBAT-10/verification.md:64`. That evidence
+was generated before D013/ADR-0006 Endurance implementation: Bash still spent
+mana when the original harness result was recorded. T1.5-COMBAT-02 later
+validated the physical-instant split, moving Bash to Endurance while keeping
+`Smite of Authority` and `Defensive Prayer` mana-based. The post-Endurance
+Cleric is therefore stronger in clean solo-trash pulls than the model that the
+original FEEL-01 band measured; the resource split is recorded at
+`tests/evidence/T1.5-COMBAT-02/verification.md:32` through
+`tests/evidence/T1.5-COMBAT-02/verification.md:35`.
+
+D012's prototype validation already supported reliable solo-trash play: the
+direct playtest finding in `production/prototypes/combat-feel-report.md:142`
+was "you nailed it! felt really smooth," and the pinned-engine rerun recorded
+`5/5` pulls, `5` med breaks, `0` unsafe pulls, and `0` deaths in
+`prototypes/combat-feel/Logs/playtest-20260506-093105.log:1`. The T1 slice
+review also framed FEEL-01 as softer than FEEL-03 after the prototype rerun
+produced clean solo-trash wins, while FEEL-03 remained the stronger pull-
+discipline warning in `production/qa/combat/feel-review-T1-slice.md:80`.
+T1.5-COMBAT-03 then restored FEEL-03 with `dangerous_outcomes=9` while
+intentionally leaving FEEL-01 untouched, recorded at
+`tests/evidence/T1.5-COMBAT-03/verification.md:24` and
+`tests/evidence/T1.5-COMBAT-03/verification.md:61` through
+`tests/evidence/T1.5-COMBAT-03/verification.md:63`.
+
+**Decision:** Move `H-CCOM-FEEL-01` from `55-85%` to `90-100%` Cleric wins for
+clean-state solo trash. "Clean-state" means `SoloTrash_EvenCon_T1` starts the
+same-band Cleric above 80% health and above 60% mana against one same-band
+`encounter_role = Trash` fixture, using intended casts, auto-attack, tactical
+instants, and med breaks. Preserve the ending-state pressure clause: the mean
+ending state must still fall below either 80% health or 60% mana so that
+immediately chaining the same pull remains measurably riskier than sitting and
+regenerating first.
+
+FEEL-01 now owns clean solo-trash reliability. FEEL-03 owns overpull danger.
+Those are distinct concerns: a Cleric should usually win a clean same-band
+single-trash pull, while normal two-trash farming should remain non-viable.
+
+**Consequences:**
+- Combat Core's FEEL-01 GDD acceptance criterion and clean-solo tuning knob
+  move to the new `90-100%` target.
+- No fixture data, harness behavior, or profiled evidence rows are changed by
+  T1.5-COMBAT-04; T1.5-COMBAT-05 owns the next profiled rerun and any
+  machine-readable target/output-label updates needed after this decision.
+- Historical references to the original `55-85%` target remain valid as
+  evidence history when explicitly classified as historical or superseded.
+- Low-resource, surprise-pull, interrupted-med-break, or other disadvantage
+  solo-trash vulnerability remains a future acceptance-criteria candidate; it
+  is not part of this clean-state FEEL-01 target.
+**See also:**
+`design/gdd/combat-core.md`;
+`production/stories/t1-5-combat-04-feel-01-target-revalidation.md`;
+`tests/evidence/T1.5-COMBAT-04/verification.md`;
+`tests/evidence/T1-COMBAT-10/profiled-combat-slice.jsonl`;
+`tests/evidence/T1.5-COMBAT-03/profiled-combat-slice.jsonl`.

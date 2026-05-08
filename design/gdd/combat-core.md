@@ -426,7 +426,7 @@ D012 tactical instant fixtures use the same profile contract. They are prototype
 
 | Fixture | Composition | T1 `kill_weight_seed` | Source-ref aliases available to downstream fixtures | Required Outcome |
 |---|---|---:|---|---|
-| `SoloTrash_EvenCon_T1` | Cleric fixture vs. same-level Trash fixture | `1.25` | `source_spawn_ref:Trash_Early_L2_T1`, `source_spawn_ref:SoloTrash_EvenCon_T1`, `source_spawn_ref:Trash_Level7_T1`, `source_spawn_ref:Trash_Late_L9_T1`, `source_spawn_ref:SoloTrash_SoftUndercon_T1`, `source_spawn_ref:SoloTrash_Trivial_T1`, `source_spawn_ref:DenseCamp_Trash_T1` | Cleric wins 55-85% of seeded trials from >80% HP and >60% mana. |
+| `SoloTrash_EvenCon_T1` | Cleric fixture vs. same-level Trash fixture | `1.25` | `source_spawn_ref:Trash_Early_L2_T1`, `source_spawn_ref:SoloTrash_EvenCon_T1`, `source_spawn_ref:Trash_Level7_T1`, `source_spawn_ref:Trash_Late_L9_T1`, `source_spawn_ref:SoloTrash_SoftUndercon_T1`, `source_spawn_ref:SoloTrash_Trivial_T1`, `source_spawn_ref:DenseCamp_Trash_T1` | Cleric wins 90-100% of clean-state seeded trials from >80% HP and >60% mana, with mean ending pressure still below either 80% HP or 60% mana. |
 | `TwoTrash_Overpull_T1` | Cleric fixture vs. two same-level Trash fixtures entering hate within 5s | `1.25` per defeated trash source | `source_spawn_ref:TwoTrash_A_T1`, `source_spawn_ref:TwoTrash_B_T1` | Normal two-trash farming is not viable. |
 | `NamedSoloBlock_T1` | `Cleric_Top_T1` vs. `Named_Top_T1` | `1.25` | `source_npc_id:Named_XP_Smoke_T1` | Named has `solo_block_profile_id` with at least health/mana wall plus interrupt pressure. Any baseline solo kill is a tuning defect unless marked exploit-under-investigation. |
 
@@ -556,7 +556,7 @@ These references do not override Locked Inputs. They bind implementation constra
 | `regen_tick_interval_seconds` | 6 s | 2-10 s | Chunkier EQ-like med ticks. | Smoother resource bars. |
 | `sitting_mana_regen_multiplier` | 4.0 | 2.0-8.0 | Shorter med breaks. | Longer med breaks. |
 | `in_combat_mana_regen_multiplier` | 0.0 | 0.0-0.25 | More forgiving long fights. | Stricter med-break dependency. |
-| `trash_solo_target_success_rate` | 0.70 | 0.55-0.85 | Cleric trash soloing more reliable. | More punishing solo trash. |
+| `trash_clean_solo_target_success_rate` | 0.95 | 0.90-1.00 | Clean same-band solo trash is more reliable. | Clean same-band solo trash becomes more punishing; disadvantage-start vulnerability needs its own fixture. |
 
 ## Visual/Audio Requirements
 
@@ -798,8 +798,12 @@ All Combat Core acceptance criteria use the project QA taxonomy: Unit, Integrati
 ### T1 feel and soloability
 
 **H-CCOM-FEEL-01 - Cleric single-trash success envelope**
-**GIVEN** `SoloTrash_EvenCon_T1` starts the same-band Cleric fixture above 80% health and above 60% mana against one same-band `encounter_role = Trash` fixture (`Cleric_Mid_T1` uses 140 HP / 180 mana), **WHEN** QA runs 20 seeded combat trials using intended casts, auto-attack, and med breaks, **THEN** the Cleric wins 55-85% of trials and the mean ending state is below either 80% health or 60% mana so that immediately pulling the same fixture again is measurably riskier than sitting/regen first.
+**GIVEN** `SoloTrash_EvenCon_T1` starts the same-band Cleric fixture above 80% health and above 60% mana against one same-band `encounter_role = Trash` fixture (`Cleric_Mid_T1` uses 140 HP / 180 mana), **WHEN** QA runs 20 seeded combat trials using intended casts, auto-attack, tactical instants, and med breaks, **THEN** the Cleric wins 90-100% of clean-state trials and the mean ending state is below either 80% health or 60% mana so that immediately pulling the same fixture again is measurably riskier than sitting/regen first.
 *Profiled playtest | game-designer + qa-tester | fixture-gated T1-blocking*
+
+**D014 note:** This criterion covers clean-state solo trash only. Low-resource,
+surprise-pull, interrupted-med-break, or other disadvantage-start solo-trash
+vulnerability requires a separate future fixture and acceptance criterion.
 
 **H-CCOM-FEEL-02 - Named enemy not soloable**
 **GIVEN** `NamedSoloBlock_T1` pits `Cleric_Top_T1` (220 HP / 300 mana) against `Named_Top_T1` with `encounter_role = Named`, `solo_block_profile_id`, and no companion/party support, **WHEN** QA runs 10 seeded combat trials, **THEN** the Cleric loses or must flee in at least 8/10 trials and the log attributes the block to health/mana wall plus interrupt pressure; any victory is logged as a tuning defect unless caused by known exploit under investigation.
