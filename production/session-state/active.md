@@ -5,9 +5,9 @@
 
 ## Current Task
 
-Sprint 1.5 is active in implementation. `T1.5-COMBAT-04` closed via `/story-done` with verdict **COMPLETE WITH NOTES**, landing D014 FEEL-01 target revalidation and preserving the evidence-provenance distinction between implementation commit `bd6c81b` and review-fix commit `f3a4a36`.
+Sprint 1.5 is active in implementation. `T1-COMBAT-11` closed via `/story-done` with verdict **COMPLETE WITH NOTES**, landing the forbidden-pattern compliance scanner as a durable local gate and preserving the evidence-provenance distinction between closure-eligible scanner state `5bbc665` and provenance-only documentation commit `496ebc6`.
 
-The next active gate is T1-COMBAT-11 story-file recovery: create or recover `production/stories/t1-combat-11-forbidden-pattern-compliance-scan-analyzer.md` from `production/sprints/sprint-1.md:577` through `production/sprints/sprint-1.md:610`, then run `/dev-story T1-COMBAT-11-forbidden-pattern-compliance-scan-analyzer`. `T1.5-COMBAT-05` remains blocked on T1-COMBAT-11.
+The next active gate is `/dev-story T1.5-COMBAT-05-profiled-rerun-evidence-summary`. Sprint 1.5 is now 6/7 done; `T1.5-COMBAT-05` is the remaining capstone story.
 
 ## Status
 
@@ -19,7 +19,7 @@ The next active gate is T1-COMBAT-11 story-file recovery: create or recover `pro
 - ✓ D006 committed — Codex onboarded as parallel implementer (commit `fae8c8c`)
 - ✓ Codex onboarding brief delivered; Codex has completed read-only onboarding and surfaced 4 clarifying questions (all answered)
 - ✓ Codex Assignment #1 drafted — `dotnet format` setup on branch `codex/dotnet-format-setup`
-- ⚠️ World Structure GDD — **NEEDS REVISION.** Full `/design-review design/gdd/world-structure.md` completed 2026-04-23 with verdict **MAJOR REVISION NEEDED** and scope signal **XL**. Six blocker groups: (1) transition contract contradiction, (2) memory residency model contradiction, (3) save/zone identity contradiction, (4) formula/registry validator-safety issues, (5) acceptance criteria not T1-gateable, (6) T1 offline "world kept moving" bridge underspecified. Review log created at [design/gdd/reviews/world-structure-review-log.md](../../design/gdd/reviews/world-structure-review-log.md).
+- ⚠️ World Structure GDD — parked revision item, not active Sprint 1.5 combat closure work. Full `/design-review design/gdd/world-structure.md` completed 2026-04-23 with verdict **MAJOR REVISION NEEDED** and scope signal **XL**. Six blocker groups: (1) transition contract contradiction, (2) memory residency model contradiction, (3) save/zone identity contradiction, (4) formula/registry validator-safety issues, (5) acceptance criteria not T1-gateable, (6) T1 offline "world kept moving" bridge underspecified. Review log created at [design/gdd/reviews/world-structure-review-log.md](../../design/gdd/reviews/world-structure-review-log.md).
 - ✅ Commit `4801d8a` on `main` (GDD + registry + systems-index + active.md bundle; rebased onto PR #1 merge).
 - ✅ Character Progression GDD skeleton created 2026-04-25 at [design/gdd/character-progression.md](../../design/gdd/character-progression.md).
 - ✅ Character Progression Overview section written 2026-04-25.
@@ -78,10 +78,11 @@ The next active gate is T1-COMBAT-11 story-file recovery: create or recover `pro
 - ✅ Sprint 1.5 story `T1.5-COMBAT-02` closed via `/story-done` 2026-05-07 with verdict **COMPLETE WITH NOTES**. Commit `9aacee0` lands Bash Endurance spend, Smite/Defensive Prayer mana carveouts, resource_kind/cost_endurance fixture schema support across both tactical instant surfaces, all-band Cleric Endurance hydration, 7 QA-02 cases, and 2 blocker regression tests; `dotnet test tests\Gravenspire.Combat.Tests.csproj` passes 148/148. ADR-0006 is now Accepted and D013 is now Locked.
 - ✅ Sprint 1.5 story `T1.5-COMBAT-03` closed via `/story-done` 2026-05-08 with verdict **COMPLETE WITH NOTES**. Commit `e7233b5` lands FEEL-03 overpull tuning and JSONL metrics with `TwoTrash_Overpull_T1` at `dangerous_outcomes=9`; commit `1935515` is the SHA-drift follow-up now on `origin/main` that regenerated the JSONL at `HEAD=e7233b5` for reproducibility. `dotnet test tests\Gravenspire.Combat.Tests.csproj` passes 149/149.
 - ✅ Sprint 1.5 story `T1.5-COMBAT-04` closed via `/story-done` 2026-05-08 with verdict **COMPLETE WITH NOTES**. Commit `bd6c81b` lands D014 as Locked, moves FEEL-01 clean-state solo trash to `90-100%`, preserves the ending-state pressure clause, updates Combat Core and `tests/performance/README.md`, and creates the story/evidence artifacts. Commit `f3a4a36` is the review-driven follow-up that classifies ADR-0005 and ADR-0006 FEEL-01 references in the QA-04-04 table. `dotnet test tests\Gravenspire.Combat.Tests.csproj` passes 149/149.
+- ✅ Sprint 1.5 carryover story `T1-COMBAT-11` closed via `/story-done` 2026-05-08 with verdict **COMPLETE WITH NOTES**. Commit chain: `015d417` story scaffold / parent baseline, `0e603a7` initial scanner implementation, `f4f191a` review fix #1, `5bbc665` review fix #2 and closure-eligible scanner/evidence state, and `496ebc6` provenance-only verification restructure. `dotnet test tests\Gravenspire.Combat.Tests.csproj` passes 159/159.
 
 ## Files Being Worked On
 
-- **Active:** Sprint 1.5 implementation. Next critical path: recover `production/stories/t1-combat-11-forbidden-pattern-compliance-scan-analyzer.md` from `production/sprints/sprint-1.md:577` through `production/sprints/sprint-1.md:610`, then run `/dev-story T1-COMBAT-11-forbidden-pattern-compliance-scan-analyzer`. `T1.5-COMBAT-05` remains blocked on T1-COMBAT-11.
+- **Active:** Sprint 1.5 implementation. Next critical path: run `/dev-story T1.5-COMBAT-05-profiled-rerun-evidence-summary`.
 - Combat Feel Prototype: [prototypes/combat-feel/](../../prototypes/combat-feel/) — pinned-engine headline pass complete; prototype code remains throwaway evidence artifact.
 - Combat Feel Prototype README: [prototypes/combat-feel/README.md](../../prototypes/combat-feel/README.md) — prototype question, success/failure criteria, loop spec, controls, run notes
 - Inventory & Item Economy: [design/gdd/inventory-item-economy.md](../../design/gdd/inventory-item-economy.md) — design draft, **NEEDS REVISION**, blocker 1 repaired, remaining blockers tracked in `INV-OQ-05`
@@ -113,12 +114,11 @@ The next active gate is T1-COMBAT-11 story-file recovery: create or recover `pro
 - T1-COMBAT-08 now provides the Combat Core HUD-safe projection seam; Layer 1 HUD must consume categorical threat and explicit Attack ON/OFF state rather than exposing raw threat or inventing parallel combat state.
 - T1-COMBAT-09c closed the player death payload stub and first held-policy feel-review artifact at `production/qa/combat/feel-review-09c-player-death.md`; human qualitative death-moment playtest remains pending as a Sprint 1.5 carryover.
 - T1-COMBAT-10 closed the profiled evidence loop and surfaced quantitative combat-feel gaps: solo trash is too safe (`20/20` wins) and two-trash overpull is insufficiently punishing (`5/10` dangerous outcomes). Treat these as slice-review inputs, not as bugs fixed in T1-COMBAT-10.
-- T1.5-COMBAT-04 is closed; `production/sprint-status.yaml` now records Sprint 1.5 progress as 5/7 done and surfaces T1-COMBAT-11 story-file recovery as the next active gate.
-- `AbilityResolvedEvent` remains `ManaSpent`-only after the physical resource split; carry this semantic gap to `T1-COMBAT-11` as a forbidden-pattern/static-scan input.
+- T1-COMBAT-11 is closed; `production/sprint-status.yaml` now records Sprint 1.5 progress as 6/7 done and surfaces `T1.5-COMBAT-05` as the next active story.
+- `AbilityResolvedEvent` remains `ManaSpent`-only after the physical resource split, but T1-COMBAT-11 now durably classifies it as `KNOWN-CARRYOVER` and fails shipping universal-spend misuse.
 - T1.5-COMBAT-02 `/code-review` P3 wording for QA-02-01 "cooldown/global recovery" remains deferred to the next QA plan iteration.
-- T1.5-COMBAT-03 surfaced a workflow lesson: harness evidence captured before commit can record the parent commit SHA. Capture the pre-commit-SHA-drift lesson before `T1.5-COMBAT-05`, the next harness-touching story.
-- T1.5-COMBAT-04 surfaced verification-artifact authoring polish: future grep classification tables should include either a command-output excerpt or an explicit categorical-coverage note, and verification rows should inline-cite prototype rerun log paths when the story body also cites them.
-- `production/stories/t1-combat-11-forbidden-pattern-compliance-scan-analyzer.md` is referenced by Sprint 1 and Sprint 1.5 planning but is currently absent; create or recover it before T1-COMBAT-11 implementation.
+- T1.5-COMBAT-03 surfaced a workflow lesson: harness evidence captured before commit can record the parent commit SHA. T1-COMBAT-11 provides the chain-table mitigation pattern to carry into `T1.5-COMBAT-05`, the next harness-touching story.
+- T1.5-COMBAT-04 surfaced verification-artifact authoring polish: `T1.5-COMBAT-05` should include command-output excerpts or categorical coverage notes in classification tables, and inline-cite prototype rerun log paths when story text cites them.
 - ADR-0003 / D009 status metadata cleanup is closed as of the T1-COMBAT-05 `/story-done` ride-along: ADR-0003 is `Accepted`, and DECISIONS.md D009 is `Locked`. Justification: T1-COMBAT-01 closure commit `565ee26` has been on `main` since 2026-04-28; `CombatProgressionBaselineSnapshot` is consumed by production `CombatActorHydrator` at `src/gameplay/combat/CombatActorHydrator.cs:55`, `src/gameplay/combat/CombatActorHydrator.cs:61-68`, and `src/gameplay/combat/CombatActorHydrator.cs:104-126`; T1-COMBAT-01 verification cites ADR-0003 coverage at `tests/evidence/T1-COMBAT-01/verification.md:31`.
 - `H-CCOM-F2B` fixture extremes are validated by `T1-COMBAT-01`; seeded melee formula execution is validated by `T1-COMBAT-04`.
 - Creature / Enemy AI still owns actual return-to-anchor movement and NavMeshAgent behavior; `T1-COMBAT-02` supplies Combat Core leash hooks and test doubles only.
@@ -130,8 +130,7 @@ The next active gate is T1-COMBAT-11 story-file recovery: create or recover `pro
 
 ## Next Skill to Run
 
-- **Recover `production/stories/t1-combat-11-forbidden-pattern-compliance-scan-analyzer.md` from `production/sprints/sprint-1.md:577` through `production/sprints/sprint-1.md:610`, then run `/dev-story T1-COMBAT-11-forbidden-pattern-compliance-scan-analyzer`.**
-- After T1-COMBAT-11 closes, run `/dev-story T1.5-COMBAT-05-profiled-rerun-evidence-summary`.
+- **Run `/dev-story T1.5-COMBAT-05-profiled-rerun-evidence-summary`.**
 - Later: run Inventory implementation pre-spec to close `INV-OQ-05`, then rerun `/design-review design/gdd/inventory-item-economy.md --depth full`.
 - Codex PR #1 is merged; no Codex follow-up pending in this active state file.
 
@@ -141,7 +140,7 @@ The next active gate is T1-COMBAT-11 story-file recovery: create or recover `pro
 - Sprint 1.5 plan: [production/sprints/sprint-1-5.md](../sprints/sprint-1-5.md) committed at `8885d2e`.
 - Sprint 1.5 QA plan: [production/qa/plans/qa-plan-sprint-1-5-20260506.md](../qa/plans/qa-plan-sprint-1-5-20260506.md) committed at `b6297b4`.
 - Sprint 1.5 scope: quiet Endurance resource-model addition, Bash/physical instant conversion, FEEL-03 overpull tuning, FEEL-01 target revalidation, T1-COMBAT-11 carryover, and profiled rerun evidence.
-- Carryover: `production/stories/t1-combat-11-forbidden-pattern-compliance-scan-analyzer.md` is currently absent and must be created or recovered before T1-COMBAT-11 implementation; [production/qa/combat/feel-review-09c-player-death.md](../qa/combat/feel-review-09c-player-death.md) still has HUMAN PLAYTEST PENDING.
+- Carryover at this checkpoint: `production/stories/t1-combat-11-forbidden-pattern-compliance-scan-analyzer.md` was not yet recovered; resolved by T1-COMBAT-11 closure on 2026-05-08. [production/qa/combat/feel-review-09c-player-death.md](../qa/combat/feel-review-09c-player-death.md) still has HUMAN PLAYTEST PENDING.
 - State update: `production/sprint-status.yaml` and this active state now point at baseline regression as the required next gate, then `/dev-story T1.5-COMBAT-00-endurance-contract-lock`.
 
 ## Session Extract - /story-done 2026-05-06 (T1.5-COMBAT-00)
@@ -153,7 +152,7 @@ The next active gate is T1-COMBAT-11 story-file recovery: create or recover `pro
 - State updates: story status set to Complete; `production/sprint-status.yaml` marks `T1.5-COMBAT-00` done, records 1/7 Sprint 1.5 stories done, and surfaces `T1.5-COMBAT-01` as next active. `T1.5-COMBAT-04` is also unblocked for optional parallel design work.
 - ADR ride-along marker: ADR-0006 / D013 status ride-along is scheduled at `T1.5-COMBAT-02` closure after physical instant conversion validates the contract. That closure batch should include both metadata flips as narrow status-only changes: ADR-0006 Proposed -> Accepted and D013 Proposed -> Locked, mirroring the T1-COMBAT-09b ride-along precedent for D007/D008.
 - Tech debt logged: None.
-- Carried forward: `T1-COMBAT-11` story file is still absent and must be created or recovered before that story's `/dev-story`; [production/qa/combat/feel-review-09c-player-death.md](../qa/combat/feel-review-09c-player-death.md) remains HUMAN PLAYTEST PENDING.
+- Carried forward at this checkpoint: `T1-COMBAT-11` story recovery was still pending; resolved by T1-COMBAT-11 closure on 2026-05-08. [production/qa/combat/feel-review-09c-player-death.md](../qa/combat/feel-review-09c-player-death.md) remains HUMAN PLAYTEST PENDING.
 - Next recommended: `/dev-story T1.5-COMBAT-01-endurance-state-hud-save-projection`.
 
 ## Session Extract - /story-done 2026-05-07 (T1.5-COMBAT-01)
@@ -165,7 +164,7 @@ The next active gate is T1-COMBAT-11 story-file recovery: create or recover `pro
 - State updates: story status set to Complete; `production/sprint-status.yaml` marks `T1.5-COMBAT-01` done, records 2/7 Sprint 1.5 stories done, corrects the `T1.5-COMBAT-01` row file path to the actual story artifact, and surfaces `T1.5-COMBAT-02` as next active. `T1.5-COMBAT-04` remains unblocked for optional parallel design work.
 - ADR ride-along marker: ADR-0006 / D013 status ride-along remains scheduled at `T1.5-COMBAT-02` closure after physical instant conversion validates the resource split. The chain is recorded in the prior `T1.5-COMBAT-00` closure extract from commit `5e59344` and this story's Completion Notes.
 - Tech debt logged: sprint-status routing drift was corrected for `T1.5-COMBAT-01`; no other story-row path drift was fixed in this batch.
-- Carried forward: `T1-COMBAT-11` story file is still absent and must be created or recovered before that story's `/dev-story`; [production/qa/combat/feel-review-09c-player-death.md](../qa/combat/feel-review-09c-player-death.md) remains HUMAN PLAYTEST PENDING.
+- Carried forward at this checkpoint: `T1-COMBAT-11` story recovery was still pending; resolved by T1-COMBAT-11 closure on 2026-05-08. [production/qa/combat/feel-review-09c-player-death.md](../qa/combat/feel-review-09c-player-death.md) remains HUMAN PLAYTEST PENDING.
 - Next recommended: `/dev-story T1.5-COMBAT-02-physical-instant-conversion`.
 
 ## Session Extract - /story-done 2026-05-07 (T1.5-COMBAT-02)
@@ -177,7 +176,7 @@ The next active gate is T1-COMBAT-11 story-file recovery: create or recover `pro
 - State updates: story status set to Complete; `production/sprint-status.yaml` marks `T1.5-COMBAT-02` done, records 3/7 Sprint 1.5 stories done, and surfaces `T1.5-COMBAT-03` as next active. `T1.5-COMBAT-04` remains unblocked for optional parallel design work.
 - ADR ride-along: ADR-0006 status changed from Proposed to Accepted; DECISIONS.md D013 status changed from Proposed to Locked. This is metadata-only and validated by T1.5-COMBAT-01 closure commit `d6c8e08`, T1.5-COMBAT-02 implementation commit `9aacee0`, ADR-0006's validation-state authorization, and the T1.5-COMBAT-02 verification artifact.
 - Tech debt logged: None in `docs/tech-debt-register.md`; P3 review findings are deferred in sprint/session carryover instead of smuggled into closure.
-- Carried forward: `AbilityResolvedEvent.ManaSpent`-only payload semantics for `T1-COMBAT-11`; `fixtureSetVersion` bump for `T1.5-COMBAT-03`; QA-02-01 cooldown/global-recovery wording for the next QA plan iteration; `T1-COMBAT-11` story file remains absent and must be created or recovered before that story's `/dev-story`; [production/qa/combat/feel-review-09c-player-death.md](../qa/combat/feel-review-09c-player-death.md) remains HUMAN PLAYTEST PENDING.
+- Carried forward at this checkpoint: `AbilityResolvedEvent.ManaSpent`-only payload semantics for `T1-COMBAT-11`; `fixtureSetVersion` bump for `T1.5-COMBAT-03`; QA-02-01 cooldown/global-recovery wording for the next QA plan iteration; `T1-COMBAT-11` story recovery was still pending and is now resolved by the 2026-05-08 closure; [production/qa/combat/feel-review-09c-player-death.md](../qa/combat/feel-review-09c-player-death.md) remains HUMAN PLAYTEST PENDING.
 - Next recommended: `/dev-story T1.5-COMBAT-03-feel-03-overpull-tuning`.
 
 ## Session Extract - /story-done 2026-05-08 (T1.5-COMBAT-03)
@@ -189,7 +188,7 @@ The next active gate is T1-COMBAT-11 story-file recovery: create or recover `pro
 - Implementation commits: `e7233b5` is the implementation and metric-capture commit for FEEL-03 tuning. `1935515` is the follow-up SHA-drift fix and current `origin/main` head; it regenerated JSONL at `HEAD=e7233b5` so `git checkout e7233b5` plus the harness rerun reproduces the committed rows.
 - State updates: story status set to Complete; `production/sprint-status.yaml` marks `T1.5-COMBAT-03` done, records 4/7 Sprint 1.5 stories done, and surfaces `T1.5-COMBAT-04` as the next active story.
 - Deviations: FEEL-01 remains failed-as-measured in the T1.5-COMBAT-03 JSONL and is intentionally owned by `T1.5-COMBAT-04`; no new human Green/Yellow/Red verdict was written.
-- Carried forward: `AbilityResolvedEvent.ManaSpent`-only payload semantics for `T1-COMBAT-11`; QA-02-01 cooldown/global-recovery wording for the next QA plan iteration; `T1-COMBAT-11` story file remains absent and must be created or recovered before that story's `/dev-story`; [production/qa/combat/feel-review-09c-player-death.md](../qa/combat/feel-review-09c-player-death.md) remains HUMAN PLAYTEST PENDING; pre-commit-SHA-drift workflow lesson should be captured before `T1.5-COMBAT-05`.
+- Carried forward at this checkpoint: `AbilityResolvedEvent.ManaSpent`-only payload semantics for `T1-COMBAT-11`; QA-02-01 cooldown/global-recovery wording for the next QA plan iteration; `T1-COMBAT-11` story recovery was still pending and is now resolved by the 2026-05-08 closure; [production/qa/combat/feel-review-09c-player-death.md](../qa/combat/feel-review-09c-player-death.md) remains HUMAN PLAYTEST PENDING; pre-commit-SHA-drift workflow lesson should be carried into `T1.5-COMBAT-05`.
 - Next recommended: `/dev-story T1.5-COMBAT-04-feel-01-target-revalidation`.
 
 ## Session Extract - /story-done 2026-05-08 (T1.5-COMBAT-04)
@@ -199,10 +198,22 @@ The next active gate is T1-COMBAT-11 story-file recovery: create or recover `pro
 - Criteria: 5/5 QA-04 cases covered; `QA-04-01` through `QA-04-05` all have file:line evidence in the story completion notes and verification summary.
 - Evidence: [tests/evidence/T1.5-COMBAT-04/verification.md](../../tests/evidence/T1.5-COMBAT-04/verification.md) records D014, current target updates, old-target and FEEL-01 reference classification, empty fixture diff, 149/149 regression pass, `git diff --check`, and `[pre-commit] OK`.
 - Implementation commits: `bd6c81b` is the implementation commit that landed D014, the Combat Core FEEL-01 target update, the performance README update, the story file, and the initial verification artifact. `f3a4a36` is the review-driven follow-up that classified ADR-0005 and ADR-0006 FEEL-01 references in the QA-04-04 table.
-- State updates: story status set to Complete; `production/sprint-status.yaml` marks `T1.5-COMBAT-04` done, records 5/7 Sprint 1.5 stories done, and surfaces T1-COMBAT-11 story-file recovery as the next active gate.
+- State updates at this checkpoint: story status set to Complete; `production/sprint-status.yaml` marked `T1.5-COMBAT-04` done, recorded 5/7 Sprint 1.5 stories done, and surfaced T1-COMBAT-11 as the next active gate.
 - Deviations: `/code-review bd6c81b` returned APPROVED WITH SUGGESTIONS; the substantive QA-04-04 compliance gap was fixed in `f3a4a36`. Two artifact-polish S3 findings remain as carryovers: future grep classification tables should include command-output excerpts or categorical-coverage notes, and future verification rows should inline-cite prototype rerun log paths when the story body also cites them.
-- Carried forward: `AbilityResolvedEvent.ManaSpent`-only payload semantics for `T1-COMBAT-11`; QA-02-01 cooldown/global-recovery wording for the next QA plan iteration; `T1-COMBAT-11` story file remains absent and must be created or recovered before that story's `/dev-story`; [production/qa/combat/feel-review-09c-player-death.md](../qa/combat/feel-review-09c-player-death.md) remains HUMAN PLAYTEST PENDING; pre-commit-SHA-drift workflow lesson should be captured before `T1.5-COMBAT-05`; T1.5-COMBAT-04 verification artifact polish should inform T1.5-COMBAT-05 evidence authoring.
-- Next recommended: recover `production/stories/t1-combat-11-forbidden-pattern-compliance-scan-analyzer.md` from `production/sprints/sprint-1.md:577` through `production/sprints/sprint-1.md:610`, then run `/dev-story T1-COMBAT-11-forbidden-pattern-compliance-scan-analyzer`.
+- Carried forward at this checkpoint: `AbilityResolvedEvent.ManaSpent`-only payload semantics for `T1-COMBAT-11`; QA-02-01 cooldown/global-recovery wording for the next QA plan iteration; `T1-COMBAT-11` story recovery was still pending and is now resolved by the 2026-05-08 closure; [production/qa/combat/feel-review-09c-player-death.md](../qa/combat/feel-review-09c-player-death.md) remains HUMAN PLAYTEST PENDING; pre-commit-SHA-drift workflow lesson and T1.5-COMBAT-04 verification artifact polish should inform T1.5-COMBAT-05 evidence authoring.
+- Next recommended at this checkpoint: `/dev-story T1-COMBAT-11-forbidden-pattern-compliance-scan-analyzer`; resolved by T1-COMBAT-11 closure on 2026-05-08.
+
+## Session Extract - /story-done 2026-05-08 (T1-COMBAT-11)
+
+- Story: [production/stories/t1-combat-11-forbidden-pattern-compliance-scan-analyzer.md](../stories/t1-combat-11-forbidden-pattern-compliance-scan-analyzer.md) - T1-COMBAT-11 Forbidden-Pattern Compliance Scan/Analyzer.
+- Verdict: COMPLETE WITH NOTES.
+- Criteria: 12/12 ACs covered. `AC-11-01` through `AC-11-08` and `AC-11-10` through `AC-11-12` pass; `AC-11-09` passes with known carryover because current `AbilityResolvedEvent.ManaSpent` remains mana-only while the scanner fails shipping universal-spend misuse and preserves Bash physical-resource coverage.
+- Evidence: [tests/evidence/T1-COMBAT-11/verification.md](../../tests/evidence/T1-COMBAT-11/verification.md) records the command, source pattern set, scanner summary, per-pattern pass/fail/known-carryover output, failure-fixture result, hygiene gates, and the implementation/provenance chain. `dotnet test tests\Gravenspire.Combat.Tests.csproj --logger "console;verbosity=minimal"` passes `159/159`.
+- Commit framing: scanner-state commits are `015d417` scaffold / parent baseline, `0e603a7` initial scanner implementation, `f4f191a` review fix #1, and `5bbc665` review fix #2 / closure-eligible scanner state. `496ebc6` is a provenance-only verification restructure, not a fifth scanner implementation iteration.
+- State updates: story status set to Complete; `production/sprint-status.yaml` marks `T1-COMBAT-11` done, records 6/7 Sprint 1.5 stories done, updates `head` to `496ebc6`, and surfaces `T1.5-COMBAT-05` as the next active story.
+- Carryover updates: removed the stale missing-story-file carryover; updated `ability_resolved_event_payload` to reflect durable scanner classification; updated pre-commit SHA drift with the chain-table mitigation pattern; combined T1.5-COMBAT-04 verification-authoring polish for T1.5-COMBAT-05; kept QA-02-01 wording and the pending 09c human playtest as separate carryovers.
+- Ride-along cleanup: World Structure GDD is now framed as a parked revision item in this active state, not as active Sprint 1.5 combat closure work.
+- Next recommended: `/dev-story T1.5-COMBAT-05-profiled-rerun-evidence-summary`.
 
 ## Session Extract - /story-done 2026-04-28
 

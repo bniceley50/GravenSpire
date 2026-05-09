@@ -1,6 +1,6 @@
 # T1-COMBAT-11 - Forbidden-Pattern Compliance Scan/Analyzer
 
-**Status:** Implemented + Verified; awaiting `/story-done`
+**Status:** Complete
 **Sprint:** 1 carryover into Sprint 1.5
 **Priority:** Must Have
 **Layer:** Architecture / Static Compliance
@@ -345,5 +345,37 @@ T1-COMBAT-11 compliance scanner gate.
 
 ## Story Status
 
-`T1-COMBAT-11` is implemented and verified after the `/code-review` follow-up,
-awaiting `/story-done`.
+`T1-COMBAT-11` is complete.
+
+## Completion Notes
+
+**Completed:** 2026-05-08
+
+**Verdict:** COMPLETE WITH NOTES
+
+**Criteria:** 12/12 covered. `AC-11-01` through `AC-11-08` and `AC-11-10`
+through `AC-11-12` pass. `AC-11-09` passes with known carryover: current
+`AbilityResolvedEvent.ManaSpent` remains mana-only, while the scanner now fails
+shipping universal-spend misuse and preserves Bash physical-resource coverage.
+
+**Implementation chain:** Scanner-state commits are `015d417` (story scaffold
+and implementation parent baseline), `0e603a7` (initial scanner
+implementation), `f4f191a` (review fix #1), and `5bbc665` (review fix #2 and
+closure-eligible scanner/evidence state). Current `496ebc6` is a
+provenance-only verification restructure that documents that state in the
+chain-table form; it is not a fifth scanner implementation iteration.
+
+**Deviations:** None blocking. The only completion note is the intentional
+`AC-11-09` known-carryover classification for the mana-only
+`AbilityResolvedEvent.ManaSpent` payload.
+
+**Test Evidence:** `dotnet test tests\Gravenspire.Combat.Tests.csproj --logger
+"console;verbosity=minimal"` passed `159/159`. Evidence is recorded in
+`tests/evidence/T1-COMBAT-11/verification.md`, including command, source
+pattern set, per-pattern pass/fail/known-carryover output, failure-fixture
+result, and hygiene/staged-footprint gates.
+
+**Code Review:** Complete after two review-fix commits; no unresolved blocking
+findings remain.
+
+**Next:** `T1.5-COMBAT-05` is unblocked for profiled rerun evidence summary.
