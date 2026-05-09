@@ -248,7 +248,7 @@ public static class CombatActorStateTransitions
     }
 
     /// <summary>
-    /// Applies tactical ability damage while preserving any target cast runtime fields.
+    /// Applies tactical ability damage while preserving Combat-owned runtime fields.
     /// </summary>
     public static CombatActorState WithCurrentHealthAfterAbilityDamage(this CombatActorState actor, int damage)
     {
@@ -262,7 +262,7 @@ public static class CombatActorStateTransitions
         var lifeState = currentHealth == 0 ? CombatActorLifeState.Dead : actor.LifeState;
         var combatState = currentHealth == 0 ? CombatState.Dead : actor.CombatState;
 
-        return new CombatActorState(
+        return PreserveInitOnlyRuntimeFields(new CombatActorState(
             actor.CombatActorId,
             actor.ActorKind,
             actor.StableSourceRef,
@@ -287,15 +287,7 @@ public static class CombatActorStateTransitions
             actor.CombatSortKey,
             actor.ThreatTable,
             maxEndurance: actor.MaxEndurance,
-            currentEndurance: actor.CurrentEndurance) with
-        {
-            CastRuntimeState = actor.CastRuntimeState,
-            ActiveCastId = actor.ActiveCastId,
-            ActiveCastSpellId = actor.ActiveCastSpellId,
-            ActiveCastTargetCombatActorId = actor.ActiveCastTargetCombatActorId,
-            CastProgressSeconds = actor.CastProgressSeconds,
-            CastRecoveryRemainingSeconds = actor.CastRecoveryRemainingSeconds
-        };
+            currentEndurance: actor.CurrentEndurance), actor);
     }
 
     /// <summary>
@@ -319,7 +311,7 @@ public static class CombatActorStateTransitions
         int? currentMana = null,
         int? currentEndurance = null)
     {
-        return new CombatActorState(
+        return PreserveInitOnlyRuntimeFields(new CombatActorState(
             actor.CombatActorId,
             actor.ActorKind,
             actor.StableSourceRef,
@@ -344,15 +336,7 @@ public static class CombatActorStateTransitions
             actor.CombatSortKey,
             actor.ThreatTable,
             maxEndurance: actor.MaxEndurance,
-            currentEndurance: currentEndurance ?? actor.CurrentEndurance) with
-        {
-            CastRuntimeState = actor.CastRuntimeState,
-            ActiveCastId = actor.ActiveCastId,
-            ActiveCastSpellId = actor.ActiveCastSpellId,
-            ActiveCastTargetCombatActorId = actor.ActiveCastTargetCombatActorId,
-            CastProgressSeconds = actor.CastProgressSeconds,
-            CastRecoveryRemainingSeconds = actor.CastRecoveryRemainingSeconds
-        };
+            currentEndurance: currentEndurance ?? actor.CurrentEndurance), actor);
     }
 
     private static void RequireText(string value, string parameterName)
@@ -370,7 +354,7 @@ public static class CombatActorStateTransitions
         bool replaceTarget = false,
         IReadOnlyDictionary<string, int>? threatTable = null)
     {
-        return new CombatActorState(
+        return PreserveInitOnlyRuntimeFields(new CombatActorState(
             actor.CombatActorId,
             actor.ActorKind,
             actor.StableSourceRef,
@@ -395,6 +379,23 @@ public static class CombatActorStateTransitions
             actor.CombatSortKey,
             threatTable ?? actor.ThreatTable,
             maxEndurance: actor.MaxEndurance,
-            currentEndurance: actor.CurrentEndurance);
+            currentEndurance: actor.CurrentEndurance), actor);
+    }
+
+    private static CombatActorState PreserveInitOnlyRuntimeFields(CombatActorState copy, CombatActorState actor)
+    {
+        return copy with
+        {
+            CastRuntimeState = actor.CastRuntimeState,
+            ActiveCastId = actor.ActiveCastId,
+            ActiveCastSpellId = actor.ActiveCastSpellId,
+            ActiveCastTargetCombatActorId = actor.ActiveCastTargetCombatActorId,
+            CastProgressSeconds = actor.CastProgressSeconds,
+            CastRecoveryRemainingSeconds = actor.CastRecoveryRemainingSeconds,
+            PostureState = actor.PostureState,
+            NextRegenTickIndex = actor.NextRegenTickIndex,
+            LastHostileActionTickIndex = actor.LastHostileActionTickIndex,
+            CombatExitRemainingSeconds = actor.CombatExitRemainingSeconds
+        };
     }
 }

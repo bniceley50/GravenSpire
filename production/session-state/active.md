@@ -1,13 +1,13 @@
 # Active Session State
 
 **Last Updated:** 2026-05-09
-**Project Stage:** Pre-Production — Sprint 1.5 — COMPLETE
+**Project Stage:** Pre-Production — Sprint 2 — Active
 
 ## Current Task
 
-Sprint 1.5 Must Have stories are complete. `T1.5-COMBAT-05` closed via `/story-done`, landing the final profiled rerun evidence and resolving the D014 target-revalidation deferral.
+Sprint 2 starts with `S2-COMBAT-01`: fix init-only property preservation in `CombatActorStateTransitions` after the Gemini cross-vendor review finding.
 
-The next active gate is the Sprint 1.5 close-out sequence: `/smoke-check sprint`, `/team-qa sprint`, and `/gate-check`.
+The active command is `/dev-story production/stories/s2-combat-01-fix-init-only-property-preservation.md`, followed by pre-commit pair review, commit/push authorization, `/code-review`, and `/story-done`.
 
 ## Status
 
@@ -60,7 +60,7 @@ The next active gate is the Sprint 1.5 close-out sequence: `/smoke-check sprint`
 
 ## Files Being Worked On
 
-- **Active:** Sprint 1.5 close-out sequence.
+- **Active:** [production/stories/s2-combat-01-fix-init-only-property-preservation.md](../stories/s2-combat-01-fix-init-only-property-preservation.md)
 - Combat Feel Prototype: [prototypes/combat-feel/](../../prototypes/combat-feel/) — pinned-engine headline pass complete; prototype code remains throwaway evidence artifact.
 - Combat Feel Prototype README: [prototypes/combat-feel/README.md](../../prototypes/combat-feel/README.md)
 - Inventory & Item Economy: [design/gdd/inventory-item-economy.md](../../design/gdd/inventory-item-economy.md)
@@ -93,9 +93,8 @@ The next active gate is the Sprint 1.5 close-out sequence: `/smoke-check sprint`
 
 ## Next Skill to Run
 
-- **Run `/smoke-check sprint`.**
-- **Run `/team-qa sprint`.**
-- **Run `/gate-check`.**
+- **Run `/code-review` for `S2-COMBAT-01` after implementation commit.**
+- Later: run Sprint 1.5 close-out gates (`/smoke-check sprint`, `/team-qa sprint`, `/gate-check`) before advancing the project stage.
 - Later: run Inventory implementation pre-spec to close `INV-OQ-05`, then rerun `/design-review design/gdd/inventory-item-economy.md --depth full`.
 
 ## Session Extract — /story-done 2026-05-09 (T1.5-COMBAT-05)
