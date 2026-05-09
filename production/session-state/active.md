@@ -1,13 +1,13 @@
 # Active Session State
 
 **Last Updated:** 2026-05-09
-**Project Stage:** Pre-Production — Sprint 2 — Active
+**Project Stage:** Pre-Production — Sprint 2 — Scaffolded
 
 ## Current Task
 
-Sprint 2 opened with `S2-COMBAT-01`, the Gemini cross-vendor hotfix for init-only property preservation in `CombatActorStateTransitions`. The story is complete at implementation commit `5b8a017`; closure metadata is being finalized.
+Sprint 2 opened with `S2-COMBAT-01`, the Gemini cross-vendor hotfix for init-only property preservation in `CombatActorStateTransitions`. The story is complete and closed at `a7269cb`.
 
-Next recommended: draft the Sprint 2 plan/status scaffold with `S2-COMBAT-01` listed retrospectively as story #1, then continue with the Sprint 1.5 close-out gates (`/smoke-check sprint`, `/team-qa sprint`, `/gate-check`) or the next Sprint 2 planning command Brian selects.
+Next recommended: run Sprint 1.5 close-out gates first: `/smoke-check sprint`, `/team-qa sprint`, `/gate-check`. After those pass, run Sprint 2 `/qa-plan sprint` before any new `/dev-story`.
 
 ## Status
 
@@ -19,7 +19,7 @@ Next recommended: draft the Sprint 2 plan/status scaffold with `S2-COMBAT-01` li
 - ✓ D006 committed — Codex onboarded as parallel implementer (commit `fae8c8c`)
 - ✓ Codex onboarding brief delivered; Codex has completed read-only onboarding and surfaced 4 clarifying questions (all answered)
 - ✓ Codex Assignment #1 drafted — `dotnet format` setup on branch `codex/dotnet-format-setup`
-- ⚠️ World Structure GDD — parked revision item, not active Sprint 1.5 combat closure work. Full `/design-review design/gdd/world-structure.md` completed 2026-04-23 with verdict **MAJOR REVISION NEEDED** and scope signal **XL**. Six blocker groups: (1) transition contract contradiction, (2) memory residency model contradiction, (3) save/zone identity contradiction, (4) formula/registry validator-safety issues, (5) acceptance criteria not T1-gateable, (6) T1 offline "world kept moving" bridge underspecified. Review log created at [design/gdd/reviews/world-structure-review-log.md](../../design/gdd/reviews/world-structure-review-log.md).
+- ✅ World Structure GDD — latest review log verdict is **APPROVED** at `design/gdd/reviews/world-structure-review-log.md`. Earlier MAJOR REVISION text was historical and is no longer the current verdict; remaining World Structure work is explicit ADR/prototype gating, not unresolved GDD revision.
 - ✅ Commit `4801d8a` on `main` (GDD + registry + systems-index + active.md bundle; rebased onto PR #1 merge).
 - ✅ Character Progression GDD skeleton created 2026-04-25 at [design/gdd/character-progression.md](../../design/gdd/character-progression.md).
 - ✅ Character Progression Overview section written 2026-04-25.
@@ -60,7 +60,7 @@ Next recommended: draft the Sprint 2 plan/status scaffold with `S2-COMBAT-01` li
 
 ## Files Being Worked On
 
-- **Active:** Sprint 2 planning/status scaffold pending; [production/stories/s2-combat-01-fix-init-only-property-preservation.md](../stories/s2-combat-01-fix-init-only-property-preservation.md) is complete.
+- **Active:** Sprint 2 plan/status scaffold pending review; [production/stories/s2-combat-01-fix-init-only-property-preservation.md](../stories/s2-combat-01-fix-init-only-property-preservation.md) is complete.
 - Combat Feel Prototype: [prototypes/combat-feel/](../../prototypes/combat-feel/) — pinned-engine headline pass complete; prototype code remains throwaway evidence artifact.
 - Combat Feel Prototype README: [prototypes/combat-feel/README.md](../../prototypes/combat-feel/README.md)
 - Inventory & Item Economy: [design/gdd/inventory-item-economy.md](../../design/gdd/inventory-item-economy.md)
@@ -90,11 +90,14 @@ Next recommended: draft the Sprint 2 plan/status scaffold with `S2-COMBAT-01` li
 - `H-CCOM-F2B` fixture extremes are validated by `T1-COMBAT-01`; seeded melee formula execution is validated by `T1-COMBAT-04`.
 - Creature / Enemy AI still owns actual return-to-anchor movement and NavMeshAgent behavior.
 - Inventory & Item Economy is intentionally parked after review.
+- Sprint 2 MVP anchor: one hub, one faction slice, one combat loop, Save/Load, minimal NPC.
+- Save/Load metadata drift is known: `save-load-persistence.md` header says `In Design`, while its review log says APPROVED. Do not silently correct outside an approved metadata cleanup batch.
+- Sprint 2 operating model: lighter ceremony for bounded doc/evidence fixes, full rigor for cross-contract code, one external whole-codebase review per sprint or tier transition.
 
 ## Next Skill to Run
 
-- **Draft Sprint 2 plan/status scaffold and list `S2-COMBAT-01` retrospectively as story #1.**
-- Later: run Sprint 1.5 close-out gates (`/smoke-check sprint`, `/team-qa sprint`, `/gate-check`) before advancing the project stage.
+- **Run Sprint 1.5 close-out gates:** `/smoke-check sprint`, `/team-qa sprint`, `/gate-check`.
+- Then run Sprint 2 `/qa-plan sprint`.
 - Later: run Inventory implementation pre-spec to close `INV-OQ-05`, then rerun `/design-review design/gdd/inventory-item-economy.md --depth full`.
 
 ## Session Extract — /story-done 2026-05-09 (T1.5-COMBAT-05)
