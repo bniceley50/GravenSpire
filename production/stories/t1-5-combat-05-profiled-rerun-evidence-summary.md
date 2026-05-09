@@ -1,6 +1,6 @@
 # T1.5-COMBAT-05 - Profiled Rerun + Slice Evidence Summary
 
-**Status:** Implemented + Verified; awaiting `/story-done`
+**Status:** Complete
 **Sprint:** 1.5
 **Priority:** Must Have
 **Layer:** Gameplay / Combat Feel Evidence
@@ -79,7 +79,19 @@ bash .githooks/pre-commit
 
 ## Story Status
 
-`T1.5-COMBAT-05` is implemented and verified, awaiting `/story-done`.
+`T1.5-COMBAT-05` is Complete.
+
+## Completion Notes
+
+**Completed**: 2026-05-09
+**Verdict**: COMPLETE
+**Criteria**: 6/6 passing
+**Deferred/Untested Criteria**: None
+**Test Evidence**: `tests/evidence/T1.5-COMBAT-05/verification.md`; `tests/evidence/T1.5-COMBAT-05/profiled-combat-slice.jsonl`
+**GDD/ADR Deviations**: None
+**Scope Notes**: D014 deferral resolved; harness/fixture labels updated to clean-state FEEL-01 targets.
+**Review Gates**: `/code-review 960a148` found a provenance-chain placeholder gap; `caea662` fixed it. Re-review of `caea662` skipped as a bounded single-file provenance correction after local gates and independent verification.
+**Forced Completion**: No
 
 ## Blockers / Carried Forward
 

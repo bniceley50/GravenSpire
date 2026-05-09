@@ -6,26 +6,26 @@ goal: "Correct the Yellow slice-review findings without reopening the Combat Cor
 start: "2026-05-06"
 end: "2026-05-21"
 generated: "2026-05-06"
-updated: "2026-05-08"
+updated: "2026-05-09"
 branch: "main"
-head: "496ebc6"
+head: "caea662"
 qa_plan: "production/qa/plans/qa-plan-sprint-1-5-20260506.md"
 plan: "production/sprints/sprint-1-5.md"
 slice_review: "production/qa/combat/feel-review-T1-slice.md"
-implementation_gate: "T1-COMBAT-11 closed by /story-done. Sprint 1.5 progress: 6/7 done. Next active story: T1.5-COMBAT-05 profiled rerun + slice evidence summary."
-progress: "6/7 done"
-completed_stories: 6
+implementation_gate: "Sprint 1.5 Must Have stories complete. Next: /smoke-check sprint; /team-qa sprint; /gate-check."
+progress: "7/7 done"
+completed_stories: 7
 total_stories: 7
-next_active_story: "T1.5-COMBAT-05"
-next_active_command: "/dev-story T1.5-COMBAT-05-profiled-rerun-evidence-summary"
+next_active_story: ""
+next_active_command: ""
 
 carryover:
   ability_resolved_event_payload: "AbilityResolvedEvent remains ManaSpent-only, but T1-COMBAT-11 now durably classifies it as KNOWN-CARRYOVER and fails shipping universal-spend misuse."
   qa_02_01_wording: "Clarify cooldown versus global recovery wording in the next QA plan iteration."
   feel_review_09c: "HUMAN PLAYTEST PENDING; deferrable carryover."
-  pre_commit_sha_drift: "Harness evidence captured before commit can record the parent SHA; T1-COMBAT-11 mitigated adjacent provenance drift with an explicit chain table."
-  chain_table_verification_pattern: "For T1.5-COMBAT-05, distinguish implementation-state SHAs from provenance-only documentation SHAs in verification artifacts when post-commit evidence corrections occur."
-  verification_authoring_polish: "For T1.5-COMBAT-05, include command-output excerpts or categorical coverage notes in classification tables and inline-cite prototype rerun logs when story text cites them."
+  pre_commit_sha_drift: "Resolved for T1.5-COMBAT-05 with Approach A: JSONL may record the parent evidence-capture SHA while verification.md names the implementation SHA explicitly."
+  chain_table_verification_pattern: "Refined by caea662: verification chain tables contain only actual existing full SHAs and grow append-only as commits land; no pending placeholder rows."
+  verification_authoring_polish: "T1.5-COMBAT-05 applied quantitative summary labels, JSONL line anchors, and command-gate citations; carry this as a future evidence-authoring norm."
 
 stories:
   - id: "T1.5-COMBAT-00"
@@ -86,8 +86,8 @@ stories:
     name: "Profiled rerun + slice evidence summary"
     file: "production/stories/t1-5-combat-05-profiled-rerun-evidence-summary.md"
     priority: must-have
-    status: ready
+    status: done
     owner: ""
     estimate_days: 1.25
     blocker: ""
-    completed: ""
+    completed: "2026-05-09"
