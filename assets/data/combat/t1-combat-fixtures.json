@@ -1,7 +1,7 @@
 {
   "fixtureSetId": "CombatPrototypeSpellProfileSet_T1",
   "fixtureSetVersion": "CombatPrototypeSpellProfileSet_T1@2026-05-07-t1-5-combat-03",
-  "sourceDocument": "design/gdd/combat-core.md:394-430; production/sprints/sprint-1.md:72-108; production/sprints/sprint-1-5.md:180-214",
+  "sourceDocument": "design/gdd/combat-core.md:394-430; production/sprints/sprint-1.md:72-108; production/sprints/sprint-1-5.md:180-331",
   "prototypeHauntBand": "PrototypeHauntBand_T1=1-10",
   "combatTickRateHz": 50,
   "targetingTuning": {
@@ -508,7 +508,7 @@
         "source_spawn_ref:SoloTrash_Trivial_T1",
         "source_spawn_ref:DenseCamp_Trash_T1"
       ],
-      "requiredOutcome": "Cleric wins 55-85% of seeded trials from greater than 80% HP and greater than 60% mana."
+      "requiredOutcome": "Cleric wins 90-100% of clean-state seeded trials from greater than 80% HP and greater than 60% mana, with mean ending pressure below either 80% HP or 60% mana."
     },
     {
       "id": "TwoTrash_Overpull_T1",

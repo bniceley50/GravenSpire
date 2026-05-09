@@ -17,8 +17,8 @@ namespace Gravenspire.Prototypes.CombatSliceT1;
 internal static class CombatSliceHarness
 {
     private const string BaseCommand = "dotnet run --project prototypes/combat-slice-T1/Harness/CombatSliceHarness.csproj";
-    private const string DefaultEvidenceStoryId = "T1.5-COMBAT-03";
-    private const string DefaultRunTimestamp = "2026-05-07T00:00:00-04:00";
+    private const string DefaultEvidenceStoryId = "T1.5-COMBAT-05";
+    private const string DefaultRunTimestamp = "2026-05-09T00:00:00-04:00";
     private const string TargetEngineVersion = "6000.3.x-headless-net8";
     private const string ZoneId = "Haunt_Prototype_T1";
     private const double FacingToleranceDegrees = 90.0d;
@@ -107,7 +107,7 @@ internal static class CombatSliceHarness
 
         var pass = definition.Kind switch
         {
-            ScenarioKind.SoloTrash => wins is >= 11 and <= 17 && (meanHealthRatio < 0.80d || meanManaRatio < 0.60d),
+            ScenarioKind.SoloTrash => wins is >= 18 and <= 20 && (meanHealthRatio < 0.80d || meanManaRatio < 0.60d),
             ScenarioKind.NamedSoloBlock => losses + flees >= 8,
             ScenarioKind.TwoTrashOverpull => dangerous >= 8,
             _ => false

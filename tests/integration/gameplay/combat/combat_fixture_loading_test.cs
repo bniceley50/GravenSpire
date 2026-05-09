@@ -56,6 +56,19 @@ public sealed class CombatFixtureLoadingTest
         Assert.That(named.SourceRefAliases, Does.Contain("source_npc_id:Named_XP_Smoke_T1"));
     }
 
+    [Test]
+    public void test_solo_trash_required_outcome_tracks_d014_clean_state_target()
+    {
+        var package = LoadPackage();
+
+        var soloTrash = package.EncounterFixtures.Single(encounter => encounter.Id == "SoloTrash_EvenCon_T1");
+
+        Assert.That(soloTrash.RequiredOutcome, Does.Contain("90-100%"));
+        Assert.That(soloTrash.RequiredOutcome, Does.Contain("clean-state seeded trials"));
+        Assert.That(soloTrash.RequiredOutcome, Does.Contain("mean ending pressure"));
+        Assert.That(soloTrash.RequiredOutcome, Does.Not.Contain("55-85%"));
+    }
+
     private static CombatFixturePackage LoadPackage()
     {
         var path = Path.Combine(FindRepoRoot(), "assets", "data", "combat", "t1-combat-fixtures.json");
