@@ -1,6 +1,6 @@
 # S2-COMBAT-01 - Fix Init-Only Property Preservation in CombatActorState Transitions
 
-**Status:** Implemented; awaiting /code-review
+**Status:** Complete
 **Sprint:** 2
 **Priority:** Must Have
 **Layer:** Gameplay / Combat Core
@@ -69,3 +69,14 @@ This story originates from the Gemini cross-vendor full-codebase review on
 2026-05-09. The specific "cast wipe during threat update" scenario is valid for
 the shared copy path; resource and ability-damage copy paths also needed the
 same non-cast runtime preservation treatment.
+
+## Completion Notes
+
+**Completed:** 2026-05-09
+**Verdict:** COMPLETE WITH NOTES
+**Criteria:** 5/5 passing
+**Deferred/Untested Criteria:** None
+**Test Evidence:** `tests/unit/gameplay/combat/combat_actor_state_transitions_test.cs`; `tests/evidence/S2-COMBAT-01/verification.md`
+**GDD/ADR Deviations:** None
+**Code Review:** `/code-review 5b8a017` completed with APPROVED WITH SUGGESTIONS; no blocking findings.
+**Notes:** Review P3 suggestions are non-blocking: evidence wording was cleaned during closure, and future polish may make the preservation assertion reflection-driven from the allowlist. `production/sprint-status.yaml` is intentionally unchanged because Sprint 1.5 is closed and no Sprint 2 plan/status file exists yet; when Sprint 2 planning lands, this hotfix should be listed retrospectively as story #1.

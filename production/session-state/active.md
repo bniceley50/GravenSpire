@@ -5,9 +5,9 @@
 
 ## Current Task
 
-Sprint 2 starts with `S2-COMBAT-01`: fix init-only property preservation in `CombatActorStateTransitions` after the Gemini cross-vendor review finding.
+Sprint 2 opened with `S2-COMBAT-01`, the Gemini cross-vendor hotfix for init-only property preservation in `CombatActorStateTransitions`. The story is complete at implementation commit `5b8a017`; closure metadata is being finalized.
 
-The active command is `/dev-story production/stories/s2-combat-01-fix-init-only-property-preservation.md`, followed by pre-commit pair review, commit/push authorization, `/code-review`, and `/story-done`.
+Next recommended: draft the Sprint 2 plan/status scaffold with `S2-COMBAT-01` listed retrospectively as story #1, then continue with the Sprint 1.5 close-out gates (`/smoke-check sprint`, `/team-qa sprint`, `/gate-check`) or the next Sprint 2 planning command Brian selects.
 
 ## Status
 
@@ -60,7 +60,7 @@ The active command is `/dev-story production/stories/s2-combat-01-fix-init-only-
 
 ## Files Being Worked On
 
-- **Active:** [production/stories/s2-combat-01-fix-init-only-property-preservation.md](../stories/s2-combat-01-fix-init-only-property-preservation.md)
+- **Active:** Sprint 2 planning/status scaffold pending; [production/stories/s2-combat-01-fix-init-only-property-preservation.md](../stories/s2-combat-01-fix-init-only-property-preservation.md) is complete.
 - Combat Feel Prototype: [prototypes/combat-feel/](../../prototypes/combat-feel/) — pinned-engine headline pass complete; prototype code remains throwaway evidence artifact.
 - Combat Feel Prototype README: [prototypes/combat-feel/README.md](../../prototypes/combat-feel/README.md)
 - Inventory & Item Economy: [design/gdd/inventory-item-economy.md](../../design/gdd/inventory-item-economy.md)
@@ -93,7 +93,7 @@ The active command is `/dev-story production/stories/s2-combat-01-fix-init-only-
 
 ## Next Skill to Run
 
-- **Run `/code-review` for `S2-COMBAT-01` after implementation commit.**
+- **Draft Sprint 2 plan/status scaffold and list `S2-COMBAT-01` retrospectively as story #1.**
 - Later: run Sprint 1.5 close-out gates (`/smoke-check sprint`, `/team-qa sprint`, `/gate-check`) before advancing the project stage.
 - Later: run Inventory implementation pre-spec to close `INV-OQ-05`, then rerun `/design-review design/gdd/inventory-item-economy.md --depth full`.
 
@@ -108,3 +108,16 @@ The active command is `/dev-story production/stories/s2-combat-01-fix-init-only-
 - Tech debt logged: None.
 - Carried forward: human qualitative death-moment playtest pending for the slice review; `AbilityResolvedEvent.ManaSpent`-only payload semantics; QA-02-01 cooldown/global-recovery wording.
 - Next recommended: `/smoke-check sprint`.
+
+## Session Extract — /story-done 2026-05-09 (S2-COMBAT-01)
+
+- Story: [production/stories/s2-combat-01-fix-init-only-property-preservation.md](../stories/s2-combat-01-fix-init-only-property-preservation.md) - S2-COMBAT-01 Fix Init-Only Property Preservation in CombatActorState Transitions.
+- Verdict: COMPLETE WITH NOTES.
+- Criteria: 5/5 passing; `S2-01-01` through `S2-01-05` all covered by unit tests and verification evidence.
+- Evidence: [tests/evidence/S2-COMBAT-01/verification.md](../../tests/evidence/S2-COMBAT-01/verification.md) records implementation provenance, local gates, T1 negative-scope scan, and deferred Gemini-review items.
+- Implementation commit: `5b8a017` fixes the three manual transition-copy paths and adds four regression tests.
+- Code review: `/code-review 5b8a017` returned APPROVED WITH SUGGESTIONS from code and QA agents; no blocking findings.
+- State updates: story status set to Complete; `production/sprint-status.yaml` intentionally unchanged because Sprint 1.5 is closed and no Sprint 2 status file exists yet.
+- Tech debt logged: None.
+- Carried forward: include `S2-COMBAT-01` retrospectively as story #1 when Sprint 2 plan/status scaffolding is drafted; optional future test polish can make the init-only preservation assertion reflection-driven from the allowlist.
+- Next recommended: draft Sprint 2 plan/status scaffold, or run Sprint 1.5 close-out gates if Brian chooses that sequencing.

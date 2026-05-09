@@ -3,17 +3,18 @@
 **Story:** `production/stories/s2-combat-01-fix-init-only-property-preservation.md`
 **Captured:** 2026-05-09
 **Evidence-capture SHA:** `4bb4d7b2ab5e8c770ec2197b1bf329cbcdc8f385`
-**Verdict:** IMPLEMENTED; pre-commit pair review completed with QA whitespace fix; awaiting commit/push authorization
+**Implementation SHA:** `5b8a0177d74b8c8ff9d67abcda7ae9b0536e6b40`
+**Verdict:** COMPLETE WITH NOTES; implementation committed and pushed; `/code-review 5b8a017` approved with non-blocking suggestions
 
 ## Provenance
 
 | SHA | Role | Verification status |
 | --- | --- | --- |
 | `4bb4d7b2ab5e8c770ec2197b1bf329cbcdc8f385` | Parent/evidence-capture SHA for the worktree diff | `164/164` tests passed against the approved S2-COMBAT-01 batch on top of this SHA. |
+| `5b8a0177d74b8c8ff9d67abcda7ae9b0536e6b40` | Implementation commit | Preserves init-only runtime fields in all three manual transition-copy paths; pushed to `origin/main`. |
 
-No forward-reference placeholder rows are recorded. If a later approved batch
-reopens this artifact after a commit exists, append the actual commit SHA as a
-new row.
+No forward-reference placeholder rows are recorded. Chain rows name only actual
+existing SHAs.
 
 ## Implementation Evidence
 
