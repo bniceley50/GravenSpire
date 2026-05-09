@@ -19,9 +19,8 @@ Commit / evidence chain:
 
 | Commit | Role | Verification status |
 | --- | --- | --- |
-| `be1c3ed` | Parent and evidence-capture SHA recorded in JSONL `build_sha` | Intentional Approach A state: the JSONL was generated before the implementation commit and names the pre-existing head. This is not SHA drift. |
-| `pending implementation commit` | Lands harness evaluator, fixture label, regression test, story, JSONL, verification, and QA summary in one batch | Expected to differ from JSONL `build_sha`; this verification file documents the distinction instead of regenerating JSONL solely to chase commit identity. |
-| `pending optional review-fix commit` | Only used if `/code-review` finds required changes | Chain table grows additively if review produces a follow-up. |
+| `be1c3ed31bbe4be44c3923ba44e03b4ac6fb62cd` | Parent and evidence-capture SHA recorded in JSONL `build_sha` | Intentional Approach A state: the JSONL was generated before the implementation commit and names the pre-existing head. This is not SHA drift. |
+| `960a1481840f8c178cf840b0de52481cd4cff493` | T1.5-COMBAT-05 implementation commit | Lands harness evaluator, fixture label, regression test, story, JSONL, verification, and QA summary in one batch. This commit intentionally differs from JSONL `build_sha`; the table records the distinction instead of regenerating JSONL solely to chase commit identity. |
 
 JSONL provenance proof:
 
