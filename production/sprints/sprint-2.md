@@ -49,14 +49,14 @@ Sprint 2 has rolled forward. The QA plan exists and M1 shell implementation is c
 | M5 | Faction Consequence | Connect moment-to-moment action to visible world state. | Completing the objective visibly changes the district or faction presence. |
 
 ## Story Ledger
-
 | Story | Status | Commits | Evidence |
 |---|---|---:|---|
 | `S2-COMBAT-01` Fix init-only property preservation in CombatActorState transitions | Complete | `5b8a017` -> `a7269cb` | `tests/evidence/S2-COMBAT-01/verification.md` |
 | `S2-FOUNDATION-01` Unity project shell | Complete | `f5f74dc` | `tests/evidence/S2-FOUNDATION-01/verification.md` |
-
-Next gate: human Unity launch verification before M2 story-breaking.
-
+| `S2-M2-01` Unity Combat Core runtime bridge | Ready for story-readiness | Not started | `tests/evidence/S2-M2-01/verification.md` |
+| `S2-M2-02` Single trash pull + med loop | Blocked on `S2-M2-01` | Not started | `tests/evidence/S2-M2-02/verification.md` |
+| `S2-M2-03` Linked trash overpull | Blocked on `S2-M2-02` | Not started | `tests/evidence/S2-M2-03/verification.md` |
+| `S2-M2-04` Named blocker + camp boundary | Blocked on `S2-M2-03` | Not started | `tests/evidence/S2-M2-04/verification.md` |
 ## Operating Model Calibration
 
 - Prioritization test: **Does this make the first 10 minutes of playable Gravenspire better?** If no, defer it.

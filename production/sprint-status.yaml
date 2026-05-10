@@ -6,18 +6,18 @@ goal: "Gravenspire T1: The First District - a 20-30 minute offline playable slic
 start: "2026-05-09"
 end: "2026-05-30"
 generated: "2026-05-09"
-updated: "2026-05-09"
+updated: "2026-05-10"
 branch: "main"
-head: "f5f74dc"
+head: "21bb9a3"
 qa_plan: "production/qa/plans/qa-plan-sprint-2-20260509.md"
 plan: "production/sprints/sprint-2.md"
 slice_review: ""
-implementation_gate: "M1 Unity project shell and launch verification are complete. Required next gate: M2 Combat Camp Loop story-breaking."
-progress: "2/2 closed; M1 Unity shell and launch verification complete; M2 story-breaking next"
+implementation_gate: "M2 Combat Camp Loop story slate is open. Required next gate: /story-readiness production/stories/s2-m2-01-unity-combat-core-runtime-bridge.md."
+progress: "2/6 closed; M1 Unity shell and launch verification complete; M2 story slate open; S2-M2-01 story-readiness next"
 completed_stories: 2
-total_stories: 2
-next_active_story: ""
-next_active_command: ""
+total_stories: 6
+next_active_story: "S2-M2-01"
+next_active_command: "/story-readiness production/stories/s2-m2-01-unity-combat-core-runtime-bridge.md"
 
 carryover:
   ability_resolved_event_payload: "AbilityResolvedEvent remains ManaSpent-only, but T1-COMBAT-11 durably classifies it as KNOWN-CARRYOVER and fails shipping universal-spend misuse."
@@ -54,3 +54,39 @@ stories:
     estimate_days: 1.0
     blocker: ""
     completed: "2026-05-09"
+  - id: "S2-M2-01"
+    name: "Unity Combat Core runtime bridge"
+    file: "production/stories/s2-m2-01-unity-combat-core-runtime-bridge.md"
+    priority: must-have
+    status: ready-for-dev
+    owner: ""
+    estimate_days: 1.0
+    blocker: ""
+    completed: ""
+  - id: "S2-M2-02"
+    name: "Single trash pull + med loop"
+    file: "production/stories/s2-m2-02-single-trash-pull-med-loop.md"
+    priority: must-have
+    status: blocked
+    owner: ""
+    estimate_days: 1.0
+    blocker: "Blocked on S2-M2-01 Unity Combat Core runtime bridge."
+    completed: ""
+  - id: "S2-M2-03"
+    name: "Linked trash overpull"
+    file: "production/stories/s2-m2-03-linked-trash-overpull.md"
+    priority: must-have
+    status: blocked
+    owner: ""
+    estimate_days: 1.0
+    blocker: "Blocked on S2-M2-02 Single trash pull + med loop."
+    completed: ""
+  - id: "S2-M2-04"
+    name: "Named blocker + camp boundary"
+    file: "production/stories/s2-m2-04-named-blocker-camp-boundary.md"
+    priority: must-have
+    status: blocked
+    owner: ""
+    estimate_days: 1.0
+    blocker: "Blocked on S2-M2-03 Linked trash overpull."
+    completed: ""

@@ -1,7 +1,7 @@
 # Active Session State
 
-**Last Updated:** 2026-05-09
-**Project Stage:** Pre-Production — Sprint 2 — M2 Story-Breaking Next
+**Last Updated:** 2026-05-10
+**Project Stage:** Pre-Production — Sprint 2 — M2 Stories Open / S2-M2-01 Next
 
 ## Current Task
 
@@ -9,7 +9,7 @@ Sprint 1.5 close-out gates are complete 3/3: `/smoke-check sprint` PASS WITH WAR
 
 S2-FOUNDATION-01 Unity launch verification is complete. Manual Play Mode verification and the Unity CLI runner both confirmed `_DevEntry.unity` loads, renders, and remains stable for 30 seconds with no captured errors.
 
-Next action: break M2 Combat Camp Loop into implementation stories.
+M2 Combat Camp Loop quick design is complete, and the four-story M2 slate is open. Next action: `/story-readiness production/stories/s2-m2-01-unity-combat-core-runtime-bridge.md`.
 
 ## Status
 
@@ -67,13 +67,15 @@ Next action: break M2 Combat Camp Loop into implementation stories.
 - ✅ Sprint 2 story `S2-FOUNDATION-01` opened as a blocked routing story for the Unity project shell.
 - ✅ Sprint 2 QA plan recorded at [production/qa/plans/qa-plan-sprint-2-20260509.md](../qa/plans/qa-plan-sprint-2-20260509.md).
 - ✅ Sprint 2 story `S2-FOUNDATION-01` closed via `/story-done` 2026-05-09 with verdict **COMPLETE WITH NOTES**. Commit `f5f74dc` lands the Unity project shell.
-- ✅ Sprint 2 M1 Player In World foundation is complete; human Unity launch verification is the next gate before M2 story-breaking.
-- ✅ Sprint 2 M1 Unity launch verification complete (manual Play Mode + Unity CLI runner) at [tests/evidence/S2-FOUNDATION-01/unity-cli-launch-verification-20260510.md](../../tests/evidence/S2-FOUNDATION-01/unity-cli-launch-verification-20260510.md); M2 story-breaking is unblocked.
+- ✅ Sprint 2 M1 Player In World foundation and launch verification are complete; M2 story slate is now open.
+- ✅ Sprint 2 M1 Unity launch verification complete (manual Play Mode + Unity CLI runner) at [tests/evidence/S2-FOUNDATION-01/unity-cli-launch-verification-20260510.md](../../tests/evidence/S2-FOUNDATION-01/unity-cli-launch-verification-20260510.md); M2 story slate is now open.
+- ✅ Sprint 2 M2 Combat Camp Loop quick design recorded at [design/quick/quick-design-m2-combat-camp-loop.md](../../design/quick/quick-design-m2-combat-camp-loop.md).
+- ✅ Sprint 2 M2 story slate opened: `S2-M2-01` through `S2-M2-04`. `S2-M2-01` is ready for `/story-readiness`; `S2-M2-02` through `S2-M2-04` are blocked in dependency order.
 
 ## Files Being Worked On
 
-- **Active:** Sprint 2 M2 Combat Camp Loop story-breaking. Unity shell and launch verification complete; CLI verification runner at [Assets/Editor/GravenspireLaunchVerificationRunner.cs](../../Assets/Editor/GravenspireLaunchVerificationRunner.cs) is reusable for M2-M5 Unity smoke gates.
-- **Next story:** None routed yet; choose M2 story-breaking path after human launch findings.
+- **Active:** Sprint 2 M2 Combat Camp Loop story slate is open. Next command is `/story-readiness production/stories/s2-m2-01-unity-combat-core-runtime-bridge.md`.
+- **Next story:** [production/stories/s2-m2-01-unity-combat-core-runtime-bridge.md](../stories/s2-m2-01-unity-combat-core-runtime-bridge.md).
 - **Closed:** [production/stories/s2-combat-01-fix-init-only-property-preservation.md](../stories/s2-combat-01-fix-init-only-property-preservation.md) is complete.
 - **Closed:** [production/stories/s2-foundation-01-unity-project-shell.md](../stories/s2-foundation-01-unity-project-shell.md) is complete.
 - Combat Feel Prototype: [prototypes/combat-feel/](../../prototypes/combat-feel/) — pinned-engine headline pass complete; prototype code remains throwaway evidence artifact.
@@ -112,8 +114,9 @@ Next action: break M2 Combat Camp Loop into implementation stories.
 
 ## Next Skill to Run
 
-- `/create-stories` or `/quick-design M2-combat-camp-loop` depending on how much design shaping Brian wants before story-breaking.
-- Default recommendation: proceed to M2 story-breaking now that the Unity shell is verified.
+- `/story-readiness production/stories/s2-m2-01-unity-combat-core-runtime-bridge.md`.
+- After readiness passes, run `/dev-story production/stories/s2-m2-01-unity-combat-core-runtime-bridge.md`.
+- Then proceed in order: `S2-M2-02` -> `S2-M2-03` -> `S2-M2-04`.
 - Later: run Inventory implementation pre-spec to close `INV-OQ-05`, then rerun `/design-review design/gdd/inventory-item-economy.md --depth full`.
 
 ## Session Extract — Sprint 2 Story Open 2026-05-09 (S2-FOUNDATION-01)
@@ -122,7 +125,7 @@ Next action: break M2 Combat Camp Loop into implementation stories.
 - Status at creation: BLOCKED - Sprint 2 `/qa-plan sprint` not yet run.
 - Source trace: `production/sprints/sprint-2.md:45` anchors M1 Player In World; `production/sprints/sprint-2.md:94-98` anchors the minimum shell shape.
 - Routing: `production/sprint-status.yaml` now carries 2 total stories, 1 complete, and `S2-FOUNDATION-01` blocked.
-- Superseded by the Sprint 2 closure extract below; current next gate is human Unity launch verification before M2 story-breaking.
+- Superseded by the Sprint 2 M2 story-slate extract below; current next gate is `/story-readiness production/stories/s2-m2-01-unity-combat-core-runtime-bridge.md`.
 
 ## Session Extract — Sprint 1.5 Close-Out Chain 2026-05-09
 
@@ -162,9 +165,9 @@ Next action: break M2 Combat Camp Loop into implementation stories.
 
 - QA plan: [production/qa/plans/qa-plan-sprint-2-20260509.md](../qa/plans/qa-plan-sprint-2-20260509.md).
 - Scope: Sprint 2 First District foundation routing, covering completed `S2-COMBAT-01` as regression-only and `S2-FOUNDATION-01` as the next implementation story.
-- Classification: `S2-COMBAT-01` is Hotfix / Logic and remains closed; `S2-FOUNDATION-01` is Foundation / Integration and is now closed, with human Unity launch verification next.
+- Classification: `S2-COMBAT-01` is Hotfix / Logic and remains closed; `S2-FOUNDATION-01` is Foundation / Integration and is now closed. This extract is superseded by completed launch verification and the M2 story-slate opening.
 - Required evidence for next story: `tests/evidence/S2-FOUNDATION-01/verification.md`.
-- Next required gate: human Unity launch verification before M2 story-breaking.
+- Superseded next gate: launch verification is complete; current next command is `/story-readiness production/stories/s2-m2-01-unity-combat-core-runtime-bridge.md`.
 
 ## Session Extract — /dev-story 2026-05-09 (S2-FOUNDATION-01)
 
@@ -183,9 +186,9 @@ Next action: break M2 Combat Camp Loop into implementation stories.
 - Criteria: 6/6 passing; `S2-FND-01` through `S2-FND-06` are covered by verification evidence.
 - Evidence: [tests/evidence/S2-FOUNDATION-01/verification.md](../../tests/evidence/S2-FOUNDATION-01/verification.md) records source trace, Unity config, dev-entry scene, Unity batchmode smoke, combat regression, negative-scope scan, hygiene gates, and code-review notes.
 - Implementation commit: `f5f74dc` creates the production Unity shell.
-- State updates: story status set to Complete; `production/sprint-status.yaml` records 2/2 Sprint 2 tracked stories closed, updates `head` to `f5f74dc`, and leaves `next_active_command` empty pending human Unity launch verification.
+- State updates: story status set to Complete; `production/sprint-status.yaml` recorded 2/2 Sprint 2 tracked stories closed, updated `head` to `f5f74dc`, and left `next_active_command` empty pending launch verification. This is superseded by the M2 story-slate routing below.
 - Watch items: build-settings GUID parity, Unity Test Runner results XML absence, and test-data bridge/scanner alignment.
-- Next recommended: human Unity launch verification before M2 Combat Camp Loop design/story-breaking.
+- Superseded by Unity launch verification and M2 story-slate opening; current next recommended command is `/story-readiness production/stories/s2-m2-01-unity-combat-core-runtime-bridge.md`.
 
 ## Session Extract — Unity Launch Verification 2026-05-10 (S2-FOUNDATION-01)
 
@@ -195,4 +198,16 @@ Next action: break M2 Combat Camp Loop into implementation stories.
 - Tooling added: [Assets/Editor/GravenspireLaunchVerificationRunner.cs](../../Assets/Editor/GravenspireLaunchVerificationRunner.cs) provides reusable Editor-only Unity launch verification for later Sprint 2 Unity smoke gates.
 - Hardening note: the runner persists state through Unity Play Mode editor-domain reload using `SessionState` plus `[InitializeOnLoad]`; the first runner version hung because static callbacks were erased during Play Mode entry.
 - ProjectSettings noise: Unity-open-and-close generated settings drift was restored and not carried forward.
-- Next gate: M2 Combat Camp Loop story-breaking.
+- Superseded by the M2 story-slate opening below. Next gate: `/story-readiness production/stories/s2-m2-01-unity-combat-core-runtime-bridge.md`.
+
+## Session Extract — M2 Combat Camp Loop Story Slate 2026-05-10
+
+- Quick design: [design/quick/quick-design-m2-combat-camp-loop.md](../../design/quick/quick-design-m2-combat-camp-loop.md).
+- Open stories:
+  - [production/stories/s2-m2-01-unity-combat-core-runtime-bridge.md](../stories/s2-m2-01-unity-combat-core-runtime-bridge.md) - Ready for story-readiness.
+  - [production/stories/s2-m2-02-single-trash-pull-med-loop.md](../stories/s2-m2-02-single-trash-pull-med-loop.md) - Blocked on `S2-M2-01`.
+  - [production/stories/s2-m2-03-linked-trash-overpull.md](../stories/s2-m2-03-linked-trash-overpull.md) - Blocked on `S2-M2-02`.
+  - [production/stories/s2-m2-04-named-blocker-camp-boundary.md](../stories/s2-m2-04-named-blocker-camp-boundary.md) - Blocked on `S2-M2-03`.
+- Routing: `production/sprint-status.yaml` now tracks 6 Sprint 2 stories, 2 closed, 1 ready-for-dev, and 3 blocked in M2 dependency order.
+- Sprint plan: `production/sprints/sprint-2.md` Story Ledger now lists the M2 slate while preserving the quick-design citation to `production/sprints/sprint-2.md:60` through `production/sprints/sprint-2.md:78`.
+- Next command: `/story-readiness production/stories/s2-m2-01-unity-combat-core-runtime-bridge.md`.
