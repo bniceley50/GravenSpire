@@ -978,7 +978,7 @@ public sealed class ForbiddenPatternComplianceScanTest
 
     private static IReadOnlyList<SourceFile> ProductionDataFiles()
     {
-        var dataRoot = RepoPath("assets/data");
+        var dataRoot = RepoPath("data");
         if (!Directory.Exists(dataRoot))
         {
             return Array.Empty<SourceFile>();

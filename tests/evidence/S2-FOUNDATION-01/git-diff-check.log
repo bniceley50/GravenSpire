@@ -1,0 +1,7 @@
+warning: in the working copy of '.gitignore', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'production/session-state/active.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'production/stories/s2-foundation-01-unity-project-shell.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tests/Gravenspire.Combat.Tests.csproj', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tests/README.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tests/architecture/forbidden_pattern_compliance_scan_test.cs', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tests/fixtures/README.md', LF will be replaced by CRLF the next time Git touches it

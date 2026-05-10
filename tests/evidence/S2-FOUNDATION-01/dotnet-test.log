@@ -1,0 +1,7 @@
+  Determining projects to restore...
+  All projects are up-to-date for restore.
+  Gravenspire.Combat.Tests -> N:\GravenSpire\tests\bin\Debug\net8.0\Gravenspire.Combat.Tests.dll
+Test run for N:\GravenSpire\tests\bin\Debug\net8.0\Gravenspire.Combat.Tests.dll (.NETCoreApp,Version=v8.0)
+A total of 1 test files matched the specified pattern.
+
+Passed!  - Failed:     0, Passed:   164, Skipped:     0, Total:   164, Duration: 612 ms - Gravenspire.Combat.Tests.dll (net8.0)

@@ -1,6 +1,6 @@
 # S2-FOUNDATION-01 - Unity Project Shell
 
-**Status:** Blocked - pending Sprint 2 QA plan
+**Status:** Implemented - code-review approved with notes; pending `/story-done`
 **Sprint:** 2
 **Priority:** Must Have
 **Layer:** Foundation / Unity Shell
@@ -14,9 +14,9 @@
 ## Routing Status
 
 This story is open for Sprint 2 routing visibility. It is intentionally
-blocked until Sprint 2 `/qa-plan sprint` exists. Do not run
-`/dev-story S2-FOUNDATION-01` or start new Sprint 2 feature implementation
-before that QA plan is written.
+blocked until Sprint 2 `/qa-plan sprint` exists. Sprint 2 QA plan now exists
+at `production/qa/plans/qa-plan-sprint-2-20260509.md`, so implementation ran
+under `/dev-story S2-FOUNDATION-01-unity-project-shell`.
 
 ## Source Trace
 
@@ -39,11 +39,15 @@ belong to later Sprint 2 stories.
 
 Planned implementation surface:
 
+- `Assets/` as the canonical Unity asset root.
 - `ProjectSettings/` for the production Unity project.
 - `Packages/manifest.json` and any minimal package lock/config files Unity
   requires for the selected project shell.
 - One launchable dev entry scene or equivalent temporary entry path.
 - Verification evidence under `tests/evidence/S2-FOUNDATION-01/`.
+- Move existing non-Unity production fixture data from `assets/data/**` to
+  `data/**` so the lowercase folder does not collide with Unity's canonical
+  `Assets/` root on case-sensitive platforms.
 
 ## Out Of Scope
 
@@ -84,7 +88,20 @@ Planned implementation surface:
   command and exact blocker in `tests/evidence/S2-FOUNDATION-01/verification.md`
   instead of treating the story as silently verified.
 
+## Dev Implementation Notes
+
+- Dev entry scene path: `Assets/Scenes/_DevEntry.unity`.
+- Unity asset root decision: production Unity assets use canonical `Assets/`;
+  non-Unity production fixture data now lives under `data/**`.
+- Unity-generated metadata policy: commit deterministic shell metadata under
+  `Assets/**`, `ProjectSettings/**`, `Packages/manifest.json`, and
+  `Packages/packages-lock.json`; keep local Unity output ignored.
+- Empty generated `Assets/Resources/` output was removed; this shell does not
+  introduce `Resources` folder usage.
+- The shell scene contains only a camera, light, floor blockout, Cleric marker,
+  and shell-only district marker. It does not implement hub, faction,
+  Save/Load, NPC, loot, vendor, objective, or world-state gameplay.
+
 ## Blockers
 
-- Sprint 2 `/qa-plan sprint` has not been run. This story remains blocked for
-  `/dev-story` until that QA plan exists.
+- None for implementation. Code review returned approved with notes; awaiting `/story-done`.

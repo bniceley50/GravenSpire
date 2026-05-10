@@ -30,12 +30,13 @@ tests/
 Production code and data should follow these conventions unless a later approved story narrows them:
 
 ```text
+Assets/**                         # Unity project assets, scenes, render settings, and editor-only shell tools
 src/gameplay/combat/**           # Combat domain code
 src/gameplay/progression/**      # Character Progression code
 src/gameplay/npc/**              # NPC lifecycle integration or test doubles
 src/core/save/**                 # Save/Load code
-assets/data/combat/**            # Combat actor, spell, ability, and encounter fixtures
-assets/data/progression/**       # XP source lookup and progression fixture data
+data/combat/**                   # Combat actor, spell, ability, and encounter fixtures
+data/progression/**              # XP source lookup and progression fixture data
 production/qa/combat/**          # Durable combat QA evidence and sprint reports
 production/playtests/combat/**   # Human/profiler combat playtest evidence
 ```
@@ -60,7 +61,7 @@ Run PlayMode tests for runtime integration, event ordering, save/load barriers, 
 & "C:\Program Files\Unity\Hub\Editor\6000.3.14f1\Editor\Unity.exe" -batchmode -nographics -quit -projectPath "$PWD" -runTests -testPlatform PlayMode -testResults "tests/evidence/test-results/playmode-results.xml" -logFile "tests/evidence/test-results/playmode.log"
 ```
 
-Current setup note: the repository does not yet contain Unity `ProjectSettings/` or `Packages/manifest.json`, so these commands define the required runner surface but cannot pass until the Unity project shell and real test assemblies exist.
+Current setup note: `S2-FOUNDATION-01` created the production Unity shell at the repository root with canonical `Assets/`, `ProjectSettings/`, and `Packages/` directories. The shell has no real Unity Test Runner assemblies yet; until an approved story adds them, EditMode/PlayMode commands may launch and exit successfully without writing result XML.
 
 No example test was created because no implemented production gameplay system was detected. The first implementation story should add a real failing-then-passing test for `T1-COMBAT-01`; do not add a fake passing assertion.
 

@@ -1,6 +1,6 @@
 # Test Fixtures
 
-Use this tree for test-only data fixtures. Production data belongs under `assets/data/**`; these fixture files should either mirror approved production rows for validation or hold deliberately invalid rows for negative tests.
+Use this tree for test-only data fixtures. Production data belongs under `data/**`; these fixture files should either mirror approved production rows for validation or hold deliberately invalid rows for negative tests.
 
 Expected Sprint 1 fixture paths:
 

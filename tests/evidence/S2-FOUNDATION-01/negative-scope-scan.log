@@ -1,0 +1,12 @@
+tests\fixtures\README.md:20:- Do not include network, server, account, PvP, live LLM, companion, Warrior, or Enchanter fixture rows in T1 Combat Core tests.
+tests\README.md:13:T1 tests must stay offline and local. Do not add FishNet, networking placeholders, account identity, server authority, PvP, live LLM calls, companions, Warrior, or Enchanter implementation while building the T1 Combat Core test surface.
+tests\architecture\forbidden_pattern_compliance_scan_test.cs:241:            @"local_character_id.*(?:character_name|save_slot|account|device|path|CombatActorId|combat_actor_id)"
+tests\architecture\forbidden_pattern_compliance_scan_test.cs:540:            @"local_character_id.*(?:character_name|save_slot|account|device|path|CombatActorId|combat_actor_id)"
+tests\architecture\forbidden_pattern_compliance_scan_test.cs:843:            @"\baccount\s+identity\b",
+data\combat\README.md:22:- T1 data must not add FishNet, networking, server authority, PvP, live LLM, companions, Warrior, or Enchanter rows.
+ProjectSettings\ProjectSettings.asset:418:  switchStartupUserAccount: 0
+ProjectSettings\ProjectSettings.asset:422:  switchUserAccountSaveDataSize: 0
+ProjectSettings\ProjectSettings.asset:423:  switchUserAccountSaveDataJournalSize: 0
+ProjectSettings\ProjectSettings.asset:454:  switchUserAccountLockEnabled: 0
+production\stories\s2-foundation-01-unity-project-shell.md:56:- No multiplayer, FishNet, server authority, PvP, accounts, cloud saves, live
+production\stories\s2-foundation-01-unity-project-shell.md:76:| `S2-FND-05` | T1 negative-scope scan shows no FishNet, networking, server authority, PvP, live LLM, account, or cloud-save implementation introduced by the shell. | `tests/evidence/S2-FOUNDATION-01/verification.md` |

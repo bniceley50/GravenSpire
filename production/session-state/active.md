@@ -160,3 +160,13 @@ Sprint 2 `/qa-plan sprint` is recorded. `S2-FOUNDATION-01` is the next active st
 - Classification: `S2-COMBAT-01` is Hotfix / Logic and remains closed; `S2-FOUNDATION-01` is Foundation / Integration and is ready for `/dev-story`.
 - Required evidence for next story: `tests/evidence/S2-FOUNDATION-01/verification.md`.
 - Next required gate: `/dev-story S2-FOUNDATION-01-unity-project-shell`.
+
+## Session Extract — /dev-story 2026-05-09 (S2-FOUNDATION-01)
+
+- Story: [production/stories/s2-foundation-01-unity-project-shell.md](../stories/s2-foundation-01-unity-project-shell.md) - S2-FOUNDATION-01 Unity Project Shell.
+- Files changed: Unity shell under `Assets/**`, `ProjectSettings/**`, `Packages/**`; production fixture data moved from `assets/data/**` to `data/**`; test bridge/docs/evidence updated.
+- Dev entry: `Assets/Scenes/_DevEntry.unity`.
+- Test written: None - Foundation / Integration shell story; Unity batchmode builder and EditMode smoke were run instead.
+- Verification: [tests/evidence/S2-FOUNDATION-01/verification.md](../../tests/evidence/S2-FOUNDATION-01/verification.md) records source trace, footprint, Unity smoke, combat regression, negative-scope scan, and hygiene gates.
+- Gate results: `dotnet test tests\Gravenspire.Combat.Tests.csproj --logger "console;verbosity=minimal"` passed 164/164; Unity batchmode shell generation returned code 0; Unity EditMode smoke returned code 0 but produced no results XML because no Unity Test Runner assemblies exist yet; `git diff --check` and `.githooks/pre-commit` passed.
+- Blockers: None for implementation. Next: `/code-review` on changed files, then `/story-done production/stories/s2-foundation-01-unity-project-shell.md`.
