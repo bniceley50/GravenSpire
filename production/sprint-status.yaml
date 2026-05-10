@@ -12,11 +12,11 @@ head: "aa785a0"
 qa_plan: ""
 plan: "production/sprints/sprint-2.md"
 slice_review: ""
-implementation_gate: "Sprint 2 routing is active. Next: open S2-FOUNDATION-01 as the Unity project shell story, then run /qa-plan sprint before new feature implementation."
-progress: "1/1 closed hotfix; First District story ledger pending S2-FOUNDATION-01"
+implementation_gate: "Sprint 2 routing is active. S2-FOUNDATION-01 is open for routing visibility; next required gate is /qa-plan sprint before /dev-story or new feature implementation."
+progress: "1/2 closed; S2-FOUNDATION-01 blocked pending Sprint 2 QA plan"
 completed_stories: 1
-total_stories: 1
-next_active_story: ""
+total_stories: 2
+next_active_story: "S2-FOUNDATION-01"
 next_active_command: ""
 
 carryover:
@@ -41,3 +41,12 @@ stories:
     estimate_days: 0.5
     blocker: ""
     completed: "2026-05-09"
+  - id: "S2-FOUNDATION-01"
+    name: "Unity project shell"
+    file: "production/stories/s2-foundation-01-unity-project-shell.md"
+    priority: must-have
+    status: blocked
+    owner: ""
+    estimate_days: 1.0
+    blocker: "Sprint 2 /qa-plan sprint not yet run"
+    completed: ""

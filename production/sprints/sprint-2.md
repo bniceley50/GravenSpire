@@ -53,8 +53,9 @@ Sprint 2 may now roll forward, but new feature implementation still waits on:
 | Story | Status | Commits | Evidence |
 |---|---|---:|---|
 | `S2-COMBAT-01` Fix init-only property preservation in CombatActorState transitions | Complete | `5b8a017` -> `a7269cb` | `tests/evidence/S2-COMBAT-01/verification.md` |
+| `S2-FOUNDATION-01` Unity project shell | Blocked - pending Sprint 2 QA plan | "" | `tests/evidence/S2-FOUNDATION-01/verification.md` |
 
-Next story to open: `S2-FOUNDATION-01` - Unity project shell.
+Next gate: Sprint 2 `/qa-plan sprint`; `S2-FOUNDATION-01` exists for routing visibility but `/dev-story` remains blocked until the QA plan exists.
 
 ## Operating Model Calibration
 
@@ -85,10 +86,9 @@ Next story to open: `S2-FOUNDATION-01` - Unity project shell.
 - Sprint 1.5 carryovers remain inputs to Sprint 2 QA planning, especially human death-moment playtest, QA-02-01 wording, and evidence-authoring norms.
 - Production Unity shell is absent; `S2-FOUNDATION-01` owns this before launch/menu/session smoke can pass.
 
-## Recommended Next Story
+## Next Gate
 
-`S2-FOUNDATION-01` - Unity project shell.
-
+Sprint 2 `/qa-plan sprint`; `S2-FOUNDATION-01` remains blocked for `/dev-story` until the QA plan exists.
 Minimum story shape:
 
 - Create the Unity project shell at the production root.
@@ -99,7 +99,7 @@ Minimum story shape:
 
 ## Definition Of Done For Sprint 2 Planning
 
-- [ ] `S2-FOUNDATION-01` story file exists.
+- [x] `S2-FOUNDATION-01` story file exists.
 - [ ] Sprint 2 `/qa-plan sprint` exists.
 - [ ] QA plan names the First District target and accepted Sprint 1.5 carryovers.
 - [ ] No new Sprint 2 feature implementation starts before the QA plan.
