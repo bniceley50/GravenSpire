@@ -1,15 +1,15 @@
 # Active Session State
 
 **Last Updated:** 2026-05-09
-**Project Stage:** Pre-Production — Sprint 2 — M1 Complete / Unity Launch Verification Next
+**Project Stage:** Pre-Production — Sprint 2 — M2 Story-Breaking Next
 
 ## Current Task
 
 Sprint 1.5 close-out gates are complete 3/3: `/smoke-check sprint` PASS WITH WARNINGS, `/team-qa sprint` APPROVED WITH CONDITIONS, and `/gate-check` PASS. Sprint 2 is now rolling forward to **Gravenspire T1: The First District**, a 20-30 minute offline playable slice.
 
-Sprint 2 M1 Player In World foundation is complete: `S2-FOUNDATION-01` created the production Unity shell and launchable dev entry path at commit `f5f74dc`.
+S2-FOUNDATION-01 Unity launch verification is complete. Manual Play Mode verification and the Unity CLI runner both confirmed `_DevEntry.unity` loads, renders, and remains stable for 30 seconds with no captured errors.
 
-Before M2 Combat Camp Loop story-breaking, run human-in-the-loop Unity launch verification: open Unity `6000.3.14f1`, load `Assets/Scenes/_DevEntry.unity`, enter Play mode, confirm the camera, Cleric marker, blockout floor, and `FirstDistrict_ShellOnly_NoGameplay` marker render/stabilize, and capture findings. No next `/dev-story` is routed yet.
+Next action: break M2 Combat Camp Loop into implementation stories.
 
 ## Status
 
@@ -68,10 +68,11 @@ Before M2 Combat Camp Loop story-breaking, run human-in-the-loop Unity launch ve
 - ✅ Sprint 2 QA plan recorded at [production/qa/plans/qa-plan-sprint-2-20260509.md](../qa/plans/qa-plan-sprint-2-20260509.md).
 - ✅ Sprint 2 story `S2-FOUNDATION-01` closed via `/story-done` 2026-05-09 with verdict **COMPLETE WITH NOTES**. Commit `f5f74dc` lands the Unity project shell.
 - ✅ Sprint 2 M1 Player In World foundation is complete; human Unity launch verification is the next gate before M2 story-breaking.
+- ✅ Sprint 2 M1 Unity launch verification complete (manual Play Mode + Unity CLI runner) at [tests/evidence/S2-FOUNDATION-01/unity-cli-launch-verification-20260510.md](../../tests/evidence/S2-FOUNDATION-01/unity-cli-launch-verification-20260510.md); M2 story-breaking is unblocked.
 
 ## Files Being Worked On
 
-- **Active:** Human Unity launch verification for [Assets/Scenes/_DevEntry.unity](../../Assets/Scenes/_DevEntry.unity).
+- **Active:** Sprint 2 M2 Combat Camp Loop story-breaking. Unity shell and launch verification complete; CLI verification runner at [Assets/Editor/GravenspireLaunchVerificationRunner.cs](../../Assets/Editor/GravenspireLaunchVerificationRunner.cs) is reusable for M2-M5 Unity smoke gates.
 - **Next story:** None routed yet; choose M2 story-breaking path after human launch findings.
 - **Closed:** [production/stories/s2-combat-01-fix-init-only-property-preservation.md](../stories/s2-combat-01-fix-init-only-property-preservation.md) is complete.
 - **Closed:** [production/stories/s2-foundation-01-unity-project-shell.md](../stories/s2-foundation-01-unity-project-shell.md) is complete.
@@ -111,8 +112,8 @@ Before M2 Combat Camp Loop story-breaking, run human-in-the-loop Unity launch ve
 
 ## Next Skill to Run
 
-- None yet. First run human-in-the-loop Unity launch verification for `Assets/Scenes/_DevEntry.unity`.
-- After findings are captured, choose `/quick-design M2-combat-camp-loop` if the launch check surfaces design/pacing questions; choose `/create-stories` only if the shell is stable and Sprint 2 plan plus Combat Core GDD are enough to break M2 directly.
+- `/create-stories` or `/quick-design M2-combat-camp-loop` depending on how much design shaping Brian wants before story-breaking.
+- Default recommendation: proceed to M2 story-breaking now that the Unity shell is verified.
 - Later: run Inventory implementation pre-spec to close `INV-OQ-05`, then rerun `/design-review design/gdd/inventory-item-economy.md --depth full`.
 
 ## Session Extract — Sprint 2 Story Open 2026-05-09 (S2-FOUNDATION-01)
@@ -185,3 +186,13 @@ Before M2 Combat Camp Loop story-breaking, run human-in-the-loop Unity launch ve
 - State updates: story status set to Complete; `production/sprint-status.yaml` records 2/2 Sprint 2 tracked stories closed, updates `head` to `f5f74dc`, and leaves `next_active_command` empty pending human Unity launch verification.
 - Watch items: build-settings GUID parity, Unity Test Runner results XML absence, and test-data bridge/scanner alignment.
 - Next recommended: human Unity launch verification before M2 Combat Camp Loop design/story-breaking.
+
+## Session Extract — Unity Launch Verification 2026-05-10 (S2-FOUNDATION-01)
+
+- Verification methods: manual Play Mode check plus Unity CLI runner.
+- Manual result: `_DevEntry.unity` loaded in Unity `6000.3.14f1`; Game view rendered; floor, Cleric marker, and `FirstDistrict_ShellOnly_NoGameplay` were visible; Console had no red errors; Play Mode stayed stable for 30 seconds.
+- CLI result: [tests/evidence/S2-FOUNDATION-01/unity-cli-launch-verification-20260510.md](../../tests/evidence/S2-FOUNDATION-01/unity-cli-launch-verification-20260510.md) records PASS for scene load, required objects, nonblank camera render, 30-second Play Mode stability, and no captured errors or warnings.
+- Tooling added: [Assets/Editor/GravenspireLaunchVerificationRunner.cs](../../Assets/Editor/GravenspireLaunchVerificationRunner.cs) provides reusable Editor-only Unity launch verification for later Sprint 2 Unity smoke gates.
+- Hardening note: the runner persists state through Unity Play Mode editor-domain reload using `SessionState` plus `[InitializeOnLoad]`; the first runner version hung because static callbacks were erased during Play Mode entry.
+- ProjectSettings noise: Unity-open-and-close generated settings drift was restored and not carried forward.
+- Next gate: M2 Combat Camp Loop story-breaking.
