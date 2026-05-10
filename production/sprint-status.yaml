@@ -9,15 +9,15 @@ generated: "2026-05-09"
 updated: "2026-05-09"
 branch: "main"
 head: "aa785a0"
-qa_plan: ""
+qa_plan: "production/qa/plans/qa-plan-sprint-2-20260509.md"
 plan: "production/sprints/sprint-2.md"
 slice_review: ""
-implementation_gate: "Sprint 2 routing is active. S2-FOUNDATION-01 is open for routing visibility; next required gate is /qa-plan sprint before /dev-story or new feature implementation."
-progress: "1/2 closed; S2-FOUNDATION-01 blocked pending Sprint 2 QA plan"
+implementation_gate: "Sprint 2 QA plan is recorded. Required next gate: /dev-story S2-FOUNDATION-01-unity-project-shell."
+progress: "1/2 closed; S2-FOUNDATION-01 ready for /dev-story"
 completed_stories: 1
 total_stories: 2
 next_active_story: "S2-FOUNDATION-01"
-next_active_command: ""
+next_active_command: "/dev-story S2-FOUNDATION-01-unity-project-shell"
 
 carryover:
   ability_resolved_event_payload: "AbilityResolvedEvent remains ManaSpent-only, but T1-COMBAT-11 durably classifies it as KNOWN-CARRYOVER and fails shipping universal-spend misuse."
@@ -45,8 +45,8 @@ stories:
     name: "Unity project shell"
     file: "production/stories/s2-foundation-01-unity-project-shell.md"
     priority: must-have
-    status: blocked
+    status: ready-for-dev
     owner: ""
     estimate_days: 1.0
-    blocker: "Sprint 2 /qa-plan sprint not yet run"
+    blocker: ""
     completed: ""

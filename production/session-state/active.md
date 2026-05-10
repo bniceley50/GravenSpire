@@ -1,13 +1,13 @@
 # Active Session State
 
 **Last Updated:** 2026-05-09
-**Project Stage:** Pre-Production — Sprint 2 — Active Routing / QA Planning
+**Project Stage:** Pre-Production — Sprint 2 — Foundation Story Ready
 
 ## Current Task
 
 Sprint 1.5 close-out gates are complete 3/3: `/smoke-check sprint` PASS WITH WARNINGS, `/team-qa sprint` APPROVED WITH CONDITIONS, and `/gate-check` PASS. Sprint 2 is now rolling forward to **Gravenspire T1: The First District**, a 20-30 minute offline playable slice.
 
-`S2-FOUNDATION-01` is opened as the Unity project shell routing story. Next required gate: run Sprint 2 `/qa-plan sprint` before any `/dev-story` or new feature implementation.
+Sprint 2 `/qa-plan sprint` is recorded. `S2-FOUNDATION-01` is the next active story and is ready for `/dev-story S2-FOUNDATION-01-unity-project-shell`.
 
 ## Status
 
@@ -63,12 +63,13 @@ Sprint 1.5 close-out gates are complete 3/3: `/smoke-check sprint` PASS WITH WAR
 - ✅ Sprint 2 target refined to **Gravenspire T1: The First District**: one Cleric, one cursed-city district, three enemy types, one named NPC, one faction presence, one objective, one loot table, one vendor or stash, one save/load flow, and one visible world-state change.
 - ✅ Sprint 2 first implementation constraint: production Unity shell is absent, so `S2-FOUNDATION-01` must open before launch/menu/session smoke can pass.
 - ✅ Sprint 2 story `S2-FOUNDATION-01` opened as a blocked routing story for the Unity project shell.
-- ⛔ Sprint 2 `/dev-story S2-FOUNDATION-01` is blocked until Sprint 2 `/qa-plan sprint` exists.
+- ✅ Sprint 2 QA plan recorded at [production/qa/plans/qa-plan-sprint-2-20260509.md](../qa/plans/qa-plan-sprint-2-20260509.md).
+- ✅ Sprint 2 `S2-FOUNDATION-01` is ready for `/dev-story S2-FOUNDATION-01-unity-project-shell`.
 
 ## Files Being Worked On
 
-- **Active:** Sprint 2 First District routing now includes [production/stories/s2-foundation-01-unity-project-shell.md](../stories/s2-foundation-01-unity-project-shell.md) as opened but blocked pending `/qa-plan sprint`.
-- **Blocked:** `S2-FOUNDATION-01` Unity project shell; no `/dev-story` until Sprint 2 QA plan exists.
+- **Active:** Sprint 2 First District QA plan now exists at [production/qa/plans/qa-plan-sprint-2-20260509.md](../qa/plans/qa-plan-sprint-2-20260509.md); [production/stories/s2-foundation-01-unity-project-shell.md](../stories/s2-foundation-01-unity-project-shell.md) is ready for `/dev-story`.
+- **Next story:** `S2-FOUNDATION-01` Unity project shell.
 - **Closed:** [production/stories/s2-combat-01-fix-init-only-property-preservation.md](../stories/s2-combat-01-fix-init-only-property-preservation.md) is complete.
 - Combat Feel Prototype: [prototypes/combat-feel/](../../prototypes/combat-feel/) — pinned-engine headline pass complete; prototype code remains throwaway evidence artifact.
 - Combat Feel Prototype README: [prototypes/combat-feel/README.md](../../prototypes/combat-feel/README.md)
@@ -106,17 +107,17 @@ Sprint 1.5 close-out gates are complete 3/3: `/smoke-check sprint` PASS WITH WAR
 
 ## Next Skill to Run
 
-- Sprint 2 `/qa-plan sprint`.
-- Do not run `/dev-story S2-FOUNDATION-01` until the QA plan exists.
+- `/dev-story S2-FOUNDATION-01-unity-project-shell`.
+- Keep the story scoped to Unity shell, launchability, smoke-testability, and `tests/evidence/S2-FOUNDATION-01/verification.md`.
 - Later: run Inventory implementation pre-spec to close `INV-OQ-05`, then rerun `/design-review design/gdd/inventory-item-economy.md --depth full`.
 
 ## Session Extract — Sprint 2 Story Open 2026-05-09 (S2-FOUNDATION-01)
 
 - Story: [production/stories/s2-foundation-01-unity-project-shell.md](../stories/s2-foundation-01-unity-project-shell.md) - S2-FOUNDATION-01 Unity Project Shell.
-- Status: BLOCKED - Sprint 2 `/qa-plan sprint` not yet run.
+- Status at creation: BLOCKED - Sprint 2 `/qa-plan sprint` not yet run.
 - Source trace: `production/sprints/sprint-2.md:45` anchors M1 Player In World; `production/sprints/sprint-2.md:94-98` anchors the minimum shell shape.
 - Routing: `production/sprint-status.yaml` now carries 2 total stories, 1 complete, and `S2-FOUNDATION-01` blocked.
-- Next required gate: Sprint 2 `/qa-plan sprint`; no `/dev-story` until the QA plan exists.
+- Superseded by the Sprint 2 QA plan extract below; current next gate is `/dev-story S2-FOUNDATION-01-unity-project-shell`.
 
 ## Session Extract — Sprint 1.5 Close-Out Chain 2026-05-09
 
@@ -151,3 +152,11 @@ Sprint 1.5 close-out gates are complete 3/3: `/smoke-check sprint` PASS WITH WAR
 - Tech debt logged: None.
 - Carried forward: include `S2-COMBAT-01` retrospectively as story #1 when Sprint 2 plan/status scaffolding is drafted; optional future test polish can make the init-only preservation assertion reflection-driven from the allowlist.
 - Next recommended: draft Sprint 2 plan/status scaffold, or run Sprint 1.5 close-out gates if Brian chooses that sequencing.
+
+## Session Extract — Sprint 2 QA Plan 2026-05-09
+
+- QA plan: [production/qa/plans/qa-plan-sprint-2-20260509.md](../qa/plans/qa-plan-sprint-2-20260509.md).
+- Scope: Sprint 2 First District foundation routing, covering completed `S2-COMBAT-01` as regression-only and `S2-FOUNDATION-01` as the next implementation story.
+- Classification: `S2-COMBAT-01` is Hotfix / Logic and remains closed; `S2-FOUNDATION-01` is Foundation / Integration and is ready for `/dev-story`.
+- Required evidence for next story: `tests/evidence/S2-FOUNDATION-01/verification.md`.
+- Next required gate: `/dev-story S2-FOUNDATION-01-unity-project-shell`.

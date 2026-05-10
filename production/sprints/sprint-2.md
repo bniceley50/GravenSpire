@@ -1,6 +1,6 @@
 # Sprint 2 - Gravenspire T1: The First District
 
-> **Status**: Active routing / QA planning
+> **Status**: Active implementation gate / foundation story ready
 > **Generated**: 2026-05-09
 > **Current Head**: aa785a0
 > **Prior Sprint Gate**: Sprint 1.5 close-out gates complete 3/3
@@ -32,11 +32,11 @@ Sprint 1.5 close-out is complete:
 2. `/team-qa sprint` recorded `APPROVED WITH CONDITIONS`.
 3. `/gate-check` recorded `PASS`.
 
-Sprint 2 may now roll forward, but new feature implementation still waits on:
+Sprint 2 may now roll forward. The QA plan exists; new feature implementation starts with:
 
-1. Open `S2-FOUNDATION-01` as the Unity project shell story.
-2. Run `/qa-plan sprint` for Sprint 2.
-3. Select the next `/dev-story` only after the QA plan exists.
+1. `/dev-story S2-FOUNDATION-01-unity-project-shell`.
+2. Keep implementation scoped to the Unity shell before hub, faction, Save/Load, NPC, loot, vendor, objective, or world-state feature work.
+3. Verification artifact at `tests/evidence/S2-FOUNDATION-01/verification.md` records source trace, footprint, commands, and pass/fail evidence before `/story-done`.
 
 ## Milestone Structure
 
@@ -53,9 +53,9 @@ Sprint 2 may now roll forward, but new feature implementation still waits on:
 | Story | Status | Commits | Evidence |
 |---|---|---:|---|
 | `S2-COMBAT-01` Fix init-only property preservation in CombatActorState transitions | Complete | `5b8a017` -> `a7269cb` | `tests/evidence/S2-COMBAT-01/verification.md` |
-| `S2-FOUNDATION-01` Unity project shell | Blocked - pending Sprint 2 QA plan | "" | `tests/evidence/S2-FOUNDATION-01/verification.md` |
+| `S2-FOUNDATION-01` Unity project shell | Ready for dev | "" | `tests/evidence/S2-FOUNDATION-01/verification.md` |
 
-Next gate: Sprint 2 `/qa-plan sprint`; `S2-FOUNDATION-01` exists for routing visibility but `/dev-story` remains blocked until the QA plan exists.
+Next gate: `/dev-story S2-FOUNDATION-01-unity-project-shell`.
 
 ## Operating Model Calibration
 
@@ -88,7 +88,7 @@ Next gate: Sprint 2 `/qa-plan sprint`; `S2-FOUNDATION-01` exists for routing vis
 
 ## Next Gate
 
-Sprint 2 `/qa-plan sprint`; `S2-FOUNDATION-01` remains blocked for `/dev-story` until the QA plan exists.
+`/dev-story S2-FOUNDATION-01-unity-project-shell`.
 Minimum story shape:
 
 - Create the Unity project shell at the production root.
@@ -100,6 +100,6 @@ Minimum story shape:
 ## Definition Of Done For Sprint 2 Planning
 
 - [x] `S2-FOUNDATION-01` story file exists.
-- [ ] Sprint 2 `/qa-plan sprint` exists.
-- [ ] QA plan names the First District target and accepted Sprint 1.5 carryovers.
-- [ ] No new Sprint 2 feature implementation starts before the QA plan.
+- [x] Sprint 2 `/qa-plan sprint` exists.
+- [x] QA plan names the First District target and accepted Sprint 1.5 carryovers.
+- [x] No new Sprint 2 feature implementation started before the QA plan.
