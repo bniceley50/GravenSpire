@@ -8,16 +8,16 @@ end: "2026-05-30"
 generated: "2026-05-09"
 updated: "2026-05-09"
 branch: "main"
-head: "aa785a0"
+head: "f5f74dc"
 qa_plan: "production/qa/plans/qa-plan-sprint-2-20260509.md"
 plan: "production/sprints/sprint-2.md"
 slice_review: ""
-implementation_gate: "Sprint 2 QA plan is recorded. Required next gate: /dev-story S2-FOUNDATION-01-unity-project-shell."
-progress: "1/2 closed; S2-FOUNDATION-01 ready for /dev-story"
-completed_stories: 1
+implementation_gate: "M1 Unity project shell is complete. Required next gate: human-in-the-loop Unity launch verification of Assets/Scenes/_DevEntry.unity before M2 combat-camp-loop design/story-breaking."
+progress: "2/2 closed; M1 Unity shell complete; human Unity launch verification required before M2 story-breaking"
+completed_stories: 2
 total_stories: 2
-next_active_story: "S2-FOUNDATION-01"
-next_active_command: "/dev-story S2-FOUNDATION-01-unity-project-shell"
+next_active_story: ""
+next_active_command: ""
 
 carryover:
   ability_resolved_event_payload: "AbilityResolvedEvent remains ManaSpent-only, but T1-COMBAT-11 durably classifies it as KNOWN-CARRYOVER and fails shipping universal-spend misuse."
@@ -26,7 +26,11 @@ carryover:
   pre_commit_sha_drift: "Resolved for Sprint 1.5 with Approach A: JSONL may record the parent evidence-capture SHA while verification.md names the implementation SHA explicitly. Preserve this convention for future profiled evidence unless an approved evidence-update batch changes it."
   chain_table_verification_pattern: "Verification chain tables contain only actual existing full SHAs and grow append-only as commits land; no pending placeholder rows."
   verification_authoring_polish: "Preserve as Sprint 2 evidence-authoring norm: quantitative summary labels, JSONL line anchors, and command-gate citations."
-  unity_shell_absent: "Promoted to Sprint 2 foundation constraint; S2-FOUNDATION-01 owns ProjectSettings, Packages/manifest.json, and a launchable dev entry scene."
+  unity_shell_absent: "Resolved by S2-FOUNDATION-01; production Unity shell now exists at Assets/**, ProjectSettings/**, and Packages/**. Keep this as historical Sprint 2 foundation context."
+  unity_launch_human_verification: "Next gate before M2: open Unity 6000.3.14f1, load Assets/Scenes/_DevEntry.unity, enter Play mode, confirm shell visibility/stability, and capture findings."
+  unity_build_settings_guid_parity: "Non-blocking watch item: ProjectSettings/EditorBuildSettings.asset path is correct, but serialized GUID is zero; harden before real build automation."
+  unity_test_runner_results_xml: "Non-blocking watch item: EditMode batchmode exits 0 but produces no results XML until Unity Test Runner assemblies exist."
+  test_data_bridge_and_scanner_target: "Non-blocking testability watch: tests source production data from data/combat/** while preserving legacy copied output under assets/data/combat/**; forbidden-pattern scanner now targets data/** and should stay aligned if data moves again."
   save_load_metadata_drift: "Known finding: design/gdd/save-load-persistence.md header says In Design while its review log says APPROVED; defer cleanup until M4 Save/Load story-breaking naturally touches the file."
   readme_template_facing: "Known finding: README remains template-facing and should later become a Gravenspire landing page."
   game_concept_engine_drift: "Known finding: design/gdd/game-concept.md still says engine TBD / Godot pinned; D001 locks Unity 6.3 LTS + C# + URP."
@@ -45,8 +49,8 @@ stories:
     name: "Unity project shell"
     file: "production/stories/s2-foundation-01-unity-project-shell.md"
     priority: must-have
-    status: ready-for-dev
+    status: done
     owner: ""
     estimate_days: 1.0
     blocker: ""
-    completed: ""
+    completed: "2026-05-09"

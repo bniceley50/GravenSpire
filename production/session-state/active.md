@@ -1,13 +1,15 @@
 # Active Session State
 
 **Last Updated:** 2026-05-09
-**Project Stage:** Pre-Production — Sprint 2 — Foundation Story Ready
+**Project Stage:** Pre-Production — Sprint 2 — M1 Complete / Unity Launch Verification Next
 
 ## Current Task
 
 Sprint 1.5 close-out gates are complete 3/3: `/smoke-check sprint` PASS WITH WARNINGS, `/team-qa sprint` APPROVED WITH CONDITIONS, and `/gate-check` PASS. Sprint 2 is now rolling forward to **Gravenspire T1: The First District**, a 20-30 minute offline playable slice.
 
-Sprint 2 `/qa-plan sprint` is recorded. `S2-FOUNDATION-01` is the next active story and is ready for `/dev-story S2-FOUNDATION-01-unity-project-shell`.
+Sprint 2 M1 Player In World foundation is complete: `S2-FOUNDATION-01` created the production Unity shell and launchable dev entry path at commit `f5f74dc`.
+
+Before M2 Combat Camp Loop story-breaking, run human-in-the-loop Unity launch verification: open Unity `6000.3.14f1`, load `Assets/Scenes/_DevEntry.unity`, enter Play mode, confirm the camera, Cleric marker, blockout floor, and `FirstDistrict_ShellOnly_NoGameplay` marker render/stabilize, and capture findings. No next `/dev-story` is routed yet.
 
 ## Status
 
@@ -61,16 +63,18 @@ Sprint 2 `/qa-plan sprint` is recorded. `S2-FOUNDATION-01` is the next active st
 - ✅ Sprint 1.5 QA sign-off recorded **APPROVED WITH CONDITIONS** at `production/qa/qa-signoff-sprint-1-5-20260509.md`.
 - ✅ Sprint 1.5 gate-check recorded **PASS** at `production/gate-checks/gate-check-2026-05-09-sprint-1-5-closeout.md`; rollover to Sprint 2 is unblocked.
 - ✅ Sprint 2 target refined to **Gravenspire T1: The First District**: one Cleric, one cursed-city district, three enemy types, one named NPC, one faction presence, one objective, one loot table, one vendor or stash, one save/load flow, and one visible world-state change.
-- ✅ Sprint 2 first implementation constraint: production Unity shell is absent, so `S2-FOUNDATION-01` must open before launch/menu/session smoke can pass.
+- ✅ Sprint 2 first implementation constraint resolved: production Unity shell now exists under `Assets/**`, `ProjectSettings/**`, and `Packages/**`.
 - ✅ Sprint 2 story `S2-FOUNDATION-01` opened as a blocked routing story for the Unity project shell.
 - ✅ Sprint 2 QA plan recorded at [production/qa/plans/qa-plan-sprint-2-20260509.md](../qa/plans/qa-plan-sprint-2-20260509.md).
-- ✅ Sprint 2 `S2-FOUNDATION-01` is ready for `/dev-story S2-FOUNDATION-01-unity-project-shell`.
+- ✅ Sprint 2 story `S2-FOUNDATION-01` closed via `/story-done` 2026-05-09 with verdict **COMPLETE WITH NOTES**. Commit `f5f74dc` lands the Unity project shell.
+- ✅ Sprint 2 M1 Player In World foundation is complete; human Unity launch verification is the next gate before M2 story-breaking.
 
 ## Files Being Worked On
 
-- **Active:** Sprint 2 First District QA plan now exists at [production/qa/plans/qa-plan-sprint-2-20260509.md](../qa/plans/qa-plan-sprint-2-20260509.md); [production/stories/s2-foundation-01-unity-project-shell.md](../stories/s2-foundation-01-unity-project-shell.md) is ready for `/dev-story`.
-- **Next story:** `S2-FOUNDATION-01` Unity project shell.
+- **Active:** Human Unity launch verification for [Assets/Scenes/_DevEntry.unity](../../Assets/Scenes/_DevEntry.unity).
+- **Next story:** None routed yet; choose M2 story-breaking path after human launch findings.
 - **Closed:** [production/stories/s2-combat-01-fix-init-only-property-preservation.md](../stories/s2-combat-01-fix-init-only-property-preservation.md) is complete.
+- **Closed:** [production/stories/s2-foundation-01-unity-project-shell.md](../stories/s2-foundation-01-unity-project-shell.md) is complete.
 - Combat Feel Prototype: [prototypes/combat-feel/](../../prototypes/combat-feel/) — pinned-engine headline pass complete; prototype code remains throwaway evidence artifact.
 - Combat Feel Prototype README: [prototypes/combat-feel/README.md](../../prototypes/combat-feel/README.md)
 - Inventory & Item Economy: [design/gdd/inventory-item-economy.md](../../design/gdd/inventory-item-economy.md)
@@ -107,8 +111,8 @@ Sprint 2 `/qa-plan sprint` is recorded. `S2-FOUNDATION-01` is the next active st
 
 ## Next Skill to Run
 
-- `/dev-story S2-FOUNDATION-01-unity-project-shell`.
-- Keep the story scoped to Unity shell, launchability, smoke-testability, and `tests/evidence/S2-FOUNDATION-01/verification.md`.
+- None yet. First run human-in-the-loop Unity launch verification for `Assets/Scenes/_DevEntry.unity`.
+- After findings are captured, choose `/quick-design M2-combat-camp-loop` if the launch check surfaces design/pacing questions; choose `/create-stories` only if the shell is stable and Sprint 2 plan plus Combat Core GDD are enough to break M2 directly.
 - Later: run Inventory implementation pre-spec to close `INV-OQ-05`, then rerun `/design-review design/gdd/inventory-item-economy.md --depth full`.
 
 ## Session Extract — Sprint 2 Story Open 2026-05-09 (S2-FOUNDATION-01)
@@ -117,7 +121,7 @@ Sprint 2 `/qa-plan sprint` is recorded. `S2-FOUNDATION-01` is the next active st
 - Status at creation: BLOCKED - Sprint 2 `/qa-plan sprint` not yet run.
 - Source trace: `production/sprints/sprint-2.md:45` anchors M1 Player In World; `production/sprints/sprint-2.md:94-98` anchors the minimum shell shape.
 - Routing: `production/sprint-status.yaml` now carries 2 total stories, 1 complete, and `S2-FOUNDATION-01` blocked.
-- Superseded by the Sprint 2 QA plan extract below; current next gate is `/dev-story S2-FOUNDATION-01-unity-project-shell`.
+- Superseded by the Sprint 2 closure extract below; current next gate is human Unity launch verification before M2 story-breaking.
 
 ## Session Extract — Sprint 1.5 Close-Out Chain 2026-05-09
 
@@ -157,9 +161,9 @@ Sprint 2 `/qa-plan sprint` is recorded. `S2-FOUNDATION-01` is the next active st
 
 - QA plan: [production/qa/plans/qa-plan-sprint-2-20260509.md](../qa/plans/qa-plan-sprint-2-20260509.md).
 - Scope: Sprint 2 First District foundation routing, covering completed `S2-COMBAT-01` as regression-only and `S2-FOUNDATION-01` as the next implementation story.
-- Classification: `S2-COMBAT-01` is Hotfix / Logic and remains closed; `S2-FOUNDATION-01` is Foundation / Integration and is ready for `/dev-story`.
+- Classification: `S2-COMBAT-01` is Hotfix / Logic and remains closed; `S2-FOUNDATION-01` is Foundation / Integration and is now closed, with human Unity launch verification next.
 - Required evidence for next story: `tests/evidence/S2-FOUNDATION-01/verification.md`.
-- Next required gate: `/dev-story S2-FOUNDATION-01-unity-project-shell`.
+- Next required gate: human Unity launch verification before M2 story-breaking.
 
 ## Session Extract — /dev-story 2026-05-09 (S2-FOUNDATION-01)
 
@@ -170,3 +174,14 @@ Sprint 2 `/qa-plan sprint` is recorded. `S2-FOUNDATION-01` is the next active st
 - Verification: [tests/evidence/S2-FOUNDATION-01/verification.md](../../tests/evidence/S2-FOUNDATION-01/verification.md) records source trace, footprint, Unity smoke, combat regression, negative-scope scan, and hygiene gates.
 - Gate results: `dotnet test tests\Gravenspire.Combat.Tests.csproj --logger "console;verbosity=minimal"` passed 164/164; Unity batchmode shell generation returned code 0; Unity EditMode smoke returned code 0 but produced no results XML because no Unity Test Runner assemblies exist yet; `git diff --check` and `.githooks/pre-commit` passed.
 - Blockers: None for implementation. Next: `/code-review` on changed files, then `/story-done production/stories/s2-foundation-01-unity-project-shell.md`.
+
+## Session Extract — /story-done 2026-05-09 (S2-FOUNDATION-01)
+
+- Story: [production/stories/s2-foundation-01-unity-project-shell.md](../stories/s2-foundation-01-unity-project-shell.md) - S2-FOUNDATION-01 Unity Project Shell.
+- Verdict: COMPLETE WITH NOTES.
+- Criteria: 6/6 passing; `S2-FND-01` through `S2-FND-06` are covered by verification evidence.
+- Evidence: [tests/evidence/S2-FOUNDATION-01/verification.md](../../tests/evidence/S2-FOUNDATION-01/verification.md) records source trace, Unity config, dev-entry scene, Unity batchmode smoke, combat regression, negative-scope scan, hygiene gates, and code-review notes.
+- Implementation commit: `f5f74dc` creates the production Unity shell.
+- State updates: story status set to Complete; `production/sprint-status.yaml` records 2/2 Sprint 2 tracked stories closed, updates `head` to `f5f74dc`, and leaves `next_active_command` empty pending human Unity launch verification.
+- Watch items: build-settings GUID parity, Unity Test Runner results XML absence, and test-data bridge/scanner alignment.
+- Next recommended: human Unity launch verification before M2 Combat Camp Loop design/story-breaking.

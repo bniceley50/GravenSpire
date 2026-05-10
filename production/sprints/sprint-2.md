@@ -32,11 +32,11 @@ Sprint 1.5 close-out is complete:
 2. `/team-qa sprint` recorded `APPROVED WITH CONDITIONS`.
 3. `/gate-check` recorded `PASS`.
 
-Sprint 2 may now roll forward. The QA plan exists; new feature implementation starts with:
+Sprint 2 has rolled forward. The QA plan exists and M1 shell implementation is complete. Before M2:
 
-1. `/dev-story S2-FOUNDATION-01-unity-project-shell`.
-2. Keep implementation scoped to the Unity shell before hub, faction, Save/Load, NPC, loot, vendor, objective, or world-state feature work.
-3. Verification artifact at `tests/evidence/S2-FOUNDATION-01/verification.md` records source trace, footprint, commands, and pass/fail evidence before `/story-done`.
+1. Run human Unity launch verification for `Assets/Scenes/_DevEntry.unity`.
+2. Capture findings about shell visibility/stability before combat-camp-loop story-breaking.
+3. Use the findings to choose `/quick-design M2-combat-camp-loop` or direct `/create-stories`.
 
 ## Milestone Structure
 
@@ -53,9 +53,9 @@ Sprint 2 may now roll forward. The QA plan exists; new feature implementation st
 | Story | Status | Commits | Evidence |
 |---|---|---:|---|
 | `S2-COMBAT-01` Fix init-only property preservation in CombatActorState transitions | Complete | `5b8a017` -> `a7269cb` | `tests/evidence/S2-COMBAT-01/verification.md` |
-| `S2-FOUNDATION-01` Unity project shell | Ready for dev | "" | `tests/evidence/S2-FOUNDATION-01/verification.md` |
+| `S2-FOUNDATION-01` Unity project shell | Complete | `f5f74dc` | `tests/evidence/S2-FOUNDATION-01/verification.md` |
 
-Next gate: `/dev-story S2-FOUNDATION-01-unity-project-shell`.
+Next gate: human Unity launch verification before M2 story-breaking.
 
 ## Operating Model Calibration
 
@@ -84,11 +84,11 @@ Next gate: `/dev-story S2-FOUNDATION-01-unity-project-shell`.
 - `design/gdd/game-concept.md` still says engine TBD / Godot pinned; D001 locks Unity 6.3 LTS + C# + URP.
 - README remains template-facing and should later become a Gravenspire landing page.
 - Sprint 1.5 carryovers remain inputs to Sprint 2 QA planning, especially human death-moment playtest, QA-02-01 wording, and evidence-authoring norms.
-- Production Unity shell is absent; `S2-FOUNDATION-01` owns this before launch/menu/session smoke can pass.
+- Production Unity shell is present after `S2-FOUNDATION-01`; human launch verification remains before M2 story-breaking.
 
 ## Next Gate
 
-`/dev-story S2-FOUNDATION-01-unity-project-shell`.
+M1 complete at `f5f74dc`; next gate is human Unity launch verification before M2 story-breaking.
 Minimum story shape:
 
 - Create the Unity project shell at the production root.

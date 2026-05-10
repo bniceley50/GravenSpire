@@ -1,6 +1,6 @@
 # S2-FOUNDATION-01 - Unity Project Shell
 
-**Status:** Implemented - code-review approved with notes; pending `/story-done`
+**Status:** Complete
 **Sprint:** 2
 **Priority:** Must Have
 **Layer:** Foundation / Unity Shell
@@ -105,3 +105,16 @@ Planned implementation surface:
 ## Blockers
 
 - None for implementation. Code review returned approved with notes; awaiting `/story-done`.
+
+## Completion Notes
+
+**Completed:** 2026-05-09
+**Verdict:** COMPLETE WITH NOTES
+**Criteria:** 6/6 passing
+**Deferred/Untested Criteria:** None
+**Test Evidence:** `tests/evidence/S2-FOUNDATION-01/verification.md`
+**GDD/ADR Deviations:** None
+**Code Review:** Code/engine review returned APPROVED WITH SUGGESTIONS; QA/testability review returned APPROVED WITH NOTES. No blocking findings.
+**Scope Notes:** M1 Unity project shell is complete. This story created the shell only; hub, faction, Save/Load, NPC, loot, vendor, objective, and world-state gameplay remain outside this story.
+**Watch Items:** Build-settings GUID parity remains a later build-pipeline hardening item; Unity EditMode smoke exits `0` but has no results XML until Unity Test Runner assemblies exist; the combat test bridge still preserves legacy copied output under `assets/data/combat/**` while sourcing production data from `data/combat/**`.
+**Next Recommended:** Human-in-the-loop Unity launch verification before M2 story-breaking: open Unity `6000.3.14f1`, load `Assets/Scenes/_DevEntry.unity`, enter Play mode, confirm the camera, Cleric marker, blockout floor, and `FirstDistrict_ShellOnly_NoGameplay` marker render/stabilize, and capture findings before choosing `/quick-design M2-combat-camp-loop` or `/create-stories`.
