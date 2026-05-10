@@ -1,13 +1,13 @@
 # Active Session State
 
 **Last Updated:** 2026-05-09
-**Project Stage:** Pre-Production — Sprint 2 — Scaffolded
+**Project Stage:** Pre-Production — Sprint 2 — Active Routing / QA Planning
 
 ## Current Task
 
-Sprint 2 opened with `S2-COMBAT-01`, the Gemini cross-vendor hotfix for init-only property preservation in `CombatActorStateTransitions`. The story is complete and closed at `a7269cb`.
+Sprint 1.5 close-out gates are complete 3/3: `/smoke-check sprint` PASS WITH WARNINGS, `/team-qa sprint` APPROVED WITH CONDITIONS, and `/gate-check` PASS. Sprint 2 is now rolling forward to **Gravenspire T1: The First District**, a 20-30 minute offline playable slice.
 
-Next recommended: run Sprint 1.5 close-out gates first: `/smoke-check sprint`, `/team-qa sprint`, `/gate-check`. After those pass, run Sprint 2 `/qa-plan sprint` before any new `/dev-story`.
+Next recommended: open `S2-FOUNDATION-01` as the Unity project shell story, then run Sprint 2 `/qa-plan sprint` before any new feature implementation.
 
 ## Status
 
@@ -57,10 +57,17 @@ Next recommended: run Sprint 1.5 close-out gates first: `/smoke-check sprint`, `
 - ✅ Sprint 1.5 story `T1.5-COMBAT-04` closed via `/story-done` 2026-05-08 with verdict **COMPLETE WITH NOTES**. Commit `bd6c81b` lands D014 Locked.
 - ✅ Sprint 1.5 carryover story `T1-COMBAT-11` closed via `/story-done` 2026-05-08 with verdict **COMPLETE WITH NOTES**. Commit `496ebc6` provenance restructure.
 - ✅ Sprint 1.5 story `T1.5-COMBAT-05` closed via `/story-done` 2026-05-09 with verdict **COMPLETE**. Commit `960a148` lands profiled rerun evidence; `caea662` fixes verification provenance.
+- ✅ Sprint 1.5 close-out smoke recorded **PASS WITH WARNINGS** at `production/qa/smoke-sprint-20260509.md`.
+- ✅ Sprint 1.5 QA sign-off recorded **APPROVED WITH CONDITIONS** at `production/qa/qa-signoff-sprint-1-5-20260509.md`.
+- ✅ Sprint 1.5 gate-check recorded **PASS** at `production/gate-checks/gate-check-2026-05-09-sprint-1-5-closeout.md`; rollover to Sprint 2 is unblocked.
+- ✅ Sprint 2 target refined to **Gravenspire T1: The First District**: one Cleric, one cursed-city district, three enemy types, one named NPC, one faction presence, one objective, one loot table, one vendor or stash, one save/load flow, and one visible world-state change.
+- ✅ Sprint 2 first implementation constraint: production Unity shell is absent, so `S2-FOUNDATION-01` must open before launch/menu/session smoke can pass.
 
 ## Files Being Worked On
 
-- **Active:** Sprint 2 plan/status scaffold pending review; [production/stories/s2-combat-01-fix-init-only-property-preservation.md](../stories/s2-combat-01-fix-init-only-property-preservation.md) is complete.
+- **Active:** Sprint 2 First District alignment landed in [production/sprints/sprint-2.md](../sprints/sprint-2.md) (5-milestone structure) and [production/sprint-status.yaml](../sprint-status.yaml) (rolled to Sprint 2 at `aa785a0`). Next milestone gate: open `S2-FOUNDATION-01`.
+- **Next story to open:** `S2-FOUNDATION-01` Unity project shell.
+- **Closed:** [production/stories/s2-combat-01-fix-init-only-property-preservation.md](../stories/s2-combat-01-fix-init-only-property-preservation.md) is complete.
 - Combat Feel Prototype: [prototypes/combat-feel/](../../prototypes/combat-feel/) — pinned-engine headline pass complete; prototype code remains throwaway evidence artifact.
 - Combat Feel Prototype README: [prototypes/combat-feel/README.md](../../prototypes/combat-feel/README.md)
 - Inventory & Item Economy: [design/gdd/inventory-item-economy.md](../../design/gdd/inventory-item-economy.md)
@@ -90,15 +97,25 @@ Next recommended: run Sprint 1.5 close-out gates first: `/smoke-check sprint`, `
 - `H-CCOM-F2B` fixture extremes are validated by `T1-COMBAT-01`; seeded melee formula execution is validated by `T1-COMBAT-04`.
 - Creature / Enemy AI still owns actual return-to-anchor movement and NavMeshAgent behavior.
 - Inventory & Item Economy is intentionally parked after review.
-- Sprint 2 MVP anchor: one hub, one faction slice, one combat loop, Save/Load, minimal NPC.
+- Sprint 2 / T1 playable anchor: **Gravenspire T1: The First District** - a 20-30 minute offline slice that makes the first 10 minutes of playable Gravenspire better.
+- Sprint 2 lock: Cleric-only playable archetype; multiplayer, live LLM dialogue, extra classes, huge world, and deep economy remain cut.
+- Sprint 2 development loop: implement one small feature, play it immediately, write down what felt bad, fix the worst thing, commit, repeat.
 - Save/Load metadata drift is known: `save-load-persistence.md` header says `In Design`, while its review log says APPROVED. Do not silently correct outside an approved metadata cleanup batch.
-- Sprint 2 operating model: lighter ceremony for bounded doc/evidence fixes, full rigor for cross-contract code, one external whole-codebase review per sprint or tier transition.
 
 ## Next Skill to Run
 
-- **Run Sprint 1.5 close-out gates:** `/smoke-check sprint`, `/team-qa sprint`, `/gate-check`.
+- **Open story:** `S2-FOUNDATION-01` Unity project shell.
 - Then run Sprint 2 `/qa-plan sprint`.
 - Later: run Inventory implementation pre-spec to close `INV-OQ-05`, then rerun `/design-review design/gdd/inventory-item-economy.md --depth full`.
+
+## Session Extract — Sprint 1.5 Close-Out Chain 2026-05-09
+
+- Smoke: `production/qa/smoke-sprint-20260509.md` records **PASS WITH WARNINGS**; accepted warning is the missing production Unity shell.
+- QA sign-off: `production/qa/qa-signoff-sprint-1-5-20260509.md` records **APPROVED WITH CONDITIONS**; no Sprint 1.5 bugs found.
+- Gate-check: `production/gate-checks/gate-check-2026-05-09-sprint-1-5-closeout.md` records **PASS** and unblocks Sprint 2 rollover.
+- Routing: `production/sprint-status.yaml` intentionally held Sprint 1.5 at `caea662` until gate-check landed; current live head is `aa785a0`.
+- Carried forward: human death-moment playtest, QA-02-01 wording, `AbilityResolvedEvent.ManaSpent`-only semantics, evidence provenance conventions, Save/Load metadata drift, README template-facing drift, and game-concept engine wording drift.
+- Next recommended: open `S2-FOUNDATION-01`, then run Sprint 2 `/qa-plan sprint`; do not implement new Sprint 2 feature work before that.
 
 ## Session Extract — /story-done 2026-05-09 (T1.5-COMBAT-05)
 
