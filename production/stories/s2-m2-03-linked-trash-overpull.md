@@ -121,6 +121,16 @@ Required evidence:
 - `git diff --check`
 - `.githooks/pre-commit`
 
+## Performance Budget
+
+This story adds one linked or patrol trash pressure path on top of the existing
+single-trash loop. Runtime cost must grow linearly with the small authored enemy
+set used by M2; no quadratic enemy-pair scans or broad scene-wide polling should
+be introduced for assist, patrol, or overpull checks. Verification should record
+that the clean single-trash loop still runs after the second-trash addition and
+that authored overpull code has no obvious steady-state per-frame allocation
+loop.
+
 ## Dependencies
 
 - Depends on: `S2-M2-02` Single Trash Pull + Med Loop complete.

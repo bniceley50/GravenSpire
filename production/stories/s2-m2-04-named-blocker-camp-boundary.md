@@ -119,6 +119,15 @@ Required evidence:
 - `git diff --check`
 - `.githooks/pre-commit`
 
+## Performance Budget
+
+This story adds a visible named blocker anchor and named-fixture handoff only.
+It must not introduce boss AI, perception sweeps, animation-state complexity,
+loot evaluation, objective polling, or faction/save processing. Verification
+should confirm the named blocker is present and targetable without adding a new
+steady-state gameplay loop beyond the existing M2 combat checks; broader named
+encounter performance budgets belong to later grouped-content or boss stories.
+
 ## Dependencies
 
 - Depends on: `S2-M2-03` Linked Trash Overpull complete.

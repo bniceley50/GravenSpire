@@ -123,6 +123,16 @@ Required evidence:
 - `git diff --check`
 - `.githooks/pre-commit`
 
+## Performance Budget
+
+This story introduces the first playable single-trash loop and should remain
+bounded to one player actor, one baseline hostile actor, and the minimum camp
+objects needed for pull, fight, sit, med, and repeat evidence. Authored runtime
+code must not allocate every frame in the target, Attack toggle, combat-exit,
+sit/stand, or mana-restoration paths. Any Unity smoke or profiler evidence
+should focus on errors/exceptions, repeated-loop stability, and obvious
+steady-state allocation regressions rather than full frame-time tuning.
+
 ## Dependencies
 
 - Depends on: `S2-M2-01` Unity Combat Core Runtime Bridge complete.

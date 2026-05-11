@@ -127,6 +127,15 @@ Required evidence:
 - `git diff --check`
 - `.githooks/pre-commit`
 
+## Performance Budget
+
+This story adds bridge and smoke-runner plumbing only; it must not introduce
+per-frame combat formula work outside the existing Combat Core tick path.
+Runtime bridge smoke should record no captured errors/exceptions and no obvious
+steady-state per-frame allocation loop in authored adapter code. Broader frame
+time, animation, rendering, and encounter-feel performance budgets belong to
+later M2 loop stories once gameplay objects are active.
+
 ## Dependencies
 
 - Depends on: `S2-FOUNDATION-01` complete and Unity launch verification complete.
