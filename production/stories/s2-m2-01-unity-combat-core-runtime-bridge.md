@@ -1,6 +1,6 @@
 # S2-M2-01 - Unity Combat Core Runtime Bridge
 
-**Status:** Implemented - pending /code-review and /story-done
+**Status:** Complete
 **Sprint:** 2
 **Priority:** Must Have
 **Layer:** Gameplay / Unity Runtime
@@ -14,8 +14,9 @@
 
 ## Routing Status
 
-This is the first M2 Combat Camp Loop story. Readiness is cleared, and the
-implementation is pending `/code-review` and `/story-done` verification.
+This story is complete. It exposes the existing engine-agnostic Combat Core to
+Unity through a thin runtime bridge, records M2-specific smoke evidence, and
+unlocks `S2-M2-02` for story-readiness.
 
 ## Source Trace
 
@@ -157,5 +158,20 @@ later M2 loop stories once gameplay objects are active.
 Run:
 
 ```text
-/story-readiness production/stories/s2-m2-01-unity-combat-core-runtime-bridge.md
+/story-readiness production/stories/s2-m2-02-single-trash-pull-med-loop.md
 ```
+
+## Completion Notes
+
+**Completed:** 2026-05-11
+**Verdict:** COMPLETE WITH NOTES
+**Criteria:** 5/5 passing (`S2-M2-01-01` through `S2-M2-01-05`)
+**Deferred/Untested Criteria:** None
+**Implementation Commit:** `b4cb3776d036df5db8c883fb682cf43116b9b70d`
+**Test Evidence:** `tests/evidence/S2-M2-01/verification.md:32` through `:36`; `tests/evidence/S2-M2-01/unity-combat-bridge-smoke-20260510.md:7`; `tests/evidence/S2-M2-01/unity-combat-bridge-smoke-20260510.md:51`
+**Local Gates:** `dotnet test tests\Gravenspire.Combat.Tests.csproj --logger "console;verbosity=minimal"` reran 2026-05-11 and passed `169/169`; the S2-M2-01 negative-scope scan reran 2026-05-11 with only classified story/test/comment hits; `git diff --check` reran 2026-05-11 and was clean; `.githooks/pre-commit` reran 2026-05-11 and returned `[pre-commit] OK`.
+**GDD/ADR Deviations:** None
+**Code Review:** Complete. The structured malformed-JSON failure gap is closed in `src/gameplay/combat/fixtures/CombatFixtureLoader.cs:51` through `:63` and covered by `tests/integration/gameplay/combat/combat_runtime_encounter_hydration_test.cs:78` through `:89`.
+**Scope Notes:** This was an Integration bridge story; Unity runner and CLI evidence are sufficient for closure. No gameplay-scope expansion was introduced, and human play/feel evidence becomes load-bearing for `S2-M2-02` and later playable-loop stories.
+**Watch Items:** Unity ProjectSettings hygiene remains deferred: `ProjectSettings/TagManager.asset` emits a non-fatal YAML parse warning in committed S2-M2-01 smoke logs, including `tests/evidence/S2-M2-01/unity-combat-bridge-smoke-post-fix-20260511.log:98` through `:99`; smoke still passed exit `0`. `ProjectSettings/URPProjectSettings.asset` is currently untracked after Unity generation and should be handled in the same follow-up hygiene batch.
+**Next Recommended:** Unity ProjectSettings hygiene story, then `S2-M2-02` Single Trash Pull + Med Loop story-readiness.

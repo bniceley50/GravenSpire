@@ -6,18 +6,18 @@ goal: "Gravenspire T1: The First District - a 20-30 minute offline playable slic
 start: "2026-05-09"
 end: "2026-05-30"
 generated: "2026-05-09"
-updated: "2026-05-10"
+updated: "2026-05-11"
 branch: "main"
-head: "21bb9a3"
+head: "b4cb377"
 qa_plan: "production/qa/plans/qa-plan-sprint-2-20260509.md"
 plan: "production/sprints/sprint-2.md"
 slice_review: ""
-implementation_gate: "M2 Combat Camp Loop story slate is open. Required next gate: /story-readiness production/stories/s2-m2-01-unity-combat-core-runtime-bridge.md."
-progress: "2/6 closed; M1 Unity shell and launch verification complete; M2 story slate open; S2-M2-01 story-readiness next"
-completed_stories: 2
+implementation_gate: "S2-M2-01 Unity Combat Core runtime bridge is complete. Required next gate: /story-readiness production/stories/s2-m2-02-single-trash-pull-med-loop.md."
+progress: "3/6 closed; M2-01 Unity Combat Core runtime bridge complete; S2-M2-02 story-readiness next"
+completed_stories: 3
 total_stories: 6
-next_active_story: "S2-M2-01"
-next_active_command: "/story-readiness production/stories/s2-m2-01-unity-combat-core-runtime-bridge.md"
+next_active_story: "S2-M2-02"
+next_active_command: "/story-readiness production/stories/s2-m2-02-single-trash-pull-med-loop.md"
 
 carryover:
   ability_resolved_event_payload: "AbilityResolvedEvent remains ManaSpent-only, but T1-COMBAT-11 durably classifies it as KNOWN-CARRYOVER and fails shipping universal-spend misuse."
@@ -34,6 +34,8 @@ carryover:
   save_load_metadata_drift: "Known finding: design/gdd/save-load-persistence.md header says In Design while its review log says APPROVED; defer cleanup until M4 Save/Load story-breaking naturally touches the file."
   readme_template_facing: "Known finding: README remains template-facing and should later become a Gravenspire landing page."
   game_concept_engine_drift: "Known finding: design/gdd/game-concept.md still says engine TBD / Godot pinned; D001 locks Unity 6.3 LTS + C# + URP."
+  unity_settings_hygiene_pending: "Non-blocking Unity settings hygiene: ProjectSettings/TagManager.asset emits a YAML parse warning in S2-M2-01 smoke logs at tests/evidence/S2-M2-01/unity-combat-bridge-smoke-*.log:98-99, and ProjectSettings/URPProjectSettings.asset is currently untracked after Unity generation. Fix and verify in a separate hygiene batch before S2-M2-02 implementation if approved."
+  m2_02_human_play_gate: "S2-M2-02 and later playable M2 stories require human play/feel evidence as first-class closure input; S2-M2-01 was a bridge/infrastructure story where CLI/runner evidence was sufficient."
 
 stories:
   - id: "S2-COMBAT-01"
@@ -58,19 +60,19 @@ stories:
     name: "Unity Combat Core runtime bridge"
     file: "production/stories/s2-m2-01-unity-combat-core-runtime-bridge.md"
     priority: must-have
-    status: ready-for-dev
+    status: done
     owner: ""
     estimate_days: 1.0
     blocker: ""
-    completed: ""
+    completed: "2026-05-11"
   - id: "S2-M2-02"
     name: "Single trash pull + med loop"
     file: "production/stories/s2-m2-02-single-trash-pull-med-loop.md"
     priority: must-have
-    status: blocked
+    status: ready-for-dev
     owner: ""
     estimate_days: 1.0
-    blocker: "Blocked on S2-M2-01 Unity Combat Core runtime bridge."
+    blocker: ""
     completed: ""
   - id: "S2-M2-03"
     name: "Linked trash overpull"

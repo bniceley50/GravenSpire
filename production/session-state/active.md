@@ -1,7 +1,7 @@
 # Active Session State
 
-**Last Updated:** 2026-05-10
-**Project Stage:** Pre-Production — Sprint 2 — M2 Stories Open / S2-M2-01 Next
+**Last Updated:** 2026-05-11
+**Project Stage:** Pre-Production — Sprint 2 — S2-M2-01 Complete / S2-M2-02 Next
 
 ## Current Task
 
@@ -9,7 +9,7 @@ Sprint 1.5 close-out gates are complete 3/3: `/smoke-check sprint` PASS WITH WAR
 
 S2-FOUNDATION-01 Unity launch verification is complete. Manual Play Mode verification and the Unity CLI runner both confirmed `_DevEntry.unity` loads, renders, and remains stable for 30 seconds with no captured errors.
 
-M2 Combat Camp Loop quick design is complete, and the four-story M2 slate is open. Next action: `/story-readiness production/stories/s2-m2-01-unity-combat-core-runtime-bridge.md`.
+M2 Combat Camp Loop quick design is complete, `S2-M2-01` is closed, and `S2-M2-02` is unblocked. Next action: run the approved Unity ProjectSettings hygiene batch, then `/story-readiness production/stories/s2-m2-02-single-trash-pull-med-loop.md`.
 
 ## Status
 
@@ -70,12 +70,15 @@ M2 Combat Camp Loop quick design is complete, and the four-story M2 slate is ope
 - ✅ Sprint 2 M1 Player In World foundation and launch verification are complete; M2 story slate is now open.
 - ✅ Sprint 2 M1 Unity launch verification complete (manual Play Mode + Unity CLI runner) at [tests/evidence/S2-FOUNDATION-01/unity-cli-launch-verification-20260510.md](../../tests/evidence/S2-FOUNDATION-01/unity-cli-launch-verification-20260510.md); M2 story slate is now open.
 - ✅ Sprint 2 M2 Combat Camp Loop quick design recorded at [design/quick/quick-design-m2-combat-camp-loop.md](../../design/quick/quick-design-m2-combat-camp-loop.md).
-- ✅ Sprint 2 M2 story slate opened: `S2-M2-01` through `S2-M2-04`. `S2-M2-01` is ready for `/story-readiness`; `S2-M2-02` through `S2-M2-04` are blocked in dependency order.
+- ✅ Sprint 2 M2 story slate opened: `S2-M2-01` through `S2-M2-04`. `S2-M2-01` is complete; `S2-M2-02` is ready for `/story-readiness`; `S2-M2-03` through `S2-M2-04` remain blocked in dependency order.
+- ✅ Sprint 2 story `S2-M2-01` closed via `/story-done` 2026-05-11 with verdict **COMPLETE WITH NOTES**. Commit `b4cb377` lands the Unity Combat Core runtime bridge.
+- ⚠️ Unity ProjectSettings hygiene is deferred to a separate batch: `ProjectSettings/TagManager.asset` emits a non-fatal parse warning in committed S2-M2-01 smoke logs, and `ProjectSettings/URPProjectSettings.asset` is currently untracked after Unity generation.
 
 ## Files Being Worked On
 
-- **Active:** Sprint 2 M2 Combat Camp Loop story slate is open. Next command is `/story-readiness production/stories/s2-m2-01-unity-combat-core-runtime-bridge.md`.
-- **Next story:** [production/stories/s2-m2-01-unity-combat-core-runtime-bridge.md](../stories/s2-m2-01-unity-combat-core-runtime-bridge.md).
+- **Active:** `S2-M2-01` is complete. Next command is `/story-readiness production/stories/s2-m2-02-single-trash-pull-med-loop.md`, after any approved Unity settings hygiene batch.
+- **Next story:** [production/stories/s2-m2-02-single-trash-pull-med-loop.md](../stories/s2-m2-02-single-trash-pull-med-loop.md).
+- **Closed:** [production/stories/s2-m2-01-unity-combat-core-runtime-bridge.md](../stories/s2-m2-01-unity-combat-core-runtime-bridge.md) is complete.
 - **Closed:** [production/stories/s2-combat-01-fix-init-only-property-preservation.md](../stories/s2-combat-01-fix-init-only-property-preservation.md) is complete.
 - **Closed:** [production/stories/s2-foundation-01-unity-project-shell.md](../stories/s2-foundation-01-unity-project-shell.md) is complete.
 - Combat Feel Prototype: [prototypes/combat-feel/](../../prototypes/combat-feel/) — pinned-engine headline pass complete; prototype code remains throwaway evidence artifact.
@@ -114,9 +117,10 @@ M2 Combat Camp Loop quick design is complete, and the four-story M2 slate is ope
 
 ## Next Skill to Run
 
-- `/story-readiness production/stories/s2-m2-01-unity-combat-core-runtime-bridge.md`.
-- After readiness passes, run `/dev-story production/stories/s2-m2-01-unity-combat-core-runtime-bridge.md`.
-- Then proceed in order: `S2-M2-02` -> `S2-M2-03` -> `S2-M2-04`.
+- If approved, run the small Unity settings hygiene batch for `ProjectSettings/TagManager.asset` and `ProjectSettings/URPProjectSettings.asset`.
+- Then run `/story-readiness production/stories/s2-m2-02-single-trash-pull-med-loop.md`.
+- `S2-M2-02` is the first playable-loop story; story-readiness should require human play/feel evidence for closure, not runner evidence alone.
+- Then proceed in order: `S2-M2-03` -> `S2-M2-04`.
 - Later: run Inventory implementation pre-spec to close `INV-OQ-05`, then rerun `/design-review design/gdd/inventory-item-economy.md --depth full`.
 
 ## Session Extract — Sprint 2 Story Open 2026-05-09 (S2-FOUNDATION-01)
@@ -211,3 +215,17 @@ M2 Combat Camp Loop quick design is complete, and the four-story M2 slate is ope
 - Routing: `production/sprint-status.yaml` now tracks 6 Sprint 2 stories, 2 closed, 1 ready-for-dev, and 3 blocked in M2 dependency order.
 - Sprint plan: `production/sprints/sprint-2.md` Story Ledger now lists the M2 slate while preserving the quick-design citation to `production/sprints/sprint-2.md:60` through `production/sprints/sprint-2.md:78`.
 - Next command: `/story-readiness production/stories/s2-m2-01-unity-combat-core-runtime-bridge.md`.
+
+## Session Extract — /story-done 2026-05-11 (S2-M2-01)
+
+- Story: [production/stories/s2-m2-01-unity-combat-core-runtime-bridge.md](../stories/s2-m2-01-unity-combat-core-runtime-bridge.md) - S2-M2-01 Unity Combat Core Runtime Bridge.
+- Verdict: COMPLETE WITH NOTES.
+- Criteria: 5/5 passing; `S2-M2-01-01` through `S2-M2-01-05` are covered by committed verification evidence and live cheap-gate reruns.
+- Evidence: [tests/evidence/S2-M2-01/verification.md](../../tests/evidence/S2-M2-01/verification.md) records AC pass coverage, local gates, code-review fix evidence, and watch items. [tests/evidence/S2-M2-01/unity-combat-bridge-smoke-20260510.md](../../tests/evidence/S2-M2-01/unity-combat-bridge-smoke-20260510.md) records Play Mode PASS with bridge hydration, fixture ids, player/hostile actors, active zone id, and no captured errors.
+- Implementation commit: `b4cb377` implements the Unity Combat Core runtime bridge.
+- Gate results: `dotnet test tests\Gravenspire.Combat.Tests.csproj --logger "console;verbosity=minimal"` passed 169/169 on 2026-05-11; S2-M2-01 negative-scope scan had only classified story/test/comment hits; `git diff --check` passed; `.githooks/pre-commit` returned `[pre-commit] OK`.
+- Watch items: Unity ProjectSettings hygiene is deferred. `ProjectSettings/TagManager.asset` emits a non-fatal parse warning in S2-M2-01 Unity smoke logs; `ProjectSettings/URPProjectSettings.asset` is currently untracked after Unity generation.
+- Routing: `production/sprint-status.yaml` marks `S2-M2-01` done, updates Sprint 2 progress to 3/6 closed, unblocks `S2-M2-02`, and routes next to `/story-readiness production/stories/s2-m2-02-single-trash-pull-med-loop.md`.
+- Human-play gate: S2-M2-01 was a bridge/infrastructure story; CLI/runner evidence was sufficient. `S2-M2-02` and later playable-loop stories should require human play/feel evidence at closure.
+- Tech debt logged: None.
+- Next recommended: small Unity settings hygiene batch, then `/story-readiness production/stories/s2-m2-02-single-trash-pull-med-loop.md`.

@@ -53,8 +53,8 @@ Sprint 2 has rolled forward. The QA plan exists and M1 shell implementation is c
 |---|---|---:|---|
 | `S2-COMBAT-01` Fix init-only property preservation in CombatActorState transitions | Complete | `5b8a017` -> `a7269cb` | `tests/evidence/S2-COMBAT-01/verification.md` |
 | `S2-FOUNDATION-01` Unity project shell | Complete | `f5f74dc` | `tests/evidence/S2-FOUNDATION-01/verification.md` |
-| `S2-M2-01` Unity Combat Core runtime bridge | Ready for story-readiness | Not started | `tests/evidence/S2-M2-01/verification.md` |
-| `S2-M2-02` Single trash pull + med loop | Blocked on `S2-M2-01` | Not started | `tests/evidence/S2-M2-02/verification.md` |
+| `S2-M2-01` Unity Combat Core runtime bridge | Complete | `b4cb377` | `tests/evidence/S2-M2-01/verification.md` |
+| `S2-M2-02` Single trash pull + med loop | Ready for story-readiness | Not started | `tests/evidence/S2-M2-02/verification.md` |
 | `S2-M2-03` Linked trash overpull | Blocked on `S2-M2-02` | Not started | `tests/evidence/S2-M2-03/verification.md` |
 | `S2-M2-04` Named blocker + camp boundary | Blocked on `S2-M2-03` | Not started | `tests/evidence/S2-M2-04/verification.md` |
 ## Operating Model Calibration
