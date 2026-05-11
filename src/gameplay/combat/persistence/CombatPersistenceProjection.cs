@@ -37,7 +37,7 @@ public sealed class CombatPersistenceProjection
         CombatActorState player,
         PlayerDeathEvent? pendingDeathHandoffPayload = null)
     {
-        ArgumentNullException.ThrowIfNull(player);
+        CombatArgumentNull.ThrowIfNull(player);
         if (player.ActorKind != CombatActorKind.Player)
         {
             throw new InvalidOperationException("Combat persistence projection requires a player actor.");

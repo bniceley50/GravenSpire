@@ -102,9 +102,9 @@ public sealed class CombatAttackStateMachine
 
     public CombatAttackTransitionResult ToggleOn(CombatAttackToggleOnRequest request)
     {
-        ArgumentNullException.ThrowIfNull(request);
-        ArgumentNullException.ThrowIfNull(request.Player);
-        ArgumentNullException.ThrowIfNull(request.ZoneGate);
+        CombatArgumentNull.ThrowIfNull(request);
+        CombatArgumentNull.ThrowIfNull(request.Player);
+        CombatArgumentNull.ThrowIfNull(request.ZoneGate);
 
         if (request.TickRateHz <= 0)
         {

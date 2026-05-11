@@ -1,0 +1,13 @@
+{
+  "name": "com.gravenspire.gameplay.combat",
+  "version": "0.2.0",
+  "displayName": "Gravenspire Gameplay Combat Core",
+  "description": "Engine-agnostic Combat Core source consumed by Unity runtime bridges and headless tests.",
+  "unity": "6000.3",
+  "dependencies": {
+    "com.unity.nuget.newtonsoft-json": "3.2.1"
+  },
+  "author": {
+    "name": "Gravenspire"
+  }
+}

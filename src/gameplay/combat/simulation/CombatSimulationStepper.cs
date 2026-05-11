@@ -26,8 +26,8 @@ public sealed class CombatSimulationStepper
 {
     public CombatSimulationStepResult Step(CombatSimulationStepRequest request)
     {
-        ArgumentNullException.ThrowIfNull(request);
-        ArgumentNullException.ThrowIfNull(request.Clock);
+        CombatArgumentNull.ThrowIfNull(request);
+        CombatArgumentNull.ThrowIfNull(request.Clock);
 
         if (request.TickBudget < 0)
         {

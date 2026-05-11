@@ -105,8 +105,8 @@ public sealed class CombatLeashCoordinator
         CombatLeashRuntimeState? previousState = null,
         CombatLeashTuning? tuning = null)
     {
-        ArgumentNullException.ThrowIfNull(hostile);
-        ArgumentNullException.ThrowIfNull(pathProbe);
+        CombatArgumentNull.ThrowIfNull(hostile);
+        CombatArgumentNull.ThrowIfNull(pathProbe);
 
         var actualTuning = tuning ?? CombatLeashTuning.T1Default;
         var state = previousState ?? CombatLeashRuntimeState.None;
@@ -175,8 +175,8 @@ public sealed class CombatLeashCoordinator
         CombatTick tick,
         CombatLeashTuning? tuning = null)
     {
-        ArgumentNullException.ThrowIfNull(hostile);
-        ArgumentNullException.ThrowIfNull(state);
+        CombatArgumentNull.ThrowIfNull(hostile);
+        CombatArgumentNull.ThrowIfNull(state);
 
         var actualTuning = tuning ?? CombatLeashTuning.T1Default;
         var memoryExpired = state.ThreatMemoryExpiresSeconds is not null &&

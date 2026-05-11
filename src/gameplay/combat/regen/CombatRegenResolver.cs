@@ -20,9 +20,9 @@ public sealed class CombatRegenResolver
 {
     public CombatRegenTickResult ResolveTick(CombatRegenTickRequest request)
     {
-        ArgumentNullException.ThrowIfNull(request);
-        ArgumentNullException.ThrowIfNull(request.Actor);
-        ArgumentNullException.ThrowIfNull(request.Tuning);
+        CombatArgumentNull.ThrowIfNull(request);
+        CombatArgumentNull.ThrowIfNull(request.Actor);
+        CombatArgumentNull.ThrowIfNull(request.Tuning);
         if (request.TickRateHz <= 0)
         {
             throw new ArgumentOutOfRangeException(nameof(request), "tick_rate_hz must be positive.");

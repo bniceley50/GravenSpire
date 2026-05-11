@@ -43,7 +43,7 @@ public sealed record CombatTacticalAbilityProfile(
         CombatTacticalInstantAbilityProfileFixture fixture,
         string band)
     {
-        ArgumentNullException.ThrowIfNull(fixture);
+        CombatArgumentNull.ThrowIfNull(fixture);
         if (string.IsNullOrWhiteSpace(fixture.Id))
         {
             throw new ArgumentException("ability profile id is required.", nameof(fixture));
@@ -88,7 +88,7 @@ public sealed record CombatTacticalAbilityEffectProfile(
         CombatTacticalInstantAbilityEffectFixture fixture,
         string band)
     {
-        ArgumentNullException.ThrowIfNull(fixture);
+        CombatArgumentNull.ThrowIfNull(fixture);
 
         return fixture.EffectType switch
         {

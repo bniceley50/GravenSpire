@@ -33,9 +33,9 @@ public sealed class CombatPostureStateMachine
 {
     public CombatSitResult TrySit(CombatSitRequest request)
     {
-        ArgumentNullException.ThrowIfNull(request);
-        ArgumentNullException.ThrowIfNull(request.Player);
-        ArgumentNullException.ThrowIfNull(request.AttackStateMachine);
+        CombatArgumentNull.ThrowIfNull(request);
+        CombatArgumentNull.ThrowIfNull(request.Player);
+        CombatArgumentNull.ThrowIfNull(request.AttackStateMachine);
 
         var rejections = ValidateSit(request);
         if (rejections.Count > 0)

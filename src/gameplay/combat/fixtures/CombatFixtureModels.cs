@@ -2,6 +2,11 @@
 
 using System.Collections.Generic;
 using Gravenspire.Gameplay.Combat;
+#if UNITY_5_3_OR_NEWER
+using FixtureJsonPropertyAttribute = Newtonsoft.Json.JsonPropertyAttribute;
+#else
+using FixtureJsonPropertyAttribute = System.Text.Json.Serialization.JsonPropertyNameAttribute;
+#endif
 
 namespace Gravenspire.Gameplay.Combat.Fixtures;
 
@@ -129,7 +134,7 @@ public sealed record CombatActorFixture
     /// <summary>
     /// Fixture maximum Endurance for physical instant pacing.
     /// </summary>
-    [System.Text.Json.Serialization.JsonPropertyName("max_endurance")]
+    [FixtureJsonPropertyAttribute("max_endurance")]
     public int MaxEndurance { get; init; }
 
     /// <summary>
@@ -386,7 +391,7 @@ public sealed record CombatSpellFixture
     /// <summary>
     /// Optional tactical-instant resource branch for legacy banded rows.
     /// </summary>
-    [System.Text.Json.Serialization.JsonPropertyName("resource_kind")]
+    [FixtureJsonPropertyAttribute("resource_kind")]
     public CombatTacticalAbilityResourceKind? ResourceKind { get; init; }
 
     /// <summary>
@@ -443,43 +448,43 @@ public sealed record CombatTacticalInstantAbilityProfileFixture
     /// <summary>
     /// Fixture-owned resource branch for this tactical instant profile.
     /// </summary>
-    [System.Text.Json.Serialization.JsonPropertyName("resource_kind")]
+    [FixtureJsonPropertyAttribute("resource_kind")]
     public CombatTacticalAbilityResourceKind? ResourceKind { get; init; }
 
     /// <summary>
     /// Fixture-owned mana cost.
     /// </summary>
-    [System.Text.Json.Serialization.JsonPropertyName("cost_mana")]
+    [FixtureJsonPropertyAttribute("cost_mana")]
     public int CostMana { get; init; }
 
     /// <summary>
     /// Fixture-owned Endurance cost.
     /// </summary>
-    [System.Text.Json.Serialization.JsonPropertyName("cost_endurance")]
+    [FixtureJsonPropertyAttribute("cost_endurance")]
     public int CostEndurance { get; init; }
 
     /// <summary>
     /// Fixture-owned transient cooldown length.
     /// </summary>
-    [System.Text.Json.Serialization.JsonPropertyName("cooldown_seconds")]
+    [FixtureJsonPropertyAttribute("cooldown_seconds")]
     public double CooldownSeconds { get; init; }
 
     /// <summary>
     /// Fixture-owned ability range.
     /// </summary>
-    [System.Text.Json.Serialization.JsonPropertyName("range_meters")]
+    [FixtureJsonPropertyAttribute("range_meters")]
     public double RangeMeters { get; init; }
 
     /// <summary>
     /// True when this profile requires the caller to provide a selected target.
     /// </summary>
-    [System.Text.Json.Serialization.JsonPropertyName("requires_target")]
+    [FixtureJsonPropertyAttribute("requires_target")]
     public bool RequiresTarget { get; init; } = true;
 
     /// <summary>
     /// True when line of sight must be valid for target resolution.
     /// </summary>
-    [System.Text.Json.Serialization.JsonPropertyName("requires_line_of_sight")]
+    [FixtureJsonPropertyAttribute("requires_line_of_sight")]
     public bool RequiresLineOfSight { get; init; } = true;
 
     /// <summary>
@@ -496,31 +501,31 @@ public sealed record CombatTacticalInstantAbilityEffectFixture
     /// <summary>
     /// Declared effect type.
     /// </summary>
-    [System.Text.Json.Serialization.JsonPropertyName("effect_type")]
+    [FixtureJsonPropertyAttribute("effect_type")]
     public string EffectType { get; init; } = string.Empty;
 
     /// <summary>
     /// Fixture-owned damage values for direct damage effects.
     /// </summary>
-    [System.Text.Json.Serialization.JsonPropertyName("damage_by_band")]
+    [FixtureJsonPropertyAttribute("damage_by_band")]
     public List<CombatBandValue> DamageByBand { get; init; } = new();
 
     /// <summary>
     /// Fixture-owned duration for self-buff effects.
     /// </summary>
-    [System.Text.Json.Serialization.JsonPropertyName("duration_seconds")]
+    [FixtureJsonPropertyAttribute("duration_seconds")]
     public double? DurationSeconds { get; init; }
 
     /// <summary>
     /// Fixture-owned damage reduction ratio for self-buff effects.
     /// </summary>
-    [System.Text.Json.Serialization.JsonPropertyName("damage_reduction")]
+    [FixtureJsonPropertyAttribute("damage_reduction")]
     public double? DamageReduction { get; init; }
 
     /// <summary>
     /// Fixture-owned recovery pressure for interrupt effects.
     /// </summary>
-    [System.Text.Json.Serialization.JsonPropertyName("interrupt_seconds")]
+    [FixtureJsonPropertyAttribute("interrupt_seconds")]
     public double? InterruptSeconds { get; init; }
 }
 

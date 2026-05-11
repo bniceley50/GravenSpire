@@ -20,8 +20,8 @@ public sealed class CombatExitStateMachine
 {
     public CombatExitTimerResult Evaluate(CombatExitTimerRequest request)
     {
-        ArgumentNullException.ThrowIfNull(request);
-        ArgumentNullException.ThrowIfNull(request.Tuning);
+        CombatArgumentNull.ThrowIfNull(request);
+        CombatArgumentNull.ThrowIfNull(request.Tuning);
         if (request.TickRateHz <= 0)
         {
             throw new ArgumentOutOfRangeException(nameof(request), "tick_rate_hz must be positive.");

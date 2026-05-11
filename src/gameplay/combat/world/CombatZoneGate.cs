@@ -141,7 +141,7 @@ public sealed class CombatZoneGate
             throw new ArgumentException("incomingZoneId is required.", nameof(incomingZoneId));
         }
 
-        ArgumentNullException.ThrowIfNull(actors);
+        CombatArgumentNull.ThrowIfNull(actors);
 
         var cleaned = actors
             .Select(actor =>

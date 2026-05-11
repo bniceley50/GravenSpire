@@ -51,9 +51,9 @@ public static class CombatRegenFormulas
 {
     public static int CalculateResourceRegenPerTick(CombatResourceRegenRequest request)
     {
-        ArgumentNullException.ThrowIfNull(request);
-        ArgumentNullException.ThrowIfNull(request.Actor);
-        ArgumentNullException.ThrowIfNull(request.Tuning);
+        CombatArgumentNull.ThrowIfNull(request);
+        CombatArgumentNull.ThrowIfNull(request.Actor);
+        CombatArgumentNull.ThrowIfNull(request.Tuning);
 
         var maxResource = request.Resource == CombatResourceKind.Mana
             ? request.Actor.MaxMana
@@ -87,7 +87,7 @@ public static class CombatRegenFormulas
         CombatRegenAndCombatExitTuning tuning,
         int tickRateHz)
     {
-        ArgumentNullException.ThrowIfNull(tuning);
+        CombatArgumentNull.ThrowIfNull(tuning);
         if (tickRateHz <= 0)
         {
             throw new ArgumentOutOfRangeException(nameof(tickRateHz), "tick_rate_hz must be positive.");

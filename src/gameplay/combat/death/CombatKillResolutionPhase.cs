@@ -95,8 +95,8 @@ public sealed class CombatKillResolutionPhase
 
     public CombatKillResolutionResult Resolve(CombatKillResolutionRequest request)
     {
-        ArgumentNullException.ThrowIfNull(request);
-        ArgumentNullException.ThrowIfNull(request.DefeatedActor);
+        CombatArgumentNull.ThrowIfNull(request);
+        CombatArgumentNull.ThrowIfNull(request.DefeatedActor);
 
         if (request.DefeatedActor.ActorKind != CombatActorKind.NPC)
         {
@@ -143,7 +143,7 @@ public sealed class CombatKillResolutionPhase
         CombatKillResolutionRequest request,
         IEnumerable<ICombatKillCreditAcknowledgementSink> acknowledgementSinks)
     {
-        ArgumentNullException.ThrowIfNull(acknowledgementSinks);
+        CombatArgumentNull.ThrowIfNull(acknowledgementSinks);
 
         var resolution = Resolve(request);
         if (resolution.KillCreditEvent is null)
@@ -156,7 +156,7 @@ public sealed class CombatKillResolutionPhase
 
         foreach (var sink in acknowledgementSinks)
         {
-            ArgumentNullException.ThrowIfNull(sink);
+            CombatArgumentNull.ThrowIfNull(sink);
 
             var acknowledgement = sink.Acknowledge(resolution.KillCreditEvent);
             var consumerName = string.IsNullOrWhiteSpace(acknowledgement.ConsumerName)

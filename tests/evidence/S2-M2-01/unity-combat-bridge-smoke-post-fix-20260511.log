@@ -1,0 +1,495 @@
+[Licensing::Module] Trying to connect to existing licensing client channel...
+[Licensing::IpcConnector] Channel LicenseClient-brian doesn't exist
+Built from '6000.3/staging' branch; Version is '6000.3.14f1 (d68c3f99a318) revision 14060607'; Using compiler version '194234433'; Build Type 'Release'
+OS: 'Windows 11  (10.0.26200) Professional' Language: 'en' Physical Memory: 130616 MB
+BatchMode: 1, IsHumanControllingUs: 0, StartBugReporterOnCrash: 0, Is64bit: 1
+System  architecture: x64
+Process architecture: x64
+Date: 2026-05-11T01:40:01Z
+[Licensing::Module] Successfully launched the LicensingClient (PId: 29836)
+
+COMMAND LINE ARGUMENTS:
+C:\Program Files\Unity\Hub\Editor\6000.3.14f1\Editor\Unity.exe
+-batchmode
+-nographics
+-projectPath
+N:\GravenSpire
+-executeMethod
+Gravenspire.Editor.GravenspireM2CombatBridgeVerificationRunner.Run
+-logFile
+N:\GravenSpire\tests\evidence\S2-M2-01\unity-combat-bridge-smoke-post-fix-20260511.log
+Successfully changed project path to: N:\GravenSpire
+N:/GravenSpire
+[UnityMemory] Configuration Parameters - Can be set up in boot.config
+    "memorysetup-temp-allocator-size-nav-mesh-worker=65536"
+    "memorysetup-temp-allocator-size-audio-worker=65536"
+    "memorysetup-temp-allocator-size-gfx=262144"
+    "memorysetup-allocator-temp-initial-block-size-main=262144"
+    "memorysetup-allocator-temp-initial-block-size-worker=262144"
+    "memorysetup-temp-allocator-size-background-worker=32768"
+    "memorysetup-temp-allocator-size-job-worker=262144"
+    "memorysetup-temp-allocator-size-preload-manager=33554432"
+    "memorysetup-temp-allocator-size-gi-baking-worker=262144"
+    "memorysetup-temp-allocator-size-gi-baking-worker=262144"
+    "memorysetup-temp-allocator-size-gi-baking-worker=262144"
+    "memorysetup-temp-allocator-size-gi-baking-worker=262144"
+    "memorysetup-temp-allocator-size-gi-baking-worker=262144"
+    "memorysetup-bucket-allocator-granularity=16"
+    "memorysetup-bucket-allocator-bucket-count=8"
+    "memorysetup-bucket-allocator-block-size=33554432"
+    "memorysetup-bucket-allocator-block-count=8"
+    "memorysetup-main-allocator-block-size=16777216"
+    "memorysetup-thread-allocator-block-size=16777216"
+    "memorysetup-gfx-main-allocator-block-size=16777216"
+    "memorysetup-gfx-thread-allocator-block-size=16777216"
+    "memorysetup-cache-allocator-block-size=4194304"
+    "memorysetup-typetree-allocator-block-size=2097152"
+    "memorysetup-profiler-bucket-allocator-granularity=16"
+    "memorysetup-profiler-bucket-allocator-bucket-count=8"
+    "memorysetup-profiler-bucket-allocator-block-size=33554432"
+    "memorysetup-profiler-bucket-allocator-block-count=8"
+    "memorysetup-profiler-allocator-block-size=16777216"
+    "memorysetup-profiler-editor-allocator-block-size=1048576"
+    "memorysetup-temp-allocator-size-main=16777216"
+    "memorysetup-job-temp-allocator-block-size=2097152"
+    "memorysetup-job-temp-allocator-block-size-background=1048576"
+    "memorysetup-job-temp-allocator-reduction-small-platforms=262144"
+    "memorysetup-temp-allocator-size-cloud-worker=32768"
+Player connection [18436]  Target information:
+
+Player connection [18436]  * "[IP] [scrubbed-ip] [Port] 55504 [Flags] 2 [Guid] 2282196242 [EditorId] 2282196242 [Version] 1048832 [Id] WindowsEditor(7,brian) [Debug] 1 [PackageName] WindowsEditor [ProjectName] Editor"
+
+Player connection [18436]  * "[IP] [scrubbed-ip] [Port] 55504 [Flags] 2 [Guid] 2282196242 [EditorId] 2282196242 [Version] 1048832 [Id] WindowsEditor(7,brian) [Debug] 1 [PackageName] WindowsEditor [ProjectName] Editor"
+
+Player connection [18436]  * "[IP] [scrubbed-ip] [Port] 55504 [Flags] 2 [Guid] 2282196242 [EditorId] 2282196242 [Version] 1048832 [Id] WindowsEditor(7,brian) [Debug] 1 [PackageName] WindowsEditor [ProjectName] Editor"
+
+Player connection [18436]  * "[IP] [scrubbed-ip] [Port] 55504 [Flags] 2 [Guid] 2282196242 [EditorId] 2282196242 [Version] 1048832 [Id] WindowsEditor(7,brian) [Debug] 1 [PackageName] WindowsEditor [ProjectName] Editor"
+
+Player connection [18436] Host joined multi-casting on [[scrubbed-ip]:54997]...
+Player connection [18436] Host joined alternative multi-casting on [[scrubbed-ip]:34997]...
+Input System module state changed to: Initialized.
+[Physics::Module] Initialized fallback backend.
+[Physics::Module] Id: 0xdecafbad
+[Licensing::IpcConnector] Successfully connected to: "LicenseClient-brian" at "2026-05-11T01:40:01.7358789Z"
+[Package Manager] Connected to IPC stream "Upm-33552" after 0.2 seconds.
+[Licensing::Module] Licensing is not yet initialized.
+[Licensing::Client] Handshaking with LicensingClient:
+  Version:                 1.18.1+9fbee8e
+  Session Id:              185a364272af4ffd8193cb4657ad9647
+  Correlation Id:          35be4e2e3a552efd024a25fa88f4ea09
+  External correlation Id: 8546453388815316578
+  Machine Id:              F8+emnfz7xG8Rl8aZ4qc/82zzu0=
+[Licensing::Module] Successfully connected to LicensingClient on channel: "LicenseClient-brian" (connect: 0.24s, validation: 0.04s, handshake: 0.64s)
+[Licensing::IpcConnector] Successfully connected to: "LicenseClient-brian-notifications" at "2026-05-11T01:40:02.4187812Z"
+[Licensing::Module] Connected to LicensingClient (PId: 29836, launch time: 0.00, total connection time: 0.93s)
+[Licensing::Module] Error: Access token is unavailable; failed to update
+[Licensing::Client] Successfully resolved entitlement details
+[Licensing::Module] License group:
+  Id: 2475964307641-UnityPersXXXX
+  Product: Unity Personal
+  Type: Assigned
+  Expiration: Unlimited
+[Licensing::Client] Successfully updated license, isAsync: True, time: 0.01
+[Licensing::Client] Successfully resolved entitlement details
+[Licensing::Module] Licensing Background thread has ended after 0.95s
+[Licensing::Module] Licensing is initialized (took 0.57s).
+[Licensing::Client] Successfully resolved entitlement details
+Library Redirect Path: Library/
+Unable to parse file ProjectSettings/TagManager.asset: [Parser Failure at line 41: Expect ':' between key and value within mapping]
+[Physics::Module] Selected backend.
+[Physics::Module] Name: PhysX
+[Physics::Module] Id: 0xf2b8ea05
+[Physics::Module] SDK Version: 4.1.2
+[Physics::Module] Integration Version: 1.0.0
+[Physics::Module] Threading Mode: Multi-Threaded
+Refreshing native plugins compatible for Editor in 0.00 ms, found 0 plugins.
+Preloading 0 native plugins for Editor in 0.00 ms.
+Initialize engine version: 6000.3.14f1 (d68c3f99a318)
+[Subsystems] Discovering subsystems at path C:/Program Files/Unity/Hub/Editor/6000.3.14f1/Editor/Data/Resources/UnitySubsystems
+[Subsystems] Discovering subsystems at path N:/GravenSpire/Assets
+Forcing GfxDevice: Null
+GfxDevice: creating device client; kGfxThreadingModeNonThreaded
+NullGfxDevice:
+    Version:  NULL 1.0 [1.0]
+    Renderer: Null Device
+    Vendor:   Unity Technologies
+Initialize mono
+Mono path[0] = 'C:/Program Files/Unity/Hub/Editor/6000.3.14f1/Editor/Data/Managed'
+Mono path[1] = 'C:/Program Files/Unity/Hub/Editor/6000.3.14f1/Editor/Data/MonoBleedingEdge/lib/mono/unityjit-win32'
+Mono config path = 'C:/Program Files/Unity/Hub/Editor/6000.3.14f1/Editor/Data/MonoBleedingEdge/etc'
+Using monoOptions --debugger-agent=transport=dt_socket,embedding=1,server=y,suspend=n,address=[scrubbed-ip]:56552
+Using cacheserver namespaces - metadata:defaultmetadata, artifacts:defaultartifacts
+Using cacheserver namespaces - metadata:defaultmetadata, artifacts:defaultartifacts
+ImportWorker Server TCP listen port: 0
+AcceleratorClientConnectionCallback - disconnected - :0
+Begin MonoManager ReloadAssembly
+Registering precompiled unity dll's ...
+Register platform support module: C:/Program Files/Unity/Hub/Editor/6000.3.14f1/Editor/Data/PlaybackEngines/WindowsStandaloneSupport/UnityEditor.WindowsStandalone.Extensions.dll
+Registered in 0.002952 seconds.
+- Loaded All Assemblies, in  0.298 seconds
+Native extension for WindowsStandalone target not found
+Package Manager log level set to [2]
+ScheduleIndexationOnStartup MainProcess:False IndexOnStartup:True
+Mono: successfully reloaded assembly
+- Finished resetting the current domain, in  0.217 seconds
+Domain Reload Profiling: 508ms
+	BeginReloadAssembly (112ms)
+		ExecutionOrderSort (0ms)
+		DisableScriptedObjects (0ms)
+		BackupInstance (0ms)
+		ReleaseScriptingObjects (0ms)
+		CreateAndSetChildDomain (11ms)
+	RebuildCommonClasses (26ms)
+	RebuildNativeTypeToScriptingClass (7ms)
+	initialDomainReloadingComplete (39ms)
+	LoadAllAssembliesAndSetupDomain (107ms)
+		LoadAssemblies (94ms)
+		RebuildTransferFunctionScriptingTraits (0ms)
+		AnalyzeDomain (105ms)
+			TypeCache.Refresh (103ms)
+				TypeCache.ScanAssembly (94ms)
+			BuildScriptInfoCaches (0ms)
+			ResolveRequiredComponents (0ms)
+	FinalizeReload (217ms)
+		ReleaseScriptCaches (0ms)
+		RebuildScriptCaches (0ms)
+		SetupLoadedEditorAssemblies (194ms)
+			LogAssemblyErrors (0ms)
+			InitializePlatformSupportModulesInManaged (30ms)
+			SetLoadedEditorAssemblies (2ms)
+			BeforeProcessingInitializeOnLoad (43ms)
+			ProcessInitializeOnLoadAttributes (71ms)
+			ProcessInitializeOnLoadMethodAttributes (47ms)
+			AfterProcessingInitializeOnLoad (0ms)
+			EditorAssembliesLoaded (0ms)
+		ExecutionOrderSort2 (0ms)
+		AwakeInstancesAfterBackupRestoration (0ms)
+[Licensing::Client] Successfully resolved entitlement details
+Application.AssetDatabase Initial Refresh Start
+[Package Manager] Restoring resolved packages state from cache
+[Licensing::Client] Successfully resolved entitlement details
+[Package Manager] Registered 23 packages:
+  Packages from [https://packages.unity.com]:
+    com.unity.nuget.newtonsoft-json@3.2.2 (location: N:\GravenSpire\Library\PackageCache\com.unity.nuget.newtonsoft-json@4dfd81071c64)
+    com.unity.searcher@4.9.4 (location: N:\GravenSpire\Library\PackageCache\com.unity.searcher@d45a78918735)
+    com.unity.burst@1.8.29 (location: N:\GravenSpire\Library\PackageCache\com.unity.burst@6bb9aca3ef38)
+    com.unity.mathematics@1.3.3 (location: N:\GravenSpire\Library\PackageCache\com.unity.mathematics@19a9377c4ffa)
+    com.unity.collections@2.6.5 (location: N:\GravenSpire\Library\PackageCache\com.unity.collections@12999e356c23)
+    com.unity.nuget.mono-cecil@1.11.6 (location: N:\GravenSpire\Library\PackageCache\com.unity.nuget.mono-cecil@ecb9724e46ff)
+    com.unity.test-framework.performance@3.4.0 (location: N:\GravenSpire\Library\PackageCache\com.unity.test-framework.performance@aa81a99c4a75)
+  Built-in packages:
+    com.unity.render-pipelines.universal@17.3.0 (location: N:\GravenSpire\Library\PackageCache\com.unity.render-pipelines.universal@3b809f23691d)
+    com.unity.test-framework@1.6.0 (location: N:\GravenSpire\Library\PackageCache\com.unity.test-framework@aebcb98460c6)
+    com.unity.modules.audio@1.0.0 (location: N:\GravenSpire\Library\PackageCache\com.unity.modules.audio)
+    com.unity.modules.imgui@1.0.0 (location: N:\GravenSpire\Library\PackageCache\com.unity.modules.imgui)
+    com.unity.modules.jsonserialize@1.0.0 (location: N:\GravenSpire\Library\PackageCache\com.unity.modules.jsonserialize)
+    com.unity.modules.physics@1.0.0 (location: N:\GravenSpire\Library\PackageCache\com.unity.modules.physics)
+    com.unity.modules.ui@1.0.0 (location: N:\GravenSpire\Library\PackageCache\com.unity.modules.ui)
+    com.unity.modules.uielements@1.0.0 (location: N:\GravenSpire\Library\PackageCache\com.unity.modules.uielements)
+    com.unity.modules.hierarchycore@1.0.0 (location: N:\GravenSpire\Library\PackageCache\com.unity.modules.hierarchycore)
+    com.unity.ext.nunit@2.0.5 (location: N:\GravenSpire\Library\PackageCache\com.unity.ext.nunit@d8c07649098d)
+    com.unity.render-pipelines.core@17.3.0 (location: N:\GravenSpire\Library\PackageCache\com.unity.render-pipelines.core@02dfbe8e43de)
+    com.unity.shadergraph@17.3.0 (location: N:\GravenSpire\Library\PackageCache\com.unity.shadergraph@28ee1cc75774)
+    com.unity.render-pipelines.universal-config@17.0.3 (location: N:\GravenSpire\Library\PackageCache\com.unity.render-pipelines.universal-config@8dc1aab4af1d)
+    com.unity.ugui@2.0.0 (location: N:\GravenSpire\Library\PackageCache\com.unity.ugui@8ccc29d23a79)
+    com.unity.modules.terrain@1.0.0 (location: N:\GravenSpire\Library\PackageCache\com.unity.modules.terrain)
+  Local packages:
+    com.gravenspire.gameplay.combat@file:N:\GravenSpire\src\gameplay\combat (location: N:\GravenSpire\src\gameplay\combat)
+[Subsystems] No new subsystems found in resolved package list.
+[Package Manager] Done registering packages in 0.01 seconds
+[ScriptCompilation] Requested script compilation because: Assembly Definition File(s) changed
+[ScriptCompilation] Requested script compilation because: Assetdatabase observed changes in script compilation related files
+Starting: C:\Program Files\Unity\Hub\Editor\6000.3.14f1\Editor\Data\Tools\BuildPipeline\bee_backend.exe --ipc --defer-dag-verification --dagfile="Library/Bee/1900b0aE.dag" --continue-on-failure --profile="Library/Bee/backend1.traceevents" ScriptAssemblies
+WorkingDir: N:/GravenSpire
+DisplayProgressbar: Compiling Scripts
+ExitCode: 0 Duration: 1s450ms
+[469/584    0s] ILPP-Configuration Library/ilpp-configuration.nevergeneratedoutput
+[572/584    0s] Csc Library/Bee/artifacts/1900b0aE.dag/Gravenspire.Gameplay.Combat.dll (+2 others)
+[           0s] Csc Library/Bee/artifacts/1900b0aE.dag/Gravenspire.Gameplay.Combat.dll (+2 others) [CacheWrite 00000000000000000000000000000005]
+[575/584    0s] ILPostProcess Library/Bee/artifacts/1900b0aE.dag/post-processed/Gravenspire.Gameplay.Combat.dll (+pdb)
+Processing assembly Library/Bee/artifacts/1900b0aE.dag/Gravenspire.Gameplay.Combat.dll, with 137 defines and 128 references
+
+processors: Unity.Jobs.CodeGen.JobsILPostProcessor, zzzUnity.Burst.CodeGen.BurstILPostProcessor
+
+running Unity.Jobs.CodeGen.JobsILPostProcessor
+
+running zzzUnity.Burst.CodeGen.BurstILPostProcessor
+[576/584    0s] CopyFiles Library/ScriptAssemblies/Gravenspire.Gameplay.Combat.pdb
+[577/584    0s] CopyFiles Library/ScriptAssemblies/Gravenspire.Gameplay.Combat.dll
+[578/584    0s] ILPostProcess Library/Bee/artifacts/1900b0aE.dag/post-processed/Assembly-CSharp-Editor.dll (+pdb)
+Processing assembly Library/Bee/artifacts/1900b0aE.dag/Assembly-CSharp-Editor.dll, with 135 defines and 305 references
+
+processors: Unity.Jobs.CodeGen.JobsILPostProcessor, zzzUnity.Burst.CodeGen.BurstILPostProcessor
+
+running Unity.Jobs.CodeGen.JobsILPostProcessor
+
+running zzzUnity.Burst.CodeGen.BurstILPostProcessor
+[579/584    0s] ILPostProcess Library/Bee/artifacts/1900b0aE.dag/post-processed/Assembly-CSharp.dll (+pdb)
+Processing assembly Library/Bee/artifacts/1900b0aE.dag/Assembly-CSharp.dll, with 137 defines and 265 references
+
+processors: Unity.Jobs.CodeGen.JobsILPostProcessor, zzzUnity.Burst.CodeGen.BurstILPostProcessor
+
+running Unity.Jobs.CodeGen.JobsILPostProcessor
+
+running zzzUnity.Burst.CodeGen.BurstILPostProcessor
+*** Tundra build success (1.42 seconds), 7 items updated, 584 evaluated
+AssetDatabase: script compilation time: 1.776100s
+Begin MonoManager ReloadAssembly
+- Loaded All Assemblies, in  0.611 seconds
+Start importing Assets/Settings using Guid(c29c2b32c8bfe8f4b9ff095d42940319) (DefaultImporter) -> (artifact id: '109e2d224e839c02c2fb70f029283907') in 0.0087764 seconds
+Start importing Assets/Editor using Guid(c21fc11047e345043b203d154af1f29f) (DefaultImporter) -> (artifact id: 'dc15ef641b245e2318704e18a01b79dc') in 0.0005929 seconds
+Start importing Assets/Scenes using Guid(35fe0cd1fa9f19f469590c3a4b03b9d5) (DefaultImporter) -> (artifact id: '8efd0364722f26508bd98cc925e9eae1') in 0.0004397 seconds
+Start importing Assets/Scripts using Guid(f8fb527dd94b1b744961087201e6f97a) (DefaultImporter) -> (artifact id: 'f3ee075bc5cd1371980a9414f90488bc') in 0.0003842 seconds
+Start importing Packages/com.gravenspire.gameplay.combat/melee using Guid(d1731299b50d47d4e87d19f286c5405e) (DefaultImporter) -> (artifact id: 'da93911b39ba4fa1f2a4d9bd1017b23d') in 0.0003931 seconds
+Start importing Packages/com.gravenspire.gameplay.combat/targeting using Guid(d137f34154f12954196c9677a02d30be) (DefaultImporter) -> (artifact id: 'c201f1d20eacd95f01528a8ccac8e682') in 0.000347 seconds
+Start importing Packages/com.gravenspire.gameplay.combat/state using Guid(52df062536b79f847a336e2cf2e1b202) (DefaultImporter) -> (artifact id: '0f189e704bbe63560d3e568cd598cc1b') in 0.0003449 seconds
+Start importing Packages/com.gravenspire.gameplay.combat/spatial using Guid(b286aec31c0f2584bb3def9da3c290e8) (DefaultImporter) -> (artifact id: '24c6c4f014d997f77e793355c1c4beb1') in 0.0003406 seconds
+Start importing Packages/com.gravenspire.gameplay.combat/events using Guid(e290ad3419dada041a1bdf9c1af2bdc4) (DefaultImporter) -> (artifact id: '0576ce74b1621bbb7de71a13f208a02a') in 0.00033 seconds
+Start importing Packages/com.gravenspire.gameplay.combat/simulation using Guid(134a51aceb7a4894694109cb8413aece) (DefaultImporter) -> (artifact id: 'f66c9cb4a41cdf2b6709319ff3479dbd') in 0.0003332 seconds
+Start importing Packages/com.gravenspire.gameplay.combat/regen using Guid(5352791fd291bdc43b8ee1857b956133) (DefaultImporter) -> (artifact id: '897e250bbb12663d530cb44d0d196184') in 0.0003688 seconds
+Start importing Packages/com.gravenspire.gameplay.combat/death using Guid(63f39410915f58142bc882ca58020204) (DefaultImporter) -> (artifact id: '8840cc0899a28bbf49d3c5fb603d9526') in 0.000328 seconds
+Start importing Packages/com.gravenspire.gameplay.combat/leash using Guid(d38bc42ad92ef1140aa0eb542468ed63) (DefaultImporter) -> (artifact id: '25bbeebf3962ea5a55f82e86ad79f64d') in 0.0003364 seconds
+Start importing Packages/com.gravenspire.gameplay.combat/abilities using Guid(b42f349112525134c880f45f1ca50d1a) (DefaultImporter) -> (artifact id: '8a086747dae9e31ebb1107287807685a') in 0.0003149 seconds
+Start importing Packages/com.gravenspire.gameplay.combat/casting using Guid(3554379e031f06542bc59b3cdef5005e) (DefaultImporter) -> (artifact id: '94bae5161ba9ce5df2c3e1cb267f9f82') in 0.0003243 seconds
+Start importing Packages/com.gravenspire.gameplay.combat/world using Guid(c60b592f672325149bd2daa155e4ebd3) (DefaultImporter) -> (artifact id: 'a75ed52ad3b8ce298b17a1564d7be7d8') in 0.000363 seconds
+Start importing Packages/com.gravenspire.gameplay.combat/threat using Guid(a7ac1d63cc1387145b35f6e24f159ac3) (DefaultImporter) -> (artifact id: 'cfdbb54f6dfd5311c85be99b04026d06') in 0.0003211 seconds
+Start importing Packages/com.gravenspire.gameplay.combat/pull using Guid(d8ee4a68a7666d740a1de431ce1f0a3f) (DefaultImporter) -> (artifact id: '0b4373c655b1c099953b1eb36c2c4765') in 0.0003265 seconds
+Start importing Packages/com.gravenspire.gameplay.combat/compat using Guid(7968967c67f060e4eac76fbeb3695266) (DefaultImporter) -> (artifact id: '924b093d25729d261c6a43e12cb438ed') in 0.0003319 seconds
+Start importing Packages/com.gravenspire.gameplay.combat/fixtures using Guid(8b190b3aa25fb89428c0146ebd6e1a0f) (DefaultImporter) -> (artifact id: '9f1d77640a252cd00462667ed68624a3') in 0.000317 seconds
+Start importing Packages/com.gravenspire.gameplay.combat/presentation using Guid(ac38ea2c33588934c83eaf9ddd9f3365) (DefaultImporter) -> (artifact id: '4eb927b33ad647b96f98d5d23a473e3b') in 0.0003216 seconds
+Start importing Packages/com.gravenspire.gameplay.combat/persistence using Guid(2d0d065250c81fb4ab6400eb8b78fed0) (DefaultImporter) -> (artifact id: 'e44564ba01fc36ef0fb741e97050b129') in 0.000318 seconds
+Start importing Packages/com.gravenspire.gameplay.combat/attack using Guid(0f27bb11fef3846439ab6a493bd70f86) (DefaultImporter) -> (artifact id: 'a787e8611f24206e990934b94a7b7bd3') in 0.0003142 seconds
+Start importing Packages/com.gravenspire.gameplay.combat/Gravenspire.Gameplay.Combat.asmdef using Guid(bb55811efbfb4e049b6088d0ae156c83) (AssemblyDefinitionImporter) -> (artifact id: '5de5266a3c2cadb426df6dfc7efd122a') in 0.0033446 seconds
+Start importing Packages/com.gravenspire.gameplay.combat/csc.rsp using Guid(50d157ec18ca62a4cafc4a9734f79801) (DefaultImporter) -> (artifact id: 'afc088739fd142df50d59bf6526ddd12') in 0.0196766 seconds
+Refreshing native plugins compatible for Editor in 0.00 ms, found 0 plugins.
+Native extension for WindowsStandalone target not found
+ScheduleIndexationOnStartup MainProcess:True IndexOnStartup:True
+Mono: successfully reloaded assembly
+- Finished resetting the current domain, in  1.648 seconds
+Domain Reload Profiling: 2253ms
+	BeginReloadAssembly (287ms)
+		ExecutionOrderSort (0ms)
+		DisableScriptedObjects (33ms)
+		BackupInstance (0ms)
+		ReleaseScriptingObjects (0ms)
+		CreateAndSetChildDomain (152ms)
+	RebuildCommonClasses (23ms)
+	RebuildNativeTypeToScriptingClass (7ms)
+	initialDomainReloadingComplete (24ms)
+	LoadAllAssembliesAndSetupDomain (264ms)
+		LoadAssemblies (263ms)
+		RebuildTransferFunctionScriptingTraits (0ms)
+		AnalyzeDomain (75ms)
+			TypeCache.Refresh (56ms)
+				TypeCache.ScanAssembly (50ms)
+			BuildScriptInfoCaches (13ms)
+			ResolveRequiredComponents (5ms)
+	FinalizeReload (1649ms)
+		ReleaseScriptCaches (0ms)
+		RebuildScriptCaches (0ms)
+		SetupLoadedEditorAssemblies (1502ms)
+			LogAssemblyErrors (0ms)
+			InitializePlatformSupportModulesInManaged (14ms)
+			SetLoadedEditorAssemblies (2ms)
+			BeforeProcessingInitializeOnLoad (85ms)
+			ProcessInitializeOnLoadAttributes (1255ms)
+			ProcessInitializeOnLoadMethodAttributes (132ms)
+			AfterProcessingInitializeOnLoad (14ms)
+			EditorAssembliesLoaded (1ms)
+		ExecutionOrderSort2 (0ms)
+		AwakeInstancesAfterBackupRestoration (50ms)
+Start importing Assets/Scenes/_DevEntry.unity using Guid(02e69405b0a3f714b82b8215e2a2b3ac) (DefaultImporter) -> (artifact id: '098f7fe272c98b8e6e4cc01944166dd0') in 0.0007412 seconds
+Start importing Assets/DefaultVolumeProfile.asset using Guid(e3fae46a395837f44b29683106c25a3a) (NativeFormatImporter) -> (artifact id: '07384910d8b7ef6ecd30d36e00b79c8e') in 0.004032 seconds
+Start importing Assets/Settings/GravenspireUniversalRenderer.asset using Guid(3aaa7a35e972592449e01fc977513d53) (NativeFormatImporter) -> (artifact id: '2b958f8aa502983f420db34bd659ce05') in 0.0040892 seconds
+Start importing Assets/UniversalRenderPipelineGlobalSettings.asset using Guid(4a6705a60c53e6c4e99865fd871a33be) (NativeFormatImporter) -> (artifact id: 'b4275dc1ea9af07926a08ff365e13597') in 0.0052156 seconds
+Start importing Assets/Settings/GravenspireUniversalRenderPipeline.asset using Guid(abdf979e70e282144b5f8114f11d3e8e) (NativeFormatImporter) -> (artifact id: 'a8fac15f0b78dda43d382ede3fe592b0') in 0.0026261 seconds
+Start importing Packages/com.gravenspire.gameplay.combat/package.json using Guid(1f2997610d4fc2f4caff7d56040c8f5c) (PackageManifestImporter) -> (artifact id: '3e0a94d9e008ada02b2de290ba942ad2') in 0.0026351 seconds
+Refreshing native plugins compatible for Editor in 0.00 ms, found 0 plugins.
+Preloading 0 native plugins for Editor in 0.00 ms.
+Asset Pipeline Refresh (id=9ea93255c02288842b837aa1b972788f): Total: 4.549 seconds - Initiated by InitialRefreshV2(ForceSynchronousImport)
+	Summary:
+		Imports: total=31 (actual=31, local cache=0, cache server=0)
+		Asset DB Process Time: managed=2 ms, native=1998 ms
+		Asset DB Callback time: managed=113 ms, native=17 ms
+		Scripting: domain reloads=1, domain reload time=611 ms, compile time=1777 ms, other=29 ms
+		Project Asset Count: scripts=715, non-scripts=1462
+		Asset File Changes: new=0, changed=70, moved=0, deleted=0
+		Scan Filter Count: 0
+	InvokeCustomDependenciesCallbacks: 0.002ms
+	InvokePackagesCallback: 15.530ms
+	ApplyChangesToAssetFolders: 0.562ms
+	Scan: 82.401ms
+	OnSourceAssetsModified: 1.080ms
+	CategorizeAssetsWithTransientArtifact: 10.794ms
+	ProcessAssetsWithTransientArtifactChanges: 22.639ms
+	CategorizeAssets: 27.162ms
+	ImportOutOfDateAssets: 1720.341ms (-126.168ms without children)
+		ImportManagerImport: 68.051ms (3.781ms without children)
+			ImportInProcess: 64.052ms
+			UpdateCategorizedAssets: 0.218ms
+		CompileScripts: 1777.080ms
+		ReloadNativeAssets: 0.023ms
+		UnloadImportedAssets: 0.861ms
+		ReloadImportedAssets: 0.004ms
+		EnsureUptoDateAssetsAreRegisteredWithGuidPM: 0.248ms
+		InitializingProgressBar: 0.009ms
+		PostProcessAllAssetNotificationsAddChangedAssets: 0.001ms
+		OnDemandSchedulerStart: 0.233ms
+	PostProcessAllAssets: 115.172ms
+	Hotreload: 1.397ms
+	GatherAllCurrentPrimaryArtifactRevisions: 0.001ms
+	UnloadStreamsBegin: 1.036ms
+	PersistCurrentRevisions: 0.176ms
+	UnloadStreamsEnd: 0.000ms
+	GenerateScriptTypeHashes: 1.514ms
+	Untracked: 2551.012ms
+
+Application.AssetDatabase Initial Refresh End
+Scanning for USB devices : 21.423ms
+Initializing Unity extensions:
+[MODES] ModeService[none].Initialize
+[MODES] ModeService[none].LoadModes
+[MODES] Loading mode Default (0) for mode-current-id-Gravenspire
+Unloading 55 Unused Serialized files (Serialized files now loaded: 0)
+Unloading 3227 unused Assets / (8.3 MB). Loaded Objects now: 3988.
+Memory consumption went from 170.9 MB to 162.5 MB.
+Total: 9.085700 ms (FindLiveObjects: 0.392300 ms CreateObjectMapping: 0.098700 ms MarkObjects: 4.843800 ms  DeleteObjects: 3.749900 ms)
+
+Opening scene 'Assets/Scenes/_DevEntry.unity'
+Unloading 0 Unused Serialized files (Serialized files now loaded: 0)
+Loaded scene 'Assets/Scenes/_DevEntry.unity'
+	Deserialize:            0.578 ms
+	Integration:            160.092 ms
+	Integration of assets:  0.002 ms
+	Thread Wait Time:       0.011 ms
+	Total Operation Time:   160.684 ms
+Unloading 1 unused Assets / (5.6 KB). Loaded Objects now: 4008.
+Memory consumption went from 150.0 MB to 150.0 MB.
+Total: 5.442000 ms (FindLiveObjects: 0.209100 ms CreateObjectMapping: 0.039800 ms MarkObjects: 5.175300 ms  DeleteObjects: 0.017000 ms)
+
+Microsoft Media Foundation video decoding to texture disabled: graphics device is Null, only Direct3D 11 and Direct3D 12 (only on desktop) are supported for hardware-accelerated video decoding.
+[Project] Loading completed in 6.646 seconds
+	Project init time: 				6.193 seconds
+		Template init time: 		0.000 seconds
+		Package Manager init time: 		0.782 seconds
+		Asset Database init time: 		0.124 seconds
+		Global illumination init time: 	0.002 seconds
+		Assemblies load time: 			0.539 seconds
+		Unity extensions init time: 	0.003 seconds
+		Asset Database refresh time: 	4.549 seconds
+	Scene opening time: 			0.294 seconds
+##utp:{"type":"ProjectInfo","version":2,"phase":"Immediate","time":1778463608123,"processId":33552,"projectLoad":6.6458446,"projectInit":6.192814,"templateInit":0.0,"packageManagerInit":0.7821958,"assetDatabaseInit":0.123559,"globalIlluminationInit":0.0021791,"assembliesLoad":0.53911,"unityExtensionsInit":0.0034958,"assetDatabaseRefresh":4.5494204,"sceneOpening":0.2936541}
+##utp:{"type":"EditorInfo","version":2,"phase":"Immediate","time":1778463608123,"processId":33552,"editorVersion":"6000.3.14f1 (d68c3f99a318)","branch":"6000.3/staging","buildType":"Release","platform":"Windows"}
+Reloading assemblies for play mode.
+Reloading assemblies after forced synchronous recompile.
+Begin MonoManager ReloadAssembly
+- Loaded All Assemblies, in  0.459 seconds
+Refreshing native plugins compatible for Editor in 0.00 ms, found 0 plugins.
+Native extension for WindowsStandalone target not found
+ScheduleIndexationOnStartup MainProcess:True IndexOnStartup:True
+Mono: successfully reloaded assembly
+- Finished resetting the current domain, in  0.383 seconds
+Domain Reload Profiling: 834ms
+	BeginReloadAssembly (309ms)
+		ExecutionOrderSort (0ms)
+		DisableScriptedObjects (35ms)
+		BackupInstance (0ms)
+		ReleaseScriptingObjects (0ms)
+		CreateAndSetChildDomain (172ms)
+	RebuildCommonClasses (25ms)
+	RebuildNativeTypeToScriptingClass (8ms)
+	initialDomainReloadingComplete (30ms)
+	LoadAllAssembliesAndSetupDomain (79ms)
+		LoadAssemblies (100ms)
+		RebuildTransferFunctionScriptingTraits (0ms)
+		AnalyzeDomain (58ms)
+			TypeCache.Refresh (3ms)
+				TypeCache.ScanAssembly (0ms)
+			BuildScriptInfoCaches (47ms)
+			ResolveRequiredComponents (6ms)
+	FinalizeReload (383ms)
+		ReleaseScriptCaches (0ms)
+		RebuildScriptCaches (0ms)
+		SetupLoadedEditorAssemblies (241ms)
+			LogAssemblyErrors (0ms)
+			InitializePlatformSupportModulesInManaged (15ms)
+			SetLoadedEditorAssemblies (2ms)
+			BeforeProcessingInitializeOnLoad (80ms)
+			ProcessInitializeOnLoadAttributes (97ms)
+			ProcessInitializeOnLoadMethodAttributes (35ms)
+			AfterProcessingInitializeOnLoad (12ms)
+			EditorAssembliesLoaded (0ms)
+		ExecutionOrderSort2 (0ms)
+		AwakeInstancesAfterBackupRestoration (14ms)
+Asset Pipeline Refresh (id=c45750bea97dc6d4fa073ff555c402ec): Total: 0.931 seconds - Initiated by StopAssetImportingV2(ForceSynchronousImport | ForceDomainReload)
+	Summary:
+		Imports: total=0 (actual=0, local cache=0, cache server=0)
+		Asset DB Process Time: managed=0 ms, native=432 ms
+		Asset DB Callback time: managed=14 ms, native=0 ms
+		Scripting: domain reloads=1, domain reload time=482 ms, compile time=1 ms, other=0 ms
+		Project Asset Count: scripts=715, non-scripts=1462
+		Asset File Changes: new=0, changed=0, moved=0, deleted=0
+		Scan Filter Count: 0
+	InvokeCustomDependenciesCallbacks: 0.001ms
+	InvokePackagesCallback: 2.226ms
+	ApplyChangesToAssetFolders: 0.125ms
+	Scan: 0.001ms
+	OnSourceAssetsModified: 0.002ms
+	CategorizeAssetsWithTransientArtifact: 0.003ms
+	ProcessAssetsWithTransientArtifactChanges: 1.768ms
+	CategorizeAssets: 22.520ms
+	ImportOutOfDateAssets: 385.957ms (382.989ms without children)
+		CompileScripts: 0.692ms
+		CollectScriptTypesHashes: 1.331ms
+		ReloadNativeAssets: 0.553ms
+		UnloadImportedAssets: 0.058ms
+		EnsureUptoDateAssetsAreRegisteredWithGuidPM: 0.160ms
+		InitializingProgressBar: 0.001ms
+		PostProcessAllAssetNotificationsAddChangedAssets: 0.001ms
+		OnDemandSchedulerStart: 0.173ms
+	PostProcessAllAssets: 14.466ms
+	GatherAllCurrentPrimaryArtifactRevisions: 0.287ms
+	UnloadStreamsBegin: 0.088ms
+	PersistCurrentRevisions: 0.044ms
+	UnloadStreamsEnd: 0.001ms
+	GenerateScriptTypeHashes: 2.584ms
+	Untracked: 503.015ms
+
+Loaded scene 'Temp/__Backupscenes/0.backup'
+	Deserialize:            0.441 ms
+	Integration:            208.168 ms
+	Integration of assets:  0.002 ms
+	Thread Wait Time:       0.008 ms
+	Total Operation Time:   208.619 ms
+[MODES] ModeService[none].Initialize
+[MODES] ModeService[none].LoadModes
+Start Indexing on Editor startup
+[Indexing] Starting Initial Indexing for Assets
+Created GICache directory at C:/Users/brian/AppData/LocalLow/Unity/Caches/GiCache. Took: 0.022s, timestamps: [7.836 - 7.858]
+[Licensing::Client] Successfully resolved entitlement details
+S2-M2-01 combat bridge verification wrote tests/evidence/S2-M2-01/unity-combat-bridge-smoke-20260510.md with exit code 0.
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+Gravenspire.Editor.GravenspireM2CombatBridgeVerificationRunner:WriteEvidenceAndExit (int) (at Assets/Editor/GravenspireM2CombatBridgeVerificationRunner.cs:230)
+Gravenspire.Editor.GravenspireM2CombatBridgeVerificationRunner:ContinueAfterDomainReload () (at Assets/Editor/GravenspireM2CombatBridgeVerificationRunner.cs:112)
+UnityEditor.EditorApplication:Internal_CallUpdateFunctions ()
+
+(Filename: Assets/Editor/GravenspireM2CombatBridgeVerificationRunner.cs Line: 230)
+
+[Physics::Module] Cleanup current backend.
+[Physics::Module] Id: 0xf2b8ea05
+Input System module state changed to: ShutdownInProgress.
+Input System polling thread exited.
+Input System module state changed to: Shutdown.
+[Licensing::IpcConnector] LicenseClient-brian-notifications channel disconnected successfully.
+[Licensing::IpcConnector] LicenseClient-brian channel disconnected successfully.
+AcceleratorClientConnectionCallback - disconnected - :0
+Cleanup mono
+Checking for leaked weakptr:
+  Found no leaked weakptrs.
+[Package Manager] Server process was shutdown
+##utp:{"type":"MemoryLeaks","version":2,"phase":"Immediate","time":1778463611966,"processId":33552,"allocatedMemory":12437352,"memoryLabels":[{"Default":29313},{"Permanent":15236},{"NewDelete":68171},{"Thread":4230344},{"Manager":40413},{"VertexData":8},{"Geometry":816},{"Texture":296},{"Shader":79381},{"Material":24},{"GfxDevice":55865},{"Animation":392},{"Audio":2664},{"FreeType":8},{"FontEngine":736},{"Physics":2090},{"Physics2D":16},{"Serialization":656},{"Input":14984},{"JobScheduler":33024},{"TextLib":216},{"Mono":32},{"MonoCode":64},{"ScriptingNativeRuntime":155060},{"BaseObject":1620208},{"Resource":1336},{"Renderer":3000},{"Transform":4685},{"File":3941},{"WebCam":616},{"Culling":32},{"Terrain":11394},{"Wind":24},{"STL":40},{"String":18291},{"DynamicArray":97995},{"HashMap":67546},{"Utility":2662998},{"Curl":2559},{"PoolAlloc":2152},{"AI":80},{"TypeTree":11341},{"ScriptManager":512},{"RuntimeInitializeOnLoadManager":64},{"SpriteAtlas":112},{"GI":7792},{"Director":8240},{"CloudService":8496},{"WebRequest":808},{"VR":47994},{"SceneManager":504},{"Video":64},{"LazyScriptCache":32},{"Camera":17},{"Secure":2113},{"SerializationCache":1576},{"APIUpdating":10320},{"Subsystems":336},{"VirtualTexturing":57888},{"StaticSafetyDebugInfo":278528},{"Analytics":384},{"Hierarchy":608},{"CoreStats":13032},{"Identifiers":12960},{"Gui":96},{"EditorUtility":116973},{"VersionControl":4},{"Undo":947},{"AssetDatabase":2583287},{"EditorGi":328},{"UnityConnect":29232},{"Upm":1896},{"AssetCompliance":64},{"DrivenProperties":72},{"LocalIPC":211},{"ProfilerEditor":9746},{"CoreBusinessMetrics":2877},{"Licensing":1232},{"AssetReference":32},{"IPCStream":32}]}

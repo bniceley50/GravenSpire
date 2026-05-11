@@ -28,9 +28,9 @@ public sealed class CombatPlayerDeathResolver
 
     public CombatPlayerDeathResolutionResult Resolve(CombatPlayerDeathResolutionRequest request)
     {
-        ArgumentNullException.ThrowIfNull(request);
-        ArgumentNullException.ThrowIfNull(request.Player);
-        ArgumentNullException.ThrowIfNull(request.KillerSourceRef);
+        CombatArgumentNull.ThrowIfNull(request);
+        CombatArgumentNull.ThrowIfNull(request.Player);
+        CombatArgumentNull.ThrowIfNull(request.KillerSourceRef);
 
         ValidateRequest(request);
 
@@ -86,7 +86,7 @@ public sealed class CombatPlayerDeathResolver
         CombatStableSourceRef killerSourceRef,
         string deathCauseType)
     {
-        ArgumentNullException.ThrowIfNull(killerSourceRef);
+        CombatArgumentNull.ThrowIfNull(killerSourceRef);
         var canonical = string.Join(
             "|",
             RequireText(localCharacterId, nameof(localCharacterId)),
@@ -155,9 +155,11 @@ public sealed class CombatPlayerDeathResolver
 
     private static string Canonicalize(CombatPoint3 point)
     {
-        return string.Create(
-            CultureInfo.InvariantCulture,
-            $"{point.X.ToString("R", CultureInfo.InvariantCulture)},{point.Y.ToString("R", CultureInfo.InvariantCulture)},{point.Z.ToString("R", CultureInfo.InvariantCulture)}");
+        return string.Join(
+            ",",
+            point.X.ToString("R", CultureInfo.InvariantCulture),
+            point.Y.ToString("R", CultureInfo.InvariantCulture),
+            point.Z.ToString("R", CultureInfo.InvariantCulture));
     }
 
     private static string Canonicalize(CombatStableSourceRef sourceRef)

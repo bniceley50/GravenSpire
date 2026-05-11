@@ -15,7 +15,7 @@ public static class CombatActorStateTransitions
     /// </summary>
     public static CombatActorState WithCombatState(this CombatActorState actor, CombatState combatState)
     {
-        ArgumentNullException.ThrowIfNull(actor);
+        CombatArgumentNull.ThrowIfNull(actor);
         return Copy(actor, combatState: combatState);
     }
 
@@ -24,7 +24,7 @@ public static class CombatActorStateTransitions
     /// </summary>
     public static CombatActorState WithTarget(this CombatActorState actor, string? targetCombatActorId)
     {
-        ArgumentNullException.ThrowIfNull(actor);
+        CombatArgumentNull.ThrowIfNull(actor);
         return Copy(actor, targetCombatActorId: targetCombatActorId, replaceTarget: true);
     }
 
@@ -33,7 +33,7 @@ public static class CombatActorStateTransitions
     /// </summary>
     public static CombatActorState SetThreat(this CombatActorState actor, string sourceCombatActorId, int threat)
     {
-        ArgumentNullException.ThrowIfNull(actor);
+        CombatArgumentNull.ThrowIfNull(actor);
         if (string.IsNullOrWhiteSpace(sourceCombatActorId))
         {
             throw new ArgumentException("Threat source combat actor id is required.", nameof(sourceCombatActorId));
@@ -57,7 +57,7 @@ public static class CombatActorStateTransitions
     /// </summary>
     public static CombatActorState AddThreat(this CombatActorState actor, string sourceCombatActorId, int threatDelta)
     {
-        ArgumentNullException.ThrowIfNull(actor);
+        CombatArgumentNull.ThrowIfNull(actor);
         if (string.IsNullOrWhiteSpace(sourceCombatActorId))
         {
             throw new ArgumentException("Threat source combat actor id is required.", nameof(sourceCombatActorId));
@@ -97,7 +97,7 @@ public static class CombatActorStateTransitions
     /// </summary>
     public static CombatActorState ReleaseHostile(this CombatActorState actor, CombatState releaseState = CombatState.OutOfCombat)
     {
-        ArgumentNullException.ThrowIfNull(actor);
+        CombatArgumentNull.ThrowIfNull(actor);
         return Copy(actor, combatState: releaseState, targetCombatActorId: null, replaceTarget: true, threatTable: new Dictionary<string, int>(StringComparer.Ordinal));
     }
 
@@ -106,7 +106,7 @@ public static class CombatActorStateTransitions
     /// </summary>
     public static CombatActorState ClearTargetAndThreat(this CombatActorState actor)
     {
-        ArgumentNullException.ThrowIfNull(actor);
+        CombatArgumentNull.ThrowIfNull(actor);
         return Copy(actor, targetCombatActorId: null, replaceTarget: true, threatTable: new Dictionary<string, int>(StringComparer.Ordinal));
     }
 
@@ -119,7 +119,7 @@ public static class CombatActorStateTransitions
         string spellId,
         string? targetCombatActorId)
     {
-        ArgumentNullException.ThrowIfNull(actor);
+        CombatArgumentNull.ThrowIfNull(actor);
         RequireText(activeCastId, nameof(activeCastId));
         RequireText(spellId, nameof(spellId));
 
@@ -139,7 +139,7 @@ public static class CombatActorStateTransitions
     /// </summary>
     public static CombatActorState WithCastProgress(this CombatActorState actor, double castProgressSeconds)
     {
-        ArgumentNullException.ThrowIfNull(actor);
+        CombatArgumentNull.ThrowIfNull(actor);
         if (castProgressSeconds < 0)
         {
             throw new ArgumentOutOfRangeException(nameof(castProgressSeconds), "Cast progress cannot be negative.");
@@ -153,7 +153,7 @@ public static class CombatActorStateTransitions
     /// </summary>
     public static CombatActorState MarkCastInterrupted(this CombatActorState actor, double recoveryRemainingSeconds)
     {
-        ArgumentNullException.ThrowIfNull(actor);
+        CombatArgumentNull.ThrowIfNull(actor);
         if (recoveryRemainingSeconds < 0)
         {
             throw new ArgumentOutOfRangeException(nameof(recoveryRemainingSeconds), "Recovery remaining cannot be negative.");
@@ -175,7 +175,7 @@ public static class CombatActorStateTransitions
     /// </summary>
     public static CombatActorState BeginCastRecovery(this CombatActorState actor, double recoveryRemainingSeconds)
     {
-        ArgumentNullException.ThrowIfNull(actor);
+        CombatArgumentNull.ThrowIfNull(actor);
         if (recoveryRemainingSeconds < 0)
         {
             throw new ArgumentOutOfRangeException(nameof(recoveryRemainingSeconds), "Recovery remaining cannot be negative.");
@@ -197,7 +197,7 @@ public static class CombatActorStateTransitions
     /// </summary>
     public static CombatActorState WithCurrentMana(this CombatActorState actor, int currentMana)
     {
-        ArgumentNullException.ThrowIfNull(actor);
+        CombatArgumentNull.ThrowIfNull(actor);
         if (currentMana < 0)
         {
             throw new ArgumentOutOfRangeException(nameof(currentMana), "Current mana cannot be negative.");
@@ -216,7 +216,7 @@ public static class CombatActorStateTransitions
     /// </summary>
     public static CombatActorState WithCurrentEndurance(this CombatActorState actor, int currentEndurance)
     {
-        ArgumentNullException.ThrowIfNull(actor);
+        CombatArgumentNull.ThrowIfNull(actor);
         if (currentEndurance < 0)
         {
             throw new ArgumentOutOfRangeException(nameof(currentEndurance), "Current Endurance cannot be negative.");
@@ -235,7 +235,7 @@ public static class CombatActorStateTransitions
     /// </summary>
     public static CombatActorState ClearCastRuntime(this CombatActorState actor, CombatState nextCombatState)
     {
-        ArgumentNullException.ThrowIfNull(actor);
+        CombatArgumentNull.ThrowIfNull(actor);
         return actor.WithCombatState(nextCombatState) with
         {
             CastRuntimeState = CombatCastRuntimeState.None,
@@ -252,7 +252,7 @@ public static class CombatActorStateTransitions
     /// </summary>
     public static CombatActorState WithCurrentHealthAfterAbilityDamage(this CombatActorState actor, int damage)
     {
-        ArgumentNullException.ThrowIfNull(actor);
+        CombatArgumentNull.ThrowIfNull(actor);
         if (damage < 0)
         {
             throw new ArgumentOutOfRangeException(nameof(damage), "Ability damage cannot be negative.");
@@ -295,7 +295,7 @@ public static class CombatActorStateTransitions
     /// </summary>
     public static CombatActorState CancelActiveChannelByAbility(this CombatActorState actor, double recoveryRemainingSeconds)
     {
-        ArgumentNullException.ThrowIfNull(actor);
+        CombatArgumentNull.ThrowIfNull(actor);
         if (recoveryRemainingSeconds < 0)
         {
             throw new ArgumentOutOfRangeException(nameof(recoveryRemainingSeconds), "Recovery remaining cannot be negative.");

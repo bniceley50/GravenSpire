@@ -1,6 +1,6 @@
 # S2-M2-01 - Unity Combat Core Runtime Bridge
 
-**Status:** Ready for Story Readiness
+**Status:** Implemented - pending /code-review and /story-done
 **Sprint:** 2
 **Priority:** Must Have
 **Layer:** Gameplay / Unity Runtime
@@ -14,9 +14,8 @@
 
 ## Routing Status
 
-This is the first M2 Combat Camp Loop story. It is ready for `/story-readiness`.
-Do not start implementation until readiness confirms the runtime bridge surface,
-test approach, and evidence target.
+This is the first M2 Combat Camp Loop story. Readiness is cleared, and the
+implementation is pending `/code-review` and `/story-done` verification.
 
 ## Source Trace
 
@@ -135,6 +134,18 @@ Runtime bridge smoke should record no captured errors/exceptions and no obvious
 steady-state per-frame allocation loop in authored adapter code. Broader frame
 time, animation, rendering, and encounter-feel performance budgets belong to
 later M2 loop stories once gameplay objects are active.
+
+## Dev Implementation Notes
+
+- Combat Core is exposed to Unity as the local package
+  `com.gravenspire.gameplay.combat` from `src/gameplay/combat/`.
+- The Unity bridge auto-bootstraps at runtime with
+  `RuntimeInitializeOnLoadMethod`; `_DevEntry.unity` is intentionally unchanged.
+- Story-specific Unity smoke evidence is written under
+  `tests/evidence/S2-M2-01/`, not `tests/evidence/S2-FOUNDATION-01/`.
+- The bridge hydrates the existing `SoloTrash_EvenCon_T1` fixture for M2-01
+  proof only; pull-lane gameplay, med loop, linked overpull, and named blocker
+  behavior remain owned by S2-M2-02 through S2-M2-04.
 
 ## Dependencies
 

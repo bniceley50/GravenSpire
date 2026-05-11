@@ -64,14 +64,14 @@ public sealed class CombatMeleeResolver
 {
     public CombatMeleeTickResult ResolveTick(CombatMeleeTickRequest request)
     {
-        ArgumentNullException.ThrowIfNull(request);
-        ArgumentNullException.ThrowIfNull(request.Attacker);
-        ArgumentNullException.ThrowIfNull(request.AttackState);
-        ArgumentNullException.ThrowIfNull(request.ZoneGate);
-        ArgumentNullException.ThrowIfNull(request.LosBlockingLayers);
-        ArgumentNullException.ThrowIfNull(request.HitChanceTuning);
-        ArgumentNullException.ThrowIfNull(request.DamageTuning);
-        ArgumentNullException.ThrowIfNull(request.RandomSource);
+        CombatArgumentNull.ThrowIfNull(request);
+        CombatArgumentNull.ThrowIfNull(request.Attacker);
+        CombatArgumentNull.ThrowIfNull(request.AttackState);
+        CombatArgumentNull.ThrowIfNull(request.ZoneGate);
+        CombatArgumentNull.ThrowIfNull(request.LosBlockingLayers);
+        CombatArgumentNull.ThrowIfNull(request.HitChanceTuning);
+        CombatArgumentNull.ThrowIfNull(request.DamageTuning);
+        CombatArgumentNull.ThrowIfNull(request.RandomSource);
 
         if (request.TickRateHz <= 0)
         {

@@ -102,7 +102,7 @@ public sealed class CombatCastStateMachine
 
     public CombatCastTransitionResult StartCast(CombatCastStartRequest request)
     {
-        ArgumentNullException.ThrowIfNull(request);
+        CombatArgumentNull.ThrowIfNull(request);
         var errors = ValidateStartRequest(request);
         if (errors.Count > 0)
         {
@@ -216,9 +216,9 @@ public sealed class CombatCastStateMachine
         CombatActorState? target,
         CombatDamageInterruptRequest request)
     {
-        ArgumentNullException.ThrowIfNull(request);
-        ArgumentNullException.ThrowIfNull(request.InterruptTuning);
-        ArgumentNullException.ThrowIfNull(request.RandomSource);
+        CombatArgumentNull.ThrowIfNull(request);
+        CombatArgumentNull.ThrowIfNull(request.InterruptTuning);
+        CombatArgumentNull.ThrowIfNull(request.RandomSource);
 
         var active = activeCast;
         if (active is null)

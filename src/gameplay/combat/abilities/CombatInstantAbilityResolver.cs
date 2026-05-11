@@ -54,11 +54,11 @@ public sealed class CombatInstantAbilityResolver
 
     public CombatInstantAbilityResult Resolve(CombatInstantAbilityRequest request)
     {
-        ArgumentNullException.ThrowIfNull(request);
-        ArgumentNullException.ThrowIfNull(request.Caster);
-        ArgumentNullException.ThrowIfNull(request.ZoneGate);
-        ArgumentNullException.ThrowIfNull(request.LosBlockingLayers);
-        ArgumentNullException.ThrowIfNull(request.Profile);
+        CombatArgumentNull.ThrowIfNull(request);
+        CombatArgumentNull.ThrowIfNull(request.Caster);
+        CombatArgumentNull.ThrowIfNull(request.ZoneGate);
+        CombatArgumentNull.ThrowIfNull(request.LosBlockingLayers);
+        CombatArgumentNull.ThrowIfNull(request.Profile);
 
         var errors = ValidateRequest(request);
         if (errors.Count > 0)

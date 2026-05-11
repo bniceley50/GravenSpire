@@ -59,7 +59,9 @@
 
 <!-- Add approved third-party dependencies here -->
 <!-- Guardrail: Do NOT add speculative dependencies. A library is added here ONLY when work actively begins on the system that requires it. -->
-- [None configured yet — add as dependencies are approved]
+- `com.unity.nuget.newtonsoft-json` — Unity package dependency for local
+  Combat Core fixture deserialization in `S2-M2-01`; .NET/headless Combat Core
+  tests continue to use `System.Text.Json`.
 
 <!--
 Deferred libraries (planned but NOT yet approved for use):

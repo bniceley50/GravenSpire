@@ -69,9 +69,9 @@ public static class CombatMeleeFormulas
         CombatActorState defender,
         CombatMeleeHitChanceTuning tuning)
     {
-        ArgumentNullException.ThrowIfNull(attacker);
-        ArgumentNullException.ThrowIfNull(defender);
-        ArgumentNullException.ThrowIfNull(tuning);
+        CombatArgumentNull.ThrowIfNull(attacker);
+        CombatArgumentNull.ThrowIfNull(defender);
+        CombatArgumentNull.ThrowIfNull(tuning);
 
         tuning.Validate();
 
@@ -90,9 +90,9 @@ public static class CombatMeleeFormulas
         CombatMeleeDamageTuning tuning,
         double damageRollScalar)
     {
-        ArgumentNullException.ThrowIfNull(attacker);
-        ArgumentNullException.ThrowIfNull(defender);
-        ArgumentNullException.ThrowIfNull(tuning);
+        CombatArgumentNull.ThrowIfNull(attacker);
+        CombatArgumentNull.ThrowIfNull(defender);
+        CombatArgumentNull.ThrowIfNull(tuning);
 
         tuning.Validate();
 

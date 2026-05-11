@@ -157,10 +157,10 @@ public sealed class CombatPullCoordinator
         CombatTick tick,
         CombatPullTuning? tuning = null)
     {
-        ArgumentNullException.ThrowIfNull(player);
-        ArgumentNullException.ThrowIfNull(primary);
-        ArgumentNullException.ThrowIfNull(linkedCandidates);
-        ArgumentNullException.ThrowIfNull(zoneGate);
+        CombatArgumentNull.ThrowIfNull(player);
+        CombatArgumentNull.ThrowIfNull(primary);
+        CombatArgumentNull.ThrowIfNull(linkedCandidates);
+        CombatArgumentNull.ThrowIfNull(zoneGate);
 
         var actualTuning = tuning ?? CombatPullTuning.T1Default;
         var errors = ValidateBodyPull(player, playerPosition, primary, zoneGate, actualTuning);
@@ -211,11 +211,11 @@ public sealed class CombatPullCoordinator
         CombatTick tick,
         CombatPullTuning? tuning = null)
     {
-        ArgumentNullException.ThrowIfNull(player);
-        ArgumentNullException.ThrowIfNull(primary);
-        ArgumentNullException.ThrowIfNull(linkedCandidates);
-        ArgumentNullException.ThrowIfNull(zoneGate);
-        ArgumentNullException.ThrowIfNull(episode);
+        CombatArgumentNull.ThrowIfNull(player);
+        CombatArgumentNull.ThrowIfNull(primary);
+        CombatArgumentNull.ThrowIfNull(linkedCandidates);
+        CombatArgumentNull.ThrowIfNull(zoneGate);
+        CombatArgumentNull.ThrowIfNull(episode);
 
         var actualTuning = tuning ?? CombatPullTuning.T1Default;
         if (tick.ElapsedSeconds - episode.LastAssistPulseElapsedSeconds < actualTuning.SocialAssistPulseSeconds)

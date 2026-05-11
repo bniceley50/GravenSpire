@@ -30,7 +30,7 @@ public static class CombatCastFormulas
         double interruptResistance,
         CombatInterruptFormulaTuning tuning)
     {
-        ArgumentNullException.ThrowIfNull(tuning);
+        CombatArgumentNull.ThrowIfNull(tuning);
 
         if (damageTaken < 0)
         {

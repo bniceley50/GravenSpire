@@ -58,9 +58,9 @@ public sealed class CombatTargetSelector
         CombatTargetingTuning? tuning = null,
         string? currentTargetCombatActorId = null)
     {
-        ArgumentNullException.ThrowIfNull(player);
-        ArgumentNullException.ThrowIfNull(candidates);
-        ArgumentNullException.ThrowIfNull(zoneGate);
+        CombatArgumentNull.ThrowIfNull(player);
+        CombatArgumentNull.ThrowIfNull(candidates);
+        CombatArgumentNull.ThrowIfNull(zoneGate);
 
         var actualTuning = tuning ?? CombatTargetingTuning.T1Default;
         if (actualTuning.TargetAcquireRadiusMeters <= 0)

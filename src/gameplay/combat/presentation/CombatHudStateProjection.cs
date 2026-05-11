@@ -99,9 +99,9 @@ public static class CombatHudStateProjection
 {
     public static CombatHudStateSnapshot Project(CombatHudProjectionRequest request)
     {
-        ArgumentNullException.ThrowIfNull(request);
-        ArgumentNullException.ThrowIfNull(request.Player);
-        ArgumentNullException.ThrowIfNull(request.AttackState);
+        CombatArgumentNull.ThrowIfNull(request);
+        CombatArgumentNull.ThrowIfNull(request.Player);
+        CombatArgumentNull.ThrowIfNull(request.AttackState);
 
         return new CombatHudStateSnapshot(
             new CombatHudResourceSnapshot(request.Player.CurrentHealth, request.Player.MaxHealth),
@@ -119,7 +119,7 @@ public static class CombatHudStateProjection
 
     public static CombatHudAttackStateSignal? ProjectAttackSignal(CombatAttackTransitionResult transition)
     {
-        ArgumentNullException.ThrowIfNull(transition);
+        CombatArgumentNull.ThrowIfNull(transition);
         return transition.StateChangedSignal is null
             ? null
             : ProjectAttackSignal(transition.StateChangedSignal);
@@ -128,16 +128,16 @@ public static class CombatHudStateProjection
     public static IReadOnlyList<CombatHudAttackStateSignal> ProjectAttackSignals(
         IEnumerable<CombatAttackStateChangedSignal> signals)
     {
-        ArgumentNullException.ThrowIfNull(signals);
+        CombatArgumentNull.ThrowIfNull(signals);
         return new ReadOnlyCollection<CombatHudAttackStateSignal>(
             signals.Select(ProjectAttackSignal).ToArray());
     }
 
     public static CombatHudThreatCategory EvaluateThreatCategory(CombatHudThreatCategoryRequest request)
     {
-        ArgumentNullException.ThrowIfNull(request);
-        ArgumentNullException.ThrowIfNull(request.Actor);
-        ArgumentNullException.ThrowIfNull(request.CandidateThreatActors);
+        CombatArgumentNull.ThrowIfNull(request);
+        CombatArgumentNull.ThrowIfNull(request.Actor);
+        CombatArgumentNull.ThrowIfNull(request.CandidateThreatActors);
         ValidateTuning(request.Tuning);
 
         var hostile = request.HostileActor;
@@ -281,7 +281,7 @@ public static class CombatHudStateProjection
 
     private static void ValidateTuning(CombatHudThreatCategoryTuning tuning)
     {
-        ArgumentNullException.ThrowIfNull(tuning);
+        CombatArgumentNull.ThrowIfNull(tuning);
         if (tuning.ThreatCloseRatio <= 0d || tuning.ThreatCloseRatio > 1d)
         {
             throw new ArgumentOutOfRangeException(nameof(tuning), "threat_close_ratio must be a ratio.");

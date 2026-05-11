@@ -187,7 +187,7 @@ public sealed record CombatStableSourceRef
     /// </summary>
     public static CombatStableSourceRef ForSpawn(CombatSpawnSourceRef sourceSpawnRef)
     {
-        ArgumentNullException.ThrowIfNull(sourceSpawnRef);
+        CombatArgumentNull.ThrowIfNull(sourceSpawnRef);
         return new CombatStableSourceRef(null, null, sourceSpawnRef, null);
     }
 

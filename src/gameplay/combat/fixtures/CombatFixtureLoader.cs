@@ -2,8 +2,14 @@
 
 using System;
 using System.IO;
+#if UNITY_5_3_OR_NEWER
+using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
+using Newtonsoft.Json.Serialization;
+#else
 using System.Text.Json;
 using System.Text.Json.Serialization;
+#endif
 
 namespace Gravenspire.Gameplay.Combat.Fixtures;
 
@@ -12,7 +18,11 @@ namespace Gravenspire.Gameplay.Combat.Fixtures;
 /// </summary>
 public sealed class CombatFixtureLoader
 {
+#if UNITY_5_3_OR_NEWER
+    private static readonly JsonSerializerSettings JsonSettings = CreateSettings();
+#else
     private static readonly JsonSerializerOptions JsonOptions = CreateOptions();
+#endif
 
     /// <summary>
     /// Loads a combat fixture package from a JSON file.
@@ -38,7 +48,20 @@ public sealed class CombatFixtureLoader
             throw new InvalidDataException("Combat fixture JSON is empty.");
         }
 
-        var package = JsonSerializer.Deserialize<CombatFixturePackage>(json, JsonOptions);
+        CombatFixturePackage? package;
+        try
+        {
+#if UNITY_5_3_OR_NEWER
+            package = JsonConvert.DeserializeObject<CombatFixturePackage>(json, JsonSettings);
+#else
+            package = JsonSerializer.Deserialize<CombatFixturePackage>(json, JsonOptions);
+#endif
+        }
+        catch (JsonException ex)
+        {
+            throw new InvalidDataException("Combat fixture JSON could not be parsed.", ex);
+        }
+
         if (package is null)
         {
             throw new InvalidDataException("Combat fixture JSON did not produce a package.");
@@ -47,6 +70,27 @@ public sealed class CombatFixtureLoader
         return package;
     }
 
+#if UNITY_5_3_OR_NEWER
+    private static JsonSerializerSettings CreateSettings()
+    {
+        var settings = new JsonSerializerSettings
+        {
+            ContractResolver = new DefaultContractResolver
+            {
+                NamingStrategy = new CamelCaseNamingStrategy()
+            },
+            MissingMemberHandling = MissingMemberHandling.Ignore,
+            NullValueHandling = NullValueHandling.Ignore
+        };
+
+        settings.Converters.Add(new StringEnumConverter
+        {
+            NamingStrategy = new CamelCaseNamingStrategy()
+        });
+
+        return settings;
+    }
+#else
     private static JsonSerializerOptions CreateOptions()
     {
         var options = new JsonSerializerOptions
@@ -59,4 +103,5 @@ public sealed class CombatFixtureLoader
         options.Converters.Add(new JsonStringEnumConverter(JsonNamingPolicy.CamelCase));
         return options;
     }
+#endif
 }

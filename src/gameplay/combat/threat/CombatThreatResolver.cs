@@ -21,8 +21,8 @@ public sealed class CombatThreatResolver
         CombatActorState actor,
         IEnumerable<CombatActorState> hostileActors)
     {
-        ArgumentNullException.ThrowIfNull(actor);
-        ArgumentNullException.ThrowIfNull(hostileActors);
+        CombatArgumentNull.ThrowIfNull(actor);
+        CombatArgumentNull.ThrowIfNull(hostileActors);
 
         var count = 0;
         foreach (var hostile in hostileActors)
@@ -41,10 +41,10 @@ public sealed class CombatThreatResolver
 
     public CombatSittingThreatResult ApplySittingThreatBonus(CombatSittingThreatRequest request)
     {
-        ArgumentNullException.ThrowIfNull(request);
-        ArgumentNullException.ThrowIfNull(request.Sitter);
-        ArgumentNullException.ThrowIfNull(request.HostileActors);
-        ArgumentNullException.ThrowIfNull(request.Tuning);
+        CombatArgumentNull.ThrowIfNull(request);
+        CombatArgumentNull.ThrowIfNull(request.Sitter);
+        CombatArgumentNull.ThrowIfNull(request.HostileActors);
+        CombatArgumentNull.ThrowIfNull(request.Tuning);
         if (request.Tuning.SittingThreatBonus < 0)
         {
             throw new ArgumentOutOfRangeException(nameof(request), "sitting_threat_bonus must not be negative.");
