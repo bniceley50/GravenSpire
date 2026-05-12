@@ -1,7 +1,7 @@
-# S2-M2-01 Unity Combat Bridge Smoke
+# S2-M2-02 Unity Combat Bridge Regression Smoke (Post-Patch)
 
-**Date:** 2026-05-10
-**Story:** `production/stories/s2-m2-01-unity-combat-core-runtime-bridge.md`
+**Date:** 2026-05-12
+**Story:** `production/stories/s2-m2-02-single-trash-pull-med-loop.md`
 **Scene:** `Assets/Scenes/_DevEntry.unity`
 **Runner:** `Assets/Editor/GravenspireM2CombatBridgeVerificationRunner.cs`
 **Result:** PASS

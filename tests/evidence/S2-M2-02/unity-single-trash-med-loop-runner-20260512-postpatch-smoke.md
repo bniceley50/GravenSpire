@@ -1,4 +1,4 @@
-# S2-M2-02 Unity Single-Trash Med-Loop Smoke
+# S2-M2-02 Unity Single-Trash Med-Loop Smoke (Post-Patch Guard Evidence)
 
 **Date:** 2026-05-12
 **Story:** `production/stories/s2-m2-02-single-trash-pull-med-loop.md`

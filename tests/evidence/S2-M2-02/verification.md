@@ -34,7 +34,7 @@ package config, routing files, and story status files were not changed.
 - PASS - human Play Mode feel session recorded at `tests/evidence/S2-M2-02/human-play-20260512.md` with qualified-no answer and presentation carry-forward.
 - PASS - T1 negative-scope scan over changed S2-M2-02 files found only expected story-path references.
 - PASS - `git diff --check` returned 0 after scene YAML whitespace cleanup.
-- PENDING - `.githooks/pre-commit` after final staging; current batch is intentionally unstaged until human play decides fix vs carry-forward.
+- PASS - `.githooks/pre-commit` ran on commit `946c9d1` (Harden S2-M2-02 loop guard evidence); whitespace check and T1 deny-pattern scan passed.
 
 ## Framework-Effectiveness Note
 
