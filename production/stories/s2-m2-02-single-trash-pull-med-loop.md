@@ -1,6 +1,6 @@
 # S2-M2-02 - Single Trash Pull + Med Loop
 
-**Status:** Blocked
+**Status:** Ready for Dev
 **Sprint:** 2
 **Priority:** Must Have
 **Layer:** Gameplay / Unity Runtime
@@ -14,9 +14,10 @@
 
 ## Routing Status
 
-Blocked until `S2-M2-01` is complete. This story should not implement a parallel
-bridge or duplicate runtime adapter work; it builds the first playable loop on
-top of the bridge.
+This story is ready for dev. `S2-M2-01` (Unity Combat Core runtime bridge) is
+complete at commit `b4cb377`, closed at `87c9dcd`, with Unity ProjectSettings
+hygiene landed at `da4e177`. M2-02 builds the first playable loop on the
+existing bridge; no parallel bridge or duplicate runtime adapter work is needed.
 
 ## Source Trace
 
@@ -82,6 +83,7 @@ Planned implementation surface:
 | `S2-M2-02-03` | Player can target, toggle Attack, resolve a clean single-trash fight, exit combat, sit, recover mana, and repeat a second pull. | `tests/evidence/S2-M2-02/verification.md` |
 | `S2-M2-02-04` | Runtime smoke records pull start, Attack on/off transitions, hostile defeat, combat exit, sit/med start, mana restoration, and no captured errors or exceptions. | `tests/evidence/S2-M2-02/verification.md` |
 | `S2-M2-02-05` | `S2-M2-01` bridge smoke and dotnet combat regression still pass after the loop objects are added. | `tests/evidence/S2-M2-02/verification.md` |
+| `S2-M2-02-06` | Human play session is recorded with the player's answer to "did you want one more pull?" and at least one worst-thing finding; the worst-thing is either fixed in-story or explicitly carried forward in closure notes. | `tests/evidence/S2-M2-02/human-play-YYYYMMDD.md` |
 
 ## QA Test Cases
 
@@ -110,6 +112,11 @@ Planned implementation surface:
   - When: M2-01 bridge smoke and dotnet combat regression are rerun.
   - Then: both still pass or exact blockers are recorded before closure.
   - Edge cases: bridge regressions are fixed in this story only if caused by M2-02 changes.
+- **S2-M2-02-06**: Human play session
+  - Given: M2-02 implementation is functional under Unity Play Mode.
+  - When: a human runs the two-pull med-loop in-editor for at least one short session.
+  - Then: written evidence records the answer to "did you want one more pull?" with at least one worst-thing finding; either fixed in this story or carried forward in closure notes.
+  - Edge cases: feel is subjective; session need only be one short run, not a polish pass. CLI evidence alone is insufficient for closure.
 
 ## Test Evidence
 
@@ -118,6 +125,9 @@ Required evidence:
 - `tests/evidence/S2-M2-02/verification.md`
 - Story-specific Unity Play Mode or batchmode runner output for the two-pull
   med-loop smoke.
+- `tests/evidence/S2-M2-02/human-play-YYYYMMDD.md` (player feel session note
+  with answer to "did you want one more pull?" and at least one worst-thing
+  finding)
 - `dotnet test tests\Gravenspire.Combat.Tests.csproj --logger "console;verbosity=minimal"`
 - T1 negative-scope scan over changed files.
 - `git diff --check`
@@ -140,4 +150,4 @@ steady-state allocation regressions rather than full frame-time tuning.
 
 ## Next Gate
 
-Blocked until `S2-M2-01` is closed.
+`/dev-story production/stories/s2-m2-02-single-trash-pull-med-loop.md`.
