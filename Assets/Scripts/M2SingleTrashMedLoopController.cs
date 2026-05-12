@@ -88,6 +88,12 @@ namespace Gravenspire.UnityRuntime.Combat
 
         public bool TwoPullLoopComplete => _pullsCompleted >= 2;
 
+        public bool PullBlockedWhileSittingRecorded { get; private set; }
+
+        public bool AttackBlockedBeforeTargetRecorded { get; private set; }
+
+        public bool SmiteBlockedBeforeAttackRecorded { get; private set; }
+
         public int PullsCompleted => _pullsCompleted;
 
         public int ManaRestoredTotal => _manaRestoredTotal;
@@ -159,7 +165,7 @@ namespace Gravenspire.UnityRuntime.Combat
             var canPull = !_pullActive && hostileAlive && _pullsCompleted < 2 && !playerSitting;
             var canTarget = _pullActive && hostileAlive && !_targetSelected;
             var canAttack = _pullActive && hostileAlive && _targetSelected && !_playerAttackState.IsAttackOn;
-            var canSmite = _pullActive && hostileAlive && _targetSelected && IsSmiteReady();
+            var canSmite = _pullActive && hostileAlive && _targetSelected && _playerAttackState.IsAttackOn && IsSmiteReady();
             var canSitStand = playerSitting || (!_pullActive && !hostileAlive);
 
             DrawHudButton(new Rect(24, 292, 100, 34), "Pull V", ApproachAndPull, canPull);
@@ -236,13 +242,49 @@ namespace Gravenspire.UnityRuntime.Combat
                 for (var pull = 0; pull < 2; pull++)
                 {
                     MovePlayerToMeleeRange();
+                    if (pull == 0)
+                    {
+                        _player = _player! with { PostureState = CombatPostureState.Sitting };
+                        if (TryStartBodyPull())
+                        {
+                            AddError("pull_1: body pull started while the player was sitting.");
+                            return false;
+                        }
+
+                        _player = _player with { PostureState = CombatPostureState.Standing };
+                    }
+
                     if (!TryStartBodyPull())
                     {
                         AddError($"pull_{pull + 1}: body pull did not start.");
                         return false;
                     }
 
+                    if (pull == 0)
+                    {
+                        ToggleAttack();
+                        if (_playerAttackState.IsAttackOn)
+                        {
+                            AddError("pull_1: Attack toggled on before explicit target selection.");
+                            return false;
+                        }
+                    }
+
                     SelectBaselineTarget();
+                    if (pull == 0)
+                    {
+                        var manaBeforeSmiteGuard = _player!.CurrentMana;
+                        var hostileHealthBeforeSmiteGuard = _hostile!.CurrentHealth;
+                        UseSmite();
+                        if (_player.CurrentMana != manaBeforeSmiteGuard ||
+                            _hostile.CurrentHealth != hostileHealthBeforeSmiteGuard ||
+                            _smiteCooldownEndsTick is not null)
+                        {
+                            AddError("pull_1: Smite resolved before Attack was ON.");
+                            return false;
+                        }
+                    }
+
                     ToggleAttack();
                     UseSmite();
                     ResolveCombatUntilHostileDefeated();
@@ -272,6 +314,9 @@ namespace Gravenspire.UnityRuntime.Combat
                     CombatExitRecorded &&
                     SitMedStartRecorded &&
                     ManaRestorationRecorded &&
+                    PullBlockedWhileSittingRecorded &&
+                    AttackBlockedBeforeTargetRecorded &&
+                    SmiteBlockedBeforeAttackRecorded &&
                     TwoPullLoopComplete &&
                     Errors.Count == 0;
             }
@@ -293,6 +338,9 @@ namespace Gravenspire.UnityRuntime.Combat
             _pullDidNotAutoEnableAttack = false;
             AttackTransitionRecorded = false;
             HostileDefeatRecorded = false;
+            PullBlockedWhileSittingRecorded = false;
+            AttackBlockedBeforeTargetRecorded = false;
+            SmiteBlockedBeforeAttackRecorded = false;
             _combatExitRecorded = false;
             _sitMedStarted = false;
             _smiteCooldownEndsTick = null;
@@ -429,6 +477,12 @@ namespace Gravenspire.UnityRuntime.Combat
                 return;
             }
 
+            if (_player is not null && _player.PostureState == CombatPostureState.Sitting)
+            {
+                _lastStatus = "Stand before pulling. Med break ends before the next body pull.";
+                return;
+            }
+
             MovePlayerToMeleeRange();
             FollowCamera();
             if (!TryStartBodyPull())
@@ -453,6 +507,14 @@ namespace Gravenspire.UnityRuntime.Combat
         {
             if (_pullActive || _player is null || _hostile is null || _zoneGate is null || !_hostile.IsAlive)
             {
+                return false;
+            }
+
+            if (_player.PostureState == CombatPostureState.Sitting)
+            {
+                PullBlockedWhileSittingRecorded = true;
+                _lastStatus = "Stand before pulling. Med break ends before the next body pull.";
+                RecordEvent("pull_blocked_while_sitting");
                 return false;
             }
 
@@ -515,6 +577,13 @@ namespace Gravenspire.UnityRuntime.Combat
                 return;
             }
 
+            if (!_pullActive)
+            {
+                _lastStatus = "Start the body pull before targeting this trash.";
+                RecordEvent("target_blocked_no_pull");
+                return;
+            }
+
             _player = _player.WithTarget(_hostile.CombatActorId);
             _targetSelected = true;
             _lastStatus = "Baseline trash targeted. Press F to toggle Attack.";
@@ -534,9 +603,19 @@ namespace Gravenspire.UnityRuntime.Combat
                 return;
             }
 
+            if (!_pullActive)
+            {
+                _lastStatus = "Start the body pull before toggling Attack.";
+                RecordEvent("attack_blocked_no_pull");
+                return;
+            }
+
             if (!_targetSelected)
             {
-                SelectBaselineTarget();
+                AttackBlockedBeforeTargetRecorded = true;
+                _lastStatus = "Target the baseline trash before toggling Attack.";
+                RecordEvent("attack_blocked_without_target");
+                return;
             }
 
             var machine = new CombatAttackStateMachine();
@@ -567,9 +646,26 @@ namespace Gravenspire.UnityRuntime.Combat
                 return;
             }
 
+            if (!_pullActive)
+            {
+                _lastStatus = "Start the body pull before casting Smite.";
+                RecordEvent("smite_blocked_no_pull");
+                return;
+            }
+
             if (!_targetSelected)
             {
-                SelectBaselineTarget();
+                _lastStatus = "Target the baseline trash before casting Smite.";
+                RecordEvent("smite_blocked_without_target");
+                return;
+            }
+
+            if (!_playerAttackState.IsAttackOn)
+            {
+                SmiteBlockedBeforeAttackRecorded = true;
+                _lastStatus = "Toggle Attack ON before casting Smite in this loop.";
+                RecordEvent("smite_blocked_without_attack");
+                return;
             }
 
             if (!IsSmiteReady())

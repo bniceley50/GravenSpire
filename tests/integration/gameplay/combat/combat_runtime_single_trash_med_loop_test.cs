@@ -25,6 +25,7 @@ public sealed class CombatRuntimeSingleTrashMedLoopTest
 
         Assert.That(loop.PullStarts, Is.EqualTo(2));
         Assert.That(loop.PullDidNotAutoEnableAttack, Is.True);
+        Assert.That(loop.AutoEnabledAttackPulls, Is.EqualTo(0));
         Assert.That(loop.AttackTransitions, Is.EqualTo(2));
         Assert.That(loop.HostileDefeats, Is.EqualTo(2));
         Assert.That(loop.CombatExits, Is.EqualTo(2));
@@ -68,6 +69,8 @@ public sealed class CombatRuntimeSingleTrashMedLoopTest
 
         public bool PullDidNotAutoEnableAttack { get; private set; }
 
+        public int AutoEnabledAttackPulls { get; private set; }
+
         public int AttackTransitions { get; private set; }
 
         public int HostileDefeats { get; private set; }
@@ -102,7 +105,12 @@ public sealed class CombatRuntimeSingleTrashMedLoopTest
 
             Assert.That(pull.Succeeded, Is.True, string.Join(Environment.NewLine, pull.Errors));
             PullStarts++;
-            PullDidNotAutoEnableAttack = PullDidNotAutoEnableAttack || !pull.PlayerAttackEnabled;
+            if (pull.PlayerAttackEnabled)
+            {
+                AutoEnabledAttackPulls++;
+            }
+
+            PullDidNotAutoEnableAttack = AutoEnabledAttackPulls == 0;
             Player = Player.WithTarget(hostile.CombatActorId).WithCombatState(CombatState.InCombat);
             hostile = pull.PrimaryHostile!.WithCombatState(CombatState.InCombat);
             hostileAttack = new CombatAttackStateSnapshot(CombatAttackMode.On, Player.CombatActorId, NextWeaponTick(hostile), CombatAttackTransitionPath.PlayerToggleOn);

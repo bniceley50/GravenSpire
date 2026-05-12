@@ -18,7 +18,7 @@ namespace Gravenspire.Editor
     public static class GravenspireM2CombatBridgeVerificationRunner
     {
         private const string ScenePath = "Assets/Scenes/_DevEntry.unity";
-        private const string EvidencePath = "tests/evidence/S2-M2-01/unity-combat-bridge-smoke-20260510.md";
+        private const string DefaultEvidencePath = "tests/evidence/S2-M2-01/unity-combat-bridge-smoke-20260510.md";
         private const string RunKey = "GravenspireM2CombatBridge.Run";
         private const string PhaseKey = "GravenspireM2CombatBridge.Phase";
         private const string ChecksKey = "GravenspireM2CombatBridge.Checks";
@@ -26,6 +26,8 @@ namespace Gravenspire.Editor
         private const string WarningsKey = "GravenspireM2CombatBridge.Warnings";
         private const string BridgeSummaryKey = "GravenspireM2CombatBridge.Summary";
         private const string PlayStartedKey = "GravenspireM2CombatBridge.PlayStartedTicks";
+        private const string EvidencePathKey = "GravenspireM2CombatBridge.EvidencePath";
+        private const string EvidencePathArgumentName = "-gravenspireEvidencePath";
         private const double SmokeDelaySeconds = 2.0;
 
         static GravenspireM2CombatBridgeVerificationRunner()
@@ -51,7 +53,9 @@ namespace Gravenspire.Editor
 
             try
             {
-                Directory.CreateDirectory(Path.GetDirectoryName(EvidencePath) ?? ".");
+                var evidencePath = ResolveEvidencePathFromCommandLine(DefaultEvidencePath);
+                SessionState.SetString(EvidencePathKey, evidencePath);
+                Directory.CreateDirectory(Path.GetDirectoryName(evidencePath) ?? ".");
                 var scene = EditorSceneManager.OpenScene(ScenePath, OpenSceneMode.Single);
                 RecordCheck("scene_loaded", scene.IsValid() && scene.path == ScenePath);
                 RecordCheck("dev_entry_scene_unchanged_entrypoint", scene.path == ScenePath);
@@ -186,6 +190,7 @@ namespace Gravenspire.Editor
         {
             EditorApplication.update -= ContinueAfterDomainReload;
             Application.logMessageReceived -= CaptureLog;
+            var evidencePath = CurrentEvidencePath();
 
             var builder = new StringBuilder();
             builder.AppendLine("# S2-M2-01 Unity Combat Bridge Smoke");
@@ -226,10 +231,30 @@ namespace Gravenspire.Editor
             builder.AppendLine();
             AppendEvidenceLines(builder, GetSessionLines(ErrorsKey));
 
-            File.WriteAllText(EvidencePath, builder.ToString());
-            Debug.Log($"S2-M2-01 combat bridge verification wrote {EvidencePath} with exit code {exitCode}.");
+            File.WriteAllText(evidencePath, builder.ToString());
+            Debug.Log($"S2-M2-01 combat bridge verification wrote {evidencePath} with exit code {exitCode}.");
             ClearSession();
             EditorApplication.Exit(exitCode);
+        }
+
+        private static string CurrentEvidencePath()
+        {
+            var configuredPath = SessionState.GetString(EvidencePathKey, string.Empty);
+            return string.IsNullOrWhiteSpace(configuredPath) ? DefaultEvidencePath : configuredPath;
+        }
+
+        private static string ResolveEvidencePathFromCommandLine(string defaultEvidencePath)
+        {
+            var arguments = Environment.GetCommandLineArgs();
+            for (var i = 0; i < arguments.Length - 1; i++)
+            {
+                if (string.Equals(arguments[i], EvidencePathArgumentName, StringComparison.OrdinalIgnoreCase))
+                {
+                    return arguments[i + 1];
+                }
+            }
+
+            return defaultEvidencePath;
         }
 
         private static void AppendEvidenceLines(StringBuilder builder, List<string> lines)
@@ -269,6 +294,7 @@ namespace Gravenspire.Editor
             SessionState.EraseString(WarningsKey);
             SessionState.EraseString(BridgeSummaryKey);
             SessionState.EraseString(PlayStartedKey);
+            SessionState.EraseString(EvidencePathKey);
         }
     }
 }

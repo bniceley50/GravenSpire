@@ -17,13 +17,15 @@ namespace Gravenspire.Editor
     public static class GravenspireM2SingleTrashLoopVerificationRunner
     {
         private const string ScenePath = "Assets/Scenes/_DevEntry.unity";
-        private const string EvidencePath = "tests/evidence/S2-M2-02/unity-single-trash-med-loop-smoke-20260512.md";
+        private const string DefaultEvidencePath = "tests/evidence/S2-M2-02/unity-single-trash-med-loop-smoke-20260512.md";
         private const string RunKey = "GravenspireM2SingleTrashLoop.Run";
         private const string PhaseKey = "GravenspireM2SingleTrashLoop.Phase";
         private const string ChecksKey = "GravenspireM2SingleTrashLoop.Checks";
         private const string ErrorsKey = "GravenspireM2SingleTrashLoop.Errors";
         private const string EventsKey = "GravenspireM2SingleTrashLoop.Events";
         private const string WarningsKey = "GravenspireM2SingleTrashLoop.Warnings";
+        private const string EvidencePathKey = "GravenspireM2SingleTrashLoop.EvidencePath";
+        private const string EvidencePathArgumentName = "-gravenspireEvidencePath";
         private const double SmokeDelaySeconds = 1.0;
         private static readonly DateTime RunDate = new DateTime(2026, 5, 12, 0, 0, 0, DateTimeKind.Utc);
 
@@ -50,7 +52,9 @@ namespace Gravenspire.Editor
 
             try
             {
-                Directory.CreateDirectory(Path.GetDirectoryName(EvidencePath) ?? ".");
+                var evidencePath = ResolveEvidencePathFromCommandLine(DefaultEvidencePath);
+                SessionState.SetString(EvidencePathKey, evidencePath);
+                Directory.CreateDirectory(Path.GetDirectoryName(evidencePath) ?? ".");
                 GravenspireM2SingleTrashLoopBuilder.Build();
                 var scene = EditorSceneManager.OpenScene(ScenePath, OpenSceneMode.Single);
                 RecordCheck("scene_loaded", scene.IsValid() && scene.path == ScenePath);
@@ -175,6 +179,7 @@ namespace Gravenspire.Editor
         {
             EditorApplication.update -= ContinueAfterDomainReload;
             Application.logMessageReceived -= CaptureLog;
+            var evidencePath = CurrentEvidencePath();
 
             var builder = new StringBuilder();
             builder.AppendLine("# S2-M2-02 Unity Single-Trash Med-Loop Smoke");
@@ -209,10 +214,30 @@ namespace Gravenspire.Editor
             builder.AppendLine();
             AppendEvidenceLines(builder, GetSessionLines(ErrorsKey));
 
-            File.WriteAllText(EvidencePath, builder.ToString());
-            Debug.Log($"S2-M2-02 single-trash med-loop verification wrote {EvidencePath} with exit code {exitCode}.");
+            File.WriteAllText(evidencePath, builder.ToString());
+            Debug.Log($"S2-M2-02 single-trash med-loop verification wrote {evidencePath} with exit code {exitCode}.");
             ClearSession();
             EditorApplication.Exit(exitCode);
+        }
+
+        private static string CurrentEvidencePath()
+        {
+            var configuredPath = SessionState.GetString(EvidencePathKey, string.Empty);
+            return string.IsNullOrWhiteSpace(configuredPath) ? DefaultEvidencePath : configuredPath;
+        }
+
+        private static string ResolveEvidencePathFromCommandLine(string defaultEvidencePath)
+        {
+            var arguments = Environment.GetCommandLineArgs();
+            for (var i = 0; i < arguments.Length - 1; i++)
+            {
+                if (string.Equals(arguments[i], EvidencePathArgumentName, StringComparison.OrdinalIgnoreCase))
+                {
+                    return arguments[i + 1];
+                }
+            }
+
+            return defaultEvidencePath;
         }
 
         private static void AppendEvidenceLines(StringBuilder builder, List<string> lines)
@@ -251,6 +276,7 @@ namespace Gravenspire.Editor
             SessionState.EraseString(ErrorsKey);
             SessionState.EraseString(EventsKey);
             SessionState.EraseString(WarningsKey);
+            SessionState.EraseString(EvidencePathKey);
             SessionState.EraseString("GravenspireM2SingleTrashLoop.StartTicks");
             SessionState.EraseString("GravenspireM2SingleTrashLoop.PlayStartedTicks");
         }
