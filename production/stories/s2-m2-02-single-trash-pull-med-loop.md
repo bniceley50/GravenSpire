@@ -1,6 +1,6 @@
 # S2-M2-02 - Single Trash Pull + Med Loop
 
-**Status:** Ready for Dev
+**Status:** Complete
 **Sprint:** 2
 **Priority:** Must Have
 **Layer:** Gameplay / Unity Runtime
@@ -151,3 +151,45 @@ steady-state allocation regressions rather than full frame-time tuning.
 ## Next Gate
 
 `/dev-story production/stories/s2-m2-02-single-trash-pull-med-loop.md`.
+
+## Completion Notes
+
+**Completed:** 2026-05-12
+**Verdict:** COMPLETE WITH NOTES
+**Criteria:** 6/6 passing (`S2-M2-02-01` through `S2-M2-02-06`)
+**Deferred/Untested Criteria:** None
+**Test Evidence:**
+- `tests/evidence/S2-M2-02/verification.md` (gate evidence index)
+- `tests/evidence/S2-M2-02/human-play-20260512.md` (AC-6 qualified-no answer + worst-thing finding carried forward)
+- `tests/evidence/S2-M2-02/unity-single-trash-med-loop-runner-20260512-postpatch-smoke.md` (post-patch loop smoke with phase guards)
+- `tests/evidence/S2-M2-02/unity-m2-01-bridge-regression-20260512-postpatch-smoke.md` (post-patch bridge regression)
+- `tests/integration/gameplay/combat/combat_runtime_single_trash_med_loop_test.cs` (integration test asserting zero auto-enabled Attack pulls across both pulls)
+- `dotnet test tests\Gravenspire.Combat.Tests.csproj` 170/170 PASS on 2026-05-12
+
+**GDD/ADR Deviations:** None. All Governing Decisions (D001, D002, D003, D012, D014) remain Locked per `DECISIONS.md`.
+
+**Scope Notes:** All file changes within declared story scope (scene loop objects, runtime controller, story-specific smoke, integration test, story-specific evidence). No SCOPE CREEP.
+
+**Review Gates:**
+- `/code-review 946c9d1` pass 1 (lead-programmer + qa-tester + gameplay-programmer): qa-tester returned STILL BLOCKED on evidence integrity (K1, K2a, K2b, N1, N2); lead-programmer + gameplay-programmer returned APPROVED WITH NOTES on the runtime patch.
+- Evidence-only patch landed at commit `350b06e`.
+- `/code-review 350b06e` pass 2 (focused qa-tester): APPROVED — all 5 prior findings CLOSED, clean residual-drift sweep.
+- Aggregate: APPROVED WITH NOTES.
+
+**Forced Completion:** No.
+
+### Carryover Items
+
+Three keys recorded in `production/sprint-status.yaml`:
+
+- `m2_renderer_material_property_access`: Convergent finding from lead-programmer + gameplay-programmer code review. `Assets/Scripts/M2SingleTrashMedLoopController.cs:1168` reads `renderer.material` on the `Update` hot path via `ApplySceneVisualState` (line :123). Unity's `.material` property instantiates a per-renderer copy on first access (one-time per renderer, not per-frame), below the P1-2 blocking bar that targeted explicit `new Material()` in `Update`. T1 prototype acceptable; convert to `.sharedMaterial` + `MaterialPropertyBlock` before M3+ presentation polish or higher entity counts.
+- `s2_bridge_runner_evidence_path_hardcoded`: Lead-programmer note. `Assets/Editor/GravenspireM2CombatBridgeVerificationRunner.cs:21,:199` hard-codes the date `2026-05-10` and writes to an S2-M2-01 evidence path. Pre-patch behavior wrote there; harden patch (`946c9d1`) routed the post-patch run to a distinct S2-M2-02 path, resolving the immediate overwrite-collision risk. Cosmetic literal cleanup remains.
+- `m2_presentation_threshold_gap`: Human-play finding from AC-6 evidence at `tests/evidence/S2-M2-02/human-play-20260512.md:42-56`. Blockout-quality presentation (capsule actors, flat floor, debug HUD) is insufficient to validate gameplay feel via the "did you want one more pull?" bar. Routing decision: `S2-M2-03` accepts qualified human-play findings because linked-trash overpull is primarily a mechanical risk/stakes validation. Explicit revisit trigger before `S2-M2-04`, where presentation/discovery may matter more.
+
+### Sprint-level WATCH (not a carryover key)
+
+- Integration test inner harness uses `camelCase` private fields (e.g. `hitRoll`, `damageRollScalar`, `package`) rather than the project's `_camelCase` convention per [technical-preferences.md](.claude/docs/technical-preferences.md). Pre-existing in `93b460e`, outside the harden/evidence rubric. Defer to a future style-pass batch.
+
+### Closure Next Gate
+
+`/story-readiness production/stories/s2-m2-03-linked-trash-overpull.md`.

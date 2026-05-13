@@ -1,15 +1,13 @@
 # Active Session State
 
-**Last Updated:** 2026-05-11
-**Project Stage:** Pre-Production — Sprint 2 — S2-M2-01 Complete / S2-M2-02 Next
+**Last Updated:** 2026-05-12
+**Project Stage:** Pre-Production — Sprint 2 — S2-M2-02 Complete / S2-M2-03 Next
 
 ## Current Task
 
-Sprint 1.5 close-out gates are complete 3/3: `/smoke-check sprint` PASS WITH WARNINGS, `/team-qa sprint` APPROVED WITH CONDITIONS, and `/gate-check` PASS. Sprint 2 is now rolling forward to **Gravenspire T1: The First District**, a 20-30 minute offline playable slice.
+Sprint 2 M2 progress is 4/6: `S2-M2-02 Single trash pull + med loop` is closed via `/story-done` on 2026-05-12 with verdict **COMPLETE WITH NOTES**. Mechanical two-pull med-loop is playable; human-play evidence carries a qualified-no answer and the presentation-threshold gap forward for sprint-level tracking.
 
-S2-FOUNDATION-01 Unity launch verification is complete. Manual Play Mode verification and the Unity CLI runner both confirmed `_DevEntry.unity` loads, renders, and remains stable for 30 seconds with no captured errors.
-
-M2 Combat Camp Loop quick design is complete, `S2-M2-01` is closed, and `S2-M2-02` is unblocked. Next action: run the approved Unity ProjectSettings hygiene batch, then `/story-readiness production/stories/s2-m2-02-single-trash-pull-med-loop.md`.
+`S2-M2-03 Linked trash overpull` is unblocked. Next action: `/story-readiness production/stories/s2-m2-03-linked-trash-overpull.md`. Per closure routing decision, S2-M2-03 accepts qualified human-play findings because linked-trash overpull is primarily a mechanical risk/stakes validation; an explicit revisit trigger applies before `S2-M2-04` where presentation/discovery may matter more.
 
 ## Status
 
@@ -72,6 +70,7 @@ M2 Combat Camp Loop quick design is complete, `S2-M2-01` is closed, and `S2-M2-0
 - ✅ Sprint 2 M2 Combat Camp Loop quick design recorded at [design/quick/quick-design-m2-combat-camp-loop.md](../../design/quick/quick-design-m2-combat-camp-loop.md).
 - ✅ Sprint 2 M2 story slate opened: `S2-M2-01` through `S2-M2-04`. `S2-M2-01` is complete; `S2-M2-02` is ready for `/story-readiness`; `S2-M2-03` through `S2-M2-04` remain blocked in dependency order.
 - ✅ Sprint 2 story `S2-M2-01` closed via `/story-done` 2026-05-11 with verdict **COMPLETE WITH NOTES**. Commit `b4cb377` lands the Unity Combat Core runtime bridge.
+- ✅ Sprint 2 story `S2-M2-02` closed via `/story-done` 2026-05-12 with verdict **COMPLETE WITH NOTES**. Commits `93b460e` (implementation) -> `946c9d1` (harden / closes /code-review P0/P1) -> `350b06e` (evidence-integrity patch / closes qa-tester re-review). Three carryover keys logged: `m2_renderer_material_property_access`, `s2_bridge_runner_evidence_path_hardcoded`, `m2_presentation_threshold_gap`.
 - ⚠️ Unity ProjectSettings hygiene is deferred to a separate batch: `ProjectSettings/TagManager.asset` emits a non-fatal parse warning in committed S2-M2-01 smoke logs, and `ProjectSettings/URPProjectSettings.asset` is currently untracked after Unity generation.
 
 ## Files Being Worked On
@@ -117,10 +116,10 @@ M2 Combat Camp Loop quick design is complete, `S2-M2-01` is closed, and `S2-M2-0
 
 ## Next Skill to Run
 
-- If approved, run the small Unity settings hygiene batch for `ProjectSettings/TagManager.asset` and `ProjectSettings/URPProjectSettings.asset`.
-- Then run `/story-readiness production/stories/s2-m2-02-single-trash-pull-med-loop.md`.
-- `S2-M2-02` is the first playable-loop story; story-readiness should require human play/feel evidence for closure, not runner evidence alone.
-- Then proceed in order: `S2-M2-03` -> `S2-M2-04`.
+- Run `/story-readiness production/stories/s2-m2-03-linked-trash-overpull.md`.
+- `S2-M2-03` accepts qualified human-play findings per the M2-02 closure routing decision; linked-trash overpull is primarily mechanical risk/stakes validation, not a presentation-feel question.
+- Then `/dev-story`, `/code-review`, `/story-done` for `S2-M2-03`.
+- Explicit revisit trigger applies before `S2-M2-04` opens: re-evaluate whether the `m2_presentation_threshold_gap` carryover requires injecting a presentation-minimum story before `S2-M2-04` (option b) or deferring `S2-M2-04` human-play AC to post-presentation polish (option c).
 - Later: run Inventory implementation pre-spec to close `INV-OQ-05`, then rerun `/design-review design/gdd/inventory-item-economy.md --depth full`.
 
 ## Session Extract — Sprint 2 Story Open 2026-05-09 (S2-FOUNDATION-01)
@@ -229,3 +228,17 @@ M2 Combat Camp Loop quick design is complete, `S2-M2-01` is closed, and `S2-M2-0
 - Human-play gate: S2-M2-01 was a bridge/infrastructure story; CLI/runner evidence was sufficient. `S2-M2-02` and later playable-loop stories should require human play/feel evidence at closure.
 - Tech debt logged: None.
 - Next recommended: small Unity settings hygiene batch, then `/story-readiness production/stories/s2-m2-02-single-trash-pull-med-loop.md`.
+
+## Session Extract — /story-done 2026-05-12 (S2-M2-02)
+
+- Story: [production/stories/s2-m2-02-single-trash-pull-med-loop.md](../stories/s2-m2-02-single-trash-pull-med-loop.md) - S2-M2-02 Single Trash Pull + Med Loop.
+- Verdict: COMPLETE WITH NOTES.
+- Criteria: 6/6 passing; `S2-M2-02-01` through `S2-M2-02-06` are covered by committed verification evidence and the post-patch Unity smoke evidence.
+- Evidence: [tests/evidence/S2-M2-02/verification.md](../../tests/evidence/S2-M2-02/verification.md) records AC pass coverage, gate evidence, and review-gate provenance. [tests/evidence/S2-M2-02/human-play-20260512.md](../../tests/evidence/S2-M2-02/human-play-20260512.md) records the qualified-no answer to "did you want one more pull?" and the worst-thing presentation-threshold finding carried forward.
+- Implementation commits: `93b460e` (implementation) -> `946c9d1` (harden / closes /code-review P0/P1) -> `350b06e` (evidence-integrity patch / closes qa-tester re-review).
+- Code review: `/code-review` pass 1 on `946c9d1` returned STILL BLOCKED from qa-tester on evidence integrity; lead-programmer + gameplay-programmer returned APPROVED WITH NOTES on the runtime. Focused `/code-review` pass 2 on `350b06e` returned APPROVED from qa-tester; convergent WATCH item `renderer.material` on Update path retained.
+- Gate results: `dotnet test tests\Gravenspire.Combat.Tests.csproj --logger "console;verbosity=minimal"` passed 170/170 on 2026-05-12; `git diff --check` clean; `.githooks/pre-commit` returned `[pre-commit] OK` on the evidence-integrity commit.
+- Routing: `production/sprint-status.yaml` marks `S2-M2-02` done, updates Sprint 2 progress to 4/6 closed, unblocks `S2-M2-03`, and routes next to `/story-readiness production/stories/s2-m2-03-linked-trash-overpull.md`. M2-04 revisit trigger embedded in the `m2_presentation_threshold_gap` carryover.
+- WATCH items: `m2_renderer_material_property_access` (convergent finding on renderer.material in Update path); `s2_bridge_runner_evidence_path_hardcoded` (runner internal literal cleanup); `m2_presentation_threshold_gap` (human-play presentation-threshold; affects M2-03/M2-04 routing — see active carryover).
+- Tech debt logged: None new. Three carryover keys above were added to `sprint-status.yaml`. One sprint-level WATCH on integration-test private-field naming convention is noted in the story Completion Notes; not a separate carryover key.
+- Next recommended: `/story-readiness production/stories/s2-m2-03-linked-trash-overpull.md`.
