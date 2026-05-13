@@ -14,12 +14,18 @@ namespace Gravenspire.UnityRuntime.Combat
     {
         private const string FixtureRelativePath = "data/combat/t1-combat-fixtures.json";
         private const string EncounterFixtureId = "SoloTrash_EvenCon_T1";
+        private const string LinkedEncounterFixtureId = "TwoTrash_Overpull_T1";
         private const string ActiveZoneId = "Haunt_Prototype_T1";
         private const string PlayerActorId = "m2-player-cleric";
         private const string PlayerLocalCharacterId = "local-character-m2-dev";
         private const string HostileActorPrefix = "m2-hostile";
+        private const string LinkedHostileActorPrefix = "m2-linked-hostile";
         private const string SmiteAbilityId = "SmiteOfAuthority_T1_Prototype";
         private const string FixtureBand = "Mid";
+        private const string LinkedTrashSocialGroupId = "m2-linked-trash";
+        private const string LinkedTrashEncounterGroupId = "m2-linked-trash-overpull";
+        private const string BaseColorPropertyName = "_BaseColor";
+        private const string ColorPropertyName = "_Color";
         private const float PullAggroRadiusMeters = 4.0f;
         private const float M2MeleeRangeMeters = 1.5f;
         private const float HostileMoveSpeedMeters = 2.2f;
@@ -27,12 +33,18 @@ namespace Gravenspire.UnityRuntime.Combat
         private const float CameraFollowHeight = 7.0f;
         private const float CameraFollowBack = 8.0f;
         private const int MaxSmokeTicksPerPull = 5000;
+        private const double Feel03HateWindowSeconds = 5.0d;
+        private const double DangerHealthRatio = 0.20d;
+        private const double DangerManaRatio = 0.10d;
 
         private readonly List<string> _events = new();
         private readonly List<string> _errors = new();
+        private readonly List<string> _overpullEvents = new();
+        private MaterialPropertyBlock? _materialPropertyBlock;
 
         private Transform? _playerMarker;
         private Transform? _baselineTrash;
+        private Transform? _linkedTrash;
         private Transform? _campRestPoint;
         private Transform? _pullLane;
         private Transform? _floor;
@@ -46,6 +58,7 @@ namespace Gravenspire.UnityRuntime.Combat
         private CombatTacticalAbilityProfile? _smiteProfile;
         private CombatActorState? _player;
         private CombatActorState? _hostile;
+        private CombatActorState? _linkedHostile;
         private CombatZoneGate? _zoneGate;
         private FixedCombatClock? _clock;
         private CombatAttackStateSnapshot _playerAttackState = new(CombatAttackMode.Off, null, null, null);
@@ -56,6 +69,7 @@ namespace Gravenspire.UnityRuntime.Combat
         private readonly CombatInstantAbilityResolver _instantAbilityResolver = new();
         private readonly LoopingMeleeRandomSource _playerMeleeRandom = new(0.12d, 1.0d);
         private readonly LoopingMeleeRandomSource _hostileMeleeRandom = new(0.38d, 0.82d);
+        private readonly LoopingMeleeRandomSource _linkedHostileMeleeRandom = new(0.34d, 0.84d);
 
         private double _tickAccumulatorSeconds;
         private bool _pullActive;
@@ -100,7 +114,31 @@ namespace Gravenspire.UnityRuntime.Combat
 
         public IReadOnlyList<string> Events => _events;
 
+        public IReadOnlyList<string> OverpullEvents => _overpullEvents;
+
         public IReadOnlyList<string> Errors => _errors;
+
+        public bool LinkedTrashArrangementPresent => _linkedTrash is not null;
+
+        public bool LinkedTrashEnteredHateWithinFeelWindow { get; private set; }
+
+        public double LinkedTrashHateWindowSeconds { get; private set; } = -1d;
+
+        public int OverpullHostilesInHate { get; private set; }
+
+        public bool OverpullDangerousOutcomeRecorded { get; private set; }
+
+        public bool CleanSingleTrashLoopPreservedAfterOverpull { get; private set; }
+
+        public string OverpullOutcome { get; private set; } = "not_run";
+
+        public int OverpullEndingHealth { get; private set; }
+
+        public int OverpullMaxHealth { get; private set; }
+
+        public int OverpullEndingMana { get; private set; }
+
+        public int OverpullMaxMana { get; private set; }
 
         private void Awake()
         {
@@ -327,6 +365,31 @@ namespace Gravenspire.UnityRuntime.Combat
             }
         }
 
+        public bool RunAutomatedLinkedTrashOverpullSmoke()
+        {
+            _smokeRunning = true;
+            try
+            {
+                ResetOverpullMetrics();
+                if (!RunBadPullOverpullSmoke())
+                {
+                    return false;
+                }
+
+                CleanSingleTrashLoopPreservedAfterOverpull = RunAutomatedTwoPullSmoke();
+                return LinkedTrashArrangementPresent &&
+                    LinkedTrashEnteredHateWithinFeelWindow &&
+                    OverpullDangerousOutcomeRecorded &&
+                    CleanSingleTrashLoopPreservedAfterOverpull &&
+                    Errors.Count == 0;
+            }
+            finally
+            {
+                _smokeRunning = false;
+                ApplySceneVisualState();
+            }
+        }
+
         public void ResetLoop()
         {
             _events.Clear();
@@ -348,8 +411,24 @@ namespace Gravenspire.UnityRuntime.Combat
             _targetSelected = false;
             _playerAttackState = new CombatAttackStateSnapshot(CombatAttackMode.Off, null, null, null);
             _hostileAttackState = new CombatAttackStateSnapshot(CombatAttackMode.Off, null, null, null);
+            _linkedHostile = null;
             InitializeLoop();
             RecordEvent("loop_reset");
+        }
+
+        private void ResetOverpullMetrics()
+        {
+            _overpullEvents.Clear();
+            LinkedTrashEnteredHateWithinFeelWindow = false;
+            LinkedTrashHateWindowSeconds = -1d;
+            OverpullHostilesInHate = 0;
+            OverpullDangerousOutcomeRecorded = false;
+            CleanSingleTrashLoopPreservedAfterOverpull = false;
+            OverpullOutcome = "not_run";
+            OverpullEndingHealth = 0;
+            OverpullMaxHealth = 0;
+            OverpullEndingMana = 0;
+            OverpullMaxMana = 0;
         }
 
         private void InitializeLoop()
@@ -911,14 +990,15 @@ namespace Gravenspire.UnityRuntime.Combat
             CombatActorState target,
             CombatAttackStateSnapshot attackState,
             CombatTick tick,
-            ICombatMeleeRandomSource random)
+            ICombatMeleeRandomSource random,
+            double? distanceMetersToTarget = null)
         {
             return new CombatMeleeTickRequest(
                 attacker,
                 target,
                 attackState,
                 _zoneGate!,
-                DistanceToHostile(),
+                distanceMetersToTarget ?? DistanceToHostile(),
                 FacingDegreesToTarget: 0.0d,
                 FacingToleranceDegrees: 90.0d,
                 Array.Empty<CombatLosLayer>(),
@@ -1013,6 +1093,364 @@ namespace Gravenspire.UnityRuntime.Combat
             RecordEvent("baseline_trash_respawned");
         }
 
+        private bool RunBadPullOverpullSmoke()
+        {
+            BindSceneObjects();
+            if (_linkedTrash is null)
+            {
+                AddError("M2 linked trash scene marker was not found.");
+                return false;
+            }
+
+            var hydration = new CombatRuntimeEncounterHydrator().HydrateFromFile(
+                ResolveFixturePath(FixtureRelativePath),
+                new CombatRuntimeEncounterHydrationRequest
+                {
+                    EncounterFixtureId = LinkedEncounterFixtureId,
+                    ActiveZoneId = ActiveZoneId,
+                    PlayerCombatActorId = PlayerActorId,
+                    PlayerLocalCharacterId = PlayerLocalCharacterId,
+                    HostileCombatActorIdPrefix = LinkedHostileActorPrefix
+                });
+
+            if (!hydration.Succeeded || hydration.PlayerActor is null || hydration.HostileActors.Count < 2)
+            {
+                AddError("Linked-trash encounter hydration failed: " + string.Join("; ", hydration.Errors));
+                return false;
+            }
+
+            _player = hydration.PlayerActor;
+            _hostile = hydration.HostileActors[0];
+            _linkedHostile = hydration.HostileActors[1];
+            _zoneGate = new CombatZoneGate();
+            _zoneGate.ActivateZone(ActiveZoneId, CombatZoneType.HauntZone);
+            _clock = new FixedCombatClock(_fixturePackage?.CombatTickRateHz ?? 50);
+            _pullActive = false;
+            _targetSelected = false;
+            _playerAttackState = new CombatAttackStateSnapshot(CombatAttackMode.Off, null, null, null);
+            _hostileAttackState = new CombatAttackStateSnapshot(CombatAttackMode.Off, null, null, null);
+            PositionMarkersForBadPull();
+
+            var playerPoint = ToCombatPoint(_playerMarker!.position);
+            var primaryPoint = ToCombatPoint(_baselineTrash!.position);
+            var linkedPoint = ToCombatPoint(_linkedTrash.position);
+            var primaryCandidate = LinkedPullCandidate(
+                _hostile,
+                primaryPoint,
+                "M2_BaselineTrash",
+                assistOrderIndex: 0);
+            var linkedCandidate = LinkedPullCandidate(
+                _linkedHostile,
+                linkedPoint,
+                "M2_LinkedTrash",
+                assistOrderIndex: 1);
+
+            var pull = new CombatPullCoordinator().ResolveBodyPull(
+                _player,
+                playerPoint,
+                primaryCandidate,
+                new[] { linkedCandidate },
+                _zoneGate,
+                CurrentTick());
+
+            if (!pull.Succeeded || pull.PrimaryHostile is null || pull.AssistingHostiles.Count == 0)
+            {
+                AddError("Linked-trash body pull failed: " + string.Join("; ", pull.Errors));
+                return false;
+            }
+
+            var primary = pull.PrimaryHostile.WithCombatState(CombatState.InCombat);
+            var linked = pull.AssistingHostiles[0].WithCombatState(CombatState.InCombat);
+            _pullActive = true;
+            _pullStartedBeforeAttack = true;
+            _pullDidNotAutoEnableAttack = !pull.PlayerAttackEnabled;
+            OverpullHostilesInHate = 1 + pull.AssistingHostiles.Count;
+            LinkedTrashHateWindowSeconds = 0d;
+            LinkedTrashEnteredHateWithinFeelWindow = OverpullHostilesInHate >= 2 &&
+                LinkedTrashHateWindowSeconds <= Feel03HateWindowSeconds;
+            RecordOverpullEvent($"bad_pull_primary_hate:{primary.CombatActorId}");
+            RecordOverpullEvent($"bad_pull_linked_hate:{linked.CombatActorId}");
+            RecordOverpullEvent($"hate_window_seconds:{LinkedTrashHateWindowSeconds:0.0}");
+
+            _player = _player.WithTarget(primary.CombatActorId).WithCombatState(CombatState.InCombat);
+            _targetSelected = true;
+            _hostile = primary;
+            _linkedHostile = linked;
+            _hostileAttackState = new CombatAttackStateSnapshot(
+                CombatAttackMode.On,
+                _player.CombatActorId,
+                NextWeaponTick(primary),
+                CombatAttackTransitionPath.PlayerToggleOn);
+            var linkedAttackState = new CombatAttackStateSnapshot(
+                CombatAttackMode.On,
+                _player.CombatActorId,
+                NextWeaponTick(linked),
+                CombatAttackTransitionPath.PlayerToggleOn);
+
+            var attack = new CombatAttackStateMachine().ToggleOn(new CombatAttackToggleOnRequest(
+                _player,
+                primary,
+                _zoneGate,
+                M2MeleeRangeMeters,
+                CurrentTick(),
+                TickRateHz));
+            if (!attack.Succeeded)
+            {
+                AddError("Linked-trash player Attack toggle failed: " + string.Join("; ", attack.RejectionReasons));
+                return false;
+            }
+
+            _playerAttackState = attack.Snapshot;
+            var instantResolver = new CombatInstantAbilityResolver();
+            long? overpullSmiteCooldownEndsTick = null;
+            var targetingPrimary = true;
+            ResolveOverpullSmite(instantResolver, ref primary, ref linked, targetingPrimary, ref overpullSmiteCooldownEndsTick);
+
+            for (var tickIndex = 0; tickIndex < MaxSmokeTicksPerPull; tickIndex++)
+            {
+                var tick = _clock.AdvanceTicks(1);
+                if (targetingPrimary && !primary.IsAlive && linked.IsAlive)
+                {
+                    targetingPrimary = false;
+                    _player = _player!.WithTarget(linked.CombatActorId);
+                    _playerAttackState = new CombatAttackStateSnapshot(
+                        CombatAttackMode.On,
+                        linked.CombatActorId,
+                        NextWeaponTick(_player),
+                        CombatAttackTransitionPath.PlayerToggleOn);
+                    RecordOverpullEvent("player_retargeted_linked_trash");
+                }
+
+                if (overpullSmiteCooldownEndsTick is not null &&
+                    tick.Index >= overpullSmiteCooldownEndsTick.Value &&
+                    (targetingPrimary ? primary.IsAlive : linked.IsAlive))
+                {
+                    ResolveOverpullSmite(
+                        instantResolver,
+                        ref primary,
+                        ref linked,
+                        targetingPrimary,
+                        ref overpullSmiteCooldownEndsTick);
+                }
+
+                ResolvePlayerOverpullMelee(tick, ref primary, ref linked, targetingPrimary);
+                ResolveHostileOverpullMelee(tick, ref primary, ref _hostileAttackState, _hostileMeleeRandom, "primary");
+                ResolveHostileOverpullMelee(tick, ref linked, ref linkedAttackState, _linkedHostileMeleeRandom, "linked");
+                _hostile = primary;
+                _linkedHostile = linked;
+                UpdateHostileScale();
+                UpdateLinkedHostileScale();
+
+                if (RecordDangerIfReached(primary, linked))
+                {
+                    return true;
+                }
+
+                if (!primary.IsAlive && !linked.IsAlive)
+                {
+                    CaptureOverpullTelemetry("comfortable_two_trash_win");
+                    return false;
+                }
+            }
+
+            CaptureOverpullTelemetry("unresolved_tick_budget");
+            return false;
+        }
+
+        private CombatPullCandidate LinkedPullCandidate(
+            CombatActorState actor,
+            CombatPoint3 position,
+            string anchorId,
+            int assistOrderIndex)
+        {
+            return new CombatPullCandidate(
+                actor,
+                position,
+                new CombatSpatialAnchorSet(position, ToCombatPoint(_playerMarker!.position), anchorId, "ClericShellMarker"),
+                PullAggroRadiusMeters,
+                CombatSocialAssistProfile.T1Default(LinkedTrashSocialGroupId, LinkedTrashEncounterGroupId, assistOrderIndex),
+                Array.Empty<CombatLosLayer>(),
+                Array.Empty<CombatLosLayer>(),
+                assistOrderIndex);
+        }
+
+        private void ResolvePlayerOverpullMelee(
+            CombatTick tick,
+            ref CombatActorState primary,
+            ref CombatActorState linked,
+            bool targetingPrimary)
+        {
+            if (_player is null || !_playerAttackState.IsAttackOn)
+            {
+                return;
+            }
+
+            var target = targetingPrimary ? primary : linked;
+            if (!target.IsAlive)
+            {
+                return;
+            }
+
+            var result = _meleeResolver.ResolveTick(MeleeRequest(
+                _player,
+                target,
+                _playerAttackState,
+                tick,
+                _playerMeleeRandom,
+                M2MeleeRangeMeters));
+            if (result.Outcome == CombatMeleeTickOutcome.NotDue)
+            {
+                return;
+            }
+
+            _playerAttackState = _playerAttackState with { NextSwingDueTick = result.NextSwingDueTick };
+            if (result.TargetAfterResolution is not null)
+            {
+                if (targetingPrimary)
+                {
+                    primary = result.TargetAfterResolution;
+                }
+                else
+                {
+                    linked = result.TargetAfterResolution;
+                }
+            }
+
+            if (result.AppliedDamage)
+            {
+                RecordOverpullEvent($"player_melee_hit_{(targetingPrimary ? "primary" : "linked")}:{result.Damage}");
+            }
+        }
+
+        private void ResolveHostileOverpullMelee(
+            CombatTick tick,
+            ref CombatActorState hostile,
+            ref CombatAttackStateSnapshot attackState,
+            ICombatMeleeRandomSource random,
+            string label)
+        {
+            if (_player is null || !hostile.IsAlive)
+            {
+                return;
+            }
+
+            var result = _meleeResolver.ResolveTick(MeleeRequest(
+                hostile,
+                _player,
+                attackState,
+                tick,
+                random,
+                M2MeleeRangeMeters));
+            if (result.Outcome == CombatMeleeTickOutcome.NotDue)
+            {
+                return;
+            }
+
+            attackState = attackState with { NextSwingDueTick = result.NextSwingDueTick };
+            if (result.TargetAfterResolution is not null)
+            {
+                _player = result.TargetAfterResolution;
+            }
+
+            if (result.AppliedDamage)
+            {
+                RecordOverpullEvent($"{label}_trash_melee_hit:{result.Damage}");
+            }
+        }
+
+        private void ResolveOverpullSmite(
+            CombatInstantAbilityResolver instantResolver,
+            ref CombatActorState primary,
+            ref CombatActorState linked,
+            bool targetingPrimary,
+            ref long? cooldownEndsTick)
+        {
+            if (_player is null || _zoneGate is null || _smiteProfile is null)
+            {
+                return;
+            }
+
+            var target = targetingPrimary ? primary : linked;
+            if (!target.IsAlive)
+            {
+                return;
+            }
+
+            var result = instantResolver.Resolve(new CombatInstantAbilityRequest(
+                $"m2-overpull-smite-{CurrentTick().Index}",
+                _player,
+                target,
+                _zoneGate,
+                M2MeleeRangeMeters,
+                Array.Empty<CombatLosLayer>(),
+                CurrentTick(),
+                TickRateHz,
+                _smiteProfile));
+
+            if (!result.Succeeded)
+            {
+                return;
+            }
+
+            _player = result.Caster;
+            cooldownEndsTick = result.CooldownEndsTick;
+            if (result.TargetAfterResolution is not null)
+            {
+                if (targetingPrimary)
+                {
+                    primary = result.TargetAfterResolution;
+                }
+                else
+                {
+                    linked = result.TargetAfterResolution;
+                }
+            }
+
+            RecordOverpullEvent($"smite_resolved_{(targetingPrimary ? "primary" : "linked")}");
+        }
+
+        private bool RecordDangerIfReached(CombatActorState primary, CombatActorState linked)
+        {
+            if (_player is null)
+            {
+                return false;
+            }
+
+            if (!_player.IsAlive)
+            {
+                CaptureOverpullTelemetry("player_lost");
+                OverpullDangerousOutcomeRecorded = true;
+                return true;
+            }
+
+            var healthRatio = _player.CurrentHealth / (double)_player.MaxHealth;
+            var manaRatio = _player.MaxMana <= 0 ? 0d : _player.CurrentMana / (double)_player.MaxMana;
+            if ((primary.IsAlive || linked.IsAlive) && (healthRatio < DangerHealthRatio || manaRatio < DangerManaRatio))
+            {
+                CaptureOverpullTelemetry("forced_flee_threshold");
+                OverpullDangerousOutcomeRecorded = true;
+                return true;
+            }
+
+            return false;
+        }
+
+        private void CaptureOverpullTelemetry(string outcome)
+        {
+            OverpullOutcome = outcome;
+            if (_player is not null)
+            {
+                OverpullEndingHealth = _player.CurrentHealth;
+                OverpullMaxHealth = _player.MaxHealth;
+                OverpullEndingMana = _player.CurrentMana;
+                OverpullMaxMana = _player.MaxMana;
+            }
+
+            RecordOverpullEvent($"outcome:{outcome}");
+            RecordOverpullEvent($"ending_health:{OverpullEndingHealth}/{OverpullMaxHealth}");
+            RecordOverpullEvent($"ending_mana:{OverpullEndingMana}/{OverpullMaxMana}");
+        }
+
         private void ResolveCombatUntilHostileDefeated()
         {
             for (var tick = 0; tick < MaxSmokeTicksPerPull; tick++)
@@ -1051,6 +1489,32 @@ namespace Gravenspire.UnityRuntime.Combat
                 _baselineTrash.position = TrashAnchorPosition();
             }
 
+            if (_linkedTrash is not null)
+            {
+                _linkedTrash.position = LinkedTrashAnchorPosition();
+            }
+
+            FollowCamera();
+            ApplySceneVisualState();
+        }
+
+        private void PositionMarkersForBadPull()
+        {
+            if (_baselineTrash is not null)
+            {
+                _baselineTrash.position = TrashAnchorPosition();
+            }
+
+            if (_linkedTrash is not null)
+            {
+                _linkedTrash.position = LinkedTrashAnchorPosition();
+            }
+
+            if (_playerMarker is not null && _baselineTrash is not null)
+            {
+                _playerMarker.position = _baselineTrash.position + new Vector3(0.0f, 0.0f, -M2MeleeRangeMeters);
+            }
+
             FollowCamera();
             ApplySceneVisualState();
         }
@@ -1058,6 +1522,11 @@ namespace Gravenspire.UnityRuntime.Combat
         private static Vector3 TrashAnchorPosition()
         {
             return new Vector3(0.0f, 1.0f, 4.0f);
+        }
+
+        private static Vector3 LinkedTrashAnchorPosition()
+        {
+            return new Vector3(2.3f, 1.0f, 4.8f);
         }
 
         private long NextWeaponTick(CombatActorState actor)
@@ -1103,6 +1572,7 @@ namespace Gravenspire.UnityRuntime.Combat
         {
             _playerMarker ??= FindTransform("ClericShellMarker");
             _baselineTrash ??= FindTransform("M2_BaselineTrash");
+            _linkedTrash ??= FindTransform("M2_LinkedTrash");
             _campRestPoint ??= FindTransform("M2_CampRestPoint");
             _pullLane ??= FindTransform("M2_PullLane");
             _floor ??= FindTransform("DevEntry_DistrictBlockout_Floor");
@@ -1136,6 +1606,9 @@ namespace Gravenspire.UnityRuntime.Combat
             ApplyColor(_baselineTrash, _hostile is not null && _hostile.IsAlive
                 ? new Color(0.75f, 0.16f, 0.16f)
                 : new Color(0.22f, 0.22f, 0.24f));
+            ApplyColor(_linkedTrash, _linkedHostile is not null && _linkedHostile.IsAlive
+                ? new Color(0.78f, 0.24f, 0.12f)
+                : new Color(0.22f, 0.22f, 0.24f));
         }
 
         private void ApplyPresentationSettings()
@@ -1158,14 +1631,23 @@ namespace Gravenspire.UnityRuntime.Combat
             _camera.fieldOfView = 44.0f;
         }
 
-        private static void ApplyColor(Transform? target, Color color)
+        private void ApplyColor(Transform? target, Color color)
         {
             if (target is null || !target.TryGetComponent<Renderer>(out var renderer))
             {
                 return;
             }
 
-            renderer.material.color = color;
+            if (renderer.sharedMaterial is null)
+            {
+                return;
+            }
+
+            _materialPropertyBlock ??= new MaterialPropertyBlock();
+            renderer.GetPropertyBlock(_materialPropertyBlock);
+            _materialPropertyBlock.SetColor(BaseColorPropertyName, color);
+            _materialPropertyBlock.SetColor(ColorPropertyName, color);
+            renderer.SetPropertyBlock(_materialPropertyBlock);
         }
 
         private void UpdateHostileScale()
@@ -1179,9 +1661,25 @@ namespace Gravenspire.UnityRuntime.Combat
             _baselineTrash.localScale = new Vector3(0.8f, Mathf.Lerp(0.35f, 1.0f, healthRatio), 0.8f);
         }
 
+        private void UpdateLinkedHostileScale()
+        {
+            if (_linkedTrash is null || _linkedHostile is null || _linkedHostile.MaxHealth <= 0)
+            {
+                return;
+            }
+
+            var healthRatio = Mathf.Clamp01((float)_linkedHostile.CurrentHealth / _linkedHostile.MaxHealth);
+            _linkedTrash.localScale = new Vector3(0.8f, Mathf.Lerp(0.35f, 1.0f, healthRatio), 0.8f);
+        }
+
         private void RecordEvent(string eventName)
         {
             _events.Add($"{CurrentTick().Index}:{eventName}");
+        }
+
+        private void RecordOverpullEvent(string eventName)
+        {
+            _overpullEvents.Add($"{CurrentTick().Index}:{eventName}");
         }
 
         private void AddError(string error)

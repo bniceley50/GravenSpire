@@ -1,6 +1,6 @@
 # S2-M2-03 - Linked Trash Overpull
 
-**Status:** Blocked
+**Status:** In Progress
 **Sprint:** 2
 **Priority:** Must Have
 **Layer:** Gameplay / Unity Runtime
