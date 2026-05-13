@@ -1,6 +1,6 @@
 # S2-M2-03 - Linked Trash Overpull
 
-**Status:** In Progress
+**Status:** Complete
 **Sprint:** 2
 **Priority:** Must Have
 **Layer:** Gameplay / Unity Runtime
@@ -139,3 +139,15 @@ loop.
 ## Next Gate
 
 Blocked until `S2-M2-02` is closed.
+
+## Completion Notes
+
+**Completed**: 2026-05-13
+**Verdict**: COMPLETE WITH NOTES
+**Criteria**: 5/5 passing
+**Deferred/Untested Criteria**: None
+**Test Evidence**: `tests/evidence/S2-M2-03/verification.md`, `tests/evidence/S2-M2-03/unity-linked-trash-overpull-runner-20260513-smoke.md`, `tests/evidence/S2-M2-03/unity-linked-trash-overpull-runner-20260513.log`, `tests/integration/gameplay/combat/combat_runtime_linked_trash_overpull_test.cs`
+**GDD/ADR Deviations**: None — implementation aligns with `combat-core.md` TwoTrash_Overpull_T1 fixture and FEEL-03 timing; DECISIONS.md D001, D002, D003, D012, and D014 remain governing and Locked.
+**Scope Notes**: Implementation committed cleanly at `bb6deab` (10 files, 1965 insertions, 6 deletions). Unity log redacted for local machine identifiers before commit. AC-03 dangerous-outcome proven via mechanical telemetry (`ending_health=14/140`, `overpull_outcome=forced_flee_threshold`), retiring the M2-02 presentation-threshold gap for this story; the M2-04 revisit trigger remains active.
+**Review Gates**: Lean mode — subagent gates skipped per skill §9. Pre-commit verification covered the four conditions (story status flip, no Update-hot-path .material, no hardcoded date/path, manifest absence recorded). Local gates: dotnet 172/172, T1 negative-scope scan PASS, git diff --check PASS, pre-commit hook PASS.
+**Forced Completion**: No

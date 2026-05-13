@@ -1,13 +1,13 @@
 # Active Session State
 
-**Last Updated:** 2026-05-12
-**Project Stage:** Pre-Production — Sprint 2 — S2-M2-02 Complete / S2-M2-03 Next
+**Last Updated:** 2026-05-13
+**Project Stage:** Pre-Production — Sprint 2 — S2-M2-03 Complete / S2-M2-04 Next
 
 ## Current Task
 
-Sprint 2 M2 progress is 4/6: `S2-M2-02 Single trash pull + med loop` is closed via `/story-done` on 2026-05-12 with verdict **COMPLETE WITH NOTES**. Mechanical two-pull med-loop is playable; human-play evidence carries a qualified-no answer and the presentation-threshold gap forward for sprint-level tracking.
+Sprint 2 M2 progress is 5/6: `S2-M2-03 Linked trash overpull` is closed via `/story-done` on 2026-05-13 with verdict **COMPLETE WITH NOTES**. Linked-trash overpull pressure is mechanically validated: smoke telemetry recorded `overpull_outcome=forced_flee_threshold` and `ending_health=14/140`, with the clean M2-02 single-trash loop preserved. All four local gates passed (dotnet 172/172, T1 negative-scope scan, git diff --check, .githooks/pre-commit). Implementation landed at `bb6deab` (unpushed); closure commit is the next gate.
 
-`S2-M2-03 Linked trash overpull` is unblocked. Next action: `/story-readiness production/stories/s2-m2-03-linked-trash-overpull.md`. Per closure routing decision, S2-M2-03 accepts qualified human-play findings because linked-trash overpull is primarily a mechanical risk/stakes validation; an explicit revisit trigger applies before `S2-M2-04` where presentation/discovery may matter more.
+`S2-M2-04 Named blocker + camp boundary` is the next active routing target for `/story-readiness`; its story header and sprint-status row remain blocked until that gate flips them. The M2-02 presentation-threshold revisit trigger (`m2_presentation_threshold_gap`) remains active for M2-04 — qualified human-play findings that worked for M2-03 (mechanical risk/stakes validation) may not extend to M2-04 (named-blocker pacing where presentation/discovery may matter more).
 
 ## Status
 
@@ -71,6 +71,7 @@ Sprint 2 M2 progress is 4/6: `S2-M2-02 Single trash pull + med loop` is closed v
 - ✅ Sprint 2 M2 story slate opened: `S2-M2-01` through `S2-M2-04`. `S2-M2-01` is complete; `S2-M2-02` is ready for `/story-readiness`; `S2-M2-03` through `S2-M2-04` remain blocked in dependency order.
 - ✅ Sprint 2 story `S2-M2-01` closed via `/story-done` 2026-05-11 with verdict **COMPLETE WITH NOTES**. Commit `b4cb377` lands the Unity Combat Core runtime bridge.
 - ✅ Sprint 2 story `S2-M2-02` closed via `/story-done` 2026-05-12 with verdict **COMPLETE WITH NOTES**. Commits `93b460e` (implementation) -> `946c9d1` (harden / closes /code-review P0/P1) -> `350b06e` (evidence-integrity patch / closes qa-tester re-review). Three carryover keys logged: `m2_renderer_material_property_access`, `s2_bridge_runner_evidence_path_hardcoded`, `m2_presentation_threshold_gap`.
+- ✅ Sprint 2 story `S2-M2-03` closed via `/story-done` 2026-05-13 with verdict **COMPLETE WITH NOTES** (5/5 AC); implementation at `bb6deab` (unpushed); `control_manifest_absence_pre_existing` carryover added to sprint-status; lessons capture deferred (MaterialPropertyBlock field-initializer, PowerShell heredoc whitespace-collapse).
 - ⚠️ Unity ProjectSettings hygiene is deferred to a separate batch: `ProjectSettings/TagManager.asset` emits a non-fatal parse warning in committed S2-M2-01 smoke logs, and `ProjectSettings/URPProjectSettings.asset` is currently untracked after Unity generation.
 
 ## Files Being Worked On
@@ -116,10 +117,13 @@ Sprint 2 M2 progress is 4/6: `S2-M2-02 Single trash pull + med loop` is closed v
 
 ## Next Skill to Run
 
-- Run `/story-readiness production/stories/s2-m2-03-linked-trash-overpull.md`.
-- `S2-M2-03` accepts qualified human-play findings per the M2-02 closure routing decision; linked-trash overpull is primarily mechanical risk/stakes validation, not a presentation-feel question.
-- Then `/dev-story`, `/code-review`, `/story-done` for `S2-M2-03`.
-- Explicit revisit trigger applies before `S2-M2-04` opens: re-evaluate whether the `m2_presentation_threshold_gap` carryover requires injecting a presentation-minimum story before `S2-M2-04` (option b) or deferring `S2-M2-04` human-play AC to post-presentation polish (option c).
+After the closure commit lands and push approval is granted (separate decisions):
+
+- `/story-readiness production/stories/s2-m2-04-named-blocker-camp-boundary.md` to validate S2-M2-04 readiness. Its story header and sprint-status row remain blocked until that gate flips them.
+- Note for S2-M2-04 review: M2-02 presentation-threshold gap revisit trigger applies. Decide whether M2-04 can also pass on mechanical telemetry alone (like M2-03's AC-03), or whether named-blocker pacing requires presentation-quality validation. Three options when M2-04 readiness runs:
+  - (a) Accept qualified human-play findings (like M2-03)
+  - (b) Inject a presentation-minimum sub-story before M2-04 implementation
+  - (c) Defer the human-play AC to post-presentation-polish
 - Later: run Inventory implementation pre-spec to close `INV-OQ-05`, then rerun `/design-review design/gdd/inventory-item-economy.md --depth full`.
 
 ## Session Extract — Sprint 2 Story Open 2026-05-09 (S2-FOUNDATION-01)
@@ -242,3 +246,15 @@ Sprint 2 M2 progress is 4/6: `S2-M2-02 Single trash pull + med loop` is closed v
 - WATCH items: `m2_renderer_material_property_access` (convergent finding on renderer.material in Update path); `s2_bridge_runner_evidence_path_hardcoded` (runner internal literal cleanup); `m2_presentation_threshold_gap` (human-play presentation-threshold; affects M2-03/M2-04 routing — see active carryover).
 - Tech debt logged: None new. Three carryover keys above were added to `sprint-status.yaml`. One sprint-level WATCH on integration-test private-field naming convention is noted in the story Completion Notes; not a separate carryover key.
 - Next recommended: `/story-readiness production/stories/s2-m2-03-linked-trash-overpull.md`.
+
+## Session Extract — /story-done 2026-05-13 (S2-M2-03)
+
+- Story: `production/stories/s2-m2-03-linked-trash-overpull.md` — S2-M2-03 Linked Trash Overpull
+- Verdict: COMPLETE WITH NOTES
+- Criteria: 5/5 passing (zero deferred/untested)
+- Evidence: bb6deab commit (10 files, 1965 insertions, 6 deletions); `tests/evidence/S2-M2-03/verification.md`; dotnet 172/172; smoke evidence with mechanical AC-03 proof
+- Code review: lean mode (subagent gates skipped); pre-commit four-condition verification covered renderer-material discipline, runner hygiene, manifest absence recording, and story-status flip
+- Routing forward: S2-M2-04 is the next active routing target for `/story-readiness`; its story header and sprint-status row remain blocked until that gate flips them; M2-02 presentation-threshold revisit trigger remains active for M2-04
+- Tech debt logged in this batch: 0 (lessons deferred — MaterialPropertyBlock field-initializer + PowerShell heredoc whitespace-collapse pending dedicated lessons batch or follow-up commit per user direction)
+- Sprint-status carryover added: `control_manifest_absence_pre_existing` (pre-existing project-wide governance gap, non-blocking)
+- Next recommended: `/story-readiness production/stories/s2-m2-04-named-blocker-camp-boundary.md`

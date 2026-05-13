@@ -6,18 +6,18 @@ goal: "Gravenspire T1: The First District - a 20-30 minute offline playable slic
 start: "2026-05-09"
 end: "2026-05-30"
 generated: "2026-05-09"
-updated: "2026-05-12"
+updated: "2026-05-13"
 branch: "main"
-head: "350b06e"
+head: "bb6deab"
 qa_plan: "production/qa/plans/qa-plan-sprint-2-20260509.md"
 plan: "production/sprints/sprint-2.md"
 slice_review: ""
-implementation_gate: "S2-M2-02 Single trash pull + med loop is complete. Required next gate: /story-readiness production/stories/s2-m2-03-linked-trash-overpull.md."
-progress: "4/6 closed; M2-02 Single trash pull + med loop complete; S2-M2-03 story-readiness next"
-completed_stories: 4
+implementation_gate: "S2-M2-03 Linked trash overpull is complete. Required next gate: /story-readiness production/stories/s2-m2-04-named-blocker-camp-boundary.md."
+progress: "5/6 closed; M2-03 Linked trash overpull complete; S2-M2-04 story-readiness next"
+completed_stories: 5
 total_stories: 6
-next_active_story: "S2-M2-03"
-next_active_command: "/story-readiness production/stories/s2-m2-03-linked-trash-overpull.md"
+next_active_story: "S2-M2-04"
+next_active_command: "/story-readiness production/stories/s2-m2-04-named-blocker-camp-boundary.md"
 
 carryover:
   ability_resolved_event_payload: "AbilityResolvedEvent remains ManaSpent-only, but T1-COMBAT-11 durably classifies it as KNOWN-CARRYOVER and fails shipping universal-spend misuse."
@@ -39,6 +39,7 @@ carryover:
   m2_renderer_material_property_access: "S2-M2-02 convergent code-review finding (lead-programmer + gameplay-programmer): Assets/Scripts/M2SingleTrashMedLoopController.cs:1168 reads renderer.material on the Update hot path via ApplySceneVisualState (line 123). Unity's .material property instantiates a per-renderer copy on first access (one-time per renderer, not per-frame); below the P1-2 blocking bar that targeted explicit new Material() in Update. T1 prototype acceptable; convert to .sharedMaterial + MaterialPropertyBlock before M3+ presentation polish or higher entity counts."
   s2_bridge_runner_evidence_path_hardcoded: "S2-M2-02 lead-programmer code-review note: Assets/Editor/GravenspireM2CombatBridgeVerificationRunner.cs:21,:199 hard-codes the date 2026-05-10 and writes to an S2-M2-01 evidence path. Pre-patch behavior wrote there; harden patch (946c9d1) routed the post-patch run to a distinct S2-M2-02 path, resolving immediate overwrite-collision risk. Cosmetic literal cleanup remains; sprint-level WATCH."
   m2_presentation_threshold_gap: "S2-M2-02 human-play finding (tests/evidence/S2-M2-02/human-play-20260512.md:42-56): blockout-quality presentation (capsule actors, flat floor, debug HUD) is insufficient to validate gameplay feel via the 'did you want one more pull?' bar. Affects M2-03/M2-04 human-play AC interpretation. Routing decision: S2-M2-03 accepts qualified human-play findings because linked-trash overpull is primarily a mechanical risk/stakes validation. Explicit revisit trigger before S2-M2-04 opens, where presentation/discovery may matter more. Future M3+ presentation pass should retire this carryover or convert it into a presentation-minimum acceptance bar."
+  control_manifest_absence_pre_existing: "Pre-existing project-wide governance gap: docs/architecture/control-manifest.md is absent. Multiple Sprint 2 stories cite Manifest Version headers while docs/architecture/control-manifest.md is absent; S2-M2-01, S2-M2-02, and S2-M2-03 closed under this condition with absence recorded in verification evidence. Documented project handling: production/qa/plans/qa-plan-sprint-2-20260509.md:54,60 uses architecture-registry fallback when the manifest is absent. Sprint-close decision needed: author the manifest via /create-control-manifest as cleanup, or continue header-only convention with architecture-registry fallback as documented in the Sprint 2 QA plan. Non-blocking for M2-03 implementation or closure."
 
 stories:
   - id: "S2-COMBAT-01"
@@ -81,11 +82,11 @@ stories:
     name: "Linked trash overpull"
     file: "production/stories/s2-m2-03-linked-trash-overpull.md"
     priority: must-have
-    status: blocked
+    status: done
     owner: ""
     estimate_days: 1.0
-    blocker: "Blocked on S2-M2-02 Single trash pull + med loop."
-    completed: ""
+    blocker: ""
+    completed: "2026-05-13"
   - id: "S2-M2-04"
     name: "Named blocker + camp boundary"
     file: "production/stories/s2-m2-04-named-blocker-camp-boundary.md"
