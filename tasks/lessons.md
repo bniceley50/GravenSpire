@@ -21,6 +21,46 @@ Promote repeating lessons to `CLAUDE-patterns.md` (cross-cutting) or a
 
 ## Entries (newest first)
 
+### 2026-05-14 — [GLOBAL][TEST] Convert gameplay-feel acceptance into telemetry so blockout builds can still gate
+
+**Context:** Sprint 2 M2 stories carry human-play acceptance criteria, but `S2-M2-02` human-play evidence found blockout-quality presentation (capsule actors, flat floor, debug HUD) too thin to validate "feel" via the "did you want one more pull?" bar (`m2_presentation_threshold_gap` carryover). `S2-M2-03` resolved this for its danger criterion not by improving presentation but by instrumenting intent: the overpull smoke recorded `overpull_outcome=forced_flee_threshold` and `ending_health=14/140` as mechanical proof, so AC-03 passed on telemetry while human-play stayed a qualified supplement. At `S2-M2-04` readiness the routing decision made this standing policy: named-blocker pacing must be proven through telemetry (discovery, time-to-danger, boundary pressure, clean-loop preservation, no farm-through), with human-play qualified by blockout visuals rather than blocking on them.
+
+**Lesson:** When presentation fidelity is below the bar needed to validate "feel," do not defer the criterion and do not hand-wave it — instrument the design intent as telemetry. A blockout build cannot tell you if a mechanic feels good, but it can prove the mechanic does the thing (gates, escalates, resists trivialization). This decouples "is the mechanic correct?" (falsifiable now) from "does it feel right?" (needs art), keeps mechanical AC binding at low fidelity, and keeps human-play in the loop as a qualified supplement, not a removed step or a blocker.
+
+**Evidence:** `production/stories/s2-m2-03-linked-trash-overpull.md` Completion Notes (Scope Notes); `tests/evidence/S2-M2-03/verification.md` AC `S2-M2-03-03` row; `production/sprint-status.yaml` carryover `m2_presentation_threshold_gap`; `tests/evidence/S2-M2-02/human-play-20260512.md`.
+
+**Promotion status:** open — refines the standing "human play as first-class acceptance for gameplay-runtime stories from M2-02 onward" memory note; promote to `.claude/rules/test-standards.md` or the universal prompt if it survives the M3+ presentation pass.
+
+### 2026-05-14 — [GLOBAL][CI][SCOPE] The T1 negative-scope scanner matches its own forbidden-term documentation
+
+**Context:** The `S2-M2-03` closure ran the T1 negative-scope scan over changed files. Every hit was the scanner matching documentation that names forbidden terms in order to forbid them: the story's own "Out Of Scope" line (`s2-m2-03-linked-trash-overpull.md:67`) and the verification row's own quoted scan command. No runtime, test, scene, runner, or smoke file hit. The same pattern appeared at `S2-M2-01` closure ("only classified story/test/comment hits").
+
+**Lesson:** A negative-scope scanner that greps for forbidden vocabulary will always self-match the documentation written to exclude that vocabulary. This is expected, not a violation — but it must be handled explicitly every time: classify each hit as doc-reference vs. real implementation hit, record the classification in verification evidence (the "PASS WITH CLASSIFIED DOC HITS" convention), and never let a future reader mistake a self-match for a scope breach. A hit on a runtime/scene/runner/smoke implementation file is the real signal.
+
+**Evidence:** `tests/evidence/S2-M2-03/verification.md` Local Gates table (T1 negative-scope scan row); `production/stories/s2-m2-03-linked-trash-overpull.md:67`; `production/session-state/active.md` S2-M2-01 `/story-done` extract.
+
+**Promotion status:** open — promote to `.githooks/pre-commit` docs or `game-dev-governance.md` if the classify-doc-hits step is formalized into the hook itself.
+
+### 2026-05-14 — [GLOBAL][CI] Redact local-machine identifiers from Unity logs before committing them as evidence
+
+**Context:** `S2-M2-03` commits the Unity batchmode runner log as required test evidence (`unity-linked-trash-overpull-runner-20260513.log`). That log contains a Unity `Licensing::Client` handshake message and other local machine identifiers from the local Editor environment. The log was redacted before commit and the redaction recorded in the story Completion Notes. Every Unity-runtime story in Sprint 2 (`S2-M2-01/02/03`) commits a Unity log as evidence.
+
+**Lesson:** Unity batchmode logs are legitimate, required evidence — but they leak local environment data (licensing handshakes, machine names, absolute user paths). Redaction of local-machine identifiers is required before committing any Unity log that contains local identifiers, not optional cleanup, and the redaction itself should be recorded in verification evidence so a reviewer knows the log was sanitized, not truncated. Aligns with the governance rule against storing sensitive logs.
+
+**Evidence:** `production/stories/s2-m2-03-linked-trash-overpull.md` Completion Notes (Scope Notes); `tests/evidence/S2-M2-03/verification.md` Runtime Notes (`Licensing::Client` handshake); `.claude/rules/game-dev-governance.md` Memory Policy ("Never Store: sensitive logs").
+
+**Promotion status:** open — promote to a Unity evidence checklist on the next Unity-runtime closure.
+
+### 2026-05-14 — [GLOBAL] MaterialPropertyBlock and other Unity engine-backed objects should not be created in MonoBehaviour field initializers
+
+**Context:** `S2-M2-03` moved camp visual-state code toward the `MaterialPropertyBlock` + `GetPropertyBlock`/`SetPropertyBlock` pattern (the recommended fix for the `m2_renderer_material_property_access` carryover). In `M2SingleTrashMedLoopController.cs` the `MaterialPropertyBlock` is declared as a nullable field with no initializer (`private MaterialPropertyBlock? _materialPropertyBlock;`, line 43) and created lazily at first use (`_materialPropertyBlock ??= new MaterialPropertyBlock();`, line 1646) — deliberately not a field initializer, because C# field initializers run inside the constructor and Unity invokes MonoBehaviour constructors outside the normal engine lifecycle.
+
+**Lesson:** Unity engine-backed objects — `MaterialPropertyBlock`, `Material`, `Texture`, `Mesh`, and similar — should not be constructed in a MonoBehaviour C# field initializer or constructor unless Unity documentation explicitly marks the type safe for constructor-time allocation. Initialize them lazily (`??=` at point of use) or in a lifecycle method (`Awake`/`OnEnable`). The lazy `??=` pattern also pairs correctly with nullable reference types: one honestly-`?`-typed field, one guaranteed construction site. A field initializer on a Unity-backed type is a latent main-thread / lifecycle-order bug even when it appears to work.
+
+**Evidence:** `Assets/Scripts/M2SingleTrashMedLoopController.cs:43` and `:1646-1650` (commit `bb6deab`); `production/sprint-status.yaml` carryover `m2_renderer_material_property_access`.
+
+**Promotion status:** open — promote to `.claude/rules/` Unity code-standards if the field-initializer trap recurs on another Unity-backed type.
+
 ### 2026-04-30 — [GLOBAL][CI][SCOPE] Promote staged hygiene and T1 negative-scope checks to hook
 
 **Context:** Sprint 1 Combat Core implementation repeated the same local gates across `T1-COMBAT-01` through `T1-COMBAT-05`: `git diff --check` caught or confirmed whitespace/conflict-marker hygiene, and manual negative T1 scope greps repeatedly protected the offline single-player tier from FishNet, networking, server authority, PvP, companion, future-class, live-LLM, Unity frame-time, and wall-clock-time drift. The pattern has crossed the threshold where relying on manual recall is weaker than making the gate structural.
