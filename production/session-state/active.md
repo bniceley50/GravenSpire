@@ -1,13 +1,13 @@
 # Active Session State
 
 **Last Updated:** 2026-05-14
-**Project Stage:** Pre-Production — Sprint 2 — S2-M2-03 Complete / S2-M2-04 Next
+**Project Stage:** Pre-Production — Sprint 2 — S2-M2-04 Implemented (pending /code-review + /story-done)
 
 ## Current Task
 
 Sprint 2 M2 progress is 5/6: `S2-M2-03 Linked trash overpull` is closed (`/story-done` 2026-05-13, **COMPLETE WITH NOTES**, 5/5 AC; implementation `bb6deab`, closure `3ce334c`). Linked-trash overpull pressure is mechanically validated: smoke telemetry recorded `overpull_outcome=forced_flee_threshold` and `ending_health=14/140`, with the clean M2-02 single-trash loop preserved. All four local gates passed (dotnet 172/172, T1 negative-scope scan, git diff --check, .githooks/pre-commit). The S2-M2-03-cycle process lessons were captured 2026-05-14 in `fc20a86` (pushed to `origin/main`).
 
-`S2-M2-04 Named blocker + camp boundary` passed `/story-readiness` on 2026-05-14 with verdict **READY**. The M2-02 presentation-threshold revisit trigger (`m2_presentation_threshold_gap`) was resolved with routing option **(a)** plus a binding telemetry constraint — see `## Next Skill to Run`. Next is `/dev-story production/stories/s2-m2-04-named-blocker-camp-boundary.md`; the S2-M2-04 story header and sprint-status row stay blocked until `/dev-story` flips them.
+`S2-M2-04 Named blocker + camp boundary` is implemented via `/dev-story` on 2026-05-14; the story header is flipped to **In Progress** (sprint-status row left for `/story-done` per the dev-story skill). The binding telemetry carry-in is satisfied: the Unity `6000.3.14f1` smoke recorded `named_blocker_outcome=forced_flee_threshold`, `time_to_danger_seconds=26.00`, `ending_health=40/220`, `named_ending_health=330/520`, `clean_loop_preserved=True` (17/17 checks PASS, exit 0), and the new dotnet integration test proves the same FEEL-02 boundary mechanically. All local gates passed (dotnet 175/175, T1 negative-scope scan, git diff --check, .githooks/pre-commit). Next is `/code-review` on the changed files, then `/story-done`.
 
 ## Status
 
@@ -117,8 +117,8 @@ Sprint 2 M2 progress is 5/6: `S2-M2-03 Linked trash overpull` is closed (`/story
 
 ## Next Skill to Run
 
-- `/dev-story production/stories/s2-m2-04-named-blocker-camp-boundary.md` — implement S2-M2-04 Named Blocker + Camp Boundary. `/story-readiness` ran 2026-05-14, verdict **READY**: governing DECISIONS D001/D002/D003/D012/D014 all Locked; the only WARN is the pre-existing `control_manifest_absence_pre_existing` manifest gap, non-blocking. The S2-M2-04 story header and sprint-status row are still flagged blocked — `/dev-story` moves them to in progress.
-- Routing decision (2026-05-14) on the M2-02 presentation-threshold revisit trigger (`m2_presentation_threshold_gap`): option **(a) — accept qualified human-play findings** — with a binding constraint. S2-M2-04 verification must mechanically prove the named blocker changes camp behavior through telemetry (discovery, time-to-danger, boundary pressure, clean-loop preservation, no farm-through), the way S2-M2-03 proved danger via `ending_health=14/140`. Human-play notes may be qualified by blockout visuals; mechanical AC cannot rest on presentation feel. This is an evidence-shaping carry-in for `/dev-story` and `/story-done`, not a story-file edit. Captured durably as lesson A in `tasks/lessons.md` (`fc20a86`).
+- `/code-review` on the S2-M2-04 changed files, then `/story-done production/stories/s2-m2-04-named-blocker-camp-boundary.md`. `/dev-story` ran 2026-05-14 and implemented S2-M2-04; the story header is flipped to In Progress and `production/sprint-status.yaml` stays blocked until `/story-done`. Changed files: `Assets/Editor/GravenspireM2SingleTrashLoopBuilder.cs`, `Assets/Scripts/M2SingleTrashMedLoopController.cs`, `Assets/Editor/GravenspireM2NamedBlockerVerificationRunner.cs` (+`.meta`), `Assets/Scenes/_DevEntry.unity`, `tests/integration/gameplay/combat/combat_runtime_named_blocker_boundary_test.cs`, `tests/evidence/S2-M2-04/**`.
+- Routing decision (2026-05-14) on the M2-02 presentation-threshold revisit trigger (`m2_presentation_threshold_gap`): option **(a) — accept qualified human-play findings** — with a binding constraint. S2-M2-04 verification must mechanically prove the named blocker changes camp behavior through telemetry (discovery, time-to-danger, boundary pressure, clean-loop preservation, no farm-through), the way S2-M2-03 proved danger via `ending_health=14/140`. **Status: satisfied by `/dev-story` 2026-05-14** — telemetry + the dotnet integration test mechanically prove all five dimensions; human-play stays a qualified supplement. Human-play notes may be qualified by blockout visuals; mechanical AC cannot rest on presentation feel. Captured durably as lesson A in `tasks/lessons.md` (`fc20a86`).
 - Later: run Inventory implementation pre-spec to close `INV-OQ-05`, then rerun `/design-review design/gdd/inventory-item-economy.md --depth full`.
 
 ## Session Extract — Sprint 2 Story Open 2026-05-09 (S2-FOUNDATION-01)
@@ -253,3 +253,29 @@ Sprint 2 M2 progress is 5/6: `S2-M2-03 Linked trash overpull` is closed (`/story
 - Tech debt logged in this batch: 0; S2-M2-03-cycle lessons captured 2026-05-14 in `fc20a86` — 4 entries (telemetry-backed feel acceptance, classified negative-scope doc hits, Unity log redaction, MaterialPropertyBlock lifecycle-safe allocation). The PowerShell heredoc whitespace-collapse lesson was dropped: real but lacking durable repo evidence; recapture if it recurs or when a shell/git workflow doc is opened.
 - Sprint-status carryover added: `control_manifest_absence_pre_existing` (pre-existing project-wide governance gap, non-blocking)
 - Next recommended: `/story-readiness production/stories/s2-m2-04-named-blocker-camp-boundary.md`
+
+## Session Extract — /dev-story 2026-05-14 (S2-M2-04)
+
+- Story: `production/stories/s2-m2-04-named-blocker-camp-boundary.md` — S2-M2-04 Named Blocker + Camp Boundary.
+- Status after implementation: Implemented, pending `/code-review` and `/story-done`. Story header flipped `Blocked` → `In Progress`; `production/sprint-status.yaml` intentionally untouched (dev-story skill §7 — `/story-done` owns the sprint-status row).
+- Route: implemented directly — a straightforward additive extension of the S2-M2-01/02/03 three-layer pattern (scene builder + controller + Editor runner + dotnet integration test). No implementation subagent. An Explore subagent dispatched for read-only code mapping misread its brief; it made no edits and was abandoned in favor of direct reads.
+- Files changed:
+  - `Assets/Editor/GravenspireM2SingleTrashLoopBuilder.cs` — modified: adds the `M2_NamedBlocker` capsule anchor at `(-2.8, 1.4, 5.6)`.
+  - `Assets/Scripts/M2SingleTrashMedLoopController.cs` — modified: `NamedSoloBlock_T1` fixture handoff, named-blocker telemetry properties, `RunAutomatedNamedBlockerBoundarySmoke` + boundary-smoke helpers, `HydrateNamedBlockerPresence`, scene binding, and the violet `MaterialPropertyBlock` visual.
+  - `Assets/Editor/GravenspireM2NamedBlockerVerificationRunner.cs` — created: story-specific Unity smoke runner modeled on the S2-M2-03 runner; `CaptureLog` hardened to filter the diagnosed `UnityEditor.Search.SearchInit` editor-startup noise.
+  - `Assets/Editor/GravenspireM2NamedBlockerVerificationRunner.cs.meta` — created by the Unity import.
+  - `Assets/Scenes/_DevEntry.unity` — modified: Unity-serialized `M2_NamedBlocker` GameObject (`:706`) + Transform (`:721`); recurring Unity `m_Name:` trailing-whitespace artifact trimmed at `:232`.
+  - `tests/integration/gameplay/combat/combat_runtime_named_blocker_boundary_test.cs` — created: 3 dotnet integration tests proving the FEEL-02 boundary, named-vs-trash discovery, and no-farm-through.
+  - `tests/evidence/S2-M2-04/verification.md`, `unity-named-blocker-runner-20260514-smoke.md`, `unity-named-blocker-runner-20260514.log` — created (Unity log redacted for local-machine identifiers).
+- Evidence: `tests/evidence/S2-M2-04/verification.md` — Result PASS; 5/5 AC traced to file:line.
+- Verification:
+  - `dotnet test tests/Gravenspire.Combat.Tests.csproj` — PASS, 175/175 (172 baseline + 3 new named-blocker tests).
+  - T1 negative-scope scan over the 4 changed code files — PASS, zero matches.
+  - `git diff --check` — PASS (exit 0; `_DevEntry.unity:232` Unity trailing-whitespace artifact trimmed).
+  - `.githooks/pre-commit` — PASS (`[pre-commit] OK`, temporary index).
+  - Unity `6000.3.14f1` batchmode smoke — PASS, 17/17 checks, exit 0; telemetry `forced_flee_threshold`, `time_to_danger_seconds=26.00`, `ending_health=40/220`, `named_ending_health=330/520`, `clean_loop_preserved=True`.
+- Carry-in constraint: satisfied. The named blocker is mechanically proven (Unity smoke telemetry + dotnet integration test) to change camp behavior across all five dimensions — discovery, time-to-danger, boundary pressure, clean-loop preservation, no farm-through. Human-play remains a qualified supplement; mechanical AC does not rest on presentation feel.
+- Unity smoke note: the first two batchmode runs captured a Unity-editor `UnityEditor.Search.SearchInit.IndexationOnStartup` `ArgumentOutOfRangeException` (no default Search database asset in a fresh worktree — fires on any batchmode launch, outside the named-blocker runtime/controller/runner). The runner's `CaptureLog` was hardened to filter that diagnosed editor-startup noise; the final run is `Result: PASS` exit 0.
+- Deviations: None. `ProjectSettings/ShaderGraphSettings.asset` was incidentally re-serialized by the Unity cold import (zero semantic change) and restored to its committed content + canonical CRLF — not part of the changeset.
+- Carryover candidate for `/story-done`: `m2_runner_editor_noise_capture` — the sibling S2-M2-01/02/03 verification runners' `CaptureLog` would benefit from the same `UnityEditor.Search.SearchInit` editor-noise filter in a sprint-level runner-hardening batch.
+- Next recommended: `/code-review` on the changed files, then `/story-done production/stories/s2-m2-04-named-blocker-camp-boundary.md`.

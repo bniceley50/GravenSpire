@@ -34,6 +34,7 @@ namespace Gravenspire.Editor
             EnsurePrimitive("M2_PullLane", PrimitiveType.Cube, new Vector3(0.0f, 0.03f, -0.5f), new Vector3(2.0f, 0.06f, 8.0f), root.transform);
             EnsurePrimitive("M2_BaselineTrash", PrimitiveType.Capsule, new Vector3(0.0f, 1.0f, 4.0f), new Vector3(0.8f, 1.0f, 0.8f), root.transform);
             EnsurePrimitive("M2_LinkedTrash", PrimitiveType.Capsule, new Vector3(2.3f, 1.0f, 4.8f), new Vector3(0.8f, 1.0f, 0.8f), root.transform);
+            EnsurePrimitive("M2_NamedBlocker", PrimitiveType.Capsule, new Vector3(-2.8f, 1.4f, 5.6f), new Vector3(1.25f, 1.4f, 1.25f), root.transform);
 
             if (!root.TryGetComponent<M2SingleTrashMedLoopController>(out _))
             {
@@ -48,7 +49,7 @@ namespace Gravenspire.Editor
 
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
-            Debug.Log("S2-M2-02/S2-M2-03 combat camp loop scene objects generated.");
+            Debug.Log("S2-M2-02/S2-M2-03/S2-M2-04 combat camp loop scene objects generated.");
         }
 
         private static void EnsureBaseShellObjects()

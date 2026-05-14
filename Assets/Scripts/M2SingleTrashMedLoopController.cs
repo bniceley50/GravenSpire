@@ -20,6 +20,9 @@ namespace Gravenspire.UnityRuntime.Combat
         private const string PlayerLocalCharacterId = "local-character-m2-dev";
         private const string HostileActorPrefix = "m2-hostile";
         private const string LinkedHostileActorPrefix = "m2-linked-hostile";
+        private const string NamedEncounterFixtureId = "NamedSoloBlock_T1";
+        private const string NamedHostileActorPrefix = "m2-named-hostile";
+        private const string NamedBlockerSocialGroupId = "m2-named-blocker";
         private const string SmiteAbilityId = "SmiteOfAuthority_T1_Prototype";
         private const string FixtureBand = "Mid";
         private const string LinkedTrashSocialGroupId = "m2-linked-trash";
@@ -40,11 +43,13 @@ namespace Gravenspire.UnityRuntime.Combat
         private readonly List<string> _events = new();
         private readonly List<string> _errors = new();
         private readonly List<string> _overpullEvents = new();
+        private readonly List<string> _namedBlockerEvents = new();
         private MaterialPropertyBlock? _materialPropertyBlock;
 
         private Transform? _playerMarker;
         private Transform? _baselineTrash;
         private Transform? _linkedTrash;
+        private Transform? _namedBlocker;
         private Transform? _campRestPoint;
         private Transform? _pullLane;
         private Transform? _floor;
@@ -59,6 +64,7 @@ namespace Gravenspire.UnityRuntime.Combat
         private CombatActorState? _player;
         private CombatActorState? _hostile;
         private CombatActorState? _linkedHostile;
+        private CombatActorState? _namedHostile;
         private CombatZoneGate? _zoneGate;
         private FixedCombatClock? _clock;
         private CombatAttackStateSnapshot _playerAttackState = new(CombatAttackMode.Off, null, null, null);
@@ -70,6 +76,7 @@ namespace Gravenspire.UnityRuntime.Combat
         private readonly LoopingMeleeRandomSource _playerMeleeRandom = new(0.12d, 1.0d);
         private readonly LoopingMeleeRandomSource _hostileMeleeRandom = new(0.38d, 0.82d);
         private readonly LoopingMeleeRandomSource _linkedHostileMeleeRandom = new(0.34d, 0.84d);
+        private readonly LoopingMeleeRandomSource _namedHostileMeleeRandom = new(0.36d, 0.86d);
 
         private double _tickAccumulatorSeconds;
         private bool _pullActive;
@@ -139,6 +146,40 @@ namespace Gravenspire.UnityRuntime.Combat
         public int OverpullEndingMana { get; private set; }
 
         public int OverpullMaxMana { get; private set; }
+
+        public bool NamedBlockerAnchorPresent => _namedBlocker is not null;
+
+        public bool NamedBlockerPresentAndTargetable { get; private set; }
+
+        public bool NamedBlockerDistinctFromTrashFixture { get; private set; }
+
+        public bool NamedBlockerBoundaryOutcomeRecorded { get; private set; }
+
+        public bool NamedBlockerNotFarmableTrash { get; private set; }
+
+        public bool CleanSingleTrashLoopPreservedAfterNamedBlocker { get; private set; }
+
+        public string NamedBlockerOutcome { get; private set; } = "not_run";
+
+        public string NamedBlockerHostileFixtureId { get; private set; } = string.Empty;
+
+        public double NamedBlockerTimeToDangerSeconds { get; private set; } = -1d;
+
+        public int NamedBlockerEndingHealth { get; private set; }
+
+        public int NamedBlockerMaxHealth { get; private set; }
+
+        public int NamedBlockerEndingMana { get; private set; }
+
+        public int NamedBlockerMaxMana { get; private set; }
+
+        public int NamedBlockerEndingNamedHealth { get; private set; }
+
+        public int NamedBlockerMaxNamedHealth { get; private set; }
+
+        public int NamedBlockerBaselineTrashMaxHealth { get; private set; }
+
+        public IReadOnlyList<string> NamedBlockerEvents => _namedBlockerEvents;
 
         private void Awake()
         {
@@ -390,6 +431,33 @@ namespace Gravenspire.UnityRuntime.Combat
             }
         }
 
+        public bool RunAutomatedNamedBlockerBoundarySmoke()
+        {
+            _smokeRunning = true;
+            try
+            {
+                ResetNamedBlockerMetrics();
+                if (!RunNamedBlockerBoundarySmoke())
+                {
+                    return false;
+                }
+
+                CleanSingleTrashLoopPreservedAfterNamedBlocker = RunAutomatedTwoPullSmoke();
+                return NamedBlockerAnchorPresent &&
+                    NamedBlockerPresentAndTargetable &&
+                    NamedBlockerDistinctFromTrashFixture &&
+                    NamedBlockerBoundaryOutcomeRecorded &&
+                    NamedBlockerNotFarmableTrash &&
+                    CleanSingleTrashLoopPreservedAfterNamedBlocker &&
+                    Errors.Count == 0;
+            }
+            finally
+            {
+                _smokeRunning = false;
+                ApplySceneVisualState();
+            }
+        }
+
         public void ResetLoop()
         {
             _events.Clear();
@@ -431,6 +499,26 @@ namespace Gravenspire.UnityRuntime.Combat
             OverpullMaxMana = 0;
         }
 
+        private void ResetNamedBlockerMetrics()
+        {
+            _namedBlockerEvents.Clear();
+            NamedBlockerPresentAndTargetable = false;
+            NamedBlockerDistinctFromTrashFixture = false;
+            NamedBlockerBoundaryOutcomeRecorded = false;
+            NamedBlockerNotFarmableTrash = false;
+            CleanSingleTrashLoopPreservedAfterNamedBlocker = false;
+            NamedBlockerOutcome = "not_run";
+            NamedBlockerHostileFixtureId = string.Empty;
+            NamedBlockerTimeToDangerSeconds = -1d;
+            NamedBlockerEndingHealth = 0;
+            NamedBlockerMaxHealth = 0;
+            NamedBlockerEndingMana = 0;
+            NamedBlockerMaxMana = 0;
+            NamedBlockerEndingNamedHealth = 0;
+            NamedBlockerMaxNamedHealth = 0;
+            NamedBlockerBaselineTrashMaxHealth = 0;
+        }
+
         private void InitializeLoop()
         {
             try
@@ -460,6 +548,7 @@ namespace Gravenspire.UnityRuntime.Combat
                 _zoneGate = new CombatZoneGate();
                 _zoneGate.ActivateZone(ActiveZoneId, CombatZoneType.HauntZone);
                 _clock = new FixedCombatClock(_fixturePackage.CombatTickRateHz);
+                HydrateNamedBlockerPresence();
                 ApplyPresentationSettings();
                 PositionMarkersForFreshLoop();
                 IsInitialized = true;
@@ -1451,6 +1540,374 @@ namespace Gravenspire.UnityRuntime.Combat
             RecordOverpullEvent($"ending_mana:{OverpullEndingMana}/{OverpullMaxMana}");
         }
 
+        private bool RunNamedBlockerBoundarySmoke()
+        {
+            BindSceneObjects();
+            if (_namedBlocker is null)
+            {
+                AddError("M2 named blocker scene marker was not found.");
+                return false;
+            }
+
+            var baselineTrashHydration = new CombatRuntimeEncounterHydrator().HydrateFromFile(
+                ResolveFixturePath(FixtureRelativePath),
+                new CombatRuntimeEncounterHydrationRequest
+                {
+                    EncounterFixtureId = EncounterFixtureId,
+                    ActiveZoneId = ActiveZoneId,
+                    PlayerCombatActorId = PlayerActorId,
+                    PlayerLocalCharacterId = PlayerLocalCharacterId,
+                    HostileCombatActorIdPrefix = HostileActorPrefix
+                });
+            if (!baselineTrashHydration.Succeeded || baselineTrashHydration.HostileActors.Count == 0)
+            {
+                AddError("Baseline-trash reference hydration failed: " + string.Join("; ", baselineTrashHydration.Errors));
+                return false;
+            }
+
+            NamedBlockerBaselineTrashMaxHealth = baselineTrashHydration.HostileActors[0].MaxHealth;
+
+            var hydration = new CombatRuntimeEncounterHydrator().HydrateFromFile(
+                ResolveFixturePath(FixtureRelativePath),
+                new CombatRuntimeEncounterHydrationRequest
+                {
+                    EncounterFixtureId = NamedEncounterFixtureId,
+                    ActiveZoneId = ActiveZoneId,
+                    PlayerCombatActorId = PlayerActorId,
+                    PlayerLocalCharacterId = PlayerLocalCharacterId,
+                    HostileCombatActorIdPrefix = NamedHostileActorPrefix
+                });
+            if (!hydration.Succeeded || hydration.PlayerActor is null || hydration.HostileActors.Count == 0)
+            {
+                AddError("Named-blocker encounter hydration failed: " + string.Join("; ", hydration.Errors));
+                return false;
+            }
+
+            _player = hydration.PlayerActor;
+            _namedHostile = hydration.HostileActors[0];
+            _zoneGate = new CombatZoneGate();
+            _zoneGate.ActivateZone(ActiveZoneId, CombatZoneType.HauntZone);
+            _clock = new FixedCombatClock(_fixturePackage?.CombatTickRateHz ?? 50);
+            _pullActive = false;
+            _targetSelected = false;
+            _playerAttackState = new CombatAttackStateSnapshot(CombatAttackMode.Off, null, null, null);
+            _hostileAttackState = new CombatAttackStateSnapshot(CombatAttackMode.Off, null, null, null);
+            PositionMarkersForNamedBlocker();
+
+            NamedBlockerHostileFixtureId = NamedEncounterFixtureId;
+            NamedBlockerMaxNamedHealth = _namedHostile.MaxHealth;
+            NamedBlockerDistinctFromTrashFixture =
+                !string.Equals(NamedEncounterFixtureId, EncounterFixtureId, StringComparison.Ordinal) &&
+                _namedHostile.MaxHealth > NamedBlockerBaselineTrashMaxHealth;
+            RecordNamedBlockerEvent($"named_fixture:{NamedEncounterFixtureId}");
+            RecordNamedBlockerEvent($"named_max_health:{_namedHostile.MaxHealth} baseline_trash_max_health:{NamedBlockerBaselineTrashMaxHealth}");
+
+            var playerPoint = ToCombatPoint(_playerMarker!.position);
+            var namedPoint = ToCombatPoint(_namedBlocker.position);
+            var pull = new CombatPullCoordinator().ResolveBodyPull(
+                _player,
+                playerPoint,
+                NamedPullCandidate(_namedHostile, namedPoint, "M2_NamedBlocker"),
+                Array.Empty<CombatPullCandidate>(),
+                _zoneGate,
+                CurrentTick());
+
+            if (!pull.Succeeded || pull.PrimaryHostile is null)
+            {
+                AddError("Named-blocker body pull failed: " + string.Join("; ", pull.Errors));
+                return false;
+            }
+
+            var named = pull.PrimaryHostile.WithCombatState(CombatState.InCombat);
+            _pullActive = true;
+            _pullStartedBeforeAttack = true;
+            _pullDidNotAutoEnableAttack = !pull.PlayerAttackEnabled;
+            _player = _player.WithTarget(named.CombatActorId).WithCombatState(CombatState.InCombat);
+            _targetSelected = true;
+            _namedHostile = named;
+            NamedBlockerPresentAndTargetable = _namedBlocker is not null && _targetSelected && named.IsAlive;
+            RecordNamedBlockerEvent($"named_present_targetable:{named.CombatActorId}");
+
+            _hostileAttackState = new CombatAttackStateSnapshot(
+                CombatAttackMode.On,
+                _player.CombatActorId,
+                NextWeaponTick(named),
+                CombatAttackTransitionPath.PlayerToggleOn);
+
+            var attack = new CombatAttackStateMachine().ToggleOn(new CombatAttackToggleOnRequest(
+                _player,
+                named,
+                _zoneGate,
+                M2MeleeRangeMeters,
+                CurrentTick(),
+                TickRateHz));
+            if (!attack.Succeeded)
+            {
+                AddError("Named-blocker player Attack toggle failed: " + string.Join("; ", attack.RejectionReasons));
+                return false;
+            }
+
+            _playerAttackState = attack.Snapshot;
+            var instantResolver = new CombatInstantAbilityResolver();
+            long? namedSmiteCooldownEndsTick = null;
+            ResolveNamedBlockerSmite(instantResolver, ref named, ref namedSmiteCooldownEndsTick);
+
+            for (var tickIndex = 0; tickIndex < MaxSmokeTicksPerPull; tickIndex++)
+            {
+                var tick = _clock.AdvanceTicks(1);
+                if (namedSmiteCooldownEndsTick is not null &&
+                    tick.Index >= namedSmiteCooldownEndsTick.Value &&
+                    named.IsAlive)
+                {
+                    ResolveNamedBlockerSmite(instantResolver, ref named, ref namedSmiteCooldownEndsTick);
+                }
+
+                ResolvePlayerNamedBlockerMelee(tick, ref named);
+                ResolveHostileNamedBlockerMelee(tick, ref named, ref _hostileAttackState, _namedHostileMeleeRandom);
+                _namedHostile = named;
+                UpdateNamedBlockerScale();
+
+                if (RecordNamedBlockerDangerIfReached(named, tick))
+                {
+                    return true;
+                }
+
+                if (!named.IsAlive)
+                {
+                    CaptureNamedBlockerTelemetry("named_solo_killed", named, tick);
+                    NamedBlockerNotFarmableTrash = false;
+                    AddError("Named blocker was solo-killed; FEEL-02 tuning defect unless flagged exploit-under-investigation.");
+                    return false;
+                }
+            }
+
+            CaptureNamedBlockerTelemetry("unresolved_tick_budget", named, CurrentTick());
+            return false;
+        }
+
+        private CombatPullCandidate NamedPullCandidate(
+            CombatActorState actor,
+            CombatPoint3 position,
+            string anchorId)
+        {
+            return new CombatPullCandidate(
+                actor,
+                position,
+                new CombatSpatialAnchorSet(position, ToCombatPoint(_playerMarker!.position), anchorId, "ClericShellMarker"),
+                PullAggroRadiusMeters,
+                CombatSocialAssistProfile.T1Default(NamedBlockerSocialGroupId),
+                Array.Empty<CombatLosLayer>(),
+                Array.Empty<CombatLosLayer>(),
+                AuthoredColliderIndex: 0);
+        }
+
+        private void ResolvePlayerNamedBlockerMelee(CombatTick tick, ref CombatActorState named)
+        {
+            if (_player is null || !_playerAttackState.IsAttackOn || !named.IsAlive)
+            {
+                return;
+            }
+
+            var result = _meleeResolver.ResolveTick(MeleeRequest(
+                _player,
+                named,
+                _playerAttackState,
+                tick,
+                _playerMeleeRandom,
+                M2MeleeRangeMeters));
+            if (result.Outcome == CombatMeleeTickOutcome.NotDue)
+            {
+                return;
+            }
+
+            _playerAttackState = _playerAttackState with { NextSwingDueTick = result.NextSwingDueTick };
+            if (result.TargetAfterResolution is not null)
+            {
+                named = result.TargetAfterResolution;
+            }
+
+            if (result.AppliedDamage)
+            {
+                RecordNamedBlockerEvent($"player_melee_hit_named:{result.Damage}");
+            }
+        }
+
+        private void ResolveHostileNamedBlockerMelee(
+            CombatTick tick,
+            ref CombatActorState named,
+            ref CombatAttackStateSnapshot attackState,
+            ICombatMeleeRandomSource random)
+        {
+            if (_player is null || !named.IsAlive)
+            {
+                return;
+            }
+
+            var result = _meleeResolver.ResolveTick(MeleeRequest(
+                named,
+                _player,
+                attackState,
+                tick,
+                random,
+                M2MeleeRangeMeters));
+            if (result.Outcome == CombatMeleeTickOutcome.NotDue)
+            {
+                return;
+            }
+
+            attackState = attackState with { NextSwingDueTick = result.NextSwingDueTick };
+            if (result.TargetAfterResolution is not null)
+            {
+                _player = result.TargetAfterResolution;
+            }
+
+            if (result.AppliedDamage)
+            {
+                RecordNamedBlockerEvent($"named_melee_hit:{result.Damage}");
+            }
+        }
+
+        private void ResolveNamedBlockerSmite(
+            CombatInstantAbilityResolver instantResolver,
+            ref CombatActorState named,
+            ref long? cooldownEndsTick)
+        {
+            if (_player is null || _zoneGate is null || _smiteProfile is null || !named.IsAlive)
+            {
+                return;
+            }
+
+            var result = instantResolver.Resolve(new CombatInstantAbilityRequest(
+                $"m2-named-blocker-smite-{CurrentTick().Index}",
+                _player,
+                named,
+                _zoneGate,
+                M2MeleeRangeMeters,
+                Array.Empty<CombatLosLayer>(),
+                CurrentTick(),
+                TickRateHz,
+                _smiteProfile));
+
+            if (!result.Succeeded)
+            {
+                return;
+            }
+
+            _player = result.Caster;
+            cooldownEndsTick = result.CooldownEndsTick;
+            if (result.TargetAfterResolution is not null)
+            {
+                named = result.TargetAfterResolution;
+            }
+
+            RecordNamedBlockerEvent("smite_resolved_named");
+        }
+
+        private bool RecordNamedBlockerDangerIfReached(CombatActorState named, CombatTick tick)
+        {
+            if (_player is null)
+            {
+                return false;
+            }
+
+            if (!_player.IsAlive)
+            {
+                CaptureNamedBlockerTelemetry("player_lost", named, tick);
+                NamedBlockerBoundaryOutcomeRecorded = true;
+                NamedBlockerNotFarmableTrash = true;
+                return true;
+            }
+
+            var healthRatio = _player.CurrentHealth / (double)_player.MaxHealth;
+            var manaRatio = _player.MaxMana <= 0 ? 0d : _player.CurrentMana / (double)_player.MaxMana;
+            if (named.IsAlive && (healthRatio < DangerHealthRatio || manaRatio < DangerManaRatio))
+            {
+                CaptureNamedBlockerTelemetry("forced_flee_threshold", named, tick);
+                NamedBlockerBoundaryOutcomeRecorded = true;
+                NamedBlockerNotFarmableTrash = true;
+                return true;
+            }
+
+            return false;
+        }
+
+        private void CaptureNamedBlockerTelemetry(string outcome, CombatActorState named, CombatTick tick)
+        {
+            NamedBlockerOutcome = outcome;
+            NamedBlockerTimeToDangerSeconds = tick.Index / (double)TickRateHz;
+            if (_player is not null)
+            {
+                NamedBlockerEndingHealth = _player.CurrentHealth;
+                NamedBlockerMaxHealth = _player.MaxHealth;
+                NamedBlockerEndingMana = _player.CurrentMana;
+                NamedBlockerMaxMana = _player.MaxMana;
+            }
+
+            NamedBlockerEndingNamedHealth = named.CurrentHealth;
+            NamedBlockerMaxNamedHealth = named.MaxHealth;
+
+            RecordNamedBlockerEvent($"outcome:{outcome}");
+            RecordNamedBlockerEvent($"time_to_danger_seconds:{NamedBlockerTimeToDangerSeconds:0.00}");
+            RecordNamedBlockerEvent($"ending_health:{NamedBlockerEndingHealth}/{NamedBlockerMaxHealth}");
+            RecordNamedBlockerEvent($"ending_mana:{NamedBlockerEndingMana}/{NamedBlockerMaxMana}");
+            RecordNamedBlockerEvent($"named_ending_health:{NamedBlockerEndingNamedHealth}/{NamedBlockerMaxNamedHealth}");
+        }
+
+        private void HydrateNamedBlockerPresence()
+        {
+            var hydration = new CombatRuntimeEncounterHydrator().HydrateFromFile(
+                ResolveFixturePath(FixtureRelativePath),
+                new CombatRuntimeEncounterHydrationRequest
+                {
+                    EncounterFixtureId = NamedEncounterFixtureId,
+                    ActiveZoneId = ActiveZoneId,
+                    PlayerCombatActorId = PlayerActorId,
+                    PlayerLocalCharacterId = PlayerLocalCharacterId,
+                    HostileCombatActorIdPrefix = NamedHostileActorPrefix
+                });
+            if (hydration.Succeeded && hydration.HostileActors.Count > 0)
+            {
+                _namedHostile = hydration.HostileActors[0];
+            }
+        }
+
+        private void PositionMarkersForNamedBlocker()
+        {
+            if (_namedBlocker is not null)
+            {
+                _namedBlocker.position = NamedBlockerAnchorPosition();
+            }
+
+            if (_playerMarker is not null && _namedBlocker is not null)
+            {
+                _playerMarker.position = _namedBlocker.position + new Vector3(0.0f, -0.4f, -M2MeleeRangeMeters);
+            }
+
+            FollowCamera();
+            ApplySceneVisualState();
+        }
+
+        private static Vector3 NamedBlockerAnchorPosition()
+        {
+            return new Vector3(-2.8f, 1.4f, 5.6f);
+        }
+
+        private void UpdateNamedBlockerScale()
+        {
+            if (_namedBlocker is null || _namedHostile is null || _namedHostile.MaxHealth <= 0)
+            {
+                return;
+            }
+
+            var healthRatio = Mathf.Clamp01((float)_namedHostile.CurrentHealth / _namedHostile.MaxHealth);
+            _namedBlocker.localScale = new Vector3(1.25f, Mathf.Lerp(0.7f, 1.4f, healthRatio), 1.25f);
+        }
+
+        private void RecordNamedBlockerEvent(string eventName)
+        {
+            _namedBlockerEvents.Add($"{CurrentTick().Index}:{eventName}");
+        }
+
         private void ResolveCombatUntilHostileDefeated()
         {
             for (var tick = 0; tick < MaxSmokeTicksPerPull; tick++)
@@ -1492,6 +1949,11 @@ namespace Gravenspire.UnityRuntime.Combat
             if (_linkedTrash is not null)
             {
                 _linkedTrash.position = LinkedTrashAnchorPosition();
+            }
+
+            if (_namedBlocker is not null)
+            {
+                _namedBlocker.position = NamedBlockerAnchorPosition();
             }
 
             FollowCamera();
@@ -1573,6 +2035,7 @@ namespace Gravenspire.UnityRuntime.Combat
             _playerMarker ??= FindTransform("ClericShellMarker");
             _baselineTrash ??= FindTransform("M2_BaselineTrash");
             _linkedTrash ??= FindTransform("M2_LinkedTrash");
+            _namedBlocker ??= FindTransform("M2_NamedBlocker");
             _campRestPoint ??= FindTransform("M2_CampRestPoint");
             _pullLane ??= FindTransform("M2_PullLane");
             _floor ??= FindTransform("DevEntry_DistrictBlockout_Floor");
@@ -1608,6 +2071,9 @@ namespace Gravenspire.UnityRuntime.Combat
                 : new Color(0.22f, 0.22f, 0.24f));
             ApplyColor(_linkedTrash, _linkedHostile is not null && _linkedHostile.IsAlive
                 ? new Color(0.78f, 0.24f, 0.12f)
+                : new Color(0.22f, 0.22f, 0.24f));
+            ApplyColor(_namedBlocker, _namedHostile is not null && _namedHostile.IsAlive
+                ? new Color(0.42f, 0.10f, 0.46f)
                 : new Color(0.22f, 0.22f, 0.24f));
         }
 

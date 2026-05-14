@@ -1,6 +1,6 @@
 # S2-M2-04 - Named Blocker + Camp Boundary
 
-**Status:** Blocked
+**Status:** In Progress
 **Sprint:** 2
 **Priority:** Must Have
 **Layer:** Gameplay / Unity Runtime
