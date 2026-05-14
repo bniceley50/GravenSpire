@@ -1,13 +1,13 @@
 # Active Session State
 
-**Last Updated:** 2026-05-13
+**Last Updated:** 2026-05-14
 **Project Stage:** Pre-Production — Sprint 2 — S2-M2-03 Complete / S2-M2-04 Next
 
 ## Current Task
 
-Sprint 2 M2 progress is 5/6: `S2-M2-03 Linked trash overpull` is closed via `/story-done` on 2026-05-13 with verdict **COMPLETE WITH NOTES**. Linked-trash overpull pressure is mechanically validated: smoke telemetry recorded `overpull_outcome=forced_flee_threshold` and `ending_health=14/140`, with the clean M2-02 single-trash loop preserved. All four local gates passed (dotnet 172/172, T1 negative-scope scan, git diff --check, .githooks/pre-commit). Implementation landed at `bb6deab` (unpushed); closure commit is the next gate.
+Sprint 2 M2 progress is 5/6: `S2-M2-03 Linked trash overpull` is closed (`/story-done` 2026-05-13, **COMPLETE WITH NOTES**, 5/5 AC; implementation `bb6deab`, closure `3ce334c`). Linked-trash overpull pressure is mechanically validated: smoke telemetry recorded `overpull_outcome=forced_flee_threshold` and `ending_health=14/140`, with the clean M2-02 single-trash loop preserved. All four local gates passed (dotnet 172/172, T1 negative-scope scan, git diff --check, .githooks/pre-commit). The S2-M2-03-cycle process lessons were captured 2026-05-14 in `fc20a86` (pushed to `origin/main`).
 
-`S2-M2-04 Named blocker + camp boundary` is the next active routing target for `/story-readiness`; its story header and sprint-status row remain blocked until that gate flips them. The M2-02 presentation-threshold revisit trigger (`m2_presentation_threshold_gap`) remains active for M2-04 — qualified human-play findings that worked for M2-03 (mechanical risk/stakes validation) may not extend to M2-04 (named-blocker pacing where presentation/discovery may matter more).
+`S2-M2-04 Named blocker + camp boundary` passed `/story-readiness` on 2026-05-14 with verdict **READY**. The M2-02 presentation-threshold revisit trigger (`m2_presentation_threshold_gap`) was resolved with routing option **(a)** plus a binding telemetry constraint — see `## Next Skill to Run`. Next is `/dev-story production/stories/s2-m2-04-named-blocker-camp-boundary.md`; the S2-M2-04 story header and sprint-status row stay blocked until `/dev-story` flips them.
 
 ## Status
 
@@ -71,13 +71,13 @@ Sprint 2 M2 progress is 5/6: `S2-M2-03 Linked trash overpull` is closed via `/st
 - ✅ Sprint 2 M2 story slate opened: `S2-M2-01` through `S2-M2-04`. `S2-M2-01` is complete; `S2-M2-02` is ready for `/story-readiness`; `S2-M2-03` through `S2-M2-04` remain blocked in dependency order.
 - ✅ Sprint 2 story `S2-M2-01` closed via `/story-done` 2026-05-11 with verdict **COMPLETE WITH NOTES**. Commit `b4cb377` lands the Unity Combat Core runtime bridge.
 - ✅ Sprint 2 story `S2-M2-02` closed via `/story-done` 2026-05-12 with verdict **COMPLETE WITH NOTES**. Commits `93b460e` (implementation) -> `946c9d1` (harden / closes /code-review P0/P1) -> `350b06e` (evidence-integrity patch / closes qa-tester re-review). Three carryover keys logged: `m2_renderer_material_property_access`, `s2_bridge_runner_evidence_path_hardcoded`, `m2_presentation_threshold_gap`.
-- ✅ Sprint 2 story `S2-M2-03` closed via `/story-done` 2026-05-13 with verdict **COMPLETE WITH NOTES** (5/5 AC); implementation at `bb6deab` (unpushed); `control_manifest_absence_pre_existing` carryover added to sprint-status; lessons capture deferred (MaterialPropertyBlock field-initializer, PowerShell heredoc whitespace-collapse).
+- ✅ Sprint 2 story `S2-M2-03` closed via `/story-done` 2026-05-13 with verdict **COMPLETE WITH NOTES** (5/5 AC); implementation `bb6deab`, closure `3ce334c`; `control_manifest_absence_pre_existing` carryover added to sprint-status; S2-M2-03-cycle lessons captured 2026-05-14 in `fc20a86` (4 entries — telemetry-backed feel acceptance, classified negative-scope doc hits, Unity log redaction, MaterialPropertyBlock lifecycle-safe allocation; PowerShell heredoc whitespace-collapse lesson dropped, no durable repo evidence).
 - ⚠️ Unity ProjectSettings hygiene is deferred to a separate batch: `ProjectSettings/TagManager.asset` emits a non-fatal parse warning in committed S2-M2-01 smoke logs, and `ProjectSettings/URPProjectSettings.asset` is currently untracked after Unity generation.
 
 ## Files Being Worked On
 
-- **Active:** `S2-M2-01` is complete. Next command is `/story-readiness production/stories/s2-m2-02-single-trash-pull-med-loop.md`, after any approved Unity settings hygiene batch.
-- **Next story:** [production/stories/s2-m2-02-single-trash-pull-med-loop.md](../stories/s2-m2-02-single-trash-pull-med-loop.md).
+- **Active:** `S2-M2-03` is complete. Next command is `/dev-story production/stories/s2-m2-04-named-blocker-camp-boundary.md`.
+- **Next story:** [production/stories/s2-m2-04-named-blocker-camp-boundary.md](../stories/s2-m2-04-named-blocker-camp-boundary.md).
 - **Closed:** [production/stories/s2-m2-01-unity-combat-core-runtime-bridge.md](../stories/s2-m2-01-unity-combat-core-runtime-bridge.md) is complete.
 - **Closed:** [production/stories/s2-combat-01-fix-init-only-property-preservation.md](../stories/s2-combat-01-fix-init-only-property-preservation.md) is complete.
 - **Closed:** [production/stories/s2-foundation-01-unity-project-shell.md](../stories/s2-foundation-01-unity-project-shell.md) is complete.
@@ -117,13 +117,8 @@ Sprint 2 M2 progress is 5/6: `S2-M2-03 Linked trash overpull` is closed via `/st
 
 ## Next Skill to Run
 
-After the closure commit lands and push approval is granted (separate decisions):
-
-- `/story-readiness production/stories/s2-m2-04-named-blocker-camp-boundary.md` to validate S2-M2-04 readiness. Its story header and sprint-status row remain blocked until that gate flips them.
-- Note for S2-M2-04 review: M2-02 presentation-threshold gap revisit trigger applies. Decide whether M2-04 can also pass on mechanical telemetry alone (like M2-03's AC-03), or whether named-blocker pacing requires presentation-quality validation. Three options when M2-04 readiness runs:
-  - (a) Accept qualified human-play findings (like M2-03)
-  - (b) Inject a presentation-minimum sub-story before M2-04 implementation
-  - (c) Defer the human-play AC to post-presentation-polish
+- `/dev-story production/stories/s2-m2-04-named-blocker-camp-boundary.md` — implement S2-M2-04 Named Blocker + Camp Boundary. `/story-readiness` ran 2026-05-14, verdict **READY**: governing DECISIONS D001/D002/D003/D012/D014 all Locked; the only WARN is the pre-existing `control_manifest_absence_pre_existing` manifest gap, non-blocking. The S2-M2-04 story header and sprint-status row are still flagged blocked — `/dev-story` moves them to in progress.
+- Routing decision (2026-05-14) on the M2-02 presentation-threshold revisit trigger (`m2_presentation_threshold_gap`): option **(a) — accept qualified human-play findings** — with a binding constraint. S2-M2-04 verification must mechanically prove the named blocker changes camp behavior through telemetry (discovery, time-to-danger, boundary pressure, clean-loop preservation, no farm-through), the way S2-M2-03 proved danger via `ending_health=14/140`. Human-play notes may be qualified by blockout visuals; mechanical AC cannot rest on presentation feel. This is an evidence-shaping carry-in for `/dev-story` and `/story-done`, not a story-file edit. Captured durably as lesson A in `tasks/lessons.md` (`fc20a86`).
 - Later: run Inventory implementation pre-spec to close `INV-OQ-05`, then rerun `/design-review design/gdd/inventory-item-economy.md --depth full`.
 
 ## Session Extract — Sprint 2 Story Open 2026-05-09 (S2-FOUNDATION-01)
@@ -255,6 +250,6 @@ After the closure commit lands and push approval is granted (separate decisions)
 - Evidence: bb6deab commit (10 files, 1965 insertions, 6 deletions); `tests/evidence/S2-M2-03/verification.md`; dotnet 172/172; smoke evidence with mechanical AC-03 proof
 - Code review: lean mode (subagent gates skipped); pre-commit four-condition verification covered renderer-material discipline, runner hygiene, manifest absence recording, and story-status flip
 - Routing forward: S2-M2-04 is the next active routing target for `/story-readiness`; its story header and sprint-status row remain blocked until that gate flips them; M2-02 presentation-threshold revisit trigger remains active for M2-04
-- Tech debt logged in this batch: 0 (lessons deferred — MaterialPropertyBlock field-initializer + PowerShell heredoc whitespace-collapse pending dedicated lessons batch or follow-up commit per user direction)
+- Tech debt logged in this batch: 0; S2-M2-03-cycle lessons captured 2026-05-14 in `fc20a86` — 4 entries (telemetry-backed feel acceptance, classified negative-scope doc hits, Unity log redaction, MaterialPropertyBlock lifecycle-safe allocation). The PowerShell heredoc whitespace-collapse lesson was dropped: real but lacking durable repo evidence; recapture if it recurs or when a shell/git workflow doc is opened.
 - Sprint-status carryover added: `control_manifest_absence_pre_existing` (pre-existing project-wide governance gap, non-blocking)
 - Next recommended: `/story-readiness production/stories/s2-m2-04-named-blocker-camp-boundary.md`
