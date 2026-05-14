@@ -1,13 +1,13 @@
 # Active Session State
 
 **Last Updated:** 2026-05-14
-**Project Stage:** Pre-Production — Sprint 2 — S2-M2-04 Complete / M3 Quick-Design Next
+**Project Stage:** Pre-Production — Sprint 2 — M3 Story Slate Open / S2-M3-00 Story-Readiness Next
 
 ## Current Task
 
-Sprint 2 Milestone M2 (Combat Camp Loop) is complete — 6/6 tracked stories closed. `S2-M2-04 Named blocker + camp boundary` is closed (`/story-done` 2026-05-14, **COMPLETE WITH NOTES**, 5/5 AC; implementation `ccb0c03`, closure `1f86d1e`). See the `/story-done 2026-05-14 (S2-M2-04)` extract below for closure detail.
+Sprint 2 Milestone M3 (Objective + NPC + Loot) is story-broken: the M3 story slate `S2-M3-00` through `S2-M3-04` is open. The M3 quick-design is committed and pushed (`6704203` on `origin/main`); `design/quick/quick-design-m3-objective-npc-loot.md` is the design source for the slate. See the `M3 Objective + NPC + Loot Story Slate` extract below for slate detail.
 
-The `claude/sharp-chebyshev-ad16e1` branch carries the S2-M2-04 implementation, closure, and session-state commits unpushed, held pending review; `origin/main` is at `38a228b`. Next gate: M3 story-breaking — `/quick-design M3-objective-npc-loot`.
+`S2-M3-00` Scenario Smoke Handoff Cleanup is ready for dev; `S2-M3-01` through `S2-M3-04` are blocked in dependency order. Next gate: `/story-readiness production/stories/s2-m3-00-scenario-smoke-handoff-cleanup.md`.
 
 ## Status
 
@@ -76,8 +76,8 @@ The `claude/sharp-chebyshev-ad16e1` branch carries the S2-M2-04 implementation, 
 
 ## Files Being Worked On
 
-- **Active:** `S2-M2-03` is complete. Next command is `/dev-story production/stories/s2-m2-04-named-blocker-camp-boundary.md`.
-- **Next story:** [production/stories/s2-m2-04-named-blocker-camp-boundary.md](../stories/s2-m2-04-named-blocker-camp-boundary.md).
+- **Active:** Sprint 2 M3 story slate is open. Next command is `/story-readiness production/stories/s2-m3-00-scenario-smoke-handoff-cleanup.md`.
+- **M3 slate:** [s2-m3-00](../stories/s2-m3-00-scenario-smoke-handoff-cleanup.md) (ready for dev) -> [s2-m3-01](../stories/s2-m3-01-named-npc-objective-frame.md) -> [s2-m3-02](../stories/s2-m3-02-objective-state-relic-hand-in.md) -> [s2-m3-03](../stories/s2-m3-03-loot-table-fixed-profile-vendor.md) -> [s2-m3-04](../stories/s2-m3-04-end-to-end-objective-loop.md) (blocked in dependency order).
 - **Closed:** [production/stories/s2-m2-01-unity-combat-core-runtime-bridge.md](../stories/s2-m2-01-unity-combat-core-runtime-bridge.md) is complete.
 - **Closed:** [production/stories/s2-combat-01-fix-init-only-property-preservation.md](../stories/s2-combat-01-fix-init-only-property-preservation.md) is complete.
 - **Closed:** [production/stories/s2-foundation-01-unity-project-shell.md](../stories/s2-foundation-01-unity-project-shell.md) is complete.
@@ -117,7 +117,7 @@ The `claude/sharp-chebyshev-ad16e1` branch carries the S2-M2-04 implementation, 
 
 ## Next Skill to Run
 
-- `/code-review` on the S2-M2-04 changed files, then `/story-done production/stories/s2-m2-04-named-blocker-camp-boundary.md`. `/dev-story` ran 2026-05-14 and implemented S2-M2-04; the story header is flipped to In Progress and `production/sprint-status.yaml` stays blocked until `/story-done`. Changed files: `Assets/Editor/GravenspireM2SingleTrashLoopBuilder.cs`, `Assets/Scripts/M2SingleTrashMedLoopController.cs`, `Assets/Editor/GravenspireM2NamedBlockerVerificationRunner.cs` (+`.meta`), `Assets/Scenes/_DevEntry.unity`, `tests/integration/gameplay/combat/combat_runtime_named_blocker_boundary_test.cs`, `tests/evidence/S2-M2-04/**`.
+- `/story-readiness production/stories/s2-m3-00-scenario-smoke-handoff-cleanup.md`. The M3 story slate `S2-M3-00` through `S2-M3-04` is open; `S2-M3-00` (Scenario Smoke Handoff Cleanup) is the next readiness gate, and `S2-M3-01` through `S2-M3-04` are blocked in dependency order. M3 quick-design committed and pushed at `6704203`.
 - Routing decision (2026-05-14) on the M2-02 presentation-threshold revisit trigger (`m2_presentation_threshold_gap`): option **(a) — accept qualified human-play findings** — with a binding constraint. S2-M2-04 verification must mechanically prove the named blocker changes camp behavior through telemetry (discovery, time-to-danger, boundary pressure, clean-loop preservation, no farm-through), the way S2-M2-03 proved danger via `ending_health=14/140`. **Status: satisfied by `/dev-story` 2026-05-14** — telemetry + the dotnet integration test mechanically prove all five dimensions; human-play stays a qualified supplement. Human-play notes may be qualified by blockout visuals; mechanical AC cannot rest on presentation feel. Captured durably as lesson A in `tasks/lessons.md` (`fc20a86`).
 - Later: run Inventory implementation pre-spec to close `INV-OQ-05`, then rerun `/design-review design/gdd/inventory-item-economy.md --depth full`.
 
@@ -293,3 +293,17 @@ The `claude/sharp-chebyshev-ad16e1` branch carries the S2-M2-04 implementation, 
 - Tech debt logged: 0 to `docs/tech-debt-register.md` (file absent); 2 carryover entries added to `sprint-status.yaml` per the established project mechanism.
 - Watch item: `production/sprints/sprint-2.md` Story Ledger row for `S2-M2-04` is stale (still "Blocked on S2-M2-03 / Not started") — outside `/story-done`'s standard write set; pending user confirmation to refresh.
 - Next recommended: M3 story-breaking — `/quick-design M3-objective-npc-loot` (following the M2 quick-design then `/create-stories` pattern).
+
+## Session Extract — M3 Objective + NPC + Loot Story Slate 2026-05-14
+
+- Quick design: [design/quick/quick-design-m3-objective-npc-loot.md](../../design/quick/quick-design-m3-objective-npc-loot.md) (committed and pushed at `6704203`).
+- Open stories:
+  - [production/stories/s2-m3-00-scenario-smoke-handoff-cleanup.md](../stories/s2-m3-00-scenario-smoke-handoff-cleanup.md) - Ready for dev.
+  - [production/stories/s2-m3-01-named-npc-objective-frame.md](../stories/s2-m3-01-named-npc-objective-frame.md) - Blocked on `S2-M3-00`.
+  - [production/stories/s2-m3-02-objective-state-relic-hand-in.md](../stories/s2-m3-02-objective-state-relic-hand-in.md) - Blocked on `S2-M3-01`.
+  - [production/stories/s2-m3-03-loot-table-fixed-profile-vendor.md](../stories/s2-m3-03-loot-table-fixed-profile-vendor.md) - Blocked on `S2-M3-02`.
+  - [production/stories/s2-m3-04-end-to-end-objective-loop.md](../stories/s2-m3-04-end-to-end-objective-loop.md) - Blocked on `S2-M3-03`.
+- Routing: `production/sprint-status.yaml` now tracks 11 Sprint 2 stories, 6 closed, 1 ready-for-dev, and 4 blocked in M3 dependency order.
+- Sprint plan: `production/sprints/sprint-2.md` Story Ledger now lists the M3 slate after the M2 rows.
+- Vendor scope: `S2-M3-03` uses the Inventory GDD's fixed-profile vendor rules blockout-grade (mechanism, not tuned economy); promotion triggers carried in the quick-design.
+- Next command: `/story-readiness production/stories/s2-m3-00-scenario-smoke-handoff-cleanup.md`.

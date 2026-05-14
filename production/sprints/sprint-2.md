@@ -57,6 +57,11 @@ Sprint 2 has rolled forward. The QA plan exists and M1 shell implementation is c
 | `S2-M2-02` Single trash pull + med loop | Complete | `93b460e` -> `946c9d1` -> `350b06e` | `tests/evidence/S2-M2-02/verification.md` |
 | `S2-M2-03` Linked trash overpull | Complete | `bb6deab` | `tests/evidence/S2-M2-03/verification.md` |
 | `S2-M2-04` Named blocker + camp boundary | Complete | `ccb0c03` | `tests/evidence/S2-M2-04/verification.md` |
+| `S2-M3-00` Scenario smoke handoff cleanup | Ready for Dev | Not started | `tests/evidence/S2-M3-00/verification.md` |
+| `S2-M3-01` Named NPC objective frame | Blocked on `S2-M3-00` | Not started | `tests/evidence/S2-M3-01/verification.md` |
+| `S2-M3-02` Objective state + relic hand-in | Blocked on `S2-M3-01` | Not started | `tests/evidence/S2-M3-02/verification.md` |
+| `S2-M3-03` Loot table + fixed-profile vendor | Blocked on `S2-M3-02` | Not started | `tests/evidence/S2-M3-03/verification.md` |
+| `S2-M3-04` End-to-end objective loop | Blocked on `S2-M3-03` | Not started | `tests/evidence/S2-M3-04/verification.md` |
 ## Operating Model Calibration
 
 - Prioritization test: **Does this make the first 10 minutes of playable Gravenspire better?** If no, defer it.

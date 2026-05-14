@@ -8,16 +8,16 @@ end: "2026-05-30"
 generated: "2026-05-09"
 updated: "2026-05-14"
 branch: "main"
-head: "ccb0c03"
+head: "6704203"
 qa_plan: "production/qa/plans/qa-plan-sprint-2-20260509.md"
 plan: "production/sprints/sprint-2.md"
 slice_review: ""
-implementation_gate: "S2-M2-04 Named blocker + camp boundary is complete; Sprint 2 Milestone M2 Combat Camp Loop is complete (6/6 tracked stories closed). Required next gate: M3 Objective + NPC + Loot story-breaking."
-progress: "6/6 closed; M2 Combat Camp Loop complete; M3 Objective + NPC + Loot story-breaking next"
+implementation_gate: "M3 Objective + NPC + Loot story slate is open (S2-M3-00 through S2-M3-04). S2-M3-00 is ready for /story-readiness; S2-M3-01 through S2-M3-04 are blocked in dependency order."
+progress: "6/11 closed; M2 Combat Camp Loop complete; M3 story slate open; S2-M3-00 story-readiness next"
 completed_stories: 6
-total_stories: 6
-next_active_story: ""
-next_active_command: "/quick-design M3-objective-npc-loot"
+total_stories: 11
+next_active_story: "S2-M3-00"
+next_active_command: "/story-readiness production/stories/s2-m3-00-scenario-smoke-handoff-cleanup.md"
 
 carryover:
   ability_resolved_event_payload: "AbilityResolvedEvent remains ManaSpent-only, but T1-COMBAT-11 durably classifies it as KNOWN-CARRYOVER and fails shipping universal-spend misuse."
@@ -98,3 +98,48 @@ stories:
     estimate_days: 1.0
     blocker: ""
     completed: "2026-05-14"
+  - id: "S2-M3-00"
+    name: "Scenario smoke handoff cleanup"
+    file: "production/stories/s2-m3-00-scenario-smoke-handoff-cleanup.md"
+    priority: must-have
+    status: ready-for-dev
+    owner: ""
+    estimate_days: 1.0
+    blocker: ""
+    completed: ""
+  - id: "S2-M3-01"
+    name: "Named NPC objective frame"
+    file: "production/stories/s2-m3-01-named-npc-objective-frame.md"
+    priority: must-have
+    status: blocked
+    owner: ""
+    estimate_days: 1.0
+    blocker: "S2-M3-00"
+    completed: ""
+  - id: "S2-M3-02"
+    name: "Objective state + relic hand-in"
+    file: "production/stories/s2-m3-02-objective-state-relic-hand-in.md"
+    priority: must-have
+    status: blocked
+    owner: ""
+    estimate_days: 1.0
+    blocker: "S2-M3-01"
+    completed: ""
+  - id: "S2-M3-03"
+    name: "Loot table + fixed-profile vendor"
+    file: "production/stories/s2-m3-03-loot-table-fixed-profile-vendor.md"
+    priority: must-have
+    status: blocked
+    owner: ""
+    estimate_days: 1.0
+    blocker: "S2-M3-02"
+    completed: ""
+  - id: "S2-M3-04"
+    name: "End-to-end objective loop"
+    file: "production/stories/s2-m3-04-end-to-end-objective-loop.md"
+    priority: must-have
+    status: blocked
+    owner: ""
+    estimate_days: 1.0
+    blocker: "S2-M3-03"
+    completed: ""
