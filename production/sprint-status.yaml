@@ -6,18 +6,18 @@ goal: "Gravenspire T1: The First District - a 20-30 minute offline playable slic
 start: "2026-05-09"
 end: "2026-05-30"
 generated: "2026-05-09"
-updated: "2026-05-13"
+updated: "2026-05-14"
 branch: "main"
-head: "bb6deab"
+head: "ccb0c03"
 qa_plan: "production/qa/plans/qa-plan-sprint-2-20260509.md"
 plan: "production/sprints/sprint-2.md"
 slice_review: ""
-implementation_gate: "S2-M2-03 Linked trash overpull is complete. Required next gate: /story-readiness production/stories/s2-m2-04-named-blocker-camp-boundary.md."
-progress: "5/6 closed; M2-03 Linked trash overpull complete; S2-M2-04 story-readiness next"
-completed_stories: 5
+implementation_gate: "S2-M2-04 Named blocker + camp boundary is complete; Sprint 2 Milestone M2 Combat Camp Loop is complete (6/6 tracked stories closed). Required next gate: M3 Objective + NPC + Loot story-breaking."
+progress: "6/6 closed; M2 Combat Camp Loop complete; M3 Objective + NPC + Loot story-breaking next"
+completed_stories: 6
 total_stories: 6
-next_active_story: "S2-M2-04"
-next_active_command: "/story-readiness production/stories/s2-m2-04-named-blocker-camp-boundary.md"
+next_active_story: ""
+next_active_command: "/quick-design M3-objective-npc-loot"
 
 carryover:
   ability_resolved_event_payload: "AbilityResolvedEvent remains ManaSpent-only, but T1-COMBAT-11 durably classifies it as KNOWN-CARRYOVER and fails shipping universal-spend misuse."
@@ -39,7 +39,9 @@ carryover:
   m2_renderer_material_property_access: "S2-M2-02 convergent code-review finding (lead-programmer + gameplay-programmer): Assets/Scripts/M2SingleTrashMedLoopController.cs:1168 reads renderer.material on the Update hot path via ApplySceneVisualState (line 123). Unity's .material property instantiates a per-renderer copy on first access (one-time per renderer, not per-frame); below the P1-2 blocking bar that targeted explicit new Material() in Update. T1 prototype acceptable; convert to .sharedMaterial + MaterialPropertyBlock before M3+ presentation polish or higher entity counts."
   s2_bridge_runner_evidence_path_hardcoded: "S2-M2-02 lead-programmer code-review note: Assets/Editor/GravenspireM2CombatBridgeVerificationRunner.cs:21,:199 hard-codes the date 2026-05-10 and writes to an S2-M2-01 evidence path. Pre-patch behavior wrote there; harden patch (946c9d1) routed the post-patch run to a distinct S2-M2-02 path, resolving immediate overwrite-collision risk. Cosmetic literal cleanup remains; sprint-level WATCH."
   m2_presentation_threshold_gap: "S2-M2-02 human-play finding (tests/evidence/S2-M2-02/human-play-20260512.md:42-56): blockout-quality presentation (capsule actors, flat floor, debug HUD) is insufficient to validate gameplay feel via the 'did you want one more pull?' bar. Affects M2-03/M2-04 human-play AC interpretation. Routing decision: S2-M2-03 accepts qualified human-play findings because linked-trash overpull is primarily a mechanical risk/stakes validation. Explicit revisit trigger before S2-M2-04 opens, where presentation/discovery may matter more. Future M3+ presentation pass should retire this carryover or convert it into a presentation-minimum acceptance bar."
-  control_manifest_absence_pre_existing: "Pre-existing project-wide governance gap: docs/architecture/control-manifest.md is absent. Multiple Sprint 2 stories cite Manifest Version headers while docs/architecture/control-manifest.md is absent; S2-M2-01, S2-M2-02, and S2-M2-03 closed under this condition with absence recorded in verification evidence. Documented project handling: production/qa/plans/qa-plan-sprint-2-20260509.md:54,60 uses architecture-registry fallback when the manifest is absent. Sprint-close decision needed: author the manifest via /create-control-manifest as cleanup, or continue header-only convention with architecture-registry fallback as documented in the Sprint 2 QA plan. Non-blocking for M2-03 implementation or closure."
+  control_manifest_absence_pre_existing: "Pre-existing project-wide governance gap: docs/architecture/control-manifest.md is absent. Multiple Sprint 2 stories cite Manifest Version headers while docs/architecture/control-manifest.md is absent; S2-M2-01, S2-M2-02, S2-M2-03, and S2-M2-04 closed under this condition with absence recorded in verification evidence. Documented project handling: production/qa/plans/qa-plan-sprint-2-20260509.md:54,60 uses architecture-registry fallback when the manifest is absent. Sprint-close decision needed: author the manifest via /create-control-manifest as cleanup, or continue header-only convention with architecture-registry fallback as documented in the Sprint 2 QA plan. Non-blocking for M2 implementation or closure."
+  m2_controller_scenario_smoke_abstraction: "S2-M2-04 /code-review finding (main reviewer + unity-specialist, convergent): Assets/Scripts/M2SingleTrashMedLoopController.cs is ~2156 lines holding three near-parallel scenario-smoke subsystems (M2-02 single-trash, M2-03 overpull, M2-04 named-blocker) plus live Update play code plus the OnGUI HUD. The S2-M2-04 named-blocker code is a clean, disciplined parallel of the established pattern and the refactor was correctly deferred from this story. Pre-M3 architecture task: extract a shared scenario-smoke abstraction before a fourth scenario is added, so future scenarios are small integrations rather than ~400-line additions. Non-blocking for S2-M2-04 closure."
+  m2_runner_editor_noise_capture: "S2-M2-04 runner hardening: GravenspireM2NamedBlockerVerificationRunner.cs CaptureLog filters a diagnosed UnityEditor.Search.SearchInit.IndexationOnStartup ArgumentOutOfRangeException (fires on any batchmode launch of a fresh worktree with no default Search database asset; outside the named-blocker runtime/controller/runner). The sibling S2-M2-01/02/03 verification runners have no such filter and would false-fail under the same fresh-worktree condition. Sprint-level batch: backport the SearchInit filter to the sibling M2 runners. Non-blocking."
 
 stories:
   - id: "S2-COMBAT-01"
@@ -91,8 +93,8 @@ stories:
     name: "Named blocker + camp boundary"
     file: "production/stories/s2-m2-04-named-blocker-camp-boundary.md"
     priority: must-have
-    status: blocked
+    status: done
     owner: ""
     estimate_days: 1.0
-    blocker: "Blocked on S2-M2-03 Linked trash overpull."
-    completed: ""
+    blocker: ""
+    completed: "2026-05-14"

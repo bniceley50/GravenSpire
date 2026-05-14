@@ -1,6 +1,6 @@
 # S2-M2-04 - Named Blocker + Camp Boundary
 
-**Status:** In Progress
+**Status:** Complete
 **Sprint:** 2
 **Priority:** Must Have
 **Layer:** Gameplay / Unity Runtime
@@ -136,3 +136,15 @@ encounter performance budgets belong to later grouped-content or boss stories.
 ## Next Gate
 
 Blocked until `S2-M2-03` is closed.
+
+## Completion Notes
+
+**Completed**: 2026-05-14
+**Verdict**: COMPLETE WITH NOTES
+**Criteria**: 5/5 passing
+**Deferred/Untested Criteria**: None
+**Test Evidence**: `tests/evidence/S2-M2-04/verification.md`, `tests/evidence/S2-M2-04/unity-named-blocker-runner-20260514-smoke.md`, `tests/evidence/S2-M2-04/unity-named-blocker-runner-20260514.log`, `tests/integration/gameplay/combat/combat_runtime_named_blocker_boundary_test.cs`
+**GDD/ADR Deviations**: None — implementation aligns with `combat-core.md` FEEL-02 (H-CCOM-FEEL-02) and the `NamedSoloBlock_T1` fixture family; governing DECISIONS D001, D002, D003, D012, D014 remain Locked. No `Proposed` ADR implemented against.
+**Scope Notes**: Implementation committed at `ccb0c03` (11 files, 2083 insertions, 6 deletions). The M2-02 presentation-threshold revisit trigger (`m2_presentation_threshold_gap`) was resolved at `/story-readiness` with routing option (a): the named blocker is mechanically proven through telemetry (discovery, time-to-danger, boundary pressure, clean-loop preservation, no farm-through); human-play remains a qualified supplement, not a blocking closure gate. Unity log redacted for local-machine identifiers (username, licensing handshake IDs, network interface IPs/ports). `ProjectSettings/ShaderGraphSettings.asset` cold-import re-serialization was restored to committed state — not part of the changeset. The runner's `CaptureLog` was hardened to filter a diagnosed `UnityEditor.Search.SearchInit` editor-startup exception (Unity editor noise, outside the named-blocker runtime).
+**Review Gates**: `/story-done` ran in lean mode (§9 subagent gates skipped). The code-review gate was satisfied separately by `/code-review ccb0c03` on 2026-05-14 — verdict PASS_WITH_NOTES from the main reviewer plus a `unity-specialist` subagent; no blocking or high-priority findings. One MEDIUM (controller god-object growth → carryover `m2_controller_scenario_smoke_abstraction`) and LOW advisories. Local gates: dotnet 175/175, T1 negative-scope scan PASS, `git diff --check` PASS, `.githooks/pre-commit` PASS, Unity batchmode smoke 17/17 checks PASS.
+**Forced Completion**: No

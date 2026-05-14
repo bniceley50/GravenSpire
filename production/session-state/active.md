@@ -279,3 +279,17 @@ Sprint 2 M2 progress is 5/6: `S2-M2-03 Linked trash overpull` is closed (`/story
 - Deviations: None. `ProjectSettings/ShaderGraphSettings.asset` was incidentally re-serialized by the Unity cold import (zero semantic change) and restored to its committed content + canonical CRLF — not part of the changeset.
 - Carryover candidate for `/story-done`: `m2_runner_editor_noise_capture` — the sibling S2-M2-01/02/03 verification runners' `CaptureLog` would benefit from the same `UnityEditor.Search.SearchInit` editor-noise filter in a sprint-level runner-hardening batch.
 - Next recommended: `/code-review` on the changed files, then `/story-done production/stories/s2-m2-04-named-blocker-camp-boundary.md`.
+
+## Session Extract — /story-done 2026-05-14 (S2-M2-04)
+
+- Story: `production/stories/s2-m2-04-named-blocker-camp-boundary.md` — S2-M2-04 Named Blocker + Camp Boundary.
+- Verdict: COMPLETE WITH NOTES.
+- Criteria: 5/5 passing (0 deferred, 0 untested); all five ACs traced to file:line evidence in `tests/evidence/S2-M2-04/verification.md`.
+- Review mode: lean — §9 subagent gates skipped; the code-review gate was satisfied separately by `/code-review ccb0c03` (2026-05-14, PASS_WITH_NOTES from main reviewer + `unity-specialist`; no blocking/high findings, 1 MEDIUM + LOW advisories).
+- Evidence: `tests/evidence/S2-M2-04/verification.md` (Result PASS); Unity smoke `unity-named-blocker-runner-20260514-smoke.md` (17/17 checks, exit 0); dotnet 175/175; integration test `combat_runtime_named_blocker_boundary_test.cs` (3 tests).
+- Implementation commit: `ccb0c03` — held unpushed pending the closure commit and its review.
+- State updates: story status set to Complete + Completion Notes appended; `production/sprint-status.yaml` marks `S2-M2-04` done, sets `completed_stories: 6/6`, records `head: ccb0c03`, routes `next_active_command` to `/quick-design M3-objective-npc-loot`. Sprint 2 Milestone M2 (Combat Camp Loop) is complete; M3/M4/M5 remain un-story-broken.
+- Carryover added (2): `m2_controller_scenario_smoke_abstraction` (pre-M3: extract a shared scenario-smoke abstraction before a 4th scenario grows the controller past ~2156 lines); `m2_runner_editor_noise_capture` (sprint-level batch: backport the `UnityEditor.Search.SearchInit` `CaptureLog` filter to the sibling S2-M2-01/02/03 runners). `control_manifest_absence_pre_existing` updated to include S2-M2-04.
+- Tech debt logged: 0 to `docs/tech-debt-register.md` (file absent); 2 carryover entries added to `sprint-status.yaml` per the established project mechanism.
+- Watch item: `production/sprints/sprint-2.md` Story Ledger row for `S2-M2-04` is stale (still "Blocked on S2-M2-03 / Not started") — outside `/story-done`'s standard write set; pending user confirmation to refresh.
+- Next recommended: M3 story-breaking — `/quick-design M3-objective-npc-loot` (following the M2 quick-design then `/create-stories` pattern).
