@@ -5,9 +5,9 @@
 
 ## Current Task
 
-Sprint 2 M2 progress is 5/6: `S2-M2-03 Linked trash overpull` is closed (`/story-done` 2026-05-13, **COMPLETE WITH NOTES**, 5/5 AC; implementation `bb6deab`, closure `3ce334c`). Linked-trash overpull pressure is mechanically validated: smoke telemetry recorded `overpull_outcome=forced_flee_threshold` and `ending_health=14/140`, with the clean M2-02 single-trash loop preserved. All four local gates passed (dotnet 172/172, T1 negative-scope scan, git diff --check, .githooks/pre-commit). The S2-M2-03-cycle process lessons were captured 2026-05-14 in `fc20a86` (pushed to `origin/main`).
+Sprint 2 Milestone M2 (Combat Camp Loop) is complete — 6/6 tracked stories closed. `S2-M2-04 Named blocker + camp boundary` is closed (`/story-done` 2026-05-14, **COMPLETE WITH NOTES**, 5/5 AC; implementation `ccb0c03`, closure `1f86d1e`). See the `/story-done 2026-05-14 (S2-M2-04)` extract below for closure detail.
 
-`S2-M2-04 Named blocker + camp boundary` is implemented via `/dev-story` on 2026-05-14; the story header is flipped to **In Progress** (sprint-status row left for `/story-done` per the dev-story skill). The binding telemetry carry-in is satisfied: the Unity `6000.3.14f1` smoke recorded `named_blocker_outcome=forced_flee_threshold`, `time_to_danger_seconds=26.00`, `ending_health=40/220`, `named_ending_health=330/520`, `clean_loop_preserved=True` (17/17 checks PASS, exit 0), and the new dotnet integration test proves the same FEEL-02 boundary mechanically. All local gates passed (dotnet 175/175, T1 negative-scope scan, git diff --check, .githooks/pre-commit). Next is `/code-review` on the changed files, then `/story-done`.
+The `claude/sharp-chebyshev-ad16e1` branch carries the S2-M2-04 implementation, closure, and session-state commits unpushed, held pending review; `origin/main` is at `38a228b`. Next gate: M3 story-breaking — `/quick-design M3-objective-npc-loot`.
 
 ## Status
 
