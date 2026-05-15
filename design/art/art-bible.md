@@ -9,7 +9,67 @@
 - **Status**: Complete draft — all 9 sections authored
 - **Related documents**: [design/gdd/game-concept.md](../gdd/game-concept.md), [.claude/docs/technical-preferences.md](../../.claude/docs/technical-preferences.md), [docs/engine-reference/unity/VERSION.md](../../docs/engine-reference/unity/VERSION.md)
 
-> **Art Director Sign-Off (AD-ART-BIBLE)**: Skipped — Lean review mode. Run `/setup-engine full` mode if formal sign-off required before Tier 1 production begins.
+> **Art Director Sign-Off (AD-ART-BIBLE)**: RATIFY WITH NOTES — 2026-05-15.
+> The art bible is approved as the visual identity source-of-truth for Gravenspire
+> production. Internal consistency, pillar alignment, and forbidden-pattern
+> discipline are all production-ready. Ratification carries the following bound
+> conditions, to be resolved before `/asset-spec` runs the M3 playable surface:
+>
+> 1. **Sister Elara tier conflict (S7.5 vs. D003)** — RESOLVED 2026-05-15 by F-05:
+>    S7.5 revised to "Tier 1 templated mentor, T2+ full AI-companion." D003/D004
+>    stand.
+> 2. **T1 M3 scope clarification** — RESOLVED 2026-05-15 by companion file
+>    [`design/art/art-bible-t1-scope.md`](art-bible-t1-scope.md) covering
+>    postural compression (Court Tier 3+ per S5.5), garment-wear-pattern
+>    transfer (T2+ static variants in T1), per-faction Layer 2 (Vampire Court
+>    only at M3), and ambient stilling (animator-infrastructure-gated with
+>    surface-resolution fallback).
+> 3. **Engine coupling — VERDICT 2026-05-15** by `technical-artist` and
+>    `unity-shader-specialist` convergent subagent passes:
+>    - **(a) Corpse-run per-camera desat (S2 State 7 / S4.4)** —
+>      **CONDITIONALLY VERIFIED.** URP Volume Layer Mask is the documented
+>      camera-stack isolation mechanism. Single-player path LOW risk;
+>      multiplayer per-player isolation deferred to T2 ADR per the bible's
+>      own production note. Proof-of-concept in Unity 6.3 LTS required
+>      before T1 commits.
+>    - **(b) URP SSS cost model (S8.7)** — **UNVERIFIED — BLOCKING for
+>      skin shader authoring.** No project engine-reference file documents
+>      URP 6.3 SSS; the "1-2ms flat full-screen-pass" claim may be HDRP
+>      behavior misattributed to URP (HDRP is blocked by D001). Three
+>      remediation options before skin shader work: custom URP renderer
+>      feature (`AddRenderPasses` + `RecordRenderGraph`), per-material SSS
+>      approximation (Shader Graph), or no SSS on named NPCs. Named-NPC
+>      budget at S5/S8 is provisional until resolved.
+>    - **(c) Mipmap bias for 30m faction-silhouette legibility (S6.2 / S8.5)**
+>      — **UNVERIFIED, hardware-dependent.** `-0.5` bias is reasonable as
+>      starting value; validate against the locked hardware spec before
+>      pipeline commits.
+>    - **`/asset-spec` gating:** environment + ambient-NPC asset specs may
+>      proceed; **skin shaders / named-NPC material slot counts BLOCKED**
+>      until (b) is resolved. See companion `art-bible-t1-scope.md` for
+>      detailed fallbacks and SSS option ladder.
+> 4. **Editorial reconciliation** — RESOLVED 2026-05-15 by F-02 (S2 State 3
+>    cross-referenced to D012 combat-feel validation) and F-03 (S3.5 tension 3
+>    superseded by S4.4 HUD-exempt resolution).
+> 5. **Hardware-target governance drift (F-09)** — IDENTIFIED 2026-05-15.
+>    Bible S8.4 (line 1510) and S8.6 (line 1539) assert polygon budgets are
+>    "tech-validated against Unity 6.3 URP + GTX 1070 min-spec / RTX 4070+
+>    target / 1080p/60fps" but `.claude/docs/technical-preferences.md`
+>    performance section states all targets are `[TO BE CONFIGURED]`.
+>    Technical Director + producer decision required: either lock the hardware
+>    spec in technical-preferences.md and profile to back the bible's claim,
+>    or soften the bible's "tech-validated" language to "estimated." Either
+>    path needs a new D-entry in `DECISIONS.md`. Tracked as carryover
+>    `art_bible_hardware_target_drift` in `production/sprint-status.yaml`
+>    (added separately at next /story-done or sprint-status sync).
+>
+> All other sections (S1 Visual Identity Statement, S3 Shape Language, S4 Color
+> System, S5 Character Design, S6 Environment, S8 Asset Standards within bound
+> conditions, S9 Reference Direction) are production-ready as written.
+>
+> Ratification subject to review trigger: any future revision of pillars
+> (`design/gdd/game-concept.md`), tier strategy (`DECISIONS.md`), or render
+> pipeline (`DECISIONS.md` D001) requires a fresh AD-ART-BIBLE pass.
 
 > **Technical-artist validation flags** (accumulated across sections; require resolution before or during Tier 1 prototype):
 > - S2 State 7: per-camera desat pass for corpse run — URP camera-stacking isolation
@@ -119,6 +179,8 @@ Gravenspire does not perform atmosphere. Where most gothic games announce their 
 - **Pillar alignment:** P2 (The Silence Is Sacred) — combat earns its disruption of the silence rather than filling the world with it by default.
 
 > **Production note (flagged by art-director):** This state is deliberately under-powered visually. If it reads as thin in playtest, the approved tension-break is to add **enemy stance/silhouette shift** (idle → combat-ready) as an animation-layer behavior, NOT a lighting change or VFX addition. Defer unless playtesting shows need.
+>
+> **Cross-reference D012 (Combat Feel Prototype validated 2026-04-26):** The Cleric's Attack-ON visual state and tactical instant abilities validated in D012 are **inside this State 3 envelope**, not outside it. D012's brief localized impact events on Smite cast and Attack-ON toggle (3200-4500K cool, <0.4s duration, mesh+localized-light pairing — not particle systems) match the lighting character specified above. Combat does not need additional VFX to feel kinetic; the validated tactical instants are sufficient. Resolved 2026-05-15 by AD-ART-BIBLE sign-off pass finding F-02.
 
 #### State 4 — City Hub (Day Cycle — "Inn Hours")
 
@@ -338,7 +400,7 @@ The rule: **time-critical = abstract; not-time-critical = diegetic.** No third c
 
 2. **Geometry wear ↔ navigation legibility.** Bowing walls, racked doorframes, sloped floors communicate age but obscure nav affordances. **Resolution:** wear language holds everywhere EXCEPT within **1m of a ledge, step, or hazard threshold**, where geometry must be readable as navigation affordance.
 
-3. **Layer 1 HUD minimalism ↔ corpse-run desaturation.** The HUD uses 40-60% opacity; the corpse-run state applies -40% global desat to the dead player's camera. HUD designed for full-saturation viewing may lose contrast under corpse-run filter. **Resolution pending:** HUD must be tested under corpse-run post-process conditions before art-sign-off. If illegible, either raise HUD opacity floor OR exempt HUD from the post-process pass (flagged for technical-artist review in Section 7).
+3. **Layer 1 HUD minimalism ↔ corpse-run desaturation.** The HUD uses 40-60% opacity; the corpse-run state applies -40% global desat to the dead player's camera. HUD designed for full-saturation viewing may lose contrast under corpse-run filter. **Resolution (per Section 4.4):** HUD is **EXEMPT** from the -40% desaturation pass. Implementation: URP camera-stacking isolates HUD (Overlay camera) from the world's post-process volume (Base camera). See Section 4.4 for full rationale and the technical-artist verification flag at line 483. The "pending" status is closed; production validation of the URP camera-stack pattern itself remains a tech-artist deliverable but is not blocking on art direction. Resolved 2026-05-15 by AD-ART-BIBLE sign-off pass finding F-03.
 
 ### 3.6 — What This Section FORBIDS
 
@@ -1201,7 +1263,7 @@ Every player character carries a small leather-bound journal — a physical obje
 
 **Why this works:** the pillars prohibit explicit tutorials but permit observation-and-imitation learning. A named AI companion with authentic Gravenspire identity teaches by doing — which is how a new resident would actually learn from a mentor in this world. The mechanism is 100% diegetic.
 
-**Production note:** Sister Elara (or the equivalent named companion) must be implemented as a named-NPC-tier AI (Section 5.2 material resolution) with expanded behavioral logic for the mentoring context. She is the single most important AI companion in the game's onboarding. Her implementation is a Tier 1 MVP load-bearing feature, not Tier 2.
+**Production note:** Sister Elara (or the equivalent named companion) must be implemented as a named-NPC-tier AI (Section 5.2 material resolution) with expanded behavioral logic for the mentoring context. She is the single most important AI companion in the game's onboarding. Her implementation is **Tier 1 templated** (named-NPC visual register, behavior-driven, no LLM dependency per `DECISIONS.md` D003 and D004). The full AI-companion surface — autonomous decision-making, LLM-driven dialogue, and persistent companion state across sessions — is deferred to Tier 2+. The T1 templated mentor is load-bearing for the onboarding feel; the T2+ promotion is load-bearing for the wider companion system. Resolved 2026-05-15 by AD-ART-BIBLE sign-off pass finding F-05.
 
 **Explicit corollary:** Sister Elara's departure from the player's side after 3-5 sessions is *the ending of the onboarding phase*, marked by her behavior (not by a UI message). The player notices she's no longer in the hiring hall when they return — she's been recruited by another player, or she's pursuing her own Court business. The onboarding ending is narrative consequence, not a progression gate.
 
