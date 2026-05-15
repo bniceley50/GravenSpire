@@ -163,6 +163,11 @@ namespace Gravenspire.Editor
         {
             if (type == LogType.Error || type == LogType.Exception || type == LogType.Assert)
             {
+                if (GravenspireScenarioSmokeRunnerSupport.IsDiagnosedEditorStartupNoise(stackTrace))
+                {
+                    return;
+                }
+
                 AppendSessionLine(ErrorsKey, condition);
             }
             else if (type == LogType.Warning)

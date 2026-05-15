@@ -1,0 +1,50 @@
+# S2-M2-01 Unity Combat Bridge Smoke
+
+**Date:** 2026-05-10
+**Story:** `production/stories/s2-m2-01-unity-combat-core-runtime-bridge.md`
+**Scene:** `Assets/Scenes/_DevEntry.unity`
+**Runner:** `Assets/Editor/GravenspireM2CombatBridgeVerificationRunner.cs`
+**Result:** PASS
+
+## Checks
+
+- PASS `scene_loaded`
+- PASS `dev_entry_scene_unchanged_entrypoint`
+- PASS `floor_exists`
+- PASS `cleric_marker_exists`
+- PASS `bridge_object_exists`
+- PASS `bridge_component_enabled`
+- PASS `bridge_hydrated`
+- PASS `active_scene_recorded`
+- PASS `active_zone_id_recorded`
+- PASS `fixture_set_version_recorded`
+- PASS `solo_trash_fixture_recorded`
+- PASS `player_actor_recorded`
+- PASS `hostile_actor_recorded`
+- PASS `fixture_file_from_data_directory`
+- PASS `no_errors_or_exceptions`
+
+## Bridge Summary
+
+Object: M2_CombatCoreRuntimeBridge
+Scene: Assets/Scenes/_DevEntry.unity
+Active zone: Haunt_Prototype_T1
+Fixture file: N:\GravenSpire\.claude\worktrees\admiring-davinci-1f7c60\data\combat\t1-combat-fixtures.json
+Fixture set: CombatPrototypeSpellProfileSet_T1@2026-05-07-t1-5-combat-03
+Encounter fixtures: SoloTrash_EvenCon_T1
+Actor fixtures: Cleric_Mid_T1, Trash_Mid_T1
+Player actor: m2-player-cleric
+Hostile actors: m2-hostile-1
+
+## Bootstrap Note
+
+The bridge uses `RuntimeInitializeOnLoadMethod` and intentionally does not modify `Assets/Scenes/_DevEntry.unity`.
+Future multi-scene work may need a narrower activation predicate; S2-M2-01 keeps the bridge global for the single-scene T1 shell.
+
+## Warnings
+
+- None captured during runner execution.
+
+## Errors
+
+- None captured during runner execution.
