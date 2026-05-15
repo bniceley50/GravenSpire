@@ -1,13 +1,17 @@
 # Active Session State
 
-**Last Updated:** 2026-05-14
-**Project Stage:** Pre-Production — Sprint 2 — M3 Story Slate Open / S2-M3-00 Story-Readiness Next
+**Last Updated:** 2026-05-15
+**Project Stage:** Pre-Production — Sprint 2 — M3-00 Closed / Art-Direction Path Selected Before M3-01+
 
 ## Current Task
 
-Sprint 2 Milestone M3 (Objective + NPC + Loot) is story-broken: the M3 story slate `S2-M3-00` through `S2-M3-04` is open. The M3 quick-design is committed and pushed (`6704203` on `origin/main`); `design/quick/quick-design-m3-objective-npc-loot.md` is the design source for the slate. See the `M3 Objective + NPC + Loot Story Slate` extract below for slate detail.
+Sprint 2 Milestone M3 (Objective + NPC + Loot) cleanup story `S2-M3-00` is **closed** (COMPLETE WITH NOTES; 6/6 ACs PASS; implementation + evidence in working tree pending a single commit covering the 20-file closure batch). The shared editor-runner helper at `Assets/Editor/GravenspireScenarioSmokeRunnerSupport.cs:36` now owns the diagnosed `UnityEditor.Search.SearchInit` editor-startup noise filter for all 4 M2 verification runners; the `m2_runner_editor_noise_capture` carryover is now CLOSED.
 
-`S2-M3-00` Scenario Smoke Handoff Cleanup is ready for dev; `S2-M3-01` through `S2-M3-04` are blocked in dependency order. Next gate: `/story-readiness production/stories/s2-m3-00-scenario-smoke-handoff-cleanup.md`.
+User has chosen the **(C) Full art-director path** as the next move before M3-01+ mechanical stories resume. M3-01 dependency on M3-00 is satisfied but M3-01 is now blocked on the art-direction sequence: AD-ART-BIBLE sign-off (skipped under Lean mode at `design/art/art-bible.md:12`), then the 9 tech-artist validation flags at `design/art/art-bible.md:14-23`, then `/asset-spec` for the M3 playable surface (Cleric, named NPC, enemy silhouettes, environment, HUD), then a Sprint 2 plan amendment to insert the art track.
+
+**Trigger context:** human-play exposure of the capsule-actor / flat-floor / debug-IMGUI presentation revealed that the `m2_presentation_threshold_gap` carryover (open since 2026-05-12) has come due. The art bible is a complete draft with locked principles ("weight and age, not spectacle"; no hero silhouettes; no glowing loot; no jump-cut zone grading) but no production assets exist yet — `assets/` holds infra only and the Unity `Assets/` tree is essentially empty except for `Assets/Settings`. The (C) path resolves the bible-vs-implementation gap as a design-first sequence so M3+ stories deliver visible art rather than more blockout capsules.
+
+Next gate: dispatch `art-director` agent for the AD-ART-BIBLE sign-off pass on `design/art/art-bible.md` (read-only first; any revisions need EDIT_OK before they land).
 
 ## Status
 
@@ -307,3 +311,18 @@ Sprint 2 Milestone M3 (Objective + NPC + Loot) is story-broken: the M3 story sla
 - Sprint plan: `production/sprints/sprint-2.md` Story Ledger now lists the M3 slate after the M2 rows.
 - Vendor scope: `S2-M3-03` uses the Inventory GDD's fixed-profile vendor rules blockout-grade (mechanism, not tuned economy); promotion triggers carried in the quick-design.
 - Next command: `/story-readiness production/stories/s2-m3-00-scenario-smoke-handoff-cleanup.md`.
+
+## Session Extract — /story-done 2026-05-15 (S2-M3-00)
+
+- Story: [production/stories/s2-m3-00-scenario-smoke-handoff-cleanup.md](../stories/s2-m3-00-scenario-smoke-handoff-cleanup.md) — S2-M3-00 Scenario Smoke Handoff Cleanup.
+- Verdict: **COMPLETE WITH NOTES**.
+- Criteria: 6/6 passing (0 deferred, 0 untested); all six ACs traced to file:line evidence in `tests/evidence/S2-M3-00/verification.md`.
+- Review mode: lean (no `production/review-mode.txt`; CLI default); §9 subagent gates skipped per skill rule.
+- Out-of-band review pair (user-dispatched in this session): `reviewer` + `unity-specialist` both returned PASS_WITH_NOTES. Manual review pass also caught and patched 3 P1/P2/P3 findings (license-Id leak in Unity logs, multicast port leak in Unity logs, `verification.md:51` "eight"→"nine" miscount). Unity-spec F1 (unused `using UnityEngine;` in helper) applied in-session post-review. F2-F5 advisory/INFO deferred as new carryovers below.
+- Evidence: `tests/evidence/S2-M3-00/verification.md` (Result PASS); 4 Unity `6000.3.14f1` batchmode rerun smoke files (CombatBridge 15/15, SingleTrashLoop 16/16, LinkedTrashOverpull 15/15, NamedBlocker 17/17 = 63 checks all PASS, all exit 0); 4 redacted Unity logs (license/session/correlation/external-correlation/machine ID + Player connection IP/port/GUID/editor-id + License group Id + multicast port all redacted; trailing whitespace stripped; CRLF preserved); informal `human-play-20260515.md` playtest scaffold (non-AC, user-approved carryover documentation).
+- Implementation: **Uncommitted in working tree.** The 16-file changeset (4 modified Editor runners + 2 new helper files + 9 new evidence files + 1 playtest scaffold; net 16-line code shrink after F1 patch) plus the 4 closure writes ( story file, sprint-status.yaml, sprint-2.md ledger, this active.md update) is pending a single commit covering implementation + closure.
+- Gate results: `dotnet test tests/Gravenspire.Combat.Tests.csproj`: PASS 175/175 (baseline preserved); T1 negative-scope scan over 5 changed code files: PASS 0 matches; `git diff --check`: PASS exit 0 (after Unity-cold-import drift on `_DevEntry.unity` + `ShaderGraphSettings.asset` restored via `git checkout --` per `unity_settings_hygiene_pending` precedent); `.githooks/pre-commit`: PASS `[pre-commit] OK` against 15-file temporary index; 4× Unity `6000.3.14f1` batchmode rerun: PASS all exit 0.
+- Carryover closed: `m2_runner_editor_noise_capture` — 3 older M2 runners now share the SearchInit filter via the new helper.
+- Carryovers added (4): `m2_runner_capturelog_dedup` (reviewer F2 — CaptureLog blocks now byte-identical, promote to full extract on 5th scenario); `m2_runner_helper_allowlist_grow` (reviewer F1 + unity-spec F3 convergent — convert to allow-list table when 2nd noise pattern lands); `runner_baked_date_strings` (reviewer F3 — existing M2 runners emit hardcoded closure dates in evidence headers; M3-* runners should separate Run Date from Story Date); `launch_verification_runner_searchinit_backport` (unity-spec F4 — apply same filter to S2-FOUNDATION-01 launch runner).
+- Routing pivot: User chose **(C) Full art-director path** for the visual gap. M3-01 dependency on M3-00 unblocked by this closure BUT blocked on AD-ART-BIBLE sign-off + 9 tech-artist validation flags + `/asset-spec` + Sprint 2 plan amendment. Next active is the art-direction sequence, not `/story-readiness s2-m3-01`. Trigger: human-play exposure of capsule-actor / flat-floor / debug-IMGUI presentation triggered the `m2_presentation_threshold_gap` carryover from 2026-05-12.
+- Next recommended: dispatch `art-director` agent for AD-ART-BIBLE sign-off pass on `design/art/art-bible.md` (read-only first; any revisions need EDIT_OK before they land).

@@ -6,18 +6,18 @@ goal: "Gravenspire T1: The First District - a 20-30 minute offline playable slic
 start: "2026-05-09"
 end: "2026-05-30"
 generated: "2026-05-09"
-updated: "2026-05-14"
+updated: "2026-05-15"
 branch: "main"
 head: "6704203"
 qa_plan: "production/qa/plans/qa-plan-sprint-2-20260509.md"
 plan: "production/sprints/sprint-2.md"
 slice_review: ""
-implementation_gate: "M3 Objective + NPC + Loot story slate is open (S2-M3-00 through S2-M3-04). S2-M3-00 is ready for /story-readiness; S2-M3-01 through S2-M3-04 are blocked in dependency order."
-progress: "6/11 closed; M2 Combat Camp Loop complete; M3 story slate open; S2-M3-00 story-readiness next"
-completed_stories: 6
+implementation_gate: "S2-M3-00 Scenario Smoke Handoff Cleanup is closed (COMPLETE WITH NOTES; 6/6 ACs PASS). M3-01 dependency unblocked by S2-M3-00 closure, BUT user has chosen the (C) Full art-director path: the AD-ART-BIBLE sign-off (skipped under Lean mode at design/art/art-bible.md:12), the 9 tech-artist validation flags at design/art/art-bible.md:14-23, and /asset-spec must land before M3-01 mechanical implementation resumes. Until that art-direction sequence completes, M3-01 through M3-04 remain blocked on art-baseline, not on M3-00."
+progress: "7/11 closed; M2 Combat Camp Loop complete; M3-00 cleanup complete; art-direction path active before M3-01+"
+completed_stories: 7
 total_stories: 11
-next_active_story: "S2-M3-00"
-next_active_command: "/story-readiness production/stories/s2-m3-00-scenario-smoke-handoff-cleanup.md"
+next_active_story: ""
+next_active_command: "Art-direction path: dispatch art-director agent for AD-ART-BIBLE sign-off pass on design/art/art-bible.md before resuming M3 mechanical stories"
 
 carryover:
   ability_resolved_event_payload: "AbilityResolvedEvent remains ManaSpent-only, but T1-COMBAT-11 durably classifies it as KNOWN-CARRYOVER and fails shipping universal-spend misuse."
@@ -41,7 +41,11 @@ carryover:
   m2_presentation_threshold_gap: "S2-M2-02 human-play finding (tests/evidence/S2-M2-02/human-play-20260512.md:42-56): blockout-quality presentation (capsule actors, flat floor, debug HUD) is insufficient to validate gameplay feel via the 'did you want one more pull?' bar. Affects M2-03/M2-04 human-play AC interpretation. Routing decision: S2-M2-03 accepts qualified human-play findings because linked-trash overpull is primarily a mechanical risk/stakes validation. Explicit revisit trigger before S2-M2-04 opens, where presentation/discovery may matter more. Future M3+ presentation pass should retire this carryover or convert it into a presentation-minimum acceptance bar."
   control_manifest_absence_pre_existing: "Pre-existing project-wide governance gap: docs/architecture/control-manifest.md is absent. Multiple Sprint 2 stories cite Manifest Version headers while docs/architecture/control-manifest.md is absent; S2-M2-01, S2-M2-02, S2-M2-03, and S2-M2-04 closed under this condition with absence recorded in verification evidence. Documented project handling: production/qa/plans/qa-plan-sprint-2-20260509.md:54,60 uses architecture-registry fallback when the manifest is absent. Sprint-close decision needed: author the manifest via /create-control-manifest as cleanup, or continue header-only convention with architecture-registry fallback as documented in the Sprint 2 QA plan. Non-blocking for M2 implementation or closure."
   m2_controller_scenario_smoke_abstraction: "S2-M2-04 /code-review finding (main reviewer + unity-specialist, convergent): Assets/Scripts/M2SingleTrashMedLoopController.cs is ~2156 lines holding three near-parallel scenario-smoke subsystems (M2-02 single-trash, M2-03 overpull, M2-04 named-blocker) plus live Update play code plus the OnGUI HUD. The S2-M2-04 named-blocker code is a clean, disciplined parallel of the established pattern and the refactor was correctly deferred from this story. Pre-M3 architecture task: extract a shared scenario-smoke abstraction before a fourth scenario is added, so future scenarios are small integrations rather than ~400-line additions. Non-blocking for S2-M2-04 closure."
-  m2_runner_editor_noise_capture: "S2-M2-04 runner hardening: GravenspireM2NamedBlockerVerificationRunner.cs CaptureLog filters a diagnosed UnityEditor.Search.SearchInit.IndexationOnStartup ArgumentOutOfRangeException (fires on any batchmode launch of a fresh worktree with no default Search database asset; outside the named-blocker runtime/controller/runner). The sibling S2-M2-01/02/03 verification runners have no such filter and would false-fail under the same fresh-worktree condition. Sprint-level batch: backport the SearchInit filter to the sibling M2 runners. Non-blocking."
+  m2_runner_editor_noise_capture: "CLOSED 2026-05-15 by S2-M3-00. Shared helper Assets/Editor/GravenspireScenarioSmokeRunnerSupport.cs:36 owns the SearchInit filter; all 4 M2 verification runners call IsDiagnosedEditorStartupNoise(stackTrace) from their CaptureLog (CombatBridge:163, SingleTrashLoop:152, LinkedTrashOverpull:166, NamedBlocker:171). Fresh-worktree batchmode now resilient across the M2 runner family."
+  m2_runner_capturelog_dedup: "S2-M3-00 /code-review finding (reviewer F2): the four M2 verification runners' CaptureLog methods are now byte-identical except for ErrorsKey/WarningsKey constants. The single-helper refactor extracted only the SearchInit filter; the surrounding CaptureLog scaffolding remains duplicated. Promote to a full CaptureLog(condition, stackTrace, type, errorsKey, warningsKey) helper extract when a fifth scenario or M3-* runner lands. Non-blocking; deferred per reviewer recommendation to keep S2-M3-00 diff narrow."
+  m2_runner_helper_allowlist_grow: "S2-M3-00 /code-review finding (reviewer F1 + unity-specialist F3 convergent): the helper IsDiagnosedEditorStartupNoise currently does a single substring match for UnityEditor.Search.SearchInit. When a second diagnosed-noise pattern lands (e.g., a future Unity editor-startup symptom), convert the helper from a single-substring predicate to an allow-list table (private static readonly string[] s_DiagnosedStackRoots) rather than chaining || clauses. Unity-spec F3 also suggests tightening the current single match to also require EditorApplication.Internal_CallDelayFunctions for defense-in-depth; defer until a real false-suppression is observed. Non-blocking."
+  runner_baked_date_strings: "S2-M3-00 /code-review finding (reviewer F3): the existing M2 verification runners hardcode their **Date:** field and original story-id string in their WriteEvidenceAndExit body (e.g., GravenspireM2CombatBridgeVerificationRunner.cs:203-204 emits 'Date: 2026-05-10' on every run). When rerun for S2-M3-00 evidence, the smoke.md files therefore carry the *original* M2 closure date, not the rerun date; the rerun-date signal lives only in the filename suffix and the verification.md narrative. M3-* and future runners should emit Run Date: separately from Story Date: so smoke evidence is self-identifying without relying on the directory/filename for date context. Non-blocking; lesson candidate for tasks/lessons.md when an M3 runner is authored."
+  launch_verification_runner_searchinit_backport: "S2-M3-00 /code-review finding (unity-specialist F4): Assets/Editor/GravenspireLaunchVerificationRunner.cs (S2-FOUNDATION-01 file, intentionally out of S2-M3-00 scope) does not use the shared SearchInit filter. Its CaptureLog runs a 30-second stability window so the SearchInit exception would have fired before the check window, but a fresh-worktree rerun could still capture it as an error and produce a false FAIL. Track as a follow-up story (separate from S2-M3-00 closure): migrate GravenspireLaunchVerificationRunner.CaptureLog to call GravenspireScenarioSmokeRunnerSupport.IsDiagnosedEditorStartupNoise. Non-blocking."
 
 stories:
   - id: "S2-COMBAT-01"
@@ -102,11 +106,11 @@ stories:
     name: "Scenario smoke handoff cleanup"
     file: "production/stories/s2-m3-00-scenario-smoke-handoff-cleanup.md"
     priority: must-have
-    status: ready-for-dev
+    status: done
     owner: ""
     estimate_days: 1.0
     blocker: ""
-    completed: ""
+    completed: "2026-05-15"
   - id: "S2-M3-01"
     name: "Named NPC objective frame"
     file: "production/stories/s2-m3-01-named-npc-objective-frame.md"

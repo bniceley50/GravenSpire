@@ -1,6 +1,6 @@
 # S2-M3-00 - Scenario Smoke Handoff Cleanup
 
-**Status:** Ready for Story Readiness
+**Status:** Complete
 **Sprint:** 2
 **Priority:** Must Have
 **Layer:** Gameplay / Unity Runtime
@@ -120,4 +120,18 @@ poller, loot evaluator, vendor evaluator, or broad scene scan.
 
 ## Next Gate
 
-Ready for `/story-readiness production/stories/s2-m3-00-scenario-smoke-handoff-cleanup.md`.
+Closed via `/story-done` 2026-05-15. M3-01 dependency on S2-M3-00 is now satisfied. User chose (C) Full art-director path before resuming M3-01+; next gate is AD-ART-BIBLE sign-off via the `art-director` agent, not `/story-readiness` on M3-01.
+
+## Completion Notes
+
+**Completed**: 2026-05-15
+**Verdict**: COMPLETE WITH NOTES
+**Criteria**: 6/6 passing (0 deferred, 0 untested)
+**Deferred/Untested Criteria**: None
+**Test Evidence**: `tests/evidence/S2-M3-00/verification.md` (Result PASS); 4 Unity 6000.3.14f1 batchmode rerun smoke files (15+16+15+17 = 63 checks all PASS, all exit 0); 4 redacted Unity logs; informal `human-play-20260515.md` carryover scaffold (non-AC).
+**GDD/ADR Deviations**: None.
+**Scope Notes**: All 16 files in scope. `human-play-20260515.md` added as informal user-approved carryover documentation, explicitly disclaimed as non-AC.
+**Review Gates**: Lean mode skipped §9 subagent gates. Out-of-band review pair (`reviewer` + `unity-specialist`) both returned PASS_WITH_NOTES. Manual review pass caught and patched 3 P1/P2/P3 findings (license-Id leak, multicast-port leak, evidence-count miscount). Unity-spec F1 (unused `using UnityEngine;`) applied in-session. F2-F5 advisory/INFO deferred as new carryovers (see `production/sprint-status.yaml`).
+**Forced Completion**: No.
+**Carryovers closed**: `m2_runner_editor_noise_capture` — 3 older M2 runners now share the SearchInit filter via `Assets/Editor/GravenspireScenarioSmokeRunnerSupport.cs:36`.
+**Carryovers added (4)**: `m2_runner_capturelog_dedup`, `m2_runner_helper_allowlist_grow`, `runner_baked_date_strings`, `launch_verification_runner_searchinit_backport`. See `production/sprint-status.yaml`.
