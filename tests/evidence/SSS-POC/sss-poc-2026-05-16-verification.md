@@ -8,7 +8,7 @@ Bound condition `#3(b) URP SSS cost model (S8.7)` is closed. The PoC established
 
 `/asset-spec` named-NPC tier is unblocked for `M3_Caretaker_T1`, `Sister Elara`, and `M3_CourtVendor_T1` against Option 2 as working assumption. Named-NPC budget at art-bible.md §S8.6 needs revision to include a per-draw SSS cost line item (instead of the originally-asserted "flat 1-2ms full-screen pass regardless of count").
 
-Per-pass GPU cost was NOT empirically measured; the verdict closes #3(b) on the basis of the URP-forward architectural finding (F-3 below) and the §S5.2 visual-target alignment with Option 2 architecture (F-4 below), not on cost numbers.
+Per-pass GPU cost was NOT empirically measured; the verdict closes #3(b) on the basis of the URP-forward architectural finding (F-3 below) and the §5.4 visual-target alignment with Option 2 architecture (F-4 below), not on cost numbers.
 
 ## Source trace
 
@@ -107,7 +107,7 @@ The PoC compiles, registers in URP's renderer feature dropdown, runs, and produc
 
 URP forward rendering composites diffuse + specular per fragment before any post-pass executes. The SSS V-blur composite operates on already-composited color through a stencil mask. Result: the blur smears specular highlights through the skin scatter, producing a visually-wrong soft halo around specular peaks rather than the diffusion-of-diffuse-light effect SSS is meant to produce. This is not a tuning issue — it is structural in the forward-rendering composition order. HDRP's deferred GBuffer separates diffuse + specular which is why HDRP's screen-space SSS works correctly; HDRP is blocked by `DECISIONS.md` D001.
 
-### F-4: §S5.2 "Pre-Raphaelite portrait-grade skin" target requires Option 2 architecture regardless
+### F-4: §5.4 "Pre-Raphaelite portrait-grade skin" target requires Option 2 architecture regardless
 
 Pre-integrated skin LUT (the recommended Option 2 approach for this URP-forward production path, suitable for Shader Graph authoring) operates in light-domain *before* per-fragment compositing. Cost scales per-draw (more named NPCs on screen = more cost), not per-screen-pixel as Option 1 does. Different cost model from the bible's original assumption — but the cost model that produces correct visuals in URP forward.
 
@@ -127,7 +127,7 @@ Adopt Option 2 (Shader Graph per-material pre-integrated skin LUT) as the workin
 
 This verdict is good until any of the following:
 
-- Option 2 (Shader Graph per-material) fails §S5.2 visual differentiation in production
+- Option 2 (Shader Graph per-material) fails §5.2 named-vs-ambient material differentiation or §5.4 intimate/inspection-range visual targets in production
 - F-09 hardware target resolves with a target that makes empirical Option 1 capture meaningful AND someone has reason to want to revisit
 - URP 18+ adds native deferred-style SSS or alternative SSS infrastructure
 - Manual Frame Debugger capture is performed on Option 1 (PoC project still operational) and the per-pass numbers contradict the structural analysis in F-3
