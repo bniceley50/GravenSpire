@@ -116,30 +116,35 @@ replaced with concrete recommendations.
   budget cost ~4× per affected texture set; track for Section 8.9
   streaming-group implications.
 
-- **SSS cost model (Section 8.7) — UNVERIFIED, BLOCKING for skin shader
-  authoring:** No project engine-reference file documents URP 6.3 SSS. The
-  "1-2ms flat full-screen-pass" claim may be HDRP behavior misattributed to
-  URP (HDRP is blocked by D001). **Three options before skin shader work
-  begins** (ordered by recommended preference):
-  1. Author a custom URP screen-space SSS renderer feature using
-     `AddRenderPasses` + `RecordRenderGraph` (the render-graph path required
-     by Unity 6.2+ deprecation of `SetupRenderPasses`). Achieves the
-     flat-pass cost model the bible assumes. Non-trivial shader engineering
-     investment.
-  2. Use per-material SSS approximation in Shader Graph (pre-integrated skin
-     LUT, separable scatter approximation). Cost scales with draw calls and
-     screen-area coverage. The 15-named-NPC city-hub budget at S8.6 needs a
-     new GPU time line item to absorb this.
-  3. No SSS on named NPCs (Standard PBR + careful subsurface stencil only).
-     Violates the named-NPC differentiation in S5.2 and the portrait-quality
-     skin goal in S8.4.
+- **SSS cost model (Section 8.7) — RESOLVED-WITH-NOTES 2026-05-16, recommend Option 2:**
+  PoC executed at `N:\GravenSpire-sss-poc\`; verdict report at
+  [`tests/evidence/SSS-POC/sss-poc-2026-05-16-verification.md`](../../tests/evidence/SSS-POC/sss-poc-2026-05-16-verification.md).
+  **Findings:**
+  1. Option 1 (custom URP screen-space SSS via `ScriptableRendererFeature` +
+     `RecordRenderGraph`) IS implementable in URP 17.3 — PoC compiles, registers,
+     runs, produces visible SSS effect on 15 skin proxies.
+  2. Per-pass GPU timings could not be obtained via Unity scripting (`Recorder`
+     API + URP 17.3 native gfx jobs combination is `NotSupportedWithNativeGfxJobs`).
+     Total frame GPU on RTX 5090 was 0.938ms.
+  3. **Structural finding:** URP forward composites diffuse + specular per
+     fragment BEFORE any screen-space post-pass can isolate skin diffuse. The
+     V-blur composite smears specular highlights through the skin scatter,
+     producing a visually-wrong soft halo rather than HDRP-class SSS diffusion.
+     Unfixable in URP forward without architectural change.
+  4. §S5.2 "Pre-Raphaelite portrait-grade skin" target needs Option 2
+     architecture (per-material pre-integrated skin LUT, light-domain operation)
+     regardless of Option 1 cost numbers.
 
-  **Required action before `/asset-spec` runs skin shaders:** a URP 6.3 LTS
-  SSS proof-of-concept in the actual project, profiled on the target
-  hardware (or a representative GTX 1070-tier GPU), with Frame Debugger
-  evidence of pass count and GPU timing. Until that evidence exists, treat
-  the "flat 1-2ms" claim as UNVERIFIED and the named-NPC budget as
-  provisional.
+  **Recommendation:** adopt Option 2 (Shader Graph per-material pre-integrated
+  skin LUT). Cost scales per-draw, not per-screen-pixel as Option 1 assumed.
+  Named-NPC budget at S8.6 needs revision: replace "SSS: flat 1-2ms full-screen
+  pass" line item with "Skin LUT: per-draw cost, measured during named-NPC
+  shader validation after F-09 hardware target resolves."
+
+  **/asset-spec named-NPC tier UNBLOCKED 2026-05-16** for `M3_Caretaker_T1`,
+  `Sister Elara`, and `M3_CourtVendor_T1` against Option 2 as working assumption.
+  The PoC artifact at `N:\GravenSpire-sss-poc\` is parked as reference; do not
+  import its code into the main repo.
 
 - **F-09 hardware-target governance drift (NEW 2026-05-15):**
   Both subagents flag that the bible's "tech-validated against GTX 1070 /

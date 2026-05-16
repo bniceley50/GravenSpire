@@ -32,22 +32,23 @@
 >      multiplayer per-player isolation deferred to T2 ADR per the bible's
 >      own production note. Proof-of-concept in Unity 6.3 LTS required
 >      before T1 commits.
->    - **(b) URP SSS cost model (S8.7)** — **UNVERIFIED — BLOCKING for
->      skin shader authoring.** No project engine-reference file documents
->      URP 6.3 SSS; the "1-2ms flat full-screen-pass" claim may be HDRP
->      behavior misattributed to URP (HDRP is blocked by D001). Three
->      remediation options before skin shader work: custom URP renderer
->      feature (`AddRenderPasses` + `RecordRenderGraph`), per-material SSS
->      approximation (Shader Graph), or no SSS on named NPCs. Named-NPC
->      budget at S5/S8 is provisional until resolved.
+>    - **(b) URP SSS cost model (S8.7)** — **RESOLVED-WITH-NOTES 2026-05-16,
+>      recommend Option 2.** PoC at `N:\GravenSpire-sss-poc\`; verdict
+>      report at [`tests/evidence/SSS-POC/sss-poc-2026-05-16-verification.md`](../../tests/evidence/SSS-POC/sss-poc-2026-05-16-verification.md).
+>      Option 1 (custom URP screen-space SSS) is implementable but URP-forward
+>      composites diffuse + specular per fragment, making screen-space SSS
+>      bleed specular into the scatter — structural problem, not tuning.
+>      Option 2 (per-material Shader Graph pre-integrated skin LUT) recommended
+>      for named-NPC skin. §S8.6 named-NPC budget needs per-draw SSS cost revision.
 >    - **(c) Mipmap bias for 30m faction-silhouette legibility (S6.2 / S8.5)**
 >      — **UNVERIFIED, hardware-dependent.** `-0.5` bias is reasonable as
 >      starting value; validate against the locked hardware spec before
 >      pipeline commits.
 >    - **`/asset-spec` gating:** environment + ambient-NPC asset specs may
->      proceed; **skin shaders / named-NPC material slot counts BLOCKED**
->      until (b) is resolved. See companion `art-bible-t1-scope.md` for
->      detailed fallbacks and SSS option ladder.
+>      proceed. Skin shaders / named-NPC material slot counts **UNBLOCKED
+>      2026-05-16** against Option 2 working assumption. See companion
+>      [`art-bible-t1-scope.md`](art-bible-t1-scope.md) SSS section and
+>      [`tests/evidence/SSS-POC/sss-poc-2026-05-16-verification.md`](../../tests/evidence/SSS-POC/sss-poc-2026-05-16-verification.md).
 > 4. **Editorial reconciliation** — RESOLVED 2026-05-15 by F-02 (S2 State 3
 >    cross-referenced to D012 combat-feel validation) and F-03 (S3.5 tension 3
 >    superseded by S4.4 HUD-exempt resolution).

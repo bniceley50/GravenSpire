@@ -1,17 +1,17 @@
 # Active Session State
 
-**Last Updated:** 2026-05-15
-**Project Stage:** Pre-Production — Sprint 2 — M3-00 Closed / Art-Direction Path Selected Before M3-01+
+**Last Updated:** 2026-05-16
+**Project Stage:** Pre-Production — Sprint 2 — SSS PoC Closed (Option 2 Recommended) / Named-NPC /asset-spec Unblocked
 
 ## Current Task
 
-Sprint 2 Milestone M3 (Objective + NPC + Loot) cleanup story `S2-M3-00` is **closed** (COMPLETE WITH NOTES; 6/6 ACs PASS; implementation + evidence in working tree pending a single commit covering the 20-file closure batch). The shared editor-runner helper at `Assets/Editor/GravenspireScenarioSmokeRunnerSupport.cs:36` now owns the diagnosed `UnityEditor.Search.SearchInit` editor-startup noise filter for all 4 M2 verification runners; the `m2_runner_editor_noise_capture` carryover is now CLOSED.
+The SSS PoC arc (bound condition #3(b)) is closed via the verdict report at [tests/evidence/SSS-POC/sss-poc-2026-05-16-verification.md](../../tests/evidence/SSS-POC/sss-poc-2026-05-16-verification.md). Verdict: **RESOLVED-WITH-NOTES — Option 2 recommended.** Option 1 (custom URP screen-space SSS) is implementable but URP-forward composites diffuse + specular per fragment, making screen-space SSS structurally bleed specular into skin scatter. Option 2 (per-material Shader Graph pre-integrated skin LUT) is the working assumption for named-NPC skin authoring. Named-NPC budget at art-bible.md §S8.6 needs per-draw SSS cost revision.
 
-User has chosen the **(C) Full art-director path** as the next move before M3-01+ mechanical stories resume. M3-01 dependency on M3-00 is satisfied but M3-01 is now blocked on the art-direction sequence: AD-ART-BIBLE sign-off (skipped under Lean mode at `design/art/art-bible.md:12`), then the 9 tech-artist validation flags at `design/art/art-bible.md:14-23`, then `/asset-spec` for the M3 playable surface (Cleric, named NPC, enemy silhouettes, environment, HUD), then a Sprint 2 plan amendment to insert the art track.
+`/asset-spec` named-NPC tier is **unblocked 2026-05-16** for `M3_Caretaker_T1`, `Sister Elara`, and `M3_CourtVendor_T1` against Option 2 as documented skin-shading approach.
 
-**Trigger context:** human-play exposure of the capsule-actor / flat-floor / debug-IMGUI presentation revealed that the `m2_presentation_threshold_gap` carryover (open since 2026-05-12) has come due. The art bible is a complete draft with locked principles ("weight and age, not spectacle"; no hero silhouettes; no glowing loot; no jump-cut zone grading) but no production assets exist yet — `assets/` holds infra only and the Unity `Assets/` tree is essentially empty except for `Assets/Settings`. The (C) path resolves the bible-vs-implementation gap as a design-first sequence so M3+ stories deliver visible art rather than more blockout capsules.
+Branch: `claude/sss-poc-bound-3b` (off `claude/admiring-davinci-1f7c60` @ `40217f2`). The branch carries: AD-ART-BIBLE ratification (commit `0bcce46`), Sprint 2 M3 unblocked-surface asset specs (commit `40217f2`), S2-M3-00 cleanup, and the pending SSS PoC closure commit.
 
-Next gate: dispatch `art-director` agent for the AD-ART-BIBLE sign-off pass on `design/art/art-bible.md` (read-only first; any revisions need EDIT_OK before they land).
+Next gate: user choice between Option A — re-run `/asset-spec` for the three blocked named-NPC specs against Option 2 — or Option B — pivot to First District visible-art spike (environment dressing, two-source gothic lighting, fog/exposure tuning, enemy nameplates, HUD framing). SSS PoC unblocking does not require Option A immediately; both are legitimate forward paths.
 
 ## Status
 
@@ -121,9 +121,21 @@ Next gate: dispatch `art-director` agent for the AD-ART-BIBLE sign-off pass on `
 
 ## Next Skill to Run
 
-- `/story-readiness production/stories/s2-m3-00-scenario-smoke-handoff-cleanup.md`. The M3 story slate `S2-M3-00` through `S2-M3-04` is open; `S2-M3-00` (Scenario Smoke Handoff Cleanup) is the next readiness gate, and `S2-M3-01` through `S2-M3-04` are blocked in dependency order. M3 quick-design committed and pushed at `6704203`.
-- Routing decision (2026-05-14) on the M2-02 presentation-threshold revisit trigger (`m2_presentation_threshold_gap`): option **(a) — accept qualified human-play findings** — with a binding constraint. S2-M2-04 verification must mechanically prove the named blocker changes camp behavior through telemetry (discovery, time-to-danger, boundary pressure, clean-loop preservation, no farm-through), the way S2-M2-03 proved danger via `ending_health=14/140`. **Status: satisfied by `/dev-story` 2026-05-14** — telemetry + the dotnet integration test mechanically prove all five dimensions; human-play stays a qualified supplement. Human-play notes may be qualified by blockout visuals; mechanical AC cannot rest on presentation feel. Captured durably as lesson A in `tasks/lessons.md` (`fc20a86`).
-- Later: run Inventory implementation pre-spec to close `INV-OQ-05`, then rerun `/design-review design/gdd/inventory-item-economy.md --depth full`.
+- **Strategic branch point (user call):** Option A — re-run `/asset-spec` for the three blocked named-NPC specs (`M3_Caretaker_T1`, `Sister Elara`, `M3_CourtVendor_T1`) against the now-recommended Option 2 (Shader Graph per-material pre-integrated skin LUT) skin-shading approach. Option B — pivot to First District visible-art spike (environment dressing, two-source gothic lighting, fog/exposure tuning, enemy nameplates, HUD framing). SSS PoC unblocking does not require Option A immediately; both are legitimate forward paths.
+- **Independent of branch choice:** F-09 hardware-target governance drift (carryover `art_bible_hardware_target_drift`) remains open for Technical Director + Producer ruling. Named-NPC §S8.6 budget revision (per-draw SSS cost line item) is pending the next art-bible amendment pass.
+- **Carry-over from prior planning:** Inventory implementation pre-spec to close `INV-OQ-05`, then rerun `/design-review design/gdd/inventory-item-economy.md --depth full`.
+
+## Session Extract — SSS PoC Bound #3(b) Closure 2026-05-16
+
+- Bound condition: art bible footer condition #3(b) URP SSS cost model — flipped from UNVERIFIED-BLOCKING to RESOLVED-WITH-NOTES, Option 2 recommended.
+- Verdict report: [tests/evidence/SSS-POC/sss-poc-2026-05-16-verification.md](../../tests/evidence/SSS-POC/sss-poc-2026-05-16-verification.md).
+- PoC artifact (parked, throwaway): `N:\GravenSpire-sss-poc\` — renderer-feature implementation ~515 LOC across 7 files in `Assets/Scripts/Runtime/` and `Assets/Shaders/SSS/`; plus `Assets/Editor/SSSPoCAutomation.cs`, `Assets/Scripts/Runtime/PoCSceneSetup.cs`, `PROFILING_INSTRUCTIONS.md`, and generated scene/config assets.
+- Key finding: URP forward composites diffuse + specular per fragment before any screen-space post-pass; Option 1 (custom URP screen-space SSS) is implementable but structurally bleeds specular into skin scatter. Option 2 (Shader Graph per-material pre-integrated skin LUT) is the architectural fit for URP forward.
+- Per-pass GPU timing: not obtained (Unity `Recorder` API + URP 17.3 native gfx jobs incompatibility — `NotSupportedWithNativeGfxJobs`). Total frame GPU on RTX 5090: 0.938ms at 15 NPCs. Manual Frame Debugger capture deferred — not needed for the decision because Option 1's URP-forward structural problem is unfixable regardless of cost numbers.
+- Capture method: visible Unity Editor process via `-executeMethod GravenspireSSS.Editor.SSSPoCAutomation.RunAutomatedCapture`; lifecycle markers at `automated-capture-3.log:413` (start), `:444` (resume after domain reload), `:556` (complete).
+- /asset-spec gating: skin shaders / named-NPC material slot counts unblocked 2026-05-16 for `M3_Caretaker_T1`, `Sister Elara`, `M3_CourtVendor_T1`.
+- Carryovers: F-09 hardware-target drift remains open; §S8.6 budget revision pending next art-bible amendment.
+- Lessons worth promoting (candidates, not yet in `tasks/lessons.md`): (1) Verify-then-propose for version-specific URP API claims — grep local package source before architecture proposals (the v5→v6 pivot would have been pre-empted); (2) Unity Editor API automation (`SerializedObject`/`SerializedProperty`) is the right answer to GUID-sensitive YAML edits, not hand-written YAML; (3) `NotSupportedWithNativeGfxJobs` blocks scripting GPU recording in URP 17.3 D3D12 default — manual Frame Debugger / Profiler GPU module is the canonical capture path when this fires.
 
 ## Session Extract — Sprint 2 Story Open 2026-05-09 (S2-FOUNDATION-01)
 
