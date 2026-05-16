@@ -92,8 +92,8 @@ Per AGENTS.md §3: every "done" claim in the spike's evidence report will cite f
 - ✅ Spike inputs read (art-bible §2/§4.4/§6.1, t1-scope, manifest, lighting spec, HUD spec, rendering.md)
 - ✅ Design contract conflict surfaced + resolved (nameplates → dev-only labels)
 - ✅ Plan doc written with EDIT_OK
-- [ ] URP 17.3 fog **visual behavior + Volume-stack interaction** verification (API existence confirmed at `Assets/Scripts/M2SingleTrashMedLoopController.cs:2083-2087`; what's UNVERIFIED is fidelity + composition with `gv_district_state1`)
-- [ ] Unity 6.3 world-space text verification (for dev labels at narrowed scope)
+- ✅ URP 17.3 fog API present and locally used; Volume composition explicitly deferred to Session 2 empirical confirmation per `session-1-wrap.md`
+- ✅ Unity 6.3 world-space text verification resolved for dev labels via UGUI WorldSpace Canvas + UI Text per `session-1-wrap.md`
 - **Exit:** plan approved, two UNVERIFIED engine-API gaps resolved or explicitly deferred
 
 ### Session 2 — Scene Creation + Two-Source Lighting
