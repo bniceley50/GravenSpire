@@ -80,8 +80,9 @@ Per `env_lighting_district_camp.md:15`, the camera-stack architecture this spike
 | URP Camera Stack + Volume Layer Mask isolation | CONDITIONALLY VERIFIED | shader-specialist verdict 2026-05-15 (`art-bible-t1-scope.md:91-98`); PoC required | Session 4 HUD work validates HUD case; bound 3(a) full closure requires opt-in expansion |
 | URP RenderGraph for custom passes | VERIFIED | `rendering.md:19-33` | Spike avoids custom passes (greybox) |
 | UI Toolkit UXML/USS on Overlay camera | VERIFIED | `ui_l1_hud_layout.md:54-57`; tech-prefs UI specialist surface | Use as documented |
-| URP 17.3 fog (visual behavior + Volume-stack interaction) | PARTIALLY VERIFIED | `RenderSettings.fog` API present and used at `Assets/Scripts/M2SingleTrashMedLoopController.cs:2083-2087` (linear, 10-30m); Volume composition NOT locally source-verified (Library/PackageCache absent; rendering.md has no fog coverage). See `session-1-wrap.md` Verification 1 | Session 2 empirical confirmation required before fog can be treated as directionally safe |
+| URP 17.3 fog (visual behavior + Volume-stack interaction) | VERIFIED-WITH-CAVEAT | URP post-process execution provably integral via runner `CheckPostProcessExecution` (smoke 2026-05-16 @ `2f2eb7a`, Sat=-90 diagnostic Volume desaturates saturated red 236/31/31 → 31/33/31; 9216/9216 central crop pixels changed; delta 208.22 vs 5.00 threshold). Volume composition with fog works as URP-architected. See `session-2-evidence.md` Fog + Volume composition section. CAVEAT: art-bible spec values Sat=-5/Temp=+10 are intentionally subtle ("no spectacle"); on the cemetery's mostly-gray palette, visual delta on PNG mean-RGB central crop is near-zero by design, NOT failure | Subjective art-director gate on `session-2-evidence.md` is the load-bearing direction-validation gate; technical pipeline integrity now provably independent |
 | World-space text for dev labels (Unity 6.3) | VERIFIED | UGUI WorldSpace Canvas + UI Text path: UGUI available transitively (`packages-lock.json:68`); UI Text deprecated-but-supported (`deprecated-apis.md:29`); WorldSpace render mode documented at `modules/ui.md:270`. TextMeshPro absent and rejected (speculative dep per D001). See `session-1-wrap.md` Verification 2 | Session 3: implement via UGUI WorldSpace Canvas; legacy TextMesh optional experiment with immediate UGUI fallback if not source-verified or renders poorly |
+| URP `RenderPipeline.SubmitRenderRequest` (off-frame URP render path) | VERIFIED | Documented in local URP 17.3.0 package source (`Packages/manifest.json` pins URP 17.3.0; locally at `Library/PackageCache/com.unity.render-pipelines.universal@3b809f23691d/Runtime/UniversalRenderPipeline.cs`): line `533` (SingleCameraRequest type), line `557` (destination required), line `2567` (destination field); URP package tests use static `RenderPipeline.SubmitRenderRequest(camera, request)` invocation pattern. `Camera.Render()` in Editor mode bypasses URP per-frame init (ResetMainStack + VolumeManager.Update + post-process pass dispatch); SubmitRenderRequest is the documented entry point | Runner `CheckPostProcessExecution` uses this for all off-frame execution proof going forward |
 
 Per AGENTS.md §3: every "done" claim in the spike's evidence report will cite file:line + verification method.
 
@@ -106,6 +107,7 @@ Per AGENTS.md §3: every "done" claim in the spike's evidence report will cite f
 - **Subagent gates** at session end: art-director (lighting direction) + technical-artist (URP impl correctness)
 - **Evidence:** lighting screenshot + Frame Debugger capture
 - **Commit checkpoint per AGENTS.md §14**
+- ✅ **Session 2 complete at `2f2eb7a` (Commit 1 of closure chain)** — see [`session-2-evidence.md`](session-2-evidence.md). Subjective art-director + technical-artist gates remain pending on filled evidence; Session 3 (dressing + dev-labels) is technically unblocked.
 
 ### Session 3 — Cemetery Dressing + Dev-Only Enemy Labels
 - Placeholder primitives standing in for: `env_arch_stone_ashlar_s3_vc_yr200` (walls), `env_ground_cobble_street_neu_yr200` (ground), `prop_maj_neu_gravestone_set_01` (5-8 gravestones), `prop_maj_vc_lantern_practical_01` (lantern meshes attached to Session 2 Point Lights)
@@ -179,7 +181,7 @@ Each claim cites file:line + verification method per AGENTS.md §3.
 - §S8.7 body still asserts original SSS "flat 1-2ms" claim → follow signoff footer, not unrevised body
 - §S8.6 named-NPC budget revision pending → does not block environment work
 - `.claude/docs/directory-structure.md` doc drift (claims active.md is gitignored; reality is tracked) → flag for separate cleanup batch
-- URP 17.3 fog visual behavior + Volume-stack composition: PARTIALLY VERIFIED at session 1 start; full verification or deferral at session 1 wrap
+- URP 17.3 fog visual behavior + Volume-stack composition: VERIFIED-WITH-CAVEAT at Session 2 closure; technical pipeline integrity proven by `session-2-evidence.md`, with subjective art-director direction validation still load-bearing
 
 ## Scope Discipline (per memory: process calibration by batch class)
 
@@ -189,6 +191,17 @@ Spike sits in "gameplay-feel iteration" band — lighter implement-play-fix loop
 - Scene work touches save/load, persistence, or cross-contract state (none expected)
 - 5-session cap nears without subjective "place not capsules" verdict
 - Dev-label work surfaces unexpected design-policy pressure (must escalate to design decision, not implementation)
+### Per-session cadence calibration (amendment, 2026-05-16)
+Sessions 1-2 ran high rigor and that was vindicated: caught 14+ nameplate prohibitions, two URP serialization gotchas (Volume Profile `AddObjectToAsset`, renderer `postProcessData` null), trailing-whitespace drift, deny-pattern false positives, and the `SubmitRenderRequest` invocation requirement. The cumulative cost was real and the rigor cadence should be calibrated per session for what's actually at stake:
+
+| Session | Calibration | Rationale |
+|---|---|---|
+| 1, 2 (done) | High rigor — kept | Foundation; misses propagate to all later sessions |
+| **3 (next)** | **Light rigor — implement-play-fix loop** per original plan framing | Greybox dressing; throwaway acceptable; visual judgment is the real gate, not code review |
+| 4 (HUD) | Medium rigor — calibrate at session entry | UI Toolkit is documented but new code surface; deny patterns matter; visual is still subjective |
+| 5 (closure) | Medium-high rigor | Closing commits need to be tight; subagent gates fire |
+
+Snap-back triggers above still apply at any session. If a Session 3 dressing change accidentally touches NPC System or Combat Core code paths, treat it as the "Scene work touches cross-contract state" trigger and snap back to full rigor.
 
 ## Commit & Push Cadence (per AGENTS.md §14)
 
