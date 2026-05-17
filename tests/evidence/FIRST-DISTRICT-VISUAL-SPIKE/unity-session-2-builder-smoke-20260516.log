@@ -1,0 +1,38 @@
+[VisualSpikeRunner] Session 2 verification: 20260516
+[VisualSpikeRunner] Scene: Assets/Scenes/FirstDistrict_VisualSpike.unity
+
+[PASS] Scene loaded: Assets/Scenes/FirstDistrict_VisualSpike.unity
+
+[CHECK] Lights
+  [PASS] No Directional Light present
+  [PASS] 3 Point Lights present
+  [PASS] Light 'Lantern_NW' useColorTemperature=true, colorTemperature=2200, range=4
+  [PASS] Light 'Lantern_NE' useColorTemperature=true, colorTemperature=2200, range=4
+  [PASS] Light 'Lantern_Center' useColorTemperature=true, colorTemperature=2200, range=4
+
+[CHECK] Volume + Profile
+  [PASS] Volume found: 'Volume_District_State1'
+  [PASS] Volume profile assigned: gv_district_state1
+  [PASS] Bloom present and disabled
+  [PASS] Vignette present and disabled
+  [PASS] ColorAdjustments active, saturation=-5
+  [PASS] WhiteBalance active, temperature=+10
+  [PASS] Tonemapping active, mode=Neutral
+
+[CHECK] Camera Stack
+  [PASS] 2 cameras present
+  [PASS] Base camera Volume Layer Mask = Default (1)
+  [PASS] Overlay camera attached to Base camera stack
+  [PASS] Overlay camera Volume Layer Mask = Nothing (0)
+
+[CHECK] Fog (RenderSettings)
+  [PASS] RenderSettings.fog = true
+  [PASS] FogMode = Linear
+  [PASS] fogStartDistance = 10
+  [PASS] fogEndDistance = 30
+
+[CHECK] RenderSettings (ambient + sun)
+  [PASS] RenderSettings.sun is null (no directional sun)
+  [PASS] RenderSettings.skybox assigned: Skybox_District_Overcast
+
+[RESULT] PASS
