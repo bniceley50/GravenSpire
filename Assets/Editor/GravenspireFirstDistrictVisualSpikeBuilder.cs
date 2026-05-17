@@ -92,13 +92,28 @@ namespace Gravenspire.Editor
             var existing = AssetDatabase.LoadAssetAtPath<VolumeProfile>(VolumeProfilePath);
             if (existing != null)
             {
-                ConfigureVolumeProfile(existing);
-                return existing;
+                // Detect a broken profile from a prior buggy create flow (component refs
+                // that did not survive serialization will load as nulls). Delete the asset
+                // and recreate cleanly so AddObjectToAsset can run from a known-good base.
+                bool hasBroken = existing.components.Exists(c => c == null);
+                if (hasBroken)
+                {
+                    AssetDatabase.DeleteAsset(VolumeProfilePath);
+                }
+                else
+                {
+                    ConfigureVolumeProfile(existing);
+                    return existing;
+                }
             }
 
             var profile = ScriptableObject.CreateInstance<VolumeProfile>();
-            ConfigureVolumeProfile(profile);
+            // Persist the profile asset BEFORE adding components so AddObjectToAsset can
+            // attach each component as a subasset of the asset file. If components are added
+            // to an in-memory profile and then CreateAsset runs, the component references
+            // serialize as {fileID: 0} nulls (root cause of 2026-05-16 Session 2 smoke FAIL).
             AssetDatabase.CreateAsset(profile, VolumeProfilePath);
+            ConfigureVolumeProfile(profile);
             return profile;
         }
 
@@ -134,7 +149,15 @@ namespace Gravenspire.Editor
             {
                 return existing;
             }
-            return profile.Add<T>(overrides: true);
+            var component = profile.Add<T>(overrides: true);
+            // Persist the component as a subasset of the profile so the reference survives
+            // serialization. Without this, the saved .asset has {fileID: 0} null refs.
+            // The Editor UI path (VolumeProfileEditor in URP/Core) uses the same call.
+            if (!string.IsNullOrEmpty(AssetDatabase.GetAssetPath(profile)))
+            {
+                AssetDatabase.AddObjectToAsset(component, profile);
+            }
+            return component;
         }
 
         private static void BuildGeometry(GameObject root)

@@ -32,6 +32,17 @@ namespace Gravenspire.Editor
             int exitCode = Run();
             if (Application.isBatchMode)
             {
+                if (exitCode != 0)
+                {
+                    // Throw so batchmode reliably exits non-zero. EditorApplication.Exit
+                    // alone does not always propagate to the OS process exit code when
+                    // -quit is on the command line; an unhandled exception in -executeMethod
+                    // forces Unity to exit non-zero. The smoke log is already written by
+                    // Run() before this point.
+                    throw new System.Exception(
+                        "[VisualSpikeRunner] Smoke verification FAILED with exit code " +
+                        exitCode + "; see log at tests/evidence/FIRST-DISTRICT-VISUAL-SPIKE/.");
+                }
                 EditorApplication.Exit(exitCode);
             }
         }
