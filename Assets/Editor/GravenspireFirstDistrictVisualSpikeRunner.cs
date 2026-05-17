@@ -18,6 +18,7 @@ namespace Gravenspire.Editor
     {
         private const string ScenePath = "Assets/Scenes/FirstDistrict_VisualSpike.unity";
         private const string EvidenceDir = "tests/evidence/FIRST-DISTRICT-VISUAL-SPIKE";
+        private const string RendererPath = "Assets/Settings/GravenspireUniversalRenderer.asset";
 
         // Session date as constant per Δ6 (mirrors M2-04 pattern; avoids real-clock APIs
         // tracked by the T1 deny-pattern in .githooks/pre-commit).
@@ -68,9 +69,13 @@ namespace Gravenspire.Editor
                 log.AppendLine();
                 allPassed &= CheckCameras(log);
                 log.AppendLine();
+                allPassed &= CheckRendererPostProcessing(log);
+                log.AppendLine();
                 allPassed &= CheckFog(log);
                 log.AppendLine();
                 allPassed &= CheckRenderSettings(log);
+                log.AppendLine();
+                allPassed &= CheckPostProcessExecution(log);
                 log.AppendLine();
             }
             catch (Exception ex)
@@ -351,6 +356,405 @@ namespace Gravenspire.Editor
             }
 
             return ok;
+        }
+
+        private static bool CheckRendererPostProcessing(StringBuilder log)
+        {
+            log.AppendLine("[CHECK] URP renderer post-processing");
+            bool ok = true;
+
+            var rendererData = AssetDatabase.LoadAssetAtPath<UniversalRendererData>(RendererPath);
+            if (rendererData == null)
+            {
+                log.AppendLine("  [FAIL] Shared URP renderer asset missing: " + RendererPath);
+                return false;
+            }
+
+            log.AppendLine("  [PASS] Shared URP renderer asset loaded: " + RendererPath);
+
+            if (rendererData.postProcessData == null)
+            {
+                log.AppendLine("  [FAIL] Renderer postProcessData is null; URP post-process passes are disabled");
+                ok = false;
+            }
+            else
+            {
+                log.AppendLine(
+                    "  [PASS] Renderer postProcessData assigned: " +
+                    AssetDatabase.GetAssetPath(rendererData.postProcessData));
+            }
+
+            Camera baseCamera = null;
+            Camera overlayCamera = null;
+            var cameras = UnityEngine.Object.FindObjectsByType<Camera>(FindObjectsSortMode.None);
+            foreach (var cam in cameras)
+            {
+                var data = cam.GetUniversalAdditionalCameraData();
+                if (data.renderType == CameraRenderType.Base) baseCamera = cam;
+                else if (data.renderType == CameraRenderType.Overlay) overlayCamera = cam;
+            }
+
+            if (baseCamera == null)
+            {
+                log.AppendLine("  [FAIL] Base camera missing; cannot assert renderPostProcessing");
+                ok = false;
+            }
+            else
+            {
+                var baseData = baseCamera.GetUniversalAdditionalCameraData();
+                if (baseData.renderPostProcessing)
+                {
+                    log.AppendLine("  [PASS] Base camera renderPostProcessing = true");
+                }
+                else
+                {
+                    log.AppendLine("  [FAIL] Base camera renderPostProcessing = false; expected true");
+                    ok = false;
+                }
+            }
+
+            if (overlayCamera == null)
+            {
+                log.AppendLine("  [FAIL] Overlay camera missing; cannot assert renderPostProcessing");
+                ok = false;
+            }
+            else
+            {
+                var overlayData = overlayCamera.GetUniversalAdditionalCameraData();
+                if (!overlayData.renderPostProcessing)
+                {
+                    log.AppendLine("  [PASS] Overlay camera renderPostProcessing = false");
+                }
+                else
+                {
+                    log.AppendLine("  [FAIL] Overlay camera renderPostProcessing = true; expected false");
+                    ok = false;
+                }
+            }
+
+            return ok;
+        }
+
+        private static bool CheckPostProcessExecution(StringBuilder log)
+        {
+            log.AppendLine("[CHECK] URP post-process execution (RenderTexture A/B)");
+
+            var baseCamera = FindCameraByRenderType(CameraRenderType.Base);
+            if (baseCamera == null)
+            {
+                log.AppendLine("  [FAIL] No Base camera found; cannot measure post-process execution");
+                return false;
+            }
+
+            var baseData = baseCamera.GetUniversalAdditionalCameraData();
+            if (!baseData.renderPostProcessing)
+            {
+                log.AppendLine("  [FAIL] Base camera renderPostProcessing=false; cannot measure post-process execution");
+                return false;
+            }
+
+            const int width = 256;
+            const int height = 144;
+            const float minimumTotalDelta = 5f;
+
+            RenderTexture renderTexture = null;
+            Texture2D offTexture = null;
+            Texture2D onTexture = null;
+            GameObject diagnosticVolumeObject = null;
+            GameObject diagnosticTargetObject = null;
+            VolumeProfile diagnosticProfile = null;
+            Material diagnosticMaterial = null;
+            RenderTexture previousActive = RenderTexture.active;
+            var previousTarget = baseCamera.targetTexture;
+
+            try
+            {
+                renderTexture = RenderTexture.GetTemporary(width, height, 24, RenderTextureFormat.ARGB32);
+                renderTexture.name = "FirstDistrictPostProcessExecutionProbe";
+
+                diagnosticProfile = ScriptableObject.CreateInstance<VolumeProfile>();
+                diagnosticProfile.hideFlags = HideFlags.HideAndDontSave;
+                diagnosticProfile.name = "__DIAG_POST_PROCESS_PROFILE__";
+
+                var colorAdjustments = diagnosticProfile.Add<ColorAdjustments>(overrides: true);
+                colorAdjustments.active = true;
+                colorAdjustments.saturation.overrideState = true;
+                colorAdjustments.saturation.value = -90f;
+                colorAdjustments.colorFilter.overrideState = true;
+                colorAdjustments.colorFilter.value = new Color(0.15f, 1f, 0.15f);
+
+                diagnosticVolumeObject = new GameObject("__DIAG_POST_PROCESS_VOLUME__")
+                {
+                    hideFlags = HideFlags.HideAndDontSave
+                };
+                diagnosticVolumeObject.layer = LayerMask.NameToLayer("Default");
+
+                var diagnosticVolume = diagnosticVolumeObject.AddComponent<Volume>();
+                diagnosticVolume.isGlobal = true;
+                diagnosticVolume.priority = 100f;
+                diagnosticVolume.weight = 1f;
+                diagnosticVolume.sharedProfile = diagnosticProfile;
+                diagnosticVolume.enabled = false;
+
+                diagnosticTargetObject = GameObject.CreatePrimitive(PrimitiveType.Quad);
+                diagnosticTargetObject.name = "__DIAG_SATURATED_TARGET__";
+                diagnosticTargetObject.hideFlags = HideFlags.HideAndDontSave;
+                diagnosticTargetObject.layer = LayerMask.NameToLayer("Default");
+                diagnosticTargetObject.transform.SetPositionAndRotation(
+                    baseCamera.transform.position + baseCamera.transform.forward * 4f,
+                    baseCamera.transform.rotation);
+                diagnosticTargetObject.transform.localScale = new Vector3(3f, 1.75f, 1f);
+
+                var shader = Shader.Find("Universal Render Pipeline/Unlit");
+                if (shader == null)
+                {
+                    shader = Shader.Find("Unlit/Color");
+                }
+                if (shader == null)
+                {
+                    log.AppendLine("  [FAIL] No unlit shader found for diagnostic post-process target");
+                    return false;
+                }
+
+                diagnosticMaterial = new Material(shader)
+                {
+                    hideFlags = HideFlags.HideAndDontSave,
+                    name = "__DIAG_SATURATED_TARGET_MATERIAL__"
+                };
+                SetMaterialColor(diagnosticMaterial, new Color(1f, 0.05f, 0.05f, 1f));
+
+                var targetRenderer = diagnosticTargetObject.GetComponent<MeshRenderer>();
+                targetRenderer.sharedMaterial = diagnosticMaterial;
+
+                baseCamera.targetTexture = renderTexture;
+
+                diagnosticVolume.enabled = false;
+                VolumeManager.instance.ResetMainStack();
+                VolumeManager.instance.Update(baseCamera.transform, baseData.volumeLayerMask);
+                log.AppendLine(
+                    "  [DIAG] Resolved stack saturation before diagnostic Volume: " +
+                    ResolveStackSaturation().ToString("F2"));
+                var offRequest = new UniversalRenderPipeline.SingleCameraRequest
+                {
+                    destination = renderTexture
+                };
+                RenderPipeline.SubmitRenderRequest(baseCamera, offRequest);
+                offTexture = ReadRenderTexture(renderTexture);
+
+                diagnosticVolume.enabled = true;
+                VolumeManager.instance.ResetMainStack();
+                VolumeManager.instance.Update(baseCamera.transform, baseData.volumeLayerMask);
+                log.AppendLine(
+                    "  [DIAG] Resolved stack saturation after diagnostic Volume: " +
+                    ResolveStackSaturation().ToString("F2"));
+                var onRequest = new UniversalRenderPipeline.SingleCameraRequest
+                {
+                    destination = renderTexture
+                };
+                RenderPipeline.SubmitRenderRequest(baseCamera, onRequest);
+                onTexture = ReadRenderTexture(renderTexture);
+
+                var result = CompareCentralCrop(offTexture, onTexture);
+                log.AppendLine(
+                    "  OFF mean RGB: (" +
+                    result.OffMeanR.ToString("F2") + ", " +
+                    result.OffMeanG.ToString("F2") + ", " +
+                    result.OffMeanB.ToString("F2") + ")");
+                log.AppendLine(
+                    "  ON  mean RGB: (" +
+                    result.OnMeanR.ToString("F2") + ", " +
+                    result.OnMeanG.ToString("F2") + ", " +
+                    result.OnMeanB.ToString("F2") + ")");
+                log.AppendLine(
+                    "  Central crop changed pixels: " +
+                    result.ChangedPixels + "/" + result.SampledPixels);
+                log.AppendLine(
+                    "  Total |mean delta|: " + result.TotalMeanAbsDelta.ToString("F2") +
+                    " (threshold " + minimumTotalDelta.ToString("F2") + ")");
+
+                if (result.TotalMeanAbsDelta < minimumTotalDelta)
+                {
+                    log.AppendLine(
+                        "  [FAIL] RenderTexture A/B delta below threshold; URP post-process execution not proven");
+                    return false;
+                }
+
+                log.AppendLine("  [PASS] URP post-process execution measured by RenderTexture A/B");
+                return true;
+            }
+            finally
+            {
+                baseCamera.targetTexture = previousTarget;
+                RenderTexture.active = previousActive;
+
+                if (onTexture != null)
+                {
+                    UnityEngine.Object.DestroyImmediate(onTexture);
+                }
+                if (offTexture != null)
+                {
+                    UnityEngine.Object.DestroyImmediate(offTexture);
+                }
+                if (diagnosticTargetObject != null)
+                {
+                    UnityEngine.Object.DestroyImmediate(diagnosticTargetObject);
+                }
+                if (diagnosticMaterial != null)
+                {
+                    UnityEngine.Object.DestroyImmediate(diagnosticMaterial);
+                }
+                if (diagnosticVolumeObject != null)
+                {
+                    UnityEngine.Object.DestroyImmediate(diagnosticVolumeObject);
+                }
+                if (diagnosticProfile != null)
+                {
+                    UnityEngine.Object.DestroyImmediate(diagnosticProfile);
+                }
+                if (renderTexture != null)
+                {
+                    RenderTexture.ReleaseTemporary(renderTexture);
+                }
+            }
+        }
+
+        private static Camera FindCameraByRenderType(CameraRenderType renderType)
+        {
+            var cameras = UnityEngine.Object.FindObjectsByType<Camera>(FindObjectsSortMode.None);
+            foreach (var camera in cameras)
+            {
+                var data = camera.GetUniversalAdditionalCameraData();
+                if (data.renderType == renderType)
+                {
+                    return camera;
+                }
+            }
+            return null;
+        }
+
+        private static float ResolveStackSaturation()
+        {
+            var stack = VolumeManager.instance.stack;
+            if (stack == null)
+            {
+                return float.NaN;
+            }
+
+            var colorAdjustments = stack.GetComponent<ColorAdjustments>();
+            if (colorAdjustments == null || !colorAdjustments.saturation.overrideState)
+            {
+                return float.NaN;
+            }
+            return colorAdjustments.saturation.value;
+        }
+
+        private static void SetMaterialColor(Material material, Color color)
+        {
+            if (material.HasProperty("_BaseColor"))
+            {
+                material.SetColor("_BaseColor", color);
+            }
+            if (material.HasProperty("_Color"))
+            {
+                material.SetColor("_Color", color);
+            }
+        }
+
+        private static Texture2D ReadRenderTexture(RenderTexture renderTexture)
+        {
+            var previousActive = RenderTexture.active;
+            try
+            {
+                RenderTexture.active = renderTexture;
+                var texture = new Texture2D(
+                    renderTexture.width,
+                    renderTexture.height,
+                    TextureFormat.RGB24,
+                    mipChain: false);
+                texture.ReadPixels(new Rect(0, 0, renderTexture.width, renderTexture.height), 0, 0);
+                texture.Apply();
+                return texture;
+            }
+            finally
+            {
+                RenderTexture.active = previousActive;
+            }
+        }
+
+        private static PostProcessComparison CompareCentralCrop(Texture2D offTexture, Texture2D onTexture)
+        {
+            int xMin = offTexture.width / 4;
+            int xMax = offTexture.width * 3 / 4;
+            int yMin = offTexture.height / 4;
+            int yMax = offTexture.height * 3 / 4;
+
+            var offPixels = offTexture.GetPixels32();
+            var onPixels = onTexture.GetPixels32();
+            double offR = 0;
+            double offG = 0;
+            double offB = 0;
+            double onR = 0;
+            double onG = 0;
+            double onB = 0;
+            int changedPixels = 0;
+            int sampledPixels = 0;
+
+            for (int y = yMin; y < yMax; y++)
+            {
+                int row = y * offTexture.width;
+                for (int x = xMin; x < xMax; x++)
+                {
+                    int index = row + x;
+                    var offPixel = offPixels[index];
+                    var onPixel = onPixels[index];
+
+                    offR += offPixel.r;
+                    offG += offPixel.g;
+                    offB += offPixel.b;
+                    onR += onPixel.r;
+                    onG += onPixel.g;
+                    onB += onPixel.b;
+
+                    if (offPixel.r != onPixel.r ||
+                        offPixel.g != onPixel.g ||
+                        offPixel.b != onPixel.b)
+                    {
+                        changedPixels++;
+                    }
+
+                    sampledPixels++;
+                }
+            }
+
+            var result = new PostProcessComparison
+            {
+                SampledPixels = sampledPixels,
+                ChangedPixels = changedPixels,
+                OffMeanR = (float)(offR / sampledPixels),
+                OffMeanG = (float)(offG / sampledPixels),
+                OffMeanB = (float)(offB / sampledPixels),
+                OnMeanR = (float)(onR / sampledPixels),
+                OnMeanG = (float)(onG / sampledPixels),
+                OnMeanB = (float)(onB / sampledPixels)
+            };
+            result.TotalMeanAbsDelta =
+                Math.Abs(result.OffMeanR - result.OnMeanR) +
+                Math.Abs(result.OffMeanG - result.OnMeanG) +
+                Math.Abs(result.OffMeanB - result.OnMeanB);
+            return result;
+        }
+
+        private struct PostProcessComparison
+        {
+            public int SampledPixels;
+            public int ChangedPixels;
+            public float OffMeanR;
+            public float OffMeanG;
+            public float OffMeanB;
+            public float OnMeanR;
+            public float OnMeanG;
+            public float OnMeanB;
+            public float TotalMeanAbsDelta;
         }
 
         private static bool CheckFog(StringBuilder log)

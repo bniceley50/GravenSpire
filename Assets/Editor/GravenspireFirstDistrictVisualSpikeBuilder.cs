@@ -19,6 +19,9 @@ namespace Gravenspire.Editor
         private const string VolumeProfileDir = "Assets/Settings/lighting";
         private const string VolumeProfilePath = "Assets/Settings/lighting/gv_district_state1.asset";
         private const string ScenesDir = "Assets/Scenes";
+        private const string RendererPath = "Assets/Settings/GravenspireUniversalRenderer.asset";
+        private const string DefaultPostProcessDataPath =
+            "Packages/com.unity.render-pipelines.universal/Runtime/Data/PostProcessData.asset";
 
         // Courtyard dimensions per spike plan §Session 2 (~15x20m, 3 walls + open south).
         private const float CourtyardWidth = 15f;
@@ -53,6 +56,7 @@ namespace Gravenspire.Editor
         {
             EnsureDirectory(VolumeProfileDir);
             EnsureDirectory(ScenesDir);
+            EnsureRendererPostProcessData();
 
             var profile = EnsureVolumeProfile();
             EditorUtility.SetDirty(profile);
@@ -77,6 +81,31 @@ namespace Gravenspire.Editor
             EditorSceneManager.SaveScene(scene, ScenePath);
             AssetDatabase.SaveAssets();
             Debug.Log("[VisualSpikeBuilder] Scene built and saved to " + ScenePath);
+        }
+
+        private static void EnsureRendererPostProcessData()
+        {
+            var rendererData = AssetDatabase.LoadAssetAtPath<UniversalRendererData>(RendererPath);
+            if (rendererData == null)
+            {
+                throw new FileNotFoundException(
+                    "Failed to load shared URP renderer asset at " + RendererPath + ".");
+            }
+
+            if (rendererData.postProcessData != null)
+            {
+                return;
+            }
+
+            var postProcessData = AssetDatabase.LoadAssetAtPath<PostProcessData>(DefaultPostProcessDataPath);
+            if (postProcessData == null)
+            {
+                throw new FileNotFoundException(
+                    "Failed to load URP default PostProcessData at " + DefaultPostProcessDataPath + ".");
+            }
+
+            rendererData.postProcessData = postProcessData;
+            EditorUtility.SetDirty(rendererData);
         }
 
         private static void EnsureDirectory(string path)

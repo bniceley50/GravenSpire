@@ -14,6 +14,8 @@ namespace Gravenspire.Editor
         private const string ScenePath = "Assets/Scenes/_DevEntry.unity";
         private const string RendererPath = "Assets/Settings/GravenspireUniversalRenderer.asset";
         private const string PipelinePath = "Assets/Settings/GravenspireUniversalRenderPipeline.asset";
+        private const string DefaultPostProcessDataPath =
+            "Packages/com.unity.render-pipelines.universal/Runtime/Data/PostProcessData.asset";
 
         [MenuItem("Gravenspire/Build Dev Entry Shell")]
         public static void Build()
@@ -52,12 +54,20 @@ namespace Gravenspire.Editor
 
         private static UniversalRenderPipelineAsset EnsureUniversalRenderPipelineAsset()
         {
+            var rendererData = EnsureUniversalRendererData();
             var existingPipeline = AssetDatabase.LoadAssetAtPath<UniversalRenderPipelineAsset>(PipelinePath);
             if (existingPipeline != null)
             {
                 return existingPipeline;
             }
 
+            var pipelineAsset = UniversalRenderPipelineAsset.Create(rendererData);
+            AssetDatabase.CreateAsset(pipelineAsset, PipelinePath);
+            return pipelineAsset;
+        }
+
+        private static UniversalRendererData EnsureUniversalRendererData()
+        {
             var rendererData = AssetDatabase.LoadAssetAtPath<UniversalRendererData>(RendererPath);
             if (rendererData == null)
             {
@@ -65,9 +75,26 @@ namespace Gravenspire.Editor
                 AssetDatabase.CreateAsset(rendererData, RendererPath);
             }
 
-            var pipelineAsset = UniversalRenderPipelineAsset.Create(rendererData);
-            AssetDatabase.CreateAsset(pipelineAsset, PipelinePath);
-            return pipelineAsset;
+            EnsureRendererPostProcessData(rendererData);
+            return rendererData;
+        }
+
+        private static void EnsureRendererPostProcessData(UniversalRendererData rendererData)
+        {
+            if (rendererData.postProcessData != null)
+            {
+                return;
+            }
+
+            var postProcessData = AssetDatabase.LoadAssetAtPath<PostProcessData>(DefaultPostProcessDataPath);
+            if (postProcessData == null)
+            {
+                throw new FileNotFoundException(
+                    "Failed to load URP default PostProcessData at " + DefaultPostProcessDataPath + ".");
+            }
+
+            rendererData.postProcessData = postProcessData;
+            EditorUtility.SetDirty(rendererData);
         }
 
         private static void BuildSceneObjects()
