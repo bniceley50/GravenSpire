@@ -1,9 +1,9 @@
 # S2-M3-00 Verification
 
 **Story:** `production/stories/s2-m3-00-scenario-smoke-handoff-cleanup.md`
-**Result:** PASS (closure verification complete; commit SHA pending explicit commit approval)
+**Result:** PASS
 **Verification date:** 2026-05-17
-**Implementation HEAD:** PENDING COMMIT — closure verification complete in working tree; final commit SHA assigned after explicit commit approval
+**Implementation HEAD:** `e63e6dd52245e1e26008ccc85561e5bfc7f81861`
 **Pre-change HEAD:** `dc0f306`
 **Story manifest reference:** Sprint 2, 2026-05-14 (`production/stories/s2-m3-00-scenario-smoke-handoff-cleanup.md:9`)
 
@@ -71,7 +71,7 @@ The following items moved from implementation-gate deferral to closure evidence 
 
 2. **`.githooks/pre-commit` execution against the staged closure index** (AC-06). At implementation gate, the hook's pattern-scan scope was analyzed and the working-tree equivalent of its whitespace gate (`git diff --check`) ran clean. At closure, `.githooks/pre-commit` returned `[pre-commit] OK` against the staged closure index after closure documentation edits were complete.
 
-3. **Implementation HEAD lock**. The final commit SHA cannot exist until Brian approves the commit. This file therefore records the verified working-tree closure state as `PENDING COMMIT`; after the approved commit, the final response records the closure SHA. If a future audit requires the SHA inside this file, use a follow-up metadata-only evidence patch rather than pretending a pre-commit file can self-reference its own commit hash.
+3. **Implementation HEAD lock**. The closure commit SHA is recorded above as `e63e6dd52245e1e26008ccc85561e5bfc7f81861`. This is intentionally a follow-up metadata sync rather than an amend: a commit cannot contain its own final SHA in its tree content because the tree change would re-hash the commit.
 
 ### Launch runner exemption
 
