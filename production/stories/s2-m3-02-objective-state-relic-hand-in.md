@@ -1,6 +1,6 @@
 # S2-M3-02 - Objective State + Relic Hand-In
 
-**Status:** Blocked
+**Status:** Ready for Story Readiness
 **Sprint:** 2
 **Priority:** Must Have
 **Layer:** Gameplay / Unity Runtime
@@ -14,7 +14,7 @@
 
 ## Routing Status
 
-Blocked until `S2-M3-01` is complete. This story adds the four-state
+Ready for `/story-readiness` after `S2-M3-01` completed at closure SHA `1166cae`. This story adds the four-state
 session-local objective tracker and NPC relic hand-in. It uses an authored
 placeholder relic marker; `S2-M3-03` owns the final authored loot table that
 resolves the relic and salvage together.
@@ -120,4 +120,4 @@ updates, or broad scene searches.
 
 ## Next Gate
 
-Blocked until `S2-M3-01` is closed.
+Ready for `/story-readiness production/stories/s2-m3-02-objective-state-relic-hand-in.md` after `S2-M3-01` completed (closure SHA `1166cae`). This story adds the four-state session-local objective tracker and NPC relic hand-in, using `S2-M3-01`'s `M3_Caretaker` anchor.
