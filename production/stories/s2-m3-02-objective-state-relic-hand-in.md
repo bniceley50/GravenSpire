@@ -130,4 +130,4 @@ Complete. Next gate: `/story-readiness production/stories/s2-m3-03-loot-table-fi
 **Test Evidence:** `tests/evidence/S2-M3-02/verification.md`; `tests/unit/gameplay/npc/m3_objective_state_relic_hand_in_test.cs`; `tests/evidence/S2-M3-02/unity-objective-state-relic-hand-in-20260518-smoke.md`; `tests/evidence/S2-M3-02/m2-02-preservation-20260518-smoke.md`; `tests/evidence/S2-M3-02/m2-03-preservation-20260518-smoke.md`; `tests/evidence/S2-M3-02/m2-04-preservation-20260518-smoke.md`.
 **Code Review:** Complete on 2026-05-18. Evidence-label overclaim fixed; CodeRabbit `-langversion:10.0` finding verified as project-context false positive and documented in `tests/evidence/S2-M3-02/verification.md`.
 **Deviations / Notes:** `docs/architecture/control-manifest.md` remains absent as pre-existing Sprint 2 carryover; local Unity package wiring was required for the pure C# objective model and is valid scope; M2-02 preservation evidence still carries the known stale embedded `2026-05-12` date from `m2_02_runner_date_hardcoded`.
-**Closure Commit:** Pending user-approved commit.
+**Closure Commit:** `fb77f83`.

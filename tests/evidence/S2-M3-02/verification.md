@@ -3,6 +3,7 @@
 **Story:** `production/stories/s2-m3-02-objective-state-relic-hand-in.md`
 **Date:** 2026-05-18
 **Result:** COMPLETE WITH NOTES - STORY-DONE CLOSURE PASSED LOCALLY
+**Implementation HEAD:** `fb77f83295260f78f3221f68000748263e3fdb09`
 
 ## Implementation Summary
 
@@ -57,4 +58,4 @@
 - `/story-done` reran `git diff --check` after trimming Unity-reintroduced `_DevEntry.unity` blank `m_Name:` trailing spaces: PASS, LF/CRLF normalization warnings only.
 - `/story-done` ran `.githooks/pre-commit` against a temporary staged closure index containing only the S2-M3-02 implementation, evidence, story, sprint-status, and active-state files: PASS, `[pre-commit] OK`.
 - M2 preservation reruns remain valid because no runner or gameplay behavior changed after `/code-review`; the three story-local M2 preservation artifacts still record PASS.
-- Closure commit remains pending user-approved commit/push.
+- Closure commit `fb77f83` (`fb77f83295260f78f3221f68000748263e3fdb09`) landed the implementation, evidence, and routing closure set.
