@@ -1,6 +1,7 @@
 {
   "dependencies": {
     "com.gravenspire.gameplay.combat": "file:../src/gameplay/combat",
+    "com.gravenspire.gameplay.npc.m3objective": "file:../src/gameplay/npc/m3-objective",
     "com.unity.render-pipelines.universal": "17.3.0",
     "com.unity.test-framework": "1.6.0",
     "com.unity.modules.audio": "1.0.0",

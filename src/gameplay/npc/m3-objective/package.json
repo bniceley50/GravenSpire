@@ -1,0 +1,10 @@
+{
+  "name": "com.gravenspire.gameplay.npc.m3objective",
+  "version": "0.1.0",
+  "displayName": "Gravenspire Gameplay NPC M3 Objective",
+  "description": "Engine-agnostic M3 objective state source consumed by Unity runtime bridges and headless tests.",
+  "unity": "6000.3",
+  "author": {
+    "name": "Gravenspire"
+  }
+}

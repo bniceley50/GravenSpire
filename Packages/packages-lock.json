@@ -8,6 +8,12 @@
         "com.unity.nuget.newtonsoft-json": "3.2.1"
       }
     },
+    "com.gravenspire.gameplay.npc.m3objective": {
+      "version": "file:../src/gameplay/npc/m3-objective",
+      "depth": 0,
+      "source": "local",
+      "dependencies": {}
+    },
     "com.unity.burst": {
       "version": "1.8.29",
       "depth": 2,

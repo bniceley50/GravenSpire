@@ -8,16 +8,16 @@ end: "2026-05-30"
 generated: "2026-05-09"
 updated: "2026-05-18"
 branch: "main"
-head: "1166caec8fddfa811c9aee26d98413e994eaefd7"
+head: "PENDING_S2_M3_02_CLOSURE_COMMIT"
 qa_plan: "production/qa/plans/qa-plan-sprint-2-20260509.md"
 plan: "production/sprints/sprint-2.md"
 slice_review: ""
-implementation_gate: "M3 Objective + NPC + Loot story slate is open (S2-M3-00 through S2-M3-04). S2-M3-00 and S2-M3-01 are complete; S2-M3-02 is ready for /story-readiness; S2-M3-03 through S2-M3-04 remain blocked in dependency order."
-progress: "8/11 closed; S2-M3-01 named NPC objective frame complete; S2-M3-02 story-readiness next"
-completed_stories: 8
+implementation_gate: "M3 Objective + NPC + Loot story slate is open (S2-M3-00 through S2-M3-04). S2-M3-00, S2-M3-01, and S2-M3-02 are complete; S2-M3-03 is ready for /story-readiness; S2-M3-04 remains blocked on S2-M3-03."
+progress: "9/11 closed; S2-M3-02 objective state + relic hand-in complete; S2-M3-03 story-readiness next"
+completed_stories: 9
 total_stories: 11
-next_active_story: "S2-M3-02"
-next_active_command: "/story-readiness production/stories/s2-m3-02-objective-state-relic-hand-in.md"
+next_active_story: "S2-M3-03"
+next_active_command: "/story-readiness production/stories/s2-m3-03-loot-table-fixed-profile-vendor.md"
 
 carryover:
   ability_resolved_event_payload: "AbilityResolvedEvent remains ManaSpent-only, but T1-COMBAT-11 durably classifies it as KNOWN-CARRYOVER and fails shipping universal-spend misuse."
@@ -122,19 +122,19 @@ stories:
     name: "Objective state + relic hand-in"
     file: "production/stories/s2-m3-02-objective-state-relic-hand-in.md"
     priority: must-have
-    status: ready-for-story-readiness
+    status: done
     owner: ""
     estimate_days: 1.0
     blocker: ""
-    completed: ""
+    completed: "2026-05-18"
   - id: "S2-M3-03"
     name: "Loot table + fixed-profile vendor"
     file: "production/stories/s2-m3-03-loot-table-fixed-profile-vendor.md"
     priority: must-have
-    status: blocked
+    status: ready-for-story-readiness
     owner: ""
     estimate_days: 1.0
-    blocker: "S2-M3-02"
+    blocker: ""
     completed: ""
   - id: "S2-M3-04"
     name: "End-to-end objective loop"

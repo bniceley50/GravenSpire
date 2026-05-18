@@ -1,6 +1,6 @@
 # S2-M3-03 - Loot Table + Fixed-Profile Vendor
 
-**Status:** Blocked
+**Status:** Ready for Story Readiness
 **Sprint:** 2
 **Priority:** Must Have
 **Layer:** Gameplay / Unity Runtime
@@ -14,10 +14,10 @@
 
 ## Routing Status
 
-Blocked until `S2-M3-02` is complete. This story adds the restrained authored
-M3 loot table and the blockout-grade fixed-profile vendor salvage sale. It proves
-the mechanism only; it does not claim a tuned economy or implement full Inventory
-persistence.
+Ready for `/story-readiness` after `S2-M3-02` completed on 2026-05-18. This
+story adds the restrained authored M3 loot table and the blockout-grade
+fixed-profile vendor salvage sale. It proves the mechanism only; it does not
+claim a tuned economy or implement full Inventory persistence.
 
 ## Source Trace
 
@@ -133,4 +133,4 @@ stock ticking, Save/Load hooks, or broad item/economy scans.
 
 ## Next Gate
 
-Blocked until `S2-M3-02` is closed.
+Ready for `/story-readiness production/stories/s2-m3-03-loot-table-fixed-profile-vendor.md`.

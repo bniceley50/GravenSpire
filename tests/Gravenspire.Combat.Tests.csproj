@@ -20,6 +20,7 @@
     <Compile Include="..\src\core\save\**\*.cs" Link="src\core\save\%(RecursiveDir)%(Filename)%(Extension)" />
     <Compile Include="architecture\*.cs" Link="tests\architecture\%(Filename)%(Extension)" />
     <Compile Include="unit\gameplay\combat\*.cs" Link="tests\unit\gameplay\combat\%(Filename)%(Extension)" />
+    <Compile Include="unit\gameplay\npc\*.cs" Link="tests\unit\gameplay\npc\%(Filename)%(Extension)" />
     <Compile Include="unit\gameplay\progression\*.cs" Link="tests\unit\gameplay\progression\%(Filename)%(Extension)" />
     <Compile Include="integration\gameplay\combat\*.cs" Link="tests\integration\gameplay\combat\%(Filename)%(Extension)" />
     <Compile Include="integration\gameplay\progression\*.cs" Link="tests\integration\gameplay\progression\%(Filename)%(Extension)" />

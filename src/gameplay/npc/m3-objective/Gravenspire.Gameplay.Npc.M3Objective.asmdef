@@ -1,0 +1,14 @@
+{
+  "name": "Gravenspire.Gameplay.Npc.M3Objective",
+  "rootNamespace": "Gravenspire.Gameplay.Npc.M3Objective",
+  "references": [],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": true
+}

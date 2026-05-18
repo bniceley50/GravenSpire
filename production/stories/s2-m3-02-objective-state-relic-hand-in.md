@@ -1,6 +1,6 @@
 # S2-M3-02 - Objective State + Relic Hand-In
 
-**Status:** Ready for Story Readiness
+**Status:** Complete
 **Sprint:** 2
 **Priority:** Must Have
 **Layer:** Gameplay / Unity Runtime
@@ -14,10 +14,10 @@
 
 ## Routing Status
 
-Ready for `/story-readiness` after `S2-M3-01` completed at closure SHA `1166cae`. This story adds the four-state
-session-local objective tracker and NPC relic hand-in. It uses an authored
-placeholder relic marker; `S2-M3-03` owns the final authored loot table that
-resolves the relic and salvage together.
+Complete as of 2026-05-18. This story adds the four-state session-local objective
+tracker and NPC relic hand-in, reusing the `S2-M3-01` `M3_Caretaker` anchor. It
+uses an authored placeholder relic marker; `S2-M3-03` owns the final authored
+loot table that resolves the relic and salvage together.
 
 ## Source Trace
 
@@ -120,4 +120,14 @@ updates, or broad scene searches.
 
 ## Next Gate
 
-Ready for `/story-readiness production/stories/s2-m3-02-objective-state-relic-hand-in.md` after `S2-M3-01` completed (closure SHA `1166cae`). This story adds the four-state session-local objective tracker and NPC relic hand-in, using `S2-M3-01`'s `M3_Caretaker` anchor.
+Complete. Next gate: `/story-readiness production/stories/s2-m3-03-loot-table-fixed-profile-vendor.md`.
+
+## Completion Notes
+
+**Completed:** 2026-05-18
+**Criteria:** 6/6 passing.
+**Verdict:** COMPLETE WITH NOTES.
+**Test Evidence:** `tests/evidence/S2-M3-02/verification.md`; `tests/unit/gameplay/npc/m3_objective_state_relic_hand_in_test.cs`; `tests/evidence/S2-M3-02/unity-objective-state-relic-hand-in-20260518-smoke.md`; `tests/evidence/S2-M3-02/m2-02-preservation-20260518-smoke.md`; `tests/evidence/S2-M3-02/m2-03-preservation-20260518-smoke.md`; `tests/evidence/S2-M3-02/m2-04-preservation-20260518-smoke.md`.
+**Code Review:** Complete on 2026-05-18. Evidence-label overclaim fixed; CodeRabbit `-langversion:10.0` finding verified as project-context false positive and documented in `tests/evidence/S2-M3-02/verification.md`.
+**Deviations / Notes:** `docs/architecture/control-manifest.md` remains absent as pre-existing Sprint 2 carryover; local Unity package wiring was required for the pure C# objective model and is valid scope; M2-02 preservation evidence still carries the known stale embedded `2026-05-12` date from `m2_02_runner_date_hardcoded`.
+**Closure Commit:** Pending user-approved commit.
