@@ -1,6 +1,6 @@
 # S2-M3-00 - Scenario Smoke Handoff Cleanup
 
-**Status:** Ready for Story Readiness
+**Status:** Complete
 **Sprint:** 2
 **Priority:** Must Have
 **Layer:** Gameplay / Unity Runtime
@@ -14,11 +14,10 @@
 
 ## Routing Status
 
-This is the first M3 story. It is ready for `/story-readiness`. Do not start
-M3 NPC, objective, loot, or vendor implementation until this cleanup either
-extracts shared scenario-smoke support or proves a new M3 controller can compose
-the M2 loop without adding a fourth parallel smoke block to
-`M2SingleTrashMedLoopController`.
+This first M3 story is complete. It established shared editor-runner support for
+scenario-smoke log filtering, proved the M2 preservation runners still pass, and
+kept M3 NPC/objective/loot/vendor work blocked until the handoff cleanup was
+closed.
 
 ## Source Trace
 
@@ -120,4 +119,22 @@ poller, loot evaluator, vendor evaluator, or broad scene scan.
 
 ## Next Gate
 
-Ready for `/story-readiness production/stories/s2-m3-00-scenario-smoke-handoff-cleanup.md`.
+Complete. Next Sprint 2 M3 gate:
+
+`/story-readiness production/stories/s2-m3-01-named-npc-objective-frame.md`
+
+## Completion Notes
+
+**Completed:** 2026-05-17
+**Verdict:** COMPLETE WITH NOTES
+**Criteria:** 6/6 passing.
+**Deviations / Notes:**
+- Launch runner evidence-path parity is a follow-up carryover: `Assets/Editor/GravenspireLaunchVerificationRunner.cs:18` hardcodes S2-FOUNDATION-01 evidence and cannot safely participate in S2-M3-00 `-gravenspireEvidencePath` closure reruns without a small runner hygiene patch.
+- `m2_controller_scenario_smoke_abstraction` is partially addressed: this story intentionally extracted shared runner support only and did not refactor `Assets/Scripts/M2SingleTrashMedLoopController.cs`, preserving gameplay behavior.
+**Test Evidence:**
+- `tests/evidence/S2-M3-00/verification.md`
+- `tests/evidence/S2-M3-00/m2-01-rerun-20260517-smoke.md`
+- `tests/evidence/S2-M3-00/m2-02-rerun-20260517-smoke.md`
+- `tests/evidence/S2-M3-00/m2-03-rerun-20260517-smoke.md`
+- `tests/evidence/S2-M3-00/m2-04-rerun-20260517-smoke.md`
+**Code Review:** Complete — `/code-review` initially BLOCKED on Launch evidence-path and pre-commit evidence labeling; follow-up evidence/session-state fixes passed the third convergent verification.

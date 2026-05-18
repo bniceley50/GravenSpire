@@ -166,17 +166,13 @@ namespace Gravenspire.Editor
 
         private static void CaptureLog(string condition, string stackTrace, LogType type)
         {
+            if (GravenspireScenarioSmokeRunnerHelpers.IsEditorStartupNoise(condition, stackTrace, type))
+            {
+                return;
+            }
+
             if (type == LogType.Error || type == LogType.Exception || type == LogType.Assert)
             {
-                // UnityEditor.Search.SearchInit.IndexationOnStartup throws ArgumentOutOfRangeException
-                // on batchmode launch of a fresh worktree (no default Search database asset). It is a
-                // Unity editor-startup delay function outside the named-blocker runtime/controller/runner
-                // and must not fail the smoke.
-                if (!string.IsNullOrEmpty(stackTrace) && stackTrace.Contains("UnityEditor.Search.SearchInit"))
-                {
-                    return;
-                }
-
                 AppendSessionLine(ErrorsKey, condition);
             }
             else if (type == LogType.Warning)

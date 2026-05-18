@@ -1,6 +1,6 @@
 # S2-M3-01 - Named NPC Objective Frame
 
-**Status:** Blocked
+**Status:** Ready for Story Readiness
 **Sprint:** 2
 **Priority:** Must Have
 **Layer:** Gameplay / Unity Runtime
@@ -14,10 +14,10 @@
 
 ## Routing Status
 
-Blocked until `S2-M3-00` is complete. This story adds the first M3 player-facing
-authored reason: one named NPC anchor and intentional templated interaction,
-without quest markers, Dialogue System UI, persistence, faction reaction, or
-live LLM behavior.
+Ready for `/story-readiness` after `S2-M3-00` completed. This story adds the
+first M3 player-facing authored reason: one named NPC anchor and intentional
+templated interaction, without quest markers, Dialogue System UI, persistence,
+faction reaction, or live LLM behavior.
 
 ## Source Trace
 
@@ -108,4 +108,4 @@ Dialogue UI lifecycle, LLM calls, or broad scene polling.
 
 ## Next Gate
 
-Blocked until `S2-M3-00` is closed.
+Ready for `/story-readiness production/stories/s2-m3-01-named-npc-objective-frame.md`.

@@ -147,6 +147,11 @@ namespace Gravenspire.Editor
 
         private static void CaptureLog(string condition, string stackTrace, LogType type)
         {
+            if (GravenspireScenarioSmokeRunnerHelpers.IsEditorStartupNoise(condition, stackTrace, type))
+            {
+                return;
+            }
+
             if (type == LogType.Error || type == LogType.Exception || type == LogType.Assert)
             {
                 AppendSessionLine(ErrorsKey, condition);

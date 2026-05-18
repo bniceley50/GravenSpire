@@ -1,13 +1,13 @@
 # Active Session State
 
-**Last Updated:** 2026-05-14
-**Project Stage:** Pre-Production — Sprint 2 — M3 Story Slate Open / S2-M3-00 Story-Readiness Next
+**Last Updated:** 2026-05-17
+**Project Stage:** Pre-Production — Sprint 2 — M3 Story Slate Open / S2-M3-01 Story-Readiness Next
 
 ## Current Task
 
-Sprint 2 Milestone M3 (Objective + NPC + Loot) is story-broken: the M3 story slate `S2-M3-00` through `S2-M3-04` is open. The M3 quick-design is committed and pushed (`6704203` on `origin/main`); `design/quick/quick-design-m3-objective-npc-loot.md` is the design source for the slate. See the `M3 Objective + NPC + Loot Story Slate` extract below for slate detail.
+Sprint 2 Milestone M3 (Objective + NPC + Loot) is story-broken: the M3 story slate `S2-M3-00` through `S2-M3-04` is open. `S2-M3-00` Scenario Smoke Handoff Cleanup is complete in the working tree and awaiting the approved closure commit. The M3 quick-design is committed and pushed (`6704203` on `origin/main`); `design/quick/quick-design-m3-objective-npc-loot.md` is the design source for the slate. See the `M3 Objective + NPC + Loot Story Slate` and `/story-done` extracts below for detail.
 
-`S2-M3-00` Scenario Smoke Handoff Cleanup is ready for dev; `S2-M3-01` through `S2-M3-04` are blocked in dependency order. Next gate: `/story-readiness production/stories/s2-m3-00-scenario-smoke-handoff-cleanup.md`.
+`S2-M3-01` Named NPC Objective Frame is ready for story-readiness; `S2-M3-02` through `S2-M3-04` remain blocked in dependency order. Next gate: `/story-readiness production/stories/s2-m3-01-named-npc-objective-frame.md`.
 
 ## Status
 
@@ -72,12 +72,13 @@ Sprint 2 Milestone M3 (Objective + NPC + Loot) is story-broken: the M3 story sla
 - ✅ Sprint 2 story `S2-M2-01` closed via `/story-done` 2026-05-11 with verdict **COMPLETE WITH NOTES**. Commit `b4cb377` lands the Unity Combat Core runtime bridge.
 - ✅ Sprint 2 story `S2-M2-02` closed via `/story-done` 2026-05-12 with verdict **COMPLETE WITH NOTES**. Commits `93b460e` (implementation) -> `946c9d1` (harden / closes /code-review P0/P1) -> `350b06e` (evidence-integrity patch / closes qa-tester re-review). Three carryover keys logged: `m2_renderer_material_property_access`, `s2_bridge_runner_evidence_path_hardcoded`, `m2_presentation_threshold_gap`.
 - ✅ Sprint 2 story `S2-M2-03` closed via `/story-done` 2026-05-13 with verdict **COMPLETE WITH NOTES** (5/5 AC); implementation `bb6deab`, closure `3ce334c`; `control_manifest_absence_pre_existing` carryover added to sprint-status; S2-M2-03-cycle lessons captured 2026-05-14 in `fc20a86` (4 entries — telemetry-backed feel acceptance, classified negative-scope doc hits, Unity log redaction, MaterialPropertyBlock lifecycle-safe allocation; PowerShell heredoc whitespace-collapse lesson dropped, no durable repo evidence).
+- ✅ Sprint 2 story `S2-M3-00` closed in the working tree via `/story-done` 2026-05-17 with verdict **COMPLETE WITH NOTES** (6/6 AC); closure commit pending explicit approval. Four Unity batchmode reruns passed under `tests/evidence/S2-M3-00/`, Combat Core stayed 175/175, and `S2-M3-01` is next for `/story-readiness`.
 - ⚠️ Unity ProjectSettings hygiene is deferred to a separate batch: `ProjectSettings/TagManager.asset` emits a non-fatal parse warning in committed S2-M2-01 smoke logs, and `ProjectSettings/URPProjectSettings.asset` is currently untracked after Unity generation.
 
 ## Files Being Worked On
 
-- **Active:** Sprint 2 M3 story slate is open. Next command is `/story-readiness production/stories/s2-m3-00-scenario-smoke-handoff-cleanup.md`.
-- **M3 slate:** [s2-m3-00](../stories/s2-m3-00-scenario-smoke-handoff-cleanup.md) (ready for dev) -> [s2-m3-01](../stories/s2-m3-01-named-npc-objective-frame.md) -> [s2-m3-02](../stories/s2-m3-02-objective-state-relic-hand-in.md) -> [s2-m3-03](../stories/s2-m3-03-loot-table-fixed-profile-vendor.md) -> [s2-m3-04](../stories/s2-m3-04-end-to-end-objective-loop.md) (blocked in dependency order).
+- **Active:** Sprint 2 M3 story slate is open. Next command is `/story-readiness production/stories/s2-m3-01-named-npc-objective-frame.md`.
+- **M3 slate:** [s2-m3-00](../stories/s2-m3-00-scenario-smoke-handoff-cleanup.md) (complete, closure commit pending) -> [s2-m3-01](../stories/s2-m3-01-named-npc-objective-frame.md) (ready for story-readiness) -> [s2-m3-02](../stories/s2-m3-02-objective-state-relic-hand-in.md) -> [s2-m3-03](../stories/s2-m3-03-loot-table-fixed-profile-vendor.md) -> [s2-m3-04](../stories/s2-m3-04-end-to-end-objective-loop.md) (blocked in dependency order).
 - **Closed:** [production/stories/s2-m2-01-unity-combat-core-runtime-bridge.md](../stories/s2-m2-01-unity-combat-core-runtime-bridge.md) is complete.
 - **Closed:** [production/stories/s2-combat-01-fix-init-only-property-preservation.md](../stories/s2-combat-01-fix-init-only-property-preservation.md) is complete.
 - **Closed:** [production/stories/s2-foundation-01-unity-project-shell.md](../stories/s2-foundation-01-unity-project-shell.md) is complete.
@@ -117,7 +118,7 @@ Sprint 2 Milestone M3 (Objective + NPC + Loot) is story-broken: the M3 story sla
 
 ## Next Skill to Run
 
-- `/story-readiness production/stories/s2-m3-00-scenario-smoke-handoff-cleanup.md`. The M3 story slate `S2-M3-00` through `S2-M3-04` is open; `S2-M3-00` (Scenario Smoke Handoff Cleanup) is the next readiness gate, and `S2-M3-01` through `S2-M3-04` are blocked in dependency order. M3 quick-design committed and pushed at `6704203`.
+- `/story-readiness production/stories/s2-m3-01-named-npc-objective-frame.md`. The M3 story slate `S2-M3-00` through `S2-M3-04` is open; `S2-M3-00` (Scenario Smoke Handoff Cleanup) is complete in the working tree and awaiting the approved closure commit; `S2-M3-01` is the next readiness gate, and `S2-M3-02` through `S2-M3-04` are blocked in dependency order. M3 quick-design committed and pushed at `6704203`.
 - Routing decision (2026-05-14) on the M2-02 presentation-threshold revisit trigger (`m2_presentation_threshold_gap`): option **(a) — accept qualified human-play findings** — with a binding constraint. S2-M2-04 verification must mechanically prove the named blocker changes camp behavior through telemetry (discovery, time-to-danger, boundary pressure, clean-loop preservation, no farm-through), the way S2-M2-03 proved danger via `ending_health=14/140`. **Status: satisfied by `/dev-story` 2026-05-14** — telemetry + the dotnet integration test mechanically prove all five dimensions; human-play stays a qualified supplement. Human-play notes may be qualified by blockout visuals; mechanical AC cannot rest on presentation feel. Captured durably as lesson A in `tasks/lessons.md` (`fc20a86`).
 - Later: run Inventory implementation pre-spec to close `INV-OQ-05`, then rerun `/design-review design/gdd/inventory-item-economy.md --depth full`.
 
@@ -307,3 +308,64 @@ Sprint 2 Milestone M3 (Objective + NPC + Loot) is story-broken: the M3 story sla
 - Sprint plan: `production/sprints/sprint-2.md` Story Ledger now lists the M3 slate after the M2 rows.
 - Vendor scope: `S2-M3-03` uses the Inventory GDD's fixed-profile vendor rules blockout-grade (mechanism, not tuned economy); promotion triggers carried in the quick-design.
 - Next command: `/story-readiness production/stories/s2-m3-00-scenario-smoke-handoff-cleanup.md`.
+
+## Session Extract — /story-readiness 2026-05-17 (S2-M3-00)
+
+- Story: `production/stories/s2-m3-00-scenario-smoke-handoff-cleanup.md` — Scenario Smoke Handoff Cleanup.
+- Verdict: READY (convergent: Codex parallel run + this verification both READY).
+- Review mode: Lean (no `production/review-mode.txt`; QL-STORY-READY skipped).
+- Checks: header fields PASS, GDD traceability PASS (quick-design anchors `:216-223` and `:246-252` verified), ADR readiness PASS (D001/D002/D003/D012/D014 all Locked at `DECISIONS.md:15,35,51,342,418`), scope clarity PASS (6 ACs + Out Of Scope + Performance Budget), dependencies PASS (S2-M2-04 done at `production/sprint-status.yaml:96`), evidence PASS (`tests/evidence/S2-M3-00/verification.md` declared at story `:13`).
+- Warnings (non-blocking): `production/sprint-status.yaml:11` `head: 6704203` lags actual `HEAD dc0f306` (expected sprint-status rollover convention drift); control manifest absent per pre-existing carryover `control_manifest_absence_pre_existing`.
+- Next gate: `/dev-story production/stories/s2-m3-00-scenario-smoke-handoff-cleanup.md`.
+
+## Session Extract — /dev-story 2026-05-17 (S2-M3-00)
+
+- Story: `production/stories/s2-m3-00-scenario-smoke-handoff-cleanup.md` — S2-M3-00 Scenario Smoke Handoff Cleanup.
+- Status after implementation: Implemented, pending `/code-review` and `/story-done`. Story-file header status remains `Ready for Story Readiness` (read-only readiness skill does not auto-update); sprint-status.yaml already routes it as `ready-for-dev` at `production/sprint-status.yaml:105`.
+- Files changed:
+  - `Assets/Editor/GravenspireScenarioSmokeRunnerHelpers.cs` — created. New shared static class hosting `IsEditorStartupNoise(condition, stackTrace, type)` as the single source of truth for the diagnosed `UnityEditor.Search.SearchInit` editor-startup noise filter. Designed to grow as further cross-runner helpers are needed by M3 and beyond.
+  - `Assets/Editor/GravenspireScenarioSmokeRunnerHelpers.cs.meta` — created. Unity asset import companion for the new Editor script; matches the minimal two-line `fileFormatVersion: 2` + `guid` format used by every other Editor `.cs.meta` in the project. Persistent GUID `c471cec5ceec4d498fe462fcc0ea70a3` (verified unique by repo grep before write).
+  - `Assets/Editor/GravenspireM2NamedBlockerVerificationRunner.cs` — modified. `CaptureLog` refactored to delegate the SearchInit suppression to the shared helper. Bit-equivalent behavior because the helper internally gates on `LogType.Error / Exception / Assert` (matches the prior inline gate).
+  - `Assets/Editor/GravenspireM2CombatBridgeVerificationRunner.cs` — modified. `CaptureLog` backported to call the shared filter at the top. Additive suppression of a single diagnosed editor-startup noise condition (the same condition that was already being suppressed in the named-blocker runner). Resolves the `m2_runner_editor_noise_capture` carryover for this runner.
+  - `Assets/Editor/GravenspireM2LinkedTrashOverpullVerificationRunner.cs` — modified. Same backport as above.
+  - `Assets/Editor/GravenspireM2SingleTrashLoopVerificationRunner.cs` — modified. Same backport as above.
+  - `Assets/Editor/GravenspireLaunchVerificationRunner.cs` — modified. Same backport as above.
+  - `tests/evidence/S2-M3-00/verification.md` — created. AC trace, local gates, refactor verification note, deferred closure evidence protocol, carryover status.
+- Evidence:
+  - `tests/evidence/S2-M3-00/verification.md` — Result PARTIAL — PASS PENDING CLOSURE (Unity batchmode reruns + `.githooks/pre-commit` execution + implementation HEAD lock all finalized at `/story-done`); refactor proof in evidence file covers AC-03 at implementation gate. Top-level label updated per /code-review convergent finding on 2026-05-17.
+- Verification:
+  - `dotnet test tests/Gravenspire.Combat.Tests.csproj --logger "console;verbosity=minimal"` — PASS `175/175` (Duration 729 ms).
+  - `git diff --check` — PASS (clean).
+  - T1 negative-scope scan over 6 changed files — PASS WITH CLASSIFIED PRE-EXISTING HITS (only pre-existing `DateTime.UtcNow` calls in editor-evidence timestamping; none introduced by this story; the new helper file is clean).
+  - `.githooks/pre-commit` — PARTIAL: implementation-gate scope analysis PASS (changes in `Assets/Editor/**` are outside the hook's `src/*.cs|tests/*.cs` deny-pattern scope by design; working-tree `git diff --check` equivalent to the hook's whitespace check passed). Actual hook execution against the staged closure index is DEFERRED to `/story-done`, which will stage the changeset and record `[pre-commit] OK` or the exact failure in the closure evidence row.
+  - Unity batchmode reruns of four affected runners (M2-01 CombatBridge, M2-02 SingleTrashLoop, M2-03 LinkedTrashOverpull, M2-04 NamedBlocker) — DEFERRED to `/story-done` closure phase. The fifth modified runner (Launch) is exempt from the batchmode rerun because its evidence path is hardcoded to S2-FOUNDATION-01 (`Assets/Editor/GravenspireLaunchVerificationRunner.cs:18`) and lacks `-gravenspireEvidencePath` argument parsing; running it under S2-M3-00 would overwrite the foundation evidence rather than produce an S2-M3-00 artifact. Launch's backport is covered by the logical proof in the Refactor Verification Note. Protocol documented at `tests/evidence/S2-M3-00/verification.md` under **Closure Evidence**. AC-03's named set (S2-M2-02/03/04) maps to M2-02/M2-03/M2-04 in this list.
+- Deviations:
+  - Scope decision: extracted only the SearchInit log filter as the first concrete shared helper; did not extract the three parallel scenario-smoke subsystems from `Assets/Scripts/M2SingleTrashMedLoopController.cs` (would risk gameplay behavior change; out of scope per `production/stories/s2-m3-00-scenario-smoke-handoff-cleanup.md:50` through `:57`). M2 controller has zero diff in this story. Carryover `m2_controller_scenario_smoke_abstraction` is therefore PARTIALLY ADDRESSED (shared helper class established; further controller-side extraction remains a follow-up only if M3 ever requires it).
+  - Backported SearchInit filter to four sibling runners (M2-01/M2-02/M2-03/Launch) in addition to the strict AC-04 requirement of "shared OR explicitly available". Justification: directly resolves the `m2_runner_editor_noise_capture` carryover (`production/sprint-status.yaml:44`), addresses the false-fail risk on fresh-worktree batchmode, and is logically AC-03-preserving (one-way suppression of a single diagnosed editor-startup noise condition; any pre-change PASS remains a post-change PASS).
+- Carryover status:
+  - `m2_runner_editor_noise_capture` (`production/sprint-status.yaml:44`) — RESOLVED by this story. Single shared filter consumed by all five existing runners; future runners can opt in with a one-line call.
+  - `m2_controller_scenario_smoke_abstraction` (`production/sprint-status.yaml:43`) — PARTIALLY ADDRESSED. Shared helper class is the first piece of cross-runner abstraction; controller-side extraction explicitly deferred to keep gameplay behavior frozen.
+  - `launch_runner_evidence_path_hardcoded` (NEW, surfaced during /code-review convergent verification on 2026-05-17) — Launch runner hardcodes its evidence path to S2-FOUNDATION-01 (`Assets/Editor/GravenspireLaunchVerificationRunner.cs:18`) and has no `-gravenspireEvidencePath` argument parsing. Follow-up story should harmonize Launch's evidence-path argument handling with the four M2 runners (~12 LOC: add `EvidencePathArgumentName`, `EvidencePathKey`, `DefaultEvidencePath`, `ResolveEvidencePathFromCommandLine`, and `CurrentEvidencePath` per the M2 pattern). Out of scope for S2-M3-00 per the story's behavior-preserving constraint.
+- Next:
+  - `/code-review` on the six changed files. Standing pair: `reviewer` + `qa-tester` per `feedback_review_subagent_pairings`; substitute `reviewer` → `unity-specialist` if the diff is flagged as Unity-runner-specific (it is — editor batchmode runners and log-capture lifecycle).
+  - `/story-done production/stories/s2-m3-00-scenario-smoke-handoff-cleanup.md` to run the deferred Unity batchmode reruns, set status to Complete, append the closure extract, and update `production/sprint-status.yaml`.
+
+## Session Extract — /story-done 2026-05-17 (S2-M3-00)
+
+- Verdict: COMPLETE WITH NOTES.
+- Story: `production/stories/s2-m3-00-scenario-smoke-handoff-cleanup.md` — Scenario Smoke Handoff Cleanup.
+- Criteria: 6/6 passing. No fourth M3 scenario block added to `Assets/Scripts/M2SingleTrashMedLoopController.cs`; shared SearchInit helper exists; M2 preservation reruns passed; no gameplay code changed; local gates passed.
+- Closure evidence:
+  - `tests/evidence/S2-M3-00/m2-01-rerun-20260517-smoke.md` — PASS, exit code 0, no captured errors.
+  - `tests/evidence/S2-M3-00/m2-02-rerun-20260517-smoke.md` — PASS, exit code 0, no captured errors.
+  - `tests/evidence/S2-M3-00/m2-03-rerun-20260517-smoke.md` — PASS, exit code 0, no captured errors.
+  - `tests/evidence/S2-M3-00/m2-04-rerun-20260517-smoke.md` — PASS, exit code 0, no captured errors.
+  - `dotnet test tests/Gravenspire.Combat.Tests.csproj --logger "console;verbosity=minimal"` — PASS 175/175.
+  - `.githooks/pre-commit` — PASS (`[pre-commit] OK`) against the staged closure index after closure documentation edits were complete.
+- Code review: complete. Initial `/code-review` BLOCKED on Launch evidence-path and pre-commit evidence-label overclaims; both were fixed in evidence/session-state docs and third Codex verification returned clean.
+- Tech debt / carryovers:
+  - `m2_controller_scenario_smoke_abstraction` — PARTIALLY ADDRESSED; shared runner helper exists, controller-side extraction remains follow-up only if M3 telemetry needs it.
+  - `m2_runner_editor_noise_capture` — RESOLVED; all five existing scenario-smoke/launch runners consume `GravenspireScenarioSmokeRunnerHelpers.IsEditorStartupNoise`.
+  - `launch_runner_evidence_path_hardcoded` — NEW; Launch runner needs evidence-path argument parity before future story-local Launch reruns.
+- Sprint routing: `S2-M3-00` done; `S2-M3-01` moved to ready-for-story-readiness; `S2-M3-02` through `S2-M3-04` remain blocked in dependency order.
+- Next recommended: `/story-readiness production/stories/s2-m3-01-named-npc-objective-frame.md`.

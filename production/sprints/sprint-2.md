@@ -57,8 +57,8 @@ Sprint 2 has rolled forward. The QA plan exists and M1 shell implementation is c
 | `S2-M2-02` Single trash pull + med loop | Complete | `93b460e` -> `946c9d1` -> `350b06e` | `tests/evidence/S2-M2-02/verification.md` |
 | `S2-M2-03` Linked trash overpull | Complete | `bb6deab` | `tests/evidence/S2-M2-03/verification.md` |
 | `S2-M2-04` Named blocker + camp boundary | Complete | `ccb0c03` | `tests/evidence/S2-M2-04/verification.md` |
-| `S2-M3-00` Scenario smoke handoff cleanup | Ready for Dev | Not started | `tests/evidence/S2-M3-00/verification.md` |
-| `S2-M3-01` Named NPC objective frame | Blocked on `S2-M3-00` | Not started | `tests/evidence/S2-M3-01/verification.md` |
+| `S2-M3-00` Scenario smoke handoff cleanup | Complete | Pending closure commit | `tests/evidence/S2-M3-00/verification.md` |
+| `S2-M3-01` Named NPC objective frame | Ready for Story Readiness | Not started | `tests/evidence/S2-M3-01/verification.md` |
 | `S2-M3-02` Objective state + relic hand-in | Blocked on `S2-M3-01` | Not started | `tests/evidence/S2-M3-02/verification.md` |
 | `S2-M3-03` Loot table + fixed-profile vendor | Blocked on `S2-M3-02` | Not started | `tests/evidence/S2-M3-03/verification.md` |
 | `S2-M3-04` End-to-end objective loop | Blocked on `S2-M3-03` | Not started | `tests/evidence/S2-M3-04/verification.md` |
@@ -93,14 +93,9 @@ Sprint 2 has rolled forward. The QA plan exists and M1 shell implementation is c
 
 ## Next Gate
 
-M1 complete at `f5f74dc`; next gate is human Unity launch verification before M2 story-breaking.
-Minimum story shape:
+M3 scenario-smoke handoff cleanup is complete; next gate is:
 
-- Create the Unity project shell at the production root.
-- Add `ProjectSettings/` and `Packages/manifest.json`.
-- Add one launchable dev entry scene or equivalent temporary entry path.
-- Keep scope to shell, launchability, and smoke-testability.
-- Do not implement hub, faction, Save/Load, NPC, loot, vendor, or objective gameplay in the shell story.
+`/story-readiness production/stories/s2-m3-01-named-npc-objective-frame.md`
 
 ## Definition Of Done For Sprint 2 Planning
 
