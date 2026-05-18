@@ -3,7 +3,7 @@
 **Story:** `production/stories/s2-m3-01-named-npc-objective-frame.md`
 **Result:** PASS
 **Verification date:** 2026-05-18
-**Implementation worktree HEAD:** PENDING COMMIT — set in sync commit
+**Implementation worktree HEAD:** `1166caec8fddfa811c9aee26d98413e994eaefd7`
 **Story type:** Integration / Visual-Feel
 
 ## Summary
