@@ -1,6 +1,6 @@
 # S2-M3-01 - Named NPC Objective Frame
 
-**Status:** Ready for Story Readiness
+**Status:** Complete
 **Sprint:** 2
 **Priority:** Must Have
 **Layer:** Gameplay / Unity Runtime
@@ -106,6 +106,11 @@ Dialogue UI lifecycle, LLM calls, or broad scene polling.
 - Depends on: `S2-M3-00` complete.
 - Unlocks: `S2-M3-02` Objective State + Relic Hand-In.
 
-## Next Gate
+## Completion Notes
 
-Ready for `/story-readiness production/stories/s2-m3-01-named-npc-objective-frame.md`.
+- Closed via `/story-done` 2026-05-18 with verdict **COMPLETE WITH NOTES** (5/5 AC passing).
+- Implementation files: `Assets/Scripts/M3NamedNpcObjectiveFrame.cs`, `Assets/Editor/GravenspireM3NamedNpcObjectiveFrameBuilder.cs`, `Assets/Editor/GravenspireM3NamedNpcObjectiveFrameVerificationRunner.cs`, `Assets/Scenes/_DevEntry.unity` (NPC anchor + transform).
+- Evidence: `tests/evidence/S2-M3-01/verification.md` (PASS); story-specific Unity smoke `unity-named-npc-objective-frame-20260518-smoke.md`; M2 preservation reruns `m2-02-preservation-20260518-smoke.md`, `m2-03-preservation-20260518-smoke.md`, `m2-04-preservation-20260518-smoke.md`.
+- Local gates: dotnet Combat Core 175/175 PASS; four Unity batchmode runners exit 0 PASS; `git diff --check` clean; T1 negative-scope scan PASS WITH CLASSIFIED DOC HIT (evidence-only, no runtime/scene/runner hits — convention matches `tests/evidence/S2-M2-03/verification.md:43`); `.githooks/pre-commit` PASS.
+- Carryover added at closure: `m2_02_runner_date_hardcoded` — `Assets/Editor/GravenspireM2SingleTrashLoopVerificationRunner.cs:192` hardcodes `**Date:** 2026-05-12`; pre-existing runner-hygiene gap in the same class as `s2_bridge_runner_evidence_path_hardcoded` and `launch_runner_evidence_path_hardcoded`; non-blocking for S2-M3-01 closure.
+- Next gate: `/story-readiness production/stories/s2-m3-02-objective-state-relic-hand-in.md`.

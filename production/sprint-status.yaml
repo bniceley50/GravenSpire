@@ -6,18 +6,18 @@ goal: "Gravenspire T1: The First District - a 20-30 minute offline playable slic
 start: "2026-05-09"
 end: "2026-05-30"
 generated: "2026-05-09"
-updated: "2026-05-17"
+updated: "2026-05-18"
 branch: "main"
-head: "e63e6dd52245e1e26008ccc85561e5bfc7f81861"
+head: "PENDING_COMMIT_S2-M3-01_CLOSURE"
 qa_plan: "production/qa/plans/qa-plan-sprint-2-20260509.md"
 plan: "production/sprints/sprint-2.md"
 slice_review: ""
-implementation_gate: "M3 Objective + NPC + Loot story slate is open (S2-M3-00 through S2-M3-04). S2-M3-00 is complete; S2-M3-01 is ready for /story-readiness; S2-M3-02 through S2-M3-04 remain blocked in dependency order."
-progress: "7/11 closed; S2-M3-00 scenario-smoke handoff cleanup complete; S2-M3-01 story-readiness next"
-completed_stories: 7
+implementation_gate: "M3 Objective + NPC + Loot story slate is open (S2-M3-00 through S2-M3-04). S2-M3-00 and S2-M3-01 are complete; S2-M3-02 is ready for /story-readiness; S2-M3-03 through S2-M3-04 remain blocked in dependency order."
+progress: "8/11 closed; S2-M3-01 named NPC objective frame complete; S2-M3-02 story-readiness next"
+completed_stories: 8
 total_stories: 11
-next_active_story: "S2-M3-01"
-next_active_command: "/story-readiness production/stories/s2-m3-01-named-npc-objective-frame.md"
+next_active_story: "S2-M3-02"
+next_active_command: "/story-readiness production/stories/s2-m3-02-objective-state-relic-hand-in.md"
 
 carryover:
   ability_resolved_event_payload: "AbilityResolvedEvent remains ManaSpent-only, but T1-COMBAT-11 durably classifies it as KNOWN-CARRYOVER and fails shipping universal-spend misuse."
@@ -43,6 +43,7 @@ carryover:
   m2_controller_scenario_smoke_abstraction: "S2-M3-00 partially addressed the pre-M3 abstraction risk by adding shared editor-runner support and proving M2 preservation without adding a fourth scenario-smoke block to Assets/Scripts/M2SingleTrashMedLoopController.cs. The controller remains ~2156 lines and still owns the three M2 scenario-smoke paths; controller-side extraction remains a follow-up only if M3 telemetry ever requires touching that controller. Non-blocking for S2-M3-01."
   m2_runner_editor_noise_capture: "Resolved by S2-M3-00: UnityEditor.Search.SearchInit editor-startup noise filtering is now centralized in Assets/Editor/GravenspireScenarioSmokeRunnerHelpers.cs and consumed by all five existing scenario-smoke/launch runners. Future M3 runners can opt in with the same one-line helper call."
   launch_runner_evidence_path_hardcoded: "S2-M3-00 /code-review carryover: Assets/Editor/GravenspireLaunchVerificationRunner.cs hardcodes its evidence path to S2-FOUNDATION-01 and lacks -gravenspireEvidencePath argument parsing, so it is exempt from S2-M3-00 closure reruns that depend on runtime evidence-path override. Follow-up runner hygiene should harmonize Launch with the four M2 runners before any future story needs Launch to write story-local evidence."
+  m2_02_runner_date_hardcoded: "S2-M3-01 /code-review convergent finding: Assets/Editor/GravenspireM2SingleTrashLoopVerificationRunner.cs:192 hardcodes `**Date:** 2026-05-12`, so every M2-02 preservation rerun produced by this runner emits a stale 2026-05-12 header regardless of actual run date. Manifests in tests/evidence/S2-M3-01/m2-02-preservation-20260518-smoke.md:3 despite the 2026-05-18 actual rerun (filename and verification.md narrative both correctly reflect 2026-05-18; runner exit/log evidence is sound). Pre-existing runner-hygiene gap in the same class as s2_bridge_runner_evidence_path_hardcoded and launch_runner_evidence_path_hardcoded. Follow-up runner-hygiene story should parameterize the embedded date (and ideally the story header) in the M2-02 runner, possibly alongside the Launch runner evidence-path parity fix. Non-blocking for S2-M3-01 closure; tracked as sprint-level WATCH."
 
 stories:
   - id: "S2-COMBAT-01"
@@ -112,19 +113,19 @@ stories:
     name: "Named NPC objective frame"
     file: "production/stories/s2-m3-01-named-npc-objective-frame.md"
     priority: must-have
-    status: ready-for-story-readiness
+    status: done
     owner: ""
     estimate_days: 1.0
     blocker: ""
-    completed: ""
+    completed: "2026-05-18"
   - id: "S2-M3-02"
     name: "Objective state + relic hand-in"
     file: "production/stories/s2-m3-02-objective-state-relic-hand-in.md"
     priority: must-have
-    status: blocked
+    status: ready-for-story-readiness
     owner: ""
     estimate_days: 1.0
-    blocker: "S2-M3-01"
+    blocker: ""
     completed: ""
   - id: "S2-M3-03"
     name: "Loot table + fixed-profile vendor"

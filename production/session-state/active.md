@@ -1,13 +1,13 @@
 # Active Session State
 
-**Last Updated:** 2026-05-17
-**Project Stage:** Pre-Production — Sprint 2 — M3 Story Slate Open / S2-M3-01 Story-Readiness Next
+**Last Updated:** 2026-05-18
+**Project Stage:** Pre-Production — Sprint 2 — M3 Story Slate Open / S2-M3-02 Story-Readiness Next
 
 ## Current Task
 
-Sprint 2 Milestone M3 (Objective + NPC + Loot) is story-broken: the M3 story slate `S2-M3-00` through `S2-M3-04` is open. `S2-M3-00` Scenario Smoke Handoff Cleanup is complete in the working tree and awaiting the approved closure commit. The M3 quick-design is committed and pushed (`6704203` on `origin/main`); `design/quick/quick-design-m3-objective-npc-loot.md` is the design source for the slate. See the `M3 Objective + NPC + Loot Story Slate` and `/story-done` extracts below for detail.
+Sprint 2 Milestone M3 (Objective + NPC + Loot) is story-broken: the M3 story slate `S2-M3-00` through `S2-M3-04` is open. `S2-M3-00` (Scenario Smoke Handoff Cleanup) and `S2-M3-01` (Named NPC Objective Frame) are complete. The M3 quick-design is committed and pushed (`6704203` on `origin/main`); `design/quick/quick-design-m3-objective-npc-loot.md` is the design source for the slate. See the `M3 Objective + NPC + Loot Story Slate` and `/story-done` extracts below for detail.
 
-`S2-M3-01` Named NPC Objective Frame is ready for story-readiness; `S2-M3-02` through `S2-M3-04` remain blocked in dependency order. Next gate: `/story-readiness production/stories/s2-m3-01-named-npc-objective-frame.md`.
+`S2-M3-02` Objective State + Relic Hand-In is ready for story-readiness; `S2-M3-03` through `S2-M3-04` remain blocked in dependency order. Next gate: `/story-readiness production/stories/s2-m3-02-objective-state-relic-hand-in.md`.
 
 ## Status
 
@@ -72,13 +72,14 @@ Sprint 2 Milestone M3 (Objective + NPC + Loot) is story-broken: the M3 story sla
 - ✅ Sprint 2 story `S2-M2-01` closed via `/story-done` 2026-05-11 with verdict **COMPLETE WITH NOTES**. Commit `b4cb377` lands the Unity Combat Core runtime bridge.
 - ✅ Sprint 2 story `S2-M2-02` closed via `/story-done` 2026-05-12 with verdict **COMPLETE WITH NOTES**. Commits `93b460e` (implementation) -> `946c9d1` (harden / closes /code-review P0/P1) -> `350b06e` (evidence-integrity patch / closes qa-tester re-review). Three carryover keys logged: `m2_renderer_material_property_access`, `s2_bridge_runner_evidence_path_hardcoded`, `m2_presentation_threshold_gap`.
 - ✅ Sprint 2 story `S2-M2-03` closed via `/story-done` 2026-05-13 with verdict **COMPLETE WITH NOTES** (5/5 AC); implementation `bb6deab`, closure `3ce334c`; `control_manifest_absence_pre_existing` carryover added to sprint-status; S2-M2-03-cycle lessons captured 2026-05-14 in `fc20a86` (4 entries — telemetry-backed feel acceptance, classified negative-scope doc hits, Unity log redaction, MaterialPropertyBlock lifecycle-safe allocation; PowerShell heredoc whitespace-collapse lesson dropped, no durable repo evidence).
-- ✅ Sprint 2 story `S2-M3-00` closed in the working tree via `/story-done` 2026-05-17 with verdict **COMPLETE WITH NOTES** (6/6 AC); closure commit pending explicit approval. Four Unity batchmode reruns passed under `tests/evidence/S2-M3-00/`, Combat Core stayed 175/175, and `S2-M3-01` is next for `/story-readiness`.
+- ✅ Sprint 2 story `S2-M3-00` closed via `/story-done` 2026-05-17 with verdict **COMPLETE WITH NOTES** (6/6 AC). Closure commit `e63e6dd` + sync commit `fa54fa1`. Four Unity batchmode reruns passed under `tests/evidence/S2-M3-00/`, Combat Core 175/175.
+- ✅ Sprint 2 story `S2-M3-01` closed in the working tree via `/story-done` 2026-05-18 with verdict **COMPLETE WITH NOTES** (5/5 AC); closure commit pending sync. M3 named NPC anchor `M3_Caretaker` added to `_DevEntry.unity` with session-local intentional interaction; story-specific Unity smoke PASS plus three separate M2 preservation reruns PASS; Combat Core stayed 175/175. New carryover `m2_02_runner_date_hardcoded` recorded for follow-up runner-hygiene cleanup. `S2-M3-02` is next for `/story-readiness`.
 - ⚠️ Unity ProjectSettings hygiene is deferred to a separate batch: `ProjectSettings/TagManager.asset` emits a non-fatal parse warning in committed S2-M2-01 smoke logs, and `ProjectSettings/URPProjectSettings.asset` is currently untracked after Unity generation.
 
 ## Files Being Worked On
 
-- **Active:** Sprint 2 M3 story slate is open. Next command is `/story-readiness production/stories/s2-m3-01-named-npc-objective-frame.md`.
-- **M3 slate:** [s2-m3-00](../stories/s2-m3-00-scenario-smoke-handoff-cleanup.md) (complete, closure commit pending) -> [s2-m3-01](../stories/s2-m3-01-named-npc-objective-frame.md) (ready for story-readiness) -> [s2-m3-02](../stories/s2-m3-02-objective-state-relic-hand-in.md) -> [s2-m3-03](../stories/s2-m3-03-loot-table-fixed-profile-vendor.md) -> [s2-m3-04](../stories/s2-m3-04-end-to-end-objective-loop.md) (blocked in dependency order).
+- **Active:** Sprint 2 M3 story slate is open. Next command is `/story-readiness production/stories/s2-m3-02-objective-state-relic-hand-in.md`.
+- **M3 slate:** [s2-m3-00](../stories/s2-m3-00-scenario-smoke-handoff-cleanup.md) (complete, `e63e6dd`/`fa54fa1`) -> [s2-m3-01](../stories/s2-m3-01-named-npc-objective-frame.md) (complete, closure commit pending sync) -> [s2-m3-02](../stories/s2-m3-02-objective-state-relic-hand-in.md) (ready for story-readiness) -> [s2-m3-03](../stories/s2-m3-03-loot-table-fixed-profile-vendor.md) -> [s2-m3-04](../stories/s2-m3-04-end-to-end-objective-loop.md) (blocked in dependency order).
 - **Closed:** [production/stories/s2-m2-01-unity-combat-core-runtime-bridge.md](../stories/s2-m2-01-unity-combat-core-runtime-bridge.md) is complete.
 - **Closed:** [production/stories/s2-combat-01-fix-init-only-property-preservation.md](../stories/s2-combat-01-fix-init-only-property-preservation.md) is complete.
 - **Closed:** [production/stories/s2-foundation-01-unity-project-shell.md](../stories/s2-foundation-01-unity-project-shell.md) is complete.
@@ -118,7 +119,7 @@ Sprint 2 Milestone M3 (Objective + NPC + Loot) is story-broken: the M3 story sla
 
 ## Next Skill to Run
 
-- `/story-readiness production/stories/s2-m3-01-named-npc-objective-frame.md`. The M3 story slate `S2-M3-00` through `S2-M3-04` is open; `S2-M3-00` (Scenario Smoke Handoff Cleanup) is complete in the working tree and awaiting the approved closure commit; `S2-M3-01` is the next readiness gate, and `S2-M3-02` through `S2-M3-04` are blocked in dependency order. M3 quick-design committed and pushed at `6704203`.
+- `/story-readiness production/stories/s2-m3-02-objective-state-relic-hand-in.md`. The M3 story slate `S2-M3-00` through `S2-M3-04` is open; `S2-M3-00` and `S2-M3-01` are complete; `S2-M3-02` is the next readiness gate, and `S2-M3-03` through `S2-M3-04` are blocked in dependency order. M3 quick-design committed and pushed at `6704203`.
 - Routing decision (2026-05-14) on the M2-02 presentation-threshold revisit trigger (`m2_presentation_threshold_gap`): option **(a) — accept qualified human-play findings** — with a binding constraint. S2-M2-04 verification must mechanically prove the named blocker changes camp behavior through telemetry (discovery, time-to-danger, boundary pressure, clean-loop preservation, no farm-through), the way S2-M2-03 proved danger via `ending_health=14/140`. **Status: satisfied by `/dev-story` 2026-05-14** — telemetry + the dotnet integration test mechanically prove all five dimensions; human-play stays a qualified supplement. Human-play notes may be qualified by blockout visuals; mechanical AC cannot rest on presentation feel. Captured durably as lesson A in `tasks/lessons.md` (`fc20a86`).
 - Later: run Inventory implementation pre-spec to close `INV-OQ-05`, then rerun `/design-review design/gdd/inventory-item-economy.md --depth full`.
 
@@ -369,3 +370,69 @@ Sprint 2 Milestone M3 (Objective + NPC + Loot) is story-broken: the M3 story sla
   - `launch_runner_evidence_path_hardcoded` — NEW; Launch runner needs evidence-path argument parity before future story-local Launch reruns.
 - Sprint routing: `S2-M3-00` done; `S2-M3-01` moved to ready-for-story-readiness; `S2-M3-02` through `S2-M3-04` remain blocked in dependency order.
 - Next recommended: `/story-readiness production/stories/s2-m3-01-named-npc-objective-frame.md`.
+
+## Session Extract — /story-readiness 2026-05-17 (S2-M3-01)
+
+- Story: `production/stories/s2-m3-01-named-npc-objective-frame.md` — Named NPC Objective Frame.
+- Verdict: READY (Codex parallel run + this verification both READY).
+- Review mode: Lean.
+- Checks: header fields PASS, GDD traceability PASS (quick-design `:126-140` and `:254-259`; npc-system `:104-105` lifecycle and `:388-407` no-marker / DLG-01 templated dialogue), ADR readiness PASS (D001/D002/D003 Locked; D004 Provisional with explicit T1 templated-dialogue boundary), scope clarity PASS (5 ACs + Out Of Scope + Performance Budget), dependencies PASS (S2-M3-00 done), evidence PASS (declared at story `:13`).
+- Warnings (non-blocking): control manifest absent (pre-existing); D004 Provisional with T3 revisit trigger but T1 boundary explicit.
+- Next gate: `/dev-story production/stories/s2-m3-01-named-npc-objective-frame.md`.
+
+## Session Extract — /dev-story 2026-05-18 (S2-M3-01)
+
+- Story: `production/stories/s2-m3-01-named-npc-objective-frame.md` — S2-M3-01 Named NPC Objective Frame.
+- Status after implementation: Implemented, pending `/code-review` and `/story-done`. Story-file header status remained `Ready for Story Readiness` until `/story-done`.
+- Files changed:
+  - `Assets/Scripts/M3NamedNpcObjectiveFrame.cs` — created. Runtime MonoBehaviour component with `NpcInteractionContext` shape, `M3_Caretaker_T1` id, `dialogue.m3.caretaker.objective_frame_t1` template handle, `m3.objective.recover_marked_relic.frame` objective text key. `SessionLocalOnly => true` invariant at `:85`; `TryRecordIntentionalInteraction` at `:112`.
+  - `Assets/Scripts/M3NamedNpcObjectiveFrame.cs.meta` — created.
+  - `Assets/Editor/GravenspireM3NamedNpcObjectiveFrameBuilder.cs` — created. Editor builder that layers `M3_ObjectiveFrameRoot` / `M3_Caretaker` anchor into `_DevEntry.unity` after the M2 builder; does not mutate `Assets/Scripts/M2SingleTrashMedLoopController.cs`.
+  - `Assets/Editor/GravenspireM3NamedNpcObjectiveFrameBuilder.cs.meta` — created.
+  - `Assets/Editor/GravenspireM3NamedNpcObjectiveFrameVerificationRunner.cs` — created. Story-specific Unity smoke runner. Builds anchor, enters Play Mode, records intentional interaction, checks no marker affordances, verifies M2 handoff anchors remain available. Reuses `GravenspireScenarioSmokeRunnerHelpers.IsEditorStartupNoise` from S2-M3-00. Editor timing uses `EditorApplication.timeSinceStartup` + `DateTimeOffset.UtcNow` (not `DateTime.UtcNow`).
+  - `Assets/Editor/GravenspireM3NamedNpcObjectiveFrameVerificationRunner.cs.meta` — created.
+  - `Assets/Scenes/_DevEntry.unity` — modified: `M3_ObjectiveFrameRoot` + `M3_Caretaker` capsule with posture-staff child for blockout specificity. +256 line scene delta.
+  - `tests/evidence/S2-M3-01/verification.md` — created. 5/5 AC trace, local gates, implementation notes, scope check.
+  - `tests/evidence/S2-M3-01/unity-named-npc-objective-frame-20260518-smoke.md` — created. Story-specific Unity smoke evidence.
+  - `tests/evidence/S2-M3-01/m2-02-preservation-20260518-smoke.md`, `m2-03-preservation-20260518-smoke.md`, `m2-04-preservation-20260518-smoke.md` — created. M2 preservation reruns produced by the established M2 runners with `-gravenspireEvidencePath` overrides (separate runs, not in-process re-driving of the M2 controller).
+- Course-corrections during the run:
+  - First runner attempted to drive all three M2 smoke methods in one mutated `M2SingleTrashMedLoopController` instance; controller is not designed for that sequence and produced invalid preservation failures. Pivoted to separate M2 runner invocations under S2-M3-01 evidence paths (matches S2-M3-00 closure protocol).
+  - `FindObjectsByType` unqualified in editor static context — fixed to `UnityEngine.Object.FindObjectsByType`.
+  - New `DateTime.UtcNow` deny-pattern hit in the editor runner — replaced with `EditorApplication.timeSinceStartup` + `DateTimeOffset.UtcNow`.
+- Verification:
+  - `dotnet test tests/Gravenspire.Combat.Tests.csproj --logger "console;verbosity=minimal"` — PASS 175/175 (558ms).
+  - `git diff --check` — PASS (clean after Unity `m_Name:` trailing-space trim in `_DevEntry.unity`).
+  - T1 negative-scope scan over the four implementation-surface files — PASS, zero `DateTime.UtcNow` matches on Assets/Scripts/M3*.cs, Assets/Editor/GravenspireM3*.cs, Assets/Scenes/_DevEntry.unity.
+  - Unity M3 named NPC smoke — PASS, exit 0.
+  - Unity M2-02/M2-03/M2-04 preservation reruns — PASS, exit 0 each.
+- Scope: `Assets/Scripts/M2SingleTrashMedLoopController.cs` zero diff; no `src/gameplay/combat/**` changes; no `Packages/manifest.json` changes; no Dialogue UI, quest log, minimap, marker affordance, schedule ticking, persistence, faction reaction, loot, vendor, Save/Load, or live LLM.
+- Next: `/code-review` on the changed files, then `/story-done`.
+
+## Session Extract — /code-review 2026-05-18 (S2-M3-01)
+
+- Target: `Assets/Scripts/M3NamedNpcObjectiveFrame.cs`, `Assets/Editor/GravenspireM3NamedNpcObjectiveFrameBuilder.cs`, `Assets/Editor/GravenspireM3NamedNpcObjectiveFrameVerificationRunner.cs`, `Assets/Scenes/_DevEntry.unity`, `tests/evidence/S2-M3-01/**`.
+- Verdict: PASS_WITH_NOTES after two evidence-only fixes (both originally classified BLOCKING by Codex; both resolved without code-side changes).
+- Findings:
+  - P1 (BLOCKING, resolved in-evidence): `tests/evidence/S2-M3-01/verification.md:44` originally claimed "no matches" while the same row contained the literal `DateTime.UtcNow` deny term. Resolved by changing the row verdict to PASS WITH CLASSIFIED DOC HIT and explicitly classifying the hit as documentation-only (no runtime, scene, or runner code hits). Convention matches `tests/evidence/S2-M2-03/verification.md:43`. Edit included Brian's wording tweak ("evidence-only hit(s) are confined to this row's documented deny-term text").
+  - P2 (HIGH, routed to carryover): `tests/evidence/S2-M3-01/m2-02-preservation-20260518-smoke.md:3` carries `**Date:** 2026-05-12` because `Assets/Editor/GravenspireM2SingleTrashLoopVerificationRunner.cs:192` hardcodes that literal. Pre-existing runner-hygiene gap; routed to new sprint-status carryover `m2_02_runner_date_hardcoded` and documented in verification.md Implementation Notes.
+- Implementation surface clean: no blocking findings on the Unity runtime component, builder, runner, or scene delta. Anchor, trigger collider, templated context shape, markerless checks, session-local invariant, and M2 preservation shape all line up with the story ACs.
+- Verification (Claude): `dotnet test tests/Gravenspire.Combat.Tests.csproj` PASS 175/175; `git diff --check` clean.
+- Next: `/story-done production/stories/s2-m3-01-named-npc-objective-frame.md`.
+
+## Session Extract — /story-done 2026-05-18 (S2-M3-01)
+
+- Verdict: COMPLETE WITH NOTES.
+- Story: `production/stories/s2-m3-01-named-npc-objective-frame.md` — S2-M3-01 Named NPC Objective Frame.
+- Criteria: 5/5 passing. `M3_Caretaker` anchor exists in `_DevEntry.unity`; intentional interaction records `NpcInteractionContext`-shaped event + templated dialogue handle; no marker affordances or live LLM; session-local surface preserved; M2 preservation proven via separate established runners.
+- Closure evidence:
+  - `tests/evidence/S2-M3-01/verification.md` — PASS.
+  - `tests/evidence/S2-M3-01/unity-named-npc-objective-frame-20260518-smoke.md` — PASS, exit 0, no captured errors.
+  - `tests/evidence/S2-M3-01/m2-02-preservation-20260518-smoke.md` — PASS, exit 0 (embedded date is stale per `m2_02_runner_date_hardcoded` carryover; runner output is sound).
+  - `tests/evidence/S2-M3-01/m2-03-preservation-20260518-smoke.md` — PASS, exit 0.
+  - `tests/evidence/S2-M3-01/m2-04-preservation-20260518-smoke.md` — PASS, exit 0.
+  - `dotnet test tests/Gravenspire.Combat.Tests.csproj --logger "console;verbosity=minimal"` — PASS 175/175.
+  - `.githooks/pre-commit` — PASS (`[pre-commit] OK`) against the staged closure index.
+- Code review: complete. Two evidence-only fixes applied during /code-review (P1 doc-hit reclassification + P2 runner-hygiene carryover routing). Unity runtime surface clean.
+- Tech debt / carryovers added: `m2_02_runner_date_hardcoded` — NEW; M2-02 runner hardcodes embedded date; follow-up runner-hygiene story should parameterize the embedded date (and ideally the story header) alongside the `launch_runner_evidence_path_hardcoded` parity fix.
+- Sprint routing: `S2-M3-01` done; `S2-M3-02` moved to ready-for-story-readiness; `S2-M3-03` through `S2-M3-04` remain blocked in dependency order.
+- Next recommended: `/story-readiness production/stories/s2-m3-02-objective-state-relic-hand-in.md`.
