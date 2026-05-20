@@ -6,18 +6,18 @@ goal: "Gravenspire T1: The First District - a 20-30 minute offline playable slic
 start: "2026-05-09"
 end: "2026-05-30"
 generated: "2026-05-09"
-updated: "2026-05-18"
+updated: "2026-05-20"
 branch: "main"
-head: "fb77f83295260f78f3221f68000748263e3fdb09"
+head: "PENDING_S2_M3_03_CLOSURE_COMMIT"
 qa_plan: "production/qa/plans/qa-plan-sprint-2-20260509.md"
 plan: "production/sprints/sprint-2.md"
 slice_review: ""
-implementation_gate: "M3 Objective + NPC + Loot story slate is open (S2-M3-00 through S2-M3-04). S2-M3-00, S2-M3-01, and S2-M3-02 are complete; S2-M3-03 is ready for /story-readiness; S2-M3-04 remains blocked on S2-M3-03."
-progress: "9/11 closed; S2-M3-02 objective state + relic hand-in complete; S2-M3-03 story-readiness next"
-completed_stories: 9
+implementation_gate: "M3 Objective + NPC + Loot story slate is open (S2-M3-00 through S2-M3-04). S2-M3-00 through S2-M3-03 are complete; S2-M3-04 is ready for /story-readiness as the final M3 proof story."
+progress: "10/11 closed; S2-M3-03 loot table + fixed-profile vendor complete; S2-M3-04 story-readiness next"
+completed_stories: 10
 total_stories: 11
-next_active_story: "S2-M3-03"
-next_active_command: "/story-readiness production/stories/s2-m3-03-loot-table-fixed-profile-vendor.md"
+next_active_story: "S2-M3-04"
+next_active_command: "/story-readiness production/stories/s2-m3-04-end-to-end-objective-loop.md"
 
 carryover:
   ability_resolved_event_payload: "AbilityResolvedEvent remains ManaSpent-only, but T1-COMBAT-11 durably classifies it as KNOWN-CARRYOVER and fails shipping universal-spend misuse."
@@ -44,6 +44,7 @@ carryover:
   m2_runner_editor_noise_capture: "Resolved by S2-M3-00: UnityEditor.Search.SearchInit editor-startup noise filtering is now centralized in Assets/Editor/GravenspireScenarioSmokeRunnerHelpers.cs and consumed by all five existing scenario-smoke/launch runners. Future M3 runners can opt in with the same one-line helper call."
   launch_runner_evidence_path_hardcoded: "S2-M3-00 /code-review carryover: Assets/Editor/GravenspireLaunchVerificationRunner.cs hardcodes its evidence path to S2-FOUNDATION-01 and lacks -gravenspireEvidencePath argument parsing, so it is exempt from S2-M3-00 closure reruns that depend on runtime evidence-path override. Follow-up runner hygiene should harmonize Launch with the four M2 runners before any future story needs Launch to write story-local evidence."
   m2_02_runner_date_hardcoded: "S2-M3-01 /code-review convergent finding: Assets/Editor/GravenspireM2SingleTrashLoopVerificationRunner.cs:192 hardcodes `**Date:** 2026-05-12`, so every M2-02 preservation rerun produced by this runner emits a stale 2026-05-12 header regardless of actual run date. Manifests in tests/evidence/S2-M3-01/m2-02-preservation-20260518-smoke.md:3 despite the 2026-05-18 actual rerun (filename and verification.md narrative both correctly reflect 2026-05-18; runner exit/log evidence is sound). Pre-existing runner-hygiene gap in the same class as s2_bridge_runner_evidence_path_hardcoded and launch_runner_evidence_path_hardcoded. Follow-up runner-hygiene story should parameterize the embedded date (and ideally the story header) in the M2-02 runner, possibly alongside the Launch runner evidence-path parity fix. Non-blocking for S2-M3-01 closure; tracked as sprint-level WATCH."
+  m3_03_low_review_notes: "S2-M3-03 /code-review re-review (PASS_WITH_NOTES) deferred three non-blocking LOW notes to the runner-hygiene cleanup story: (1) tests/evidence/S2-M3-03/unity-loot-table-fixed-profile-vendor-20260519-smoke.md filename date 20260519 no longer matches its 2026-05-20 content after the rerun, documented at tests/evidence/S2-M3-03/verification.md:49; (2) Enum.Parse<M3LootEntryKind> in src/gameplay/npc/m3-objective/M3LootTableFixedProfileVendorSession.cs runs outside the JSON try/catch, so a malformed Kind throws raw ArgumentException instead of InvalidDataException; (3) runtime authored-data path resolution via Application.dataPath is Editor/batchmode-context only and a built player falls back to CreateAuthoredM3Default(), acceptable for T1 because build-pipeline data delivery is INV-OQ-04/T2 scope. None block S2-M3-03 closure."
 
 stories:
   - id: "S2-COMBAT-01"
@@ -131,17 +132,17 @@ stories:
     name: "Loot table + fixed-profile vendor"
     file: "production/stories/s2-m3-03-loot-table-fixed-profile-vendor.md"
     priority: must-have
-    status: ready-for-story-readiness
+    status: done
     owner: ""
     estimate_days: 1.0
     blocker: ""
-    completed: ""
+    completed: "2026-05-20"
   - id: "S2-M3-04"
     name: "End-to-end objective loop"
     file: "production/stories/s2-m3-04-end-to-end-objective-loop.md"
     priority: must-have
-    status: blocked
+    status: ready-for-story-readiness
     owner: ""
     estimate_days: 1.0
-    blocker: "S2-M3-03"
+    blocker: ""
     completed: ""

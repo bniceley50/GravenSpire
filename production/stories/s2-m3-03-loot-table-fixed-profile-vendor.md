@@ -1,6 +1,6 @@
 # S2-M3-03 - Loot Table + Fixed-Profile Vendor
 
-**Status:** Ready for Story Readiness
+**Status:** Complete
 **Sprint:** 2
 **Priority:** Must Have
 **Layer:** Gameplay / Unity Runtime
@@ -131,6 +131,12 @@ stock ticking, Save/Load hooks, or broad item/economy scans.
 - Depends on: `S2-M3-02` complete.
 - Unlocks: `S2-M3-04` End-To-End Objective Loop.
 
-## Next Gate
+## Completion Notes
 
-Ready for `/story-readiness production/stories/s2-m3-03-loot-table-fixed-profile-vendor.md`.
+- Closed via `/story-done` 2026-05-20 with verdict **COMPLETE WITH NOTES** (8/8 AC passing).
+- Implementation: pure C# `M3LootTableFixedProfileVendorData` + `M3LootTableFixedProfileVendorSession` in the reused `src/gameplay/npc/m3-objective/` package; Unity wrapper `M3LootTableFixedProfileVendor`; Editor builder + verification runner; authored data `data/first-district/m3-objective-npc-loot.json`; 9 NUnit tests.
+- `/code-review`: the initial pass missed a HIGH finding (runtime consumed a hardcoded factory, not the authored JSON). Corrected re-review verdict **PASS_WITH_NOTES** after the fix — the runtime now loads the authored JSON as primary data, `CreateAuthoredM3Default()` is a documented missing-file fallback, the dual-JSON-path (`#if UNITY_5_3_OR_NEWER`) matches the `CombatFixtureLoader` precedent, and the test converged on the shared loader.
+- Local gates: dotnet Combat regression 189/189 PASS; Unity S2-M3-03 smoke 39/39 PASS exit 0; `git diff --check` clean; T1 negative-scope scan zero hits; `.githooks/pre-commit` PASS.
+- ProjectSettings editor drift (`GraphicsSettings.asset`, `QualitySettings.asset`) reverted out of the story footprint.
+- Carryover added: `m3_03_low_review_notes` — three non-blocking LOW review notes deferred to the runner-hygiene cleanup story.
+- Next gate: `/story-readiness production/stories/s2-m3-04-end-to-end-objective-loop.md`.

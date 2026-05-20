@@ -1,0 +1,31 @@
+{
+  "schema": "gravenspire.m3.objective_loot_vendor.v1",
+  "tableId": "M3_ObjectiveNpcLoot_T1",
+  "vendorId": "M3_CourtVendor_T1",
+  "salvageSellMultiplier": 0.15,
+  "maxCarriedItemSlots": 4,
+  "lootEntries": [
+    {
+      "entryId": "m3.court_marked_relic.t1",
+      "itemId": "CourtMarkedRelic_T1",
+      "kind": "ObjectiveRelic",
+      "quantity": 1,
+      "nominalValueCopper": 0
+    },
+    {
+      "entryId": "m3.grave_dust_salvage.t1",
+      "itemId": "GraveDust_Salvage_T1",
+      "kind": "Salvage",
+      "quantity": 1,
+      "nominalValueCopper": 50
+    }
+  ],
+  "vendorBuyOffers": [
+    {
+      "offerId": "m3.court_vendor.votive_candle.t1",
+      "itemId": "VotiveCandle_T1",
+      "priceCopper": 3,
+      "carriedSlotCost": 1
+    }
+  ]
+}

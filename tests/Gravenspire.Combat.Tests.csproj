@@ -30,6 +30,7 @@
   <ItemGroup>
     <None Include="..\AGENTS.md" Link="AGENTS.md" CopyToOutputDirectory="PreserveNewest" />
     <None Include="..\data\combat\**\*" Link="assets\data\combat\%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="..\data\first-district\**\*" Link="data\first-district\%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
     <None Include="..\src\gameplay\combat\**\*.cs" Link="src\gameplay\combat\%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 </Project>

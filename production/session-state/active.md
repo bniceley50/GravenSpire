@@ -1,13 +1,13 @@
 # Active Session State
 
-**Last Updated:** 2026-05-18
-**Project Stage:** Pre-Production — Sprint 2 — M3 Story Slate Open / S2-M3-03 Story-Readiness Next
+**Last Updated:** 2026-05-20
+**Project Stage:** Pre-Production — Sprint 2 — M3 Story Slate Open / S2-M3-04 Story-Readiness Next
 
 ## Current Task
 
-Sprint 2 Milestone M3 (Objective + NPC + Loot) is story-broken: the M3 story slate `S2-M3-00` through `S2-M3-04` is open. `S2-M3-00` (Scenario Smoke Handoff Cleanup), `S2-M3-01` (Named NPC Objective Frame), and `S2-M3-02` (Objective State + Relic Hand-In) are complete; S2-M3-02 closure commit is `fb77f83`. The M3 quick-design is committed and pushed (`6704203` on `origin/main`); `design/quick/quick-design-m3-objective-npc-loot.md` is the design source for the slate. See the `M3 Objective + NPC + Loot Story Slate` and `/story-done` extracts below for detail.
+Sprint 2 Milestone M3 (Objective + NPC + Loot) is story-broken: the M3 story slate `S2-M3-00` through `S2-M3-04` is open. `S2-M3-00` (Scenario Smoke Handoff Cleanup), `S2-M3-01` (Named NPC Objective Frame), `S2-M3-02` (Objective State + Relic Hand-In), and `S2-M3-03` (Loot Table + Fixed-Profile Vendor) are complete. The M3 quick-design is committed and pushed (`6704203` on `origin/main`); `design/quick/quick-design-m3-objective-npc-loot.md` is the design source for the slate. See the `M3 Objective + NPC + Loot Story Slate` and `/story-done` extracts below for detail.
 
-`S2-M3-03` Loot Table + Fixed-Profile Vendor is ready for story-readiness; `S2-M3-04` remains blocked on `S2-M3-03`. Next gate: `/story-readiness production/stories/s2-m3-03-loot-table-fixed-profile-vendor.md`.
+`S2-M3-04` End-To-End Objective Loop is the final M3 proof story and is ready for story-readiness. Next gate: `/story-readiness production/stories/s2-m3-04-end-to-end-objective-loop.md`. S2-M3-04 closure requires mandatory human-play evidence per acceptance criterion `S2-M3-04-06`.
 
 ## Status
 
@@ -79,8 +79,8 @@ Sprint 2 Milestone M3 (Objective + NPC + Loot) is story-broken: the M3 story sla
 
 ## Files Being Worked On
 
-- **Active:** Sprint 2 M3 story slate is open. Next command is `/story-readiness production/stories/s2-m3-03-loot-table-fixed-profile-vendor.md`.
-- **M3 slate:** [s2-m3-00](../stories/s2-m3-00-scenario-smoke-handoff-cleanup.md) (complete, `e63e6dd`/`fa54fa1`) -> [s2-m3-01](../stories/s2-m3-01-named-npc-objective-frame.md) (complete, `1166cae`) -> [s2-m3-02](../stories/s2-m3-02-objective-state-relic-hand-in.md) (complete locally, commit pending) -> [s2-m3-03](../stories/s2-m3-03-loot-table-fixed-profile-vendor.md) (ready for story-readiness) -> [s2-m3-04](../stories/s2-m3-04-end-to-end-objective-loop.md) (blocked on S2-M3-03).
+- **Active:** Sprint 2 M3 story slate is open. Next command is `/code-review` on the S2-M3-03 implementation/evidence footprint, then `/story-done production/stories/s2-m3-03-loot-table-fixed-profile-vendor.md`.
+- **M3 slate:** [s2-m3-00](../stories/s2-m3-00-scenario-smoke-handoff-cleanup.md) (complete, `e63e6dd`/`fa54fa1`) -> [s2-m3-01](../stories/s2-m3-01-named-npc-objective-frame.md) (complete, `1166cae`) -> [s2-m3-02](../stories/s2-m3-02-objective-state-relic-hand-in.md) (complete, `fb77f83` plus routing sync `8da402d`) -> [s2-m3-03](../stories/s2-m3-03-loot-table-fixed-profile-vendor.md) (implemented locally, pending review/closure) -> [s2-m3-04](../stories/s2-m3-04-end-to-end-objective-loop.md) (blocked on S2-M3-03).
 - **Closed:** [production/stories/s2-m2-01-unity-combat-core-runtime-bridge.md](../stories/s2-m2-01-unity-combat-core-runtime-bridge.md) is complete.
 - **Closed:** [production/stories/s2-combat-01-fix-init-only-property-preservation.md](../stories/s2-combat-01-fix-init-only-property-preservation.md) is complete.
 - **Closed:** [production/stories/s2-foundation-01-unity-project-shell.md](../stories/s2-foundation-01-unity-project-shell.md) is complete.
@@ -120,7 +120,7 @@ Sprint 2 Milestone M3 (Objective + NPC + Loot) is story-broken: the M3 story sla
 
 ## Next Skill to Run
 
-- `/story-readiness production/stories/s2-m3-03-loot-table-fixed-profile-vendor.md`. The M3 story slate `S2-M3-00` through `S2-M3-04` is open; `S2-M3-00`, `S2-M3-01`, and `S2-M3-02` are complete (`fb77f83` closure); `S2-M3-03` is the next readiness gate, and `S2-M3-04` remains blocked on `S2-M3-03`. M3 quick-design committed and pushed at `6704203`.
+- `/code-review` the S2-M3-03 implementation/evidence footprint, then `/story-done production/stories/s2-m3-03-loot-table-fixed-profile-vendor.md`. The M3 story slate `S2-M3-00` through `S2-M3-04` is open; `S2-M3-00`, `S2-M3-01`, and `S2-M3-02` are complete (`fb77f83` closure plus `8da402d` routing sync); `S2-M3-03` is implemented locally, and `S2-M3-04` remains blocked on `S2-M3-03`. M3 quick-design committed and pushed at `6704203`.
 - Routing decision (2026-05-14) on the M2-02 presentation-threshold revisit trigger (`m2_presentation_threshold_gap`): option **(a) — accept qualified human-play findings** — with a binding constraint. S2-M2-04 verification must mechanically prove the named blocker changes camp behavior through telemetry (discovery, time-to-danger, boundary pressure, clean-loop preservation, no farm-through), the way S2-M2-03 proved danger via `ending_health=14/140`. **Status: satisfied by `/dev-story` 2026-05-14** — telemetry + the dotnet integration test mechanically prove all five dimensions; human-play stays a qualified supplement. Human-play notes may be qualified by blockout visuals; mechanical AC cannot rest on presentation feel. Captured durably as lesson A in `tasks/lessons.md` (`fc20a86`).
 - Later: run Inventory implementation pre-spec to close `INV-OQ-05`, then rerun `/design-review design/gdd/inventory-item-economy.md --depth full`.
 
@@ -486,3 +486,53 @@ Sprint 2 Milestone M3 (Objective + NPC + Loot) is story-broken: the M3 story sla
 - Tech debt / carryovers: none new. Existing `m2_02_runner_date_hardcoded` remains the runner-hygiene carryover for stale M2-02 embedded dates.
 - Sprint routing: `S2-M3-02` done at closure commit `fb77f83`; `S2-M3-03` moved to ready-for-story-readiness; `S2-M3-04` remains blocked on `S2-M3-03`.
 - Next recommended: `/story-readiness production/stories/s2-m3-03-loot-table-fixed-profile-vendor.md`.
+
+## Session Extract — /dev-story 2026-05-19 (S2-M3-03)
+
+- Story: `production/stories/s2-m3-03-loot-table-fixed-profile-vendor.md` — S2-M3-03 Loot Table + Fixed-Profile Vendor.
+- Status after implementation: Implemented locally, pending `/code-review` and `/story-done`. Story-file header and `production/sprint-status.yaml` are not closure-updated yet; `/story-done` owns final status/routing changes.
+- Files changed:
+  - `data/first-district/m3-objective-npc-loot.json` — authored M3 loot/vendor data with `CourtMarkedRelic_T1`, `GraveDust_Salvage_T1`, F4 multiplier `0.15`, carried-slot cap, and one fixed-price vendor offer.
+  - `src/gameplay/npc/m3-objective/M3LootTableFixedProfileVendorSession.cs` and `.meta` — pure session model for authored loot resolution, salvage sale, capacity-prevalidated fixed purchase, atomicity, no dynamic hooks, and session-local currency.
+  - `tests/unit/gameplay/npc/m3_loot_table_fixed_profile_vendor_test.cs` — nine NUnit tests covering the eight S2-M3-03 ACs.
+  - `tests/Gravenspire.Combat.Tests.csproj` — copies `data/first-district/**` into the test output so tests validate the authored JSON.
+  - `Assets/Scripts/M3LootTableFixedProfileVendor.cs` and `.meta` — Unity runtime bridge for the session model.
+  - `Assets/Editor/GravenspireM3LootTableFixedProfileVendorBuilder.cs` and `.meta` — layers `M3_LootVendorRoot`, `M3_CourtVendor`, and `M3_CourtVendor_SalvageCounter` onto `_DevEntry.unity`.
+  - `Assets/Editor/GravenspireM3LootTableFixedProfileVendorVerificationRunner.cs` and `.meta` — story-specific Unity smoke runner for objective recovery, loot resolution, salvage sale, and fixed-profile checks.
+  - `Assets/Scenes/_DevEntry.unity` — adds the M3 vendor marker/counter only.
+  - `tests/evidence/S2-M3-03/verification.md` and `tests/evidence/S2-M3-03/unity-loot-table-fixed-profile-vendor-20260519-smoke.md` — implementation evidence.
+- Verification:
+  - `dotnet test tests\Gravenspire.Combat.Tests.csproj --logger "console;verbosity=minimal"` — PASS 189/189.
+  - Unity `6000.3.14f1` S2-M3-03 smoke — PASS, 37/37 checks, no warnings/errors.
+  - T1 negative-scope scan over the new S2-M3-03 `.cs` implementation/test files — PASS, zero matches.
+  - Story-specific forbidden loot-scope scan over production code and authored JSON — PASS, zero matches.
+  - `git diff --check` — PASS after normalizing Unity blank `m_Name` serialization whitespace.
+- Scope:
+  - No full Inventory persistence, Save/Load hook, tuned economy claim, coin pacing claim, dynamic vendor profile, stock ticking, reputation discount, combat-owned loot identity, or reused progression seed path was added.
+  - Existing pre-existing untracked `.claude/**` and `all-skills-claude*.patch` items remain unrelated and untouched.
+- Next recommended: `/code-review` the S2-M3-03 implementation/evidence files, then `/story-done production/stories/s2-m3-03-loot-table-fixed-profile-vendor.md`.
+
+## Session Extract — /code-review 2026-05-20 (S2-M3-03)
+
+- Target: S2-M3-03 working-tree implementation + evidence (loot table + fixed-profile vendor).
+- Initial verdict: PASS_WITH_NOTES — **incorrect**. The first pass saw the runtime-hardcoded-data pattern, recorded it as a LOW note, and rationalized it as "likely intentional" instead of holding it against AC-01 ("resolves... from authored data") and `gameplay-code.md:32`.
+- Corrected verdict: NEEDS_FIX. Codex's independent reconciliation caught the miss. The runtime used `CreateAuthoredM3Default()` (hardcoded factory) and never consumed the authored JSON — AC-01 was met only by the test, not the runtime.
+- Fix implemented and re-reviewed: runtime now loads `data/first-district/m3-objective-npc-loot.json` as primary data; `CreateAuthoredM3Default()` demoted to documented missing-file fallback; dual-JSON-path (`#if UNITY_5_3_OR_NEWER` — Newtonsoft / System.Text.Json) matches the `CombatFixtureLoader` precedent; the test converged on the shared loader (private parser removed); ProjectSettings editor drift reverted.
+- Re-review verdict: PASS_WITH_NOTES. HIGH finding resolved with mechanical evidence (smoke checks `vendor_loaded_authored_data_file`, `vendor_not_using_fallback_data`; telemetry `authored_data_file_loaded=True`). Three non-blocking LOW notes deferred to the runner-hygiene cleanup story.
+- Process lesson (candidate for `tasks/lessons.md`): a passing test proves the test's path works, not that the acceptance criterion is met — verify the runtime path satisfies the AC, not just the test fixture.
+
+## Session Extract — /story-done 2026-05-20 (S2-M3-03)
+
+- Verdict: COMPLETE WITH NOTES (8/8 AC passing).
+- Story: `production/stories/s2-m3-03-loot-table-fixed-profile-vendor.md` — S2-M3-03 Loot Table + Fixed-Profile Vendor.
+- Closure evidence:
+  - `tests/evidence/S2-M3-03/verification.md` — COMPLETE WITH NOTES.
+  - `tests/unit/gameplay/npc/m3_loot_table_fixed_profile_vendor_test.cs` — 9 NUnit tests covering the 8 ACs.
+  - `tests/evidence/S2-M3-03/unity-loot-table-fixed-profile-vendor-20260519-smoke.md` — PASS, 39/39 checks, exit 0; telemetry `salvage_sale_credited_copper=7`, `authored_data_file_loaded=True`.
+  - `dotnet test tests\Gravenspire.Combat.Tests.csproj --logger "console;verbosity=minimal"` — PASS 189/189.
+  - T1 negative-scope scan — PASS, zero hits.
+  - `git diff --check` — PASS; `.githooks/pre-commit` — PASS against the staged closure index.
+- Code review: complete. Initial `/code-review` verdict corrected NEEDS_FIX -> fix -> re-review PASS_WITH_NOTES (see `/code-review` extract above).
+- Carryover added: `m3_03_low_review_notes` — three non-blocking LOW review notes (smoke-filename date drift, `Enum.Parse` outside JSON catch, Editor-context path resolution) deferred to the runner-hygiene cleanup story.
+- Sprint routing: `S2-M3-03` done; `S2-M3-04` moved to ready-for-story-readiness; M3 slate is now 4/5 complete with `S2-M3-04` the final proof story.
+- Next recommended: `/story-readiness production/stories/s2-m3-04-end-to-end-objective-loop.md`.

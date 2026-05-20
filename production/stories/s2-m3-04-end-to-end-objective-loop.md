@@ -1,6 +1,6 @@
 # S2-M3-04 - End-To-End Objective Loop
 
-**Status:** Blocked
+**Status:** Ready for Story Readiness
 **Sprint:** 2
 **Priority:** Must Have
 **Layer:** Gameplay / Unity Runtime
@@ -14,7 +14,7 @@
 
 ## Routing Status
 
-Blocked until `S2-M3-03` is complete. This story proves the full M3 loop:
+Ready for `/story-readiness` after `S2-M3-03` completed on 2026-05-20. This story proves the full M3 loop:
 named NPC frame -> objective accepted -> M2 combat loop preserved -> relic
 recovered -> relic returned to NPC -> objective complete -> salvage sold at
 fixed-profile vendor.
@@ -116,4 +116,4 @@ through long-running scene sweeps.
 
 ## Next Gate
 
-Blocked until `S2-M3-03` is closed.
+Ready for `/story-readiness production/stories/s2-m3-04-end-to-end-objective-loop.md` after `S2-M3-03` completed. This is the final M3 proof story — see Acceptance Criterion `S2-M3-04-06` for the mandatory human-play closure evidence.
