@@ -4,7 +4,7 @@
 **Result:** COMPLETE WITH NOTES — /code-review re-review PASS_WITH_NOTES; /story-done closure passed locally
 **Date:** 2026-05-20
 **Implementation Branch:** `claude/s2-m3-03-loot-table-fixed-profile-vendor`
-**Implementation HEAD:** PENDING COMMIT — set in sync commit
+**Implementation HEAD:** `25c94ee7c5ad011319fd5c51a52fc08f69c09409`
 
 ## Evidence Index
 

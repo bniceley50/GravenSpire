@@ -534,5 +534,5 @@ Sprint 2 Milestone M3 (Objective + NPC + Loot) is story-broken: the M3 story sla
   - `git diff --check` — PASS; `.githooks/pre-commit` — PASS against the staged closure index.
 - Code review: complete. Initial `/code-review` verdict corrected NEEDS_FIX -> fix -> re-review PASS_WITH_NOTES (see `/code-review` extract above).
 - Carryover added: `m3_03_low_review_notes` — three non-blocking LOW review notes (smoke-filename date drift, `Enum.Parse` outside JSON catch, Editor-context path resolution) deferred to the runner-hygiene cleanup story.
-- Sprint routing: `S2-M3-03` done; `S2-M3-04` moved to ready-for-story-readiness; M3 slate is now 4/5 complete with `S2-M3-04` the final proof story.
+- Sprint routing: `S2-M3-03` done at closure commit `25c94ee`; `S2-M3-04` moved to ready-for-story-readiness; M3 slate is now 4/5 complete with `S2-M3-04` the final proof story.
 - Next recommended: `/story-readiness production/stories/s2-m3-04-end-to-end-objective-loop.md`.
