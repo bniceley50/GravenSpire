@@ -545,3 +545,70 @@ narrower in scope than Codex:
   until then this entry is the governing record.
 **Related:** D006 (Codex parallel implementer); commit `9035d09` (trial result
 + `.aider*` gitignore); `AGENTS.md` §0 worktree rules.
+
+---
+
+## D016 — Sprint 2 to Sprint 3 Re-Sequence: Playable Vertical-Slice Assembly
+
+**Date:** 2026-05-20
+**Status:** Locked
+**Context:** Sprint 2 milestones M1-M3 built the Tier-1 combat and objective
+systems and proved them with automated Unity verification runners. The M3 slate
+(`S2-M3-00` through `S2-M3-04`) closed its systems — named-NPC objective frame,
+objective state + relic hand-in, loot table + fixed-profile vendor — each
+runner-verified, and `S2-M3-04` (the M3 end-to-end proof story) passed its
+runner smoke 29/29. But `S2-M3-04`'s acceptance criterion AC-06 — a mandatory
+human-play feel check — surfaced a milestone-level gap: the M3 objective layer
+has no player input path (the named NPC, relic recovery, hand-in, looting, and
+vendor are driven only by the runners; `Input.GetKey` appears in exactly one
+file in `Assets/Scripts`), there is no navigable world (only a
+`FirstDistrict_ShellOnly_NoGameplay` blockout shell), and no art. The project
+lead, attempting the human-play, found the build not playable as a loop. A
+producer + creative-director reassessment (2026-05-20) confirmed the pillars and
+the systems are sound; the failure is sequencing and the definition of "done" —
+the project proved systems via runners but never assembled them into anything a
+human can play, while the Tier-1 goal is a playable First District.
+**Decision:** Re-sequence Sprint 2 to Sprint 3:
+- **Sprint 2 closes** with M1-M3 delivered as runner-proven systems. This is a
+  real deliverable: the Tier-1 combat loop and the objective/NPC/loot systems
+  exist and are verified.
+- **Sprint 3 is a new "Playable Vertical-Slice Assembly" milestone.** It builds
+  **no new systems** — it wires the already-built, runner-proven M3 (and M2)
+  systems behind player input inside a navigable greybox First District so the
+  loop is human-playable and feel-testable end to end. Producer's proposed
+  slate (~6 dependency-ordered stories): player interaction harness ->
+  player-driven NPC interaction -> player relic recovery + looting ->
+  player-driven vendor -> navigable greybox district -> playable end-to-end +
+  human-play. The M3 systems are **reused, not rebuilt**; rewriting objective
+  state, loot resolution, or the F4 vendor formula is a red flag.
+- **M4 (Save/Load) and M5 (faction consequence) defer behind the Sprint 3
+  assembly milestone.** Both presuppose a playable loop; M5 — the Tier-1
+  emotional payoff — only lands if the player drove the change.
+- **Presentation minimum:** Sprint 3 targets a navigable, readable greybox with
+  real interaction feedback — **not produced art**. Feel is carried by
+  interactivity, spatial readability, and feedback, not texture fidelity. This
+  retires the `m2_presentation_threshold_gap` carryover.
+- **Definition-of-done change:** a human-play / "feel" acceptance criterion may
+  sit only on a story that is actually human-playable end to end; never bolt a
+  human-play AC onto a runner-only story. Playability is a milestone *entry*
+  condition, not a final-story acceptance criterion. See the 2026-05-20
+  `tasks/lessons.md` entry.
+- **`S2-M3-04` closed COMPLETE WITH NOTES** (closure commit `ee7c450`); its
+  AC-06 feel-validation transferred to the Sprint 3 milestone.
+**Consequences:**
+- Opening Sprint 3 (the sprint plan + the ~6 assembly story files) is the next
+  planning effort; a short technical-director feasibility consult should
+  precede it (confirm the M3 session-state APIs can be driven from player
+  events without rework — expected yes).
+- This is re-sequencing within Tier 1, not new scope: no multiplayer, LLM
+  dialogue, extra class, second district, or deep economy. The confirmed
+  Tier-2+ cuts stand.
+- Story files still carry empty `owner` fields; owner assignment is needed
+  before the Sprint 3 slate commits.
+- The Sprint 3 `sprint-status.yaml` is generated when Sprint 3 is planned;
+  until then `production/sprint-status.yaml` records Sprint 2 as closed.
+**Related:** `tests/evidence/S2-M3-04/verification.md` and
+`tests/evidence/S2-M3-04/human-play-20260520.md`; producer + creative-director
+reassessments (2026-05-20 session); `tasks/lessons.md` 2026-05-20
+definition-of-done entry; the 2026-05-14 telemetry lesson it bounds; D012 (T1
+combat-feel validated).

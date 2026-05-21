@@ -571,3 +571,13 @@ Sprint 2 Milestone M3 (Objective + NPC + Loot) is story-broken: the M3 story sla
 - Re-plan context: per lead decision (2026-05-20), Sprint 2 closes with M1-M3 delivered as runner-proven systems; Sprint 3 opens as the "Playable Vertical-Slice Assembly" milestone (wires the M3 systems behind player input in a navigable greybox); M4/M5 deferred behind it. Unity 6.4 drift (6 files) reverted before closure.
 - Sprint routing: `S2-M3-04` done at closure commit `ee7c450`; M3 slate 5/5 complete; Sprint 2 ready for close-out.
 - Next recommended: continue the Sprint 2 -> Sprint 3 re-plan (close Sprint 2; open Sprint 3; record D016 + the definition-of-done lesson).
+
+## Session Extract — Re-Plan Governance Lock 2026-05-20
+
+- Per the producer + creative-director reassessment and lead decision (2026-05-20), the Sprint 2 -> Sprint 3 re-sequence is locked:
+  - `DECISIONS.md` D016 — the decision: Sprint 2 closes with M1-M3 delivered as runner-proven systems; Sprint 3 is a new "Playable Vertical-Slice Assembly" milestone (wires the proven M3/M2 systems behind player input in a navigable greybox); M4/M5 defer behind it; S2-M3-04's AC-06 feel-validation transferred to Sprint 3.
+  - `tasks/lessons.md` 2026-05-20 entry: feel-gates belong only on human-playable stories; playability is a milestone entry condition (bounds the 2026-05-14 telemetry lesson).
+  - `production/sprint-status.yaml`: Sprint 2 marked CLOSED (11/11); `m2_presentation_threshold_gap` carryover RETIRED with the greybox-not-art presentation-minimum answer.
+- Re-plan status: DONE — 6.4-drift revert, S2-M3-04 closure (`ee7c450` + sync `c66654b`), Sprint 2 close, D016 + the definition-of-done lesson. REMAINING — open Sprint 3: author the sprint plan + ~6 assembly story files (a focused next effort).
+- Sprint 3 brief (in D016 + the 2026-05-20 producer/creative-director reassessments): ~6 dependency-ordered stories — player interaction harness -> player-driven NPC interaction -> player relic recovery + looting -> player-driven vendor -> navigable greybox district -> playable end-to-end + human-play. A short technical-director feasibility consult precedes the slate. Greybox, not produced art. Reuse the M3 systems, do not rebuild.
+- Next recommended: open Sprint 3 (`/sprint-plan` then `/create-stories` for the Playable Vertical-Slice Assembly milestone) per DECISIONS.md D016.
