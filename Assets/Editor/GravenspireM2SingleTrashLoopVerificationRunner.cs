@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Text;
 using Gravenspire.UnityRuntime.Combat;
@@ -189,7 +190,7 @@ namespace Gravenspire.Editor
             var builder = new StringBuilder();
             builder.AppendLine("# S2-M2-02 Unity Single-Trash Med-Loop Smoke");
             builder.AppendLine();
-            builder.AppendLine("**Date:** 2026-05-12");
+            builder.AppendLine($"**Date:** {DateTimeOffset.UtcNow.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture)}");
             builder.AppendLine("**Story:** `production/stories/s2-m2-02-single-trash-pull-med-loop.md`");
             builder.AppendLine("**Scene:** `Assets/Scenes/_DevEntry.unity`");
             builder.AppendLine("**Runner:** `Assets/Editor/GravenspireM2SingleTrashLoopVerificationRunner.cs`");
