@@ -536,3 +536,38 @@ Sprint 2 Milestone M3 (Objective + NPC + Loot) is story-broken: the M3 story sla
 - Carryover added: `m3_03_low_review_notes` — three non-blocking LOW review notes (smoke-filename date drift, `Enum.Parse` outside JSON catch, Editor-context path resolution) deferred to the runner-hygiene cleanup story.
 - Sprint routing: `S2-M3-03` done at closure commit `25c94ee`; `S2-M3-04` moved to ready-for-story-readiness; M3 slate is now 4/5 complete with `S2-M3-04` the final proof story.
 - Next recommended: `/story-readiness production/stories/s2-m3-04-end-to-end-objective-loop.md`.
+
+## Session Extract — /dev-story 2026-05-20 (S2-M3-04)
+
+- Story: `production/stories/s2-m3-04-end-to-end-objective-loop.md` — S2-M3-04 End-To-End Objective Loop (proof/integration story; Type Integration / Visual-Feel).
+- Status after implementation: Implemented locally, pending `/code-review`, the Unity batchmode smoke, and `/story-done`. Story-file `Status:` header still reads "Ready for Story Readiness" (stale — `/story-readiness` is read-only and never writes the file back); `/story-done` owns final status/routing changes.
+- Files changed:
+  - `Assets/Editor/GravenspireM3EndToEndObjectiveLoopVerificationRunner.cs` — created. M3 end-to-end batchmode verification runner; mirrors the M3-03 runner's `[InitializeOnLoad]` + `SessionState` domain-reload pattern. Invokes the three M3 builders, drives accept -> recover -> loot resolve -> hand-in -> salvage sale, runs the M2 clean-loop and named-blocker smokes, and emits all 15 required telemetry labels plus PASS/FAIL checks.
+  - `tests/evidence/S2-M3-04/human-play-20260520.md` — created. AC-06 human-play evidence stub (the "one more pull" question plus honest presentation-limitation classification).
+  - `production/stories/s2-m3-04-end-to-end-objective-loop.md` — modified. Readiness Warning 3 fix: human-play evidence filename `human-play-20260514.md` -> `human-play-20260520.md` (AC-06 row + Test Evidence list).
+- Verification:
+  - `dotnet test tests\Gravenspire.Combat.Tests.csproj --logger "console;verbosity=minimal"` — PASS 189/189 (regression; the new runner is an Editor script outside the test csproj's compile set).
+  - API surface of every component the runner calls verified by grep against the real M3/M2 sources — no compile-breakers; all three M3 builders confirmed (`public static void Build()`, namespace `Gravenspire.Editor`).
+  - Deny-pattern scan of the new runner — PASS, zero hits (`DateTimeOffset.UtcNow` for the evidence date, `EditorApplication.timeSinceStartup` for timing).
+  - Unity batchmode smoke — NOT RUN. The runner only compiles/executes inside Unity; the smoke is the post-`/code-review` verification step.
+- Scope:
+  - One new file only (the Editor runner). No new session model, Unity bridge, scene object, or `.unity` edit; no `src/` or `tests/` change. The proof story composes existing M3-01/02/03 + M2 surfaces.
+  - One in-implementation correctness tightening: telemetry `npc_interaction_intentional` sourced from `LastInteraction.WasIntentional` rather than `HasRecordedInteraction`.
+  - Pre-existing untracked `.claude/**` and `all-skills-claude*.patch` items remain unrelated and untouched.
+- Next recommended: `/code-review` the S2-M3-04 runner, run the Unity batchmode smoke, then `/story-done production/stories/s2-m3-04-end-to-end-objective-loop.md`.
+
+## Session Extract — /story-done 2026-05-20 (S2-M3-04)
+
+- Verdict: COMPLETE WITH NOTES (5/6 AC; AC-01 through AC-05 PASS, AC-06 DEFERRED — feel-validation transferred to Sprint 3).
+- Story: `production/stories/s2-m3-04-end-to-end-objective-loop.md` — S2-M3-04 End-To-End Objective Loop.
+- Closure evidence:
+  - `tests/evidence/S2-M3-04/verification.md` — COMPLETE WITH NOTES.
+  - `tests/evidence/S2-M3-04/unity-end-to-end-objective-loop-20260520-smoke.md` — Unity batchmode smoke PASS, 29/29 checks, no warnings, no errors, exit 0.
+  - `tests/evidence/S2-M3-04/human-play-20260520.md` — AC-06 human-play: the M3 objective loop was found not player-interactive in blockout; feel-validation transferred to Sprint 3.
+  - `dotnet test tests\Gravenspire.Combat.Tests.csproj` — PASS 189/189.
+  - T1 negative-scope deny-scan over the new runner — zero hits; `git diff --check` + `.githooks/pre-commit` — PASS at the staged closure index.
+- Code review and debugging: `/code-review` (lean, with a `unity-specialist` pass) — PASS_WITH_NOTES. The Unity smoke initially failed on the M2 named-blocker checks; root-caused via systematic debugging (M2SingleTrashMedLoopController's shared, never-reset `_playerMeleeRandom` cursor — chaining M2 smokes contaminated it) and fixed (the runner now calls only `RunAutomatedNamedBlockerBoundarySmoke()`); re-run smoke 29/29 PASS.
+- Carryovers added: `s2_m3_04_ac06_transfer` (AC-06 feel-validation -> Sprint 3 assembly milestone); `m2_melee_rng_not_reset` (M2 controller melee-RNG cursors never reset between smokes; M2 smokes cannot be chained); `m3_04_low_review_notes` (S2-M3-04 runner `/code-review` LOW notes).
+- Re-plan context: per lead decision (2026-05-20), Sprint 2 closes with M1-M3 delivered as runner-proven systems; Sprint 3 opens as the "Playable Vertical-Slice Assembly" milestone (wires the M3 systems behind player input in a navigable greybox); M4/M5 deferred behind it. Unity 6.4 drift (6 files) reverted before closure.
+- Sprint routing: `S2-M3-04` done at closure commit `PENDING`; M3 slate 5/5 complete; Sprint 2 ready for close-out.
+- Next recommended: continue the Sprint 2 -> Sprint 3 re-plan (close Sprint 2; open Sprint 3; record D016 + the definition-of-done lesson).

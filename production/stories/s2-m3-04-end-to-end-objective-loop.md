@@ -1,6 +1,6 @@
 # S2-M3-04 - End-To-End Objective Loop
 
-**Status:** Ready for Story Readiness
+**Status:** Complete
 **Sprint:** 2
 **Priority:** Must Have
 **Layer:** Gameplay / Unity Runtime
@@ -61,7 +61,7 @@ Planned implementation surface:
 | `S2-M3-04-03` | Runner telemetry includes `m2_clean_loop_preserved` and `m2_named_blocker_boundary_preserved`. | `tests/evidence/S2-M3-04/verification.md` |
 | `S2-M3-04-04` | Runner telemetry includes `no_save_load_state_written` and `no_faction_consequence_applied`. | `tests/evidence/S2-M3-04/verification.md` |
 | `S2-M3-04-05` | Dotnet regression, T1 negative-scope scan, `git diff --check`, and `.githooks/pre-commit` pass before closure. | `tests/evidence/S2-M3-04/verification.md` |
-| `S2-M3-04-06` | Human-play notes are captured for "did the objective give a real reason to do one more pull?", with presentation limitations classified rather than hidden. | `tests/evidence/S2-M3-04/human-play-20260514.md` |
+| `S2-M3-04-06` | Human-play notes are captured for "did the objective give a real reason to do one more pull?", with presentation limitations classified rather than hidden. | `tests/evidence/S2-M3-04/human-play-20260520.md` |
 
 ## QA Test Cases
 
@@ -96,7 +96,7 @@ Required evidence:
 
 - `tests/evidence/S2-M3-04/verification.md`
 - Story-specific Unity Play Mode or batchmode runner output.
-- `tests/evidence/S2-M3-04/human-play-20260514.md`
+- `tests/evidence/S2-M3-04/human-play-20260520.md`
 - `dotnet test tests\Gravenspire.Combat.Tests.csproj --logger "console;verbosity=minimal"`
 - T1 negative-scope scan over changed files.
 - `git diff --check`
@@ -117,3 +117,15 @@ through long-running scene sweeps.
 ## Next Gate
 
 Ready for `/story-readiness production/stories/s2-m3-04-end-to-end-objective-loop.md` after `S2-M3-03` completed. This is the final M3 proof story — see Acceptance Criterion `S2-M3-04-06` for the mandatory human-play closure evidence.
+
+## Completion Notes
+
+**Completed:** 2026-05-20
+**Verdict:** COMPLETE WITH NOTES
+**Criteria:** 5/6 PASS (AC-01 through AC-05 PASS; AC-06 DEFERRED)
+**Deferred/Untested Criteria:** AC-06 (human-play feel-validation) — transferred to the Sprint 3 "Playable Vertical-Slice Assembly" milestone per lead decision (2026-05-20). The M3 objective loop is not player-interactive in the blockout build, so the one-more-pull feel question could not be validated by a human. AC-06's documentation requirement is satisfied by `tests/evidence/S2-M3-04/human-play-20260520.md`.
+**Test Evidence:** `tests/evidence/S2-M3-04/verification.md`; Unity batchmode smoke 29/29 PASS (`tests/evidence/S2-M3-04/unity-end-to-end-objective-loop-20260520-smoke.md`); `dotnet test` 189/189.
+**GDD/ADR Deviations:** None.
+**Scope Notes:** One new file (the Editor runner). The M2 named-blocker smoke failure found during verification was root-caused (shared never-reset `_playerMeleeRandom` cursor in `M2SingleTrashMedLoopController`) and fixed (call only `RunAutomatedNamedBlockerBoundarySmoke()`) before closure.
+**Review Gates:** `/code-review` lean — PASS_WITH_NOTES (with a `unity-specialist` pass); LOW notes carried as `m3_04_low_review_notes`.
+**Forced Completion:** No.
