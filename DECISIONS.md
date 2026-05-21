@@ -474,3 +474,74 @@ single-trash pull, while normal two-trash farming should remain non-viable.
 `tests/evidence/T1.5-COMBAT-04/verification.md`;
 `tests/evidence/T1-COMBAT-10/profiled-combat-slice.jsonl`;
 `tests/evidence/T1.5-COMBAT-03/profiled-combat-slice.jsonl`.
+
+---
+
+## D015 — Qwen3-Coder Onboarded as Scoped Local Implementer
+
+**Date:** 2026-05-20
+**Status:** Locked
+**Context:** D006 (2026-04-22) onboarded Codex as a full parallel `/dev-story`
+implementer. Codex and Claude both bill metered API tokens. To offload small,
+low-design mechanical edits off that metered budget, a local model —
+`qwen3-coder-30b-a3b`, run on LM Studio (a local OpenAI-compatible inference
+server) and driven by the Aider CLI harness — was trialed on 2026-05-20. The
+trial task was the `m2_02_runner_date_hardcoded` carryover fix (commit
+`9035d09`). Outcome: the code output was correct and minimal, but the model
+over-reached scope — it attempted to edit scene, evidence, and story files
+despite an explicit "change nothing else" instruction. The Aider harness
+(`--no-auto-commit` plus per-file "Add file to the chat?" gates, answered by
+the user) fully contained the sprawl: only the two intended files reached disk.
+This entry formalizes Qwen3-Coder as a sanctioned but tightly scoped local
+implementer and records the guardrails the trial proved necessary.
+**Decision:** Qwen3-Coder is a sanctioned local implementer on Gravenspire,
+narrower in scope than Codex:
+- **Role:** Scoped local implementer for small, low-design, mechanical code
+  edits (literal cleanup, deny-pattern-safe refactors, single-function changes
+  against a named pattern). It is **not** a `/dev-story` implementer, **not** a
+  reviewer, **not** a PR author, and **not** a design or architecture partner.
+- **Why:** Offload small mechanical edits from the metered Claude/Codex token
+  budget. Cost reduction is the only rationale; it does not expand who may make
+  design decisions.
+- **Harness:** Aider CLI against LM Studio. Required Aider flags:
+  `--no-auto-commit` (the model never commits) and `--edit-format diff` (the
+  trial's `whole` format was slow and sprawl-encouraging — ~8k tokens for a
+  one-line fix). Per-file "Add file to the chat?" prompts stay ON; the user
+  answers them and denies any file outside the task.
+- **Mandatory review:** Every Qwen3-Coder output receives a full Claude
+  `/code-review` before it is staged or committed, no exception. The trial
+  proved the model over-reaches scope, so its output is never trusted on the
+  model's own description — it is judged only by `git diff` of what actually
+  reached disk.
+- **Authority:** Write only inside a dedicated branch/worktree. Never stage,
+  never commit, never push to `main`, never force-push. A human or Claude Code
+  performs staging and commits after review.
+- **Neutral system prompt (security guardrail):** Qwen3-Coder must run for
+  Gravenspire work only under a neutral or empty system prompt. The LM Studio
+  model was found configured with a jailbreak / "amoral AI" / "ignore
+  restrictions" persona system prompt; that persona must be cleared before any
+  Gravenspire code or content task. Project work never runs under a jailbreak
+  or restriction-bypassing persona.
+- **Forbidden zones** (no edits, identical to D006's Codex list):
+  `design/gdd/**`, `design/art/art-bible.md`, `DECISIONS.md`, `AGENTS.md`,
+  `CLAUDE.md`, `docs/engine-reference/**`, `.claude/agents/**`,
+  `.claude/skills/**`, `.claude/rules/**`. Given the model's demonstrated
+  over-reach, the per-file add gate is the enforced control, not the
+  instruction text.
+- **Harness state is local:** Aider writes chat history, input history, and a
+  tag cache into the working tree. `.aider*` is gitignored (commit `9035d09`);
+  harness state is never pushed.
+**Consequences:**
+- Qwen3-Coder governance is review-gated, not trust-gated: its value depends on
+  the mandatory `/code-review` step, so it only saves tokens net when the task
+  is small enough that review is cheaper than implementing directly.
+- It does not replace Codex. Codex remains the full `/dev-story` implementer
+  under D006; Qwen3-Coder handles only sub-story mechanical edits.
+- Tasks unsuitable for Qwen3-Coder (anything touching design, architecture,
+  multi-file integration, or scope judgement) go to Codex or Claude.
+- If the neutral-system-prompt guardrail cannot be verified for a session,
+  Qwen3-Coder is not used for that session.
+- `AGENTS.md` §0 worktree rules may later gain a Qwen3-Coder cross-reference;
+  until then this entry is the governing record.
+**Related:** D006 (Codex parallel implementer); commit `9035d09` (trial result
++ `.aider*` gitignore); `AGENTS.md` §0 worktree rules.
