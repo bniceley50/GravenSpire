@@ -1,128 +1,46 @@
 # Active Session State
 
-**Last Updated:** 2026-05-20
-**Project Stage:** Pre-Production — Sprint 2 — M3 Story Slate Open / S2-M3-04 Story-Readiness Next
+**Last Updated:** 2026-05-21
+**Project Stage:** Pre-Production — Sprint 3 (Playable Vertical-Slice Assembly) — Plan Approved, Pre-/create-stories
 
 ## Current Task
 
-Sprint 2 Milestone M3 (Objective + NPC + Loot) is story-broken: the M3 story slate `S2-M3-00` through `S2-M3-04` is open. `S2-M3-00` (Scenario Smoke Handoff Cleanup), `S2-M3-01` (Named NPC Objective Frame), `S2-M3-02` (Objective State + Relic Hand-In), and `S2-M3-03` (Loot Table + Fixed-Profile Vendor) are complete. The M3 quick-design is committed and pushed (`6704203` on `origin/main`); `design/quick/quick-design-m3-objective-npc-loot.md` is the design source for the slate. See the `M3 Objective + NPC + Loot Story Slate` and `/story-done` extracts below for detail.
+Sprint 3 ("Playable Vertical-Slice Assembly") is open per `DECISIONS.md` D016. The Sprint 3 plan is authored and approved at `production/sprints/sprint-3.md` — producer-drafted, with the technical-director feasibility consult and creative-director pillar consult incorporated, then red-team-reviewed and patched (7 patches). Sprint 3 builds **no new systems**: it wires the runner-proven Sprint 2 M3/M2 systems behind player input inside a navigable greybox First District so the Tier-1 objective loop is human-playable and feel-testable end to end. M4 (Save/Load) and M5 (faction consequence) defer behind it.
 
-`S2-M3-04` End-To-End Objective Loop is the final M3 proof story and is ready for story-readiness. Next gate: `/story-readiness production/stories/s2-m3-04-end-to-end-objective-loop.md`. S2-M3-04 closure requires mandatory human-play evidence per acceptance criterion `S2-M3-04-06`.
+Next gate: `/create-stories` for the 6-story slate `S3-01` through `S3-06` (input: `production/sprints/sprint-3.md` + `design/quick/quick-design-m3-objective-npc-loot.md`). `production/sprint-status.yaml` is regenerated for Sprint 3 when the slate is opened. Then assign one `owner` per story, run a Sprint 3 `/qa-plan`, and begin implementation with `S3-01`.
 
 ## Status
 
-- ✓ Brainstorm complete → [design/gdd/game-concept.md](../../design/gdd/game-concept.md)
-- ✓ Engine configured → Unity 6.3 LTS + C# + URP (FishNet planned for Tier 2+)
-- ✓ Art bible complete → [design/art/art-bible.md](../../design/art/art-bible.md) (9/9 sections, Lean mode, AD-ART-BIBLE skipped)
-- ✓ Systems mapped → [design/gdd/systems-index.md](../../design/gdd/systems-index.md) (33 systems, 26 MVP)
-- ✓ Spelling normalized Gravespire → Gravenspire, AGENTS.md §0 canonical path fixed (commit `486f0a0`)
-- ✓ D006 committed — Codex onboarded as parallel implementer (commit `fae8c8c`)
-- ✓ Codex onboarding brief delivered; Codex has completed read-only onboarding and surfaced 4 clarifying questions (all answered)
-- ✓ Codex Assignment #1 drafted — `dotnet format` setup on branch `codex/dotnet-format-setup`
-- ✅ World Structure GDD — latest review log verdict is **APPROVED** at `design/gdd/reviews/world-structure-review-log.md`. Earlier MAJOR REVISION text was historical and is no longer the current verdict; remaining World Structure work is explicit ADR/prototype gating, not unresolved GDD revision.
-- ✅ Commit `4801d8a` on `main` (GDD + registry + systems-index + active.md bundle; rebased onto PR #1 merge).
-- ✅ Character Progression GDD skeleton created 2026-04-25 at [design/gdd/character-progression.md](../../design/gdd/character-progression.md).
-- ✅ Character Progression Overview section written 2026-04-25.
-- ✅ Character Progression Player Fantasy section written 2026-04-25.
-- ✅ Character Progression Detailed Design section written 2026-04-25.
-- ✅ Character Progression Formulas section written 2026-04-25.
-- ✅ Character Progression Edge Cases section written 2026-04-25.
-- ✅ Character Progression Dependencies section written 2026-04-25.
-- ✅ Character Progression Tuning Knobs section written 2026-04-25.
-- ✅ Character Progression Visual/Audio Requirements section written 2026-04-25.
-- ✅ Character Progression UI Requirements section written 2026-04-25.
-- ✅ Character Progression Acceptance Criteria section written and count-verified 2026-04-25 (`44` criteria; `42` ordinary T1-blocking, `2` fixture-gated T1-blocking, `0` advisory-at-T1).
-- ✅ Character Progression full review reached **APPROVED** after ADR-alignment and specialist blocker fixes; landed in commit `6459ceb`.
-- ✅ Character Progression metadata/review-log follow-up landed in commit `557fa3e`.
-- ✅ Inventory & Item Economy GDD skeleton created 2026-04-26 at [design/gdd/inventory-item-economy.md](../../design/gdd/inventory-item-economy.md).
-- ✅ Inventory & Item Economy Overview section written 2026-04-26.
-- ✅ Inventory & Item Economy Player Fantasy section written 2026-04-26.
-- ✅ Inventory & Item Economy Detailed Rules section written 2026-04-26.
-- ✅ Inventory & Item Economy Formulas section written 2026-04-26.
-- ✅ Inventory & Item Economy Edge Cases section written 2026-04-26.
-- ✅ Inventory & Item Economy Dependencies section written 2026-04-26.
-- ✅ Inventory & Item Economy Tuning Knobs section written 2026-04-26.
-- ✅ Inventory & Item Economy Acceptance Criteria section written and count-verified 2026-04-26 (`51` criteria; `47` ordinary T1-blocking, `4` fixture-gated T1-blocking, `0` advisory-at-T1).
-- ✅ Inventory & Item Economy Open Questions section written 2026-04-26.
-- ⚠️ Inventory & Item Economy full design review completed 2026-04-26 with verdict **NEEDS REVISION** and scope signal **XL**. Six blocker groups: (1) Save/Load first-save reverse-listing drift, (2) Inventory schema/id/hydration pre-spec gap, (3) F1/currency/vendor math gaps, (4) vendor transaction economy not closed, (5) future Combat / Death & Corpse Recovery / Faction Reputation criteria leaking into T1, (6) Layer 1 HUD / Inventory UI receiver not registered.
-- ✅ Inventory blocker 1 repaired 2026-04-26: Save/Load now reverse-lists `InventoryFirstSaveMaterializer`; remaining blockers parked in [design/gdd/inventory-item-economy.md](../../design/gdd/inventory-item-economy.md) `INV-OQ-05` for future Inventory implementation pre-spec.
-- 🧪 `/prototype combat-feel` started 2026-04-26. Tech choice locked to Unity 6.3 LTS standalone prototype under `prototypes/combat-feel/`, with 3-5 sequential pulls, at least one default med break between pulls 2 and 3, explicit success/failure criteria, and durable findings target `production/prototypes/combat-feel-report.md`.
-- ✅ Combat-feel scripted mechanics smoke passed under locally installed Unity `6000.4.1f1` batchmode (not pinned `6000.3.x`): 5/5 scripted pulls, 97.1s combat, 41.9s downtime, 19.4s average pull, 1 med break, 9 Smites, 4 Heals, 0 unsafe pulls. Human feel playtest still required before verdict.
-- ✅ Sprint 1.5 plan committed 2026-05-06 at `8885d2e`: [production/sprints/sprint-1-5.md](../sprints/sprint-1-5.md).
-- ✅ Sprint 1.5 QA plan committed 2026-05-06 at `b6297b4`: [production/qa/plans/qa-plan-sprint-1-5-20260506.md](../qa/plans/qa-plan-sprint-1-5-20260506.md).
-- ✅ Sprint 1.5 story `T1.5-COMBAT-00` closed via `/story-done` 2026-05-06 with verdict **COMPLETE WITH NOTES**. Commit `c2487fc` lands D013 and ADR-0006 as Proposed.
-- ✅ Sprint 1.5 story `T1.5-COMBAT-01` closed via `/story-done` 2026-05-07 with verdict **COMPLETE WITH NOTES**. Commit `d6c8e08` lands Endurance state.
-- ✅ Sprint 1.5 story `T1.5-COMBAT-02` closed via `/story-done` 2026-05-07 with verdict **COMPLETE WITH NOTES**. Commit `9aacee0` lands physical conversions; ADR-0006 Accepted / D013 Locked.
-- ✅ Sprint 1.5 story `T1.5-COMBAT-03` closed via `/story-done` 2026-05-08 with verdict **COMPLETE WITH NOTES**. Commit `e7233b5` lands overpull tuning.
-- ✅ Sprint 1.5 story `T1.5-COMBAT-04` closed via `/story-done` 2026-05-08 with verdict **COMPLETE WITH NOTES**. Commit `bd6c81b` lands D014 Locked.
-- ✅ Sprint 1.5 carryover story `T1-COMBAT-11` closed via `/story-done` 2026-05-08 with verdict **COMPLETE WITH NOTES**. Commit `496ebc6` provenance restructure.
-- ✅ Sprint 1.5 story `T1.5-COMBAT-05` closed via `/story-done` 2026-05-09 with verdict **COMPLETE**. Commit `960a148` lands profiled rerun evidence; `caea662` fixes verification provenance.
-- ✅ Sprint 1.5 close-out smoke recorded **PASS WITH WARNINGS** at `production/qa/smoke-sprint-20260509.md`.
-- ✅ Sprint 1.5 QA sign-off recorded **APPROVED WITH CONDITIONS** at `production/qa/qa-signoff-sprint-1-5-20260509.md`.
-- ✅ Sprint 1.5 gate-check recorded **PASS** at `production/gate-checks/gate-check-2026-05-09-sprint-1-5-closeout.md`; rollover to Sprint 2 is unblocked.
-- ✅ Sprint 2 target refined to **Gravenspire T1: The First District**: one Cleric, one cursed-city district, three enemy types, one named NPC, one faction presence, one objective, one loot table, one vendor or stash, one save/load flow, and one visible world-state change.
-- ✅ Sprint 2 first implementation constraint resolved: production Unity shell now exists under `Assets/**`, `ProjectSettings/**`, and `Packages/**`.
-- ✅ Sprint 2 story `S2-FOUNDATION-01` opened as a blocked routing story for the Unity project shell.
-- ✅ Sprint 2 QA plan recorded at [production/qa/plans/qa-plan-sprint-2-20260509.md](../qa/plans/qa-plan-sprint-2-20260509.md).
-- ✅ Sprint 2 story `S2-FOUNDATION-01` closed via `/story-done` 2026-05-09 with verdict **COMPLETE WITH NOTES**. Commit `f5f74dc` lands the Unity project shell.
-- ✅ Sprint 2 M1 Player In World foundation and launch verification are complete; M2 story slate is now open.
-- ✅ Sprint 2 M1 Unity launch verification complete (manual Play Mode + Unity CLI runner) at [tests/evidence/S2-FOUNDATION-01/unity-cli-launch-verification-20260510.md](../../tests/evidence/S2-FOUNDATION-01/unity-cli-launch-verification-20260510.md); M2 story slate is now open.
-- ✅ Sprint 2 M2 Combat Camp Loop quick design recorded at [design/quick/quick-design-m2-combat-camp-loop.md](../../design/quick/quick-design-m2-combat-camp-loop.md).
-- ✅ Sprint 2 M2 story slate opened: `S2-M2-01` through `S2-M2-04`. `S2-M2-01` is complete; `S2-M2-02` is ready for `/story-readiness`; `S2-M2-03` through `S2-M2-04` remain blocked in dependency order.
-- ✅ Sprint 2 story `S2-M2-01` closed via `/story-done` 2026-05-11 with verdict **COMPLETE WITH NOTES**. Commit `b4cb377` lands the Unity Combat Core runtime bridge.
-- ✅ Sprint 2 story `S2-M2-02` closed via `/story-done` 2026-05-12 with verdict **COMPLETE WITH NOTES**. Commits `93b460e` (implementation) -> `946c9d1` (harden / closes /code-review P0/P1) -> `350b06e` (evidence-integrity patch / closes qa-tester re-review). Three carryover keys logged: `m2_renderer_material_property_access`, `s2_bridge_runner_evidence_path_hardcoded`, `m2_presentation_threshold_gap`.
-- ✅ Sprint 2 story `S2-M2-03` closed via `/story-done` 2026-05-13 with verdict **COMPLETE WITH NOTES** (5/5 AC); implementation `bb6deab`, closure `3ce334c`; `control_manifest_absence_pre_existing` carryover added to sprint-status; S2-M2-03-cycle lessons captured 2026-05-14 in `fc20a86` (4 entries — telemetry-backed feel acceptance, classified negative-scope doc hits, Unity log redaction, MaterialPropertyBlock lifecycle-safe allocation; PowerShell heredoc whitespace-collapse lesson dropped, no durable repo evidence).
-- ✅ Sprint 2 story `S2-M3-00` closed via `/story-done` 2026-05-17 with verdict **COMPLETE WITH NOTES** (6/6 AC). Closure commit `e63e6dd` + sync commit `fa54fa1`. Four Unity batchmode reruns passed under `tests/evidence/S2-M3-00/`, Combat Core 175/175.
-- ✅ Sprint 2 story `S2-M3-01` closed via `/story-done` 2026-05-18 with verdict **COMPLETE WITH NOTES** (5/5 AC). Closure commit `1166cae`. M3 named NPC anchor `M3_Caretaker` added to `_DevEntry.unity` with session-local intentional interaction; story-specific Unity smoke PASS plus three separate M2 preservation reruns PASS; Combat Core stayed 175/175. New carryover `m2_02_runner_date_hardcoded` recorded for follow-up runner-hygiene cleanup. `S2-M3-02` is next for `/story-readiness`.
-- ✅ Sprint 2 story `S2-M3-02` closed via `/story-done` 2026-05-18 with verdict **COMPLETE WITH NOTES** (6/6 AC). Closure commit `fb77f83`. Four-state objective tracker and relic hand-in are implemented through the narrow `src/gameplay/npc/m3-objective` package, `M3_ObjectiveRelic`, and the existing `M3_Caretaker` anchor. Combat Core 180/180, Unity S2-M3-02 smoke PASS, and T1 negative-scope scan PASS with zero hits.
-- ⚠️ Unity ProjectSettings hygiene is deferred to a separate batch: `ProjectSettings/TagManager.asset` emits a non-fatal parse warning in committed S2-M2-01 smoke logs, and `ProjectSettings/URPProjectSettings.asset` is currently untracked after Unity generation.
+- ✓ Brainstorm complete → [design/gdd/game-concept.md](../../design/gdd/game-concept.md); Engine configured → Unity 6.3 LTS + C# + URP (D001).
+- ✓ Art bible complete → [design/art/art-bible.md](../../design/art/art-bible.md); Systems mapped → [design/gdd/systems-index.md](../../design/gdd/systems-index.md) (33 systems, 26 MVP).
+- ✓ Core GDDs authored — Combat Core, Character Progression, World Structure, NPC System; Inventory & Item Economy parked behind the `INV-OQ-05` pre-spec.
+- ✓ Sprint 1 + Sprint 1.5 closed — Combat Core domain built; T1 combat-feel validated (D012); Endurance resource model (D013 / ADR-0006); FEEL-01 revalidated (D014).
+- ✓ Sprint 2 CLOSED 2026-05-20 (D016) — M1-M3 delivered as runner-proven systems, 11/11 stories complete. The Tier-1 combat loop and the objective/NPC/loot systems exist and are verified by automated Unity runners.
+- ✓ D016 locked — Sprint 2→3 re-sequence: the M3 systems were runner-proven but never assembled into a human-playable loop; Sprint 3 is the playability assembly pass.
+- ✓ Sprint 3 plan authored + approved → [production/sprints/sprint-3.md](../sprints/sprint-3.md). Single milestone; 6-story slate `S3-01`–`S3-06`, dependency-ordered.
+- Pre-`/create-stories`: the Sprint 3 slate is not yet broken into story files; `production/sprint-status.yaml` still records Sprint 2 closed and is regenerated for Sprint 3 as the slate is opened.
+- Live Sprint 3 findings and unconfirmed statuses are tracked in `production/sprints/sprint-3.md` Known Findings (and `production/sprint-status.yaml` carryover once regenerated) — notably the `dotnet format` setup (Codex Assignment #1, branch `codex/dotnet-format-setup`): drafted, completion/merge status unconfirmed, and the Sprint 3 Style Gate depends on `dotnet format --verify-no-changes` passing before the first PR.
+- Pending (Sprint 3 close-out): promote `feedback_external_review_verification` to `tasks/lessons.md` as a `[GLOBAL][TEST]` lesson — occurrence #2 logged (the 2026-05-21 claude.ai red-team cycle on the Sprint 3 plan and this refresh). Gets a `sprint-status.yaml` carryover key when the file regenerates at `/create-stories`.
 
 ## Files Being Worked On
 
-- **Active:** Sprint 2 M3 story slate is open. Next command is `/code-review` on the S2-M3-03 implementation/evidence footprint, then `/story-done production/stories/s2-m3-03-loot-table-fixed-profile-vendor.md`.
-- **M3 slate:** [s2-m3-00](../stories/s2-m3-00-scenario-smoke-handoff-cleanup.md) (complete, `e63e6dd`/`fa54fa1`) -> [s2-m3-01](../stories/s2-m3-01-named-npc-objective-frame.md) (complete, `1166cae`) -> [s2-m3-02](../stories/s2-m3-02-objective-state-relic-hand-in.md) (complete, `fb77f83` plus routing sync `8da402d`) -> [s2-m3-03](../stories/s2-m3-03-loot-table-fixed-profile-vendor.md) (implemented locally, pending review/closure) -> [s2-m3-04](../stories/s2-m3-04-end-to-end-objective-loop.md) (blocked on S2-M3-03).
-- **Closed:** [production/stories/s2-m2-01-unity-combat-core-runtime-bridge.md](../stories/s2-m2-01-unity-combat-core-runtime-bridge.md) is complete.
-- **Closed:** [production/stories/s2-combat-01-fix-init-only-property-preservation.md](../stories/s2-combat-01-fix-init-only-property-preservation.md) is complete.
-- **Closed:** [production/stories/s2-foundation-01-unity-project-shell.md](../stories/s2-foundation-01-unity-project-shell.md) is complete.
-- Combat Feel Prototype: [prototypes/combat-feel/](../../prototypes/combat-feel/) — pinned-engine headline pass complete; prototype code remains throwaway evidence artifact.
-- Combat Feel Prototype README: [prototypes/combat-feel/README.md](../../prototypes/combat-feel/README.md)
-- Inventory & Item Economy: [design/gdd/inventory-item-economy.md](../../design/gdd/inventory-item-economy.md)
-- Character Progression: [design/gdd/character-progression.md](../../design/gdd/character-progression.md)
-- World Structure: [design/gdd/world-structure.md](../../design/gdd/world-structure.md)
-- Game concept: [design/gdd/game-concept.md](../../design/gdd/game-concept.md)
-- Art bible: [design/art/art-bible.md](../../design/art/art-bible.md)
-- Systems index: [design/gdd/systems-index.md](../../design/gdd/systems-index.md)
-- CLAUDE.md (Technology Stack + Engine Version Reference)
-- .claude/docs/technical-preferences.md (Unity 6.3 LTS + C# + URP + full specialist routing)
-- docs/engine-reference/unity/VERSION.md (updated with post-May-2025 API gaps)
-- .claude/agents/unity-specialist.md (Version Awareness section added)
-- DECISIONS.md (D006 appended)
+- **Active:** Sprint 3 opening. `production/sprints/sprint-3.md` written + approved. Next command: `/create-stories` for the `S3-01`–`S3-06` slate.
+- Sprint 3 plan: [production/sprints/sprint-3.md](../sprints/sprint-3.md)
+- M3 quick-design (Sprint 3's design source for the systems being wired): [design/quick/quick-design-m3-objective-npc-loot.md](../../design/quick/quick-design-m3-objective-npc-loot.md)
+- M3/M2 systems Sprint 3 wires (reuse, not rebuild): `Assets/Scripts/M3NamedNpcObjectiveFrame.cs`, `Assets/Scripts/M3ObjectiveStateRelicHandIn.cs`, `Assets/Scripts/M3LootTableFixedProfileVendor.cs`, `src/gameplay/npc/m3-objective/**`, `Assets/Scenes/_DevEntry.unity` (M3 anchors), `Assets/Scripts/M2SingleTrashMedLoopController.cs` (player locomotion + combat loop).
+- Game concept / pillars: [design/gdd/game-concept.md](../../design/gdd/game-concept.md); DECISIONS.md (D001–D016).
 
 ## Key Decisions Made
 
-- **Engine**: Unity 6.3 LTS with C# (decided during /setup-engine) — FishNet planned for Tier 2+ netcode
-- **Review mode**: Lean — director-gates skipped this session; targeted `/code-review 960a148` ran before closure and its provenance finding was fixed by `caea662`.
-- **Visual identity locked**: "Every visual element earns its place through weight and age, not spectacle" + 3 supporting principles
-- **Two-layer UI**: Layer 1 abstract practical HUD + Layer 2 fully diegetic world information
-- T1-COMBAT-09c closed the player death payload stub and first held-policy feel-review artifact at `production/qa/combat/feel-review-09c-player-death.md`; human qualitative death-moment playtest remains pending as a Sprint 1.5 carryover.
-- T1-COMBAT-10 closed the profiled evidence loop and surfaced quantitative combat-feel gaps.
-- T1-COMBAT-11 is closed; Sprint 1.5 Must Have stories are 7/7 done.
-- `T1.5-COMBAT-05` is closed; Sprint 1.5 Must Have stories are 7/7 complete.
-- `AbilityResolvedEvent` remains `ManaSpent`-only after the physical resource split.
-- ADR-0003 / D009 status metadata cleanup is closed.
-- `H-CCOM-F2B` fixture extremes are validated by `T1-COMBAT-01`; seeded melee formula execution is validated by `T1-COMBAT-04`.
-- Creature / Enemy AI still owns actual return-to-anchor movement and NavMeshAgent behavior.
-- Inventory & Item Economy is intentionally parked after review.
-- Sprint 2 / T1 playable anchor: **Gravenspire T1: The First District** - a 20-30 minute offline slice that makes the first 10 minutes of playable Gravenspire better.
-- Sprint 2 lock: Cleric-only playable archetype; multiplayer, live LLM dialogue, extra classes, huge world, and deep economy remain cut.
-- Sprint 2 development loop: implement one small feature, play it immediately, write down what felt bad, fix the worst thing, commit, repeat.
-- Save/Load metadata drift is known: `save-load-persistence.md` header says `In Design`, while its review log says APPROVED. Do not silently correct outside an approved metadata cleanup batch.
+- **D016** (2026-05-20): Sprint 2→3 re-sequence. Sprint 2 closes with M1-M3 as runner-proven systems; Sprint 3 = "Playable Vertical-Slice Assembly" — wire the M3/M2 systems behind player input in a navigable greybox First District. No new systems; reuse the M3 systems. Greybox, not produced art. M4/M5 defer behind Sprint 3.
+- Sprint 3 USER DECISIONS (2026-05-21): the `S3-01` player interaction harness is a NEW standalone component (not bolted onto the 2156-line M2 controller); the slate is 6 stories — no 7th runner-hygiene story (runner-hygiene debt carries as tracked carryovers).
+- TD feasibility consult: D016's open question answered YES — the M3 session-state APIs are drivable from player input without rework; player locomotion already exists at `M2SingleTrashMedLoopController.cs:564-583`.
+- CD pillar consult: the Sprint 3 feedback rule — feedback acknowledges player action, never advertises/locates/routes (Pillar 2, *The Silence Is Sacred*).
+- Engine Unity 6.3 LTS + C# + URP (D001); Tier 1 single-player offline (D003); Codex parallel implementer (D006); Qwen3-Coder scoped local implementer (D015).
 
 ## Next Skill to Run
 
-- `/code-review` the S2-M3-03 implementation/evidence footprint, then `/story-done production/stories/s2-m3-03-loot-table-fixed-profile-vendor.md`. The M3 story slate `S2-M3-00` through `S2-M3-04` is open; `S2-M3-00`, `S2-M3-01`, and `S2-M3-02` are complete (`fb77f83` closure plus `8da402d` routing sync); `S2-M3-03` is implemented locally, and `S2-M3-04` remains blocked on `S2-M3-03`. M3 quick-design committed and pushed at `6704203`.
-- Routing decision (2026-05-14) on the M2-02 presentation-threshold revisit trigger (`m2_presentation_threshold_gap`): option **(a) — accept qualified human-play findings** — with a binding constraint. S2-M2-04 verification must mechanically prove the named blocker changes camp behavior through telemetry (discovery, time-to-danger, boundary pressure, clean-loop preservation, no farm-through), the way S2-M2-03 proved danger via `ending_health=14/140`. **Status: satisfied by `/dev-story` 2026-05-14** — telemetry + the dotnet integration test mechanically prove all five dimensions; human-play stays a qualified supplement. Human-play notes may be qualified by blockout visuals; mechanical AC cannot rest on presentation feel. Captured durably as lesson A in `tasks/lessons.md` (`fc20a86`).
-- Later: run Inventory implementation pre-spec to close `INV-OQ-05`, then rerun `/design-review design/gdd/inventory-item-economy.md --depth full`.
+`/create-stories` for the Sprint 3 `S3-01`–`S3-06` slate, using `production/sprints/sprint-3.md` and `design/quick/quick-design-m3-objective-npc-loot.md` as input. It creates the 6 story files, and the slate regenerates `production/sprint-status.yaml` for Sprint 3. Then: assign one `owner` per story → Sprint 3 `/qa-plan` → begin implementation with `S3-01`.
 
 ## Session Extract — Sprint 2 Story Open 2026-05-09 (S2-FOUNDATION-01)
 
