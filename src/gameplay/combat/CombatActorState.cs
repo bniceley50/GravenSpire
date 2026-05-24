@@ -426,8 +426,8 @@ public sealed record CombatActorState
     public int CurrentEndurance { get; }
 
     /// <summary>
-     /// Actor armor class fixture value.
-     /// </summary>
+    /// Actor armor class fixture value.
+    /// </summary>
     public int ArmorClass { get; }
 
     /// <summary>

@@ -9,6 +9,11 @@ set -e
 
 git diff --cached --check
 
+# Style Gate: enforce repository formatting without expanding this prep batch
+# into the pre-existing IDE1006 naming refactor.
+dotnet format tests/Gravenspire.Combat.Tests.csproj --verify-no-changes --exclude-diagnostics IDE1006
+dotnet format prototypes/combat-slice-T1/Harness/CombatSliceHarness.csproj --verify-no-changes --exclude-diagnostics IDE1006
+
 deny_pattern='FishNet|\bnetworking\b|server authority|\bPvP\b|companion|\bWarrior\b|\bEnchanter\b|OpenAI|Anthropic|Time\.deltaTime|DateTime\.Now|DateTime\.UtcNow'
 violations=0
 
