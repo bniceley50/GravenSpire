@@ -8,7 +8,7 @@
 > **Estimate**: 1.0 day (HIGH confidence — thinnest wiring of the slate, per `sprint-3.md:158`; single M3 subsystem, single Try*, no state machine)
 > **Manifest Version**: Unavailable (control-manifest absent project-wide per `production/qa/plans/qa-plan-sprint-2-20260509.md:54,60`; documented fallback applies)
 > **Generated**: 2026-05-23
-> **Owner**: (unassigned — assign before commit per D016)
+> **Owner**: Codex
 
 ## Context
 

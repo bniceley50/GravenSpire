@@ -8,12 +8,13 @@
 > **Estimate**: 1.5 days (MEDIUM confidence — greenfield composition layer, per `sprint-3.md:155`)
 > **Manifest Version**: Unavailable (control-manifest absent project-wide per `production/qa/plans/qa-plan-sprint-2-20260509.md:54,60`; documented fallback applies — `control_manifest_absence_pre_existing` carryover)
 > **Generated**: 2026-05-23
-> **Owner**: (unassigned — assign before commit per D016)
+> **Owner**: Codex
 
 ## Context
 
 **Sprint 3 plan**: `production/sprints/sprint-3.md`
 **Quick-design source**: `design/quick/quick-design-m3-objective-npc-loot.md`
+**GDD anchor**: `design/gdd/npc-system.md:125` (Interactions with Other Systems — defines the `NpcInteractionContext` / Dialogue boundary the harness dispatches into) and `design/gdd/npc-system.md:264` (`npc_interaction_range_meters` tuning knob — the canonical interaction-range value the harness's range-gate must respect at the M3 layer)
 **Story Ledger row**: `production/sprints/sprint-3.md:66`
 **Requirement IDs (story-local ACs)**: `S3-01-01` through `S3-01-09`
 
@@ -33,6 +34,7 @@
 **Architecture Module**: Gameplay / Player Interaction (new standalone component; lives alongside `Assets/Scripts/M3*.cs` per Sprint 2 placement convention)
 **Engine**: Unity 6.3 LTS
 **Engine Risk**: LOW (uses core MonoBehaviour, Transform, legacy `UnityEngine.Input`, and raycast/distance-check APIs that pre-date Unity 6.1; no URP render-pass code, no UI Toolkit, no DOTS, no deprecated-API surface)
+**Performance Impact**: No-impact at story scope. The harness runs a single Update with one keycode poll plus at most one raycast or O(n) distance-check against the registered target set (n ≤ small constant in Sprint 3 — one NPC, one relic pickup, one vendor); no per-frame allocations, no renderer hot-path access, no GC churn. Project-wide performance budgets are still `[TO BE CONFIGURED]` per `.claude/docs/technical-preferences.md` (set during Tier 1 prototype), so this story claims no absolute frame-time number; the relative claim is "additive load is negligible vs. the existing M2 controller's Update loop." Evidence path on closure: Unity batchmode runner T1 confirms harness present and active with no log-warn/log-error from a per-frame budget assertion.
 
 **Surfaces reused** (do not re-author):
 - M2 player locomotion: `Assets/Scripts/M2SingleTrashMedLoopController.cs:564-583` (`HandlePlayerMovement` — WASD transform-driven movement + `FollowCamera`, drives `_playerMarker` / `ClericShellMarker`)
@@ -60,7 +62,7 @@
 - **Renderer hot-path discipline**: if any feedback uses a renderer material, follow the `m2_renderer_material_property_access` lesson — prefer `.sharedMaterial` + `MaterialPropertyBlock` over `renderer.material` reads on Update.
 - **Scene Discipline** (governance): `_DevEntry.unity` modification is a scene edit — save in Unity before staging, inspect the diff, do not hand-edit YAML. One scene edit per PR per `.claude/rules/game-dev-governance.md` Scene Discipline.
 - **Feedback rule trigger/direction test**: every feedback element passes (a) trigger = player verb (not ambient) AND (b) direction = "what is this / did that work" (not "where do I go"). Reviewer rejects any element visible or audible before the player chooses to engage the thing (`sprint-3.md:85`).
-- **Style Gate**: `dotnet format --verify-no-changes` must pass locally before this story's PR (`.claude/rules/game-dev-governance.md` Code Style Gate). Per active.md, format-setup is unconfirmed (no `codex/dotnet-format-setup` branch exists) and must be resolved before this PR.
+- **Style Gate**: `dotnet format --verify-no-changes` must pass locally before this story's PR (`.claude/rules/game-dev-governance.md` Code Style Gate). The Sprint 3 format-gate pre-condition is RESOLVED — PR #2 merge commit `90821f2` wired the policy + baseline + pre-commit hook (`.editorconfig:8-18`, `.gitattributes:1-82`, `.githooks/pre-commit:12-15`); the hook runs `dotnet format --verify-no-changes --exclude-diagnostics IDE1006` on `tests/Gravenspire.Combat.Tests.csproj` + `prototypes/combat-slice-T1/Harness/CombatSliceHarness.csproj`. This story's PR must pass the gate locally; the IDE1006 naming-debt exclusion is carryover `ide1006_naming_debt_excluded_from_format_gate`, not Sprint 3 scope.
 
 ## Out of Scope
 
@@ -145,7 +147,7 @@ Companion artifacts:
 - T1 negative-scope scan over changed files — zero matches expected
 - `git diff --check` — clean
 - `.githooks/pre-commit` — `[pre-commit] OK`
-- `dotnet format --verify-no-changes` — PASS (resolves Style Gate; depends on format-setup landing before this PR — open finding)
+- `dotnet format --verify-no-changes` — PASS (resolves Style Gate; format-setup pre-condition already landed via PR #2 / `90821f2`, so the hook is wired before this PR opens — no longer an open finding)
 
 **Evidence status**: Not started
 
@@ -157,11 +159,11 @@ Companion artifacts:
 |---|---|---|
 | None at story level | S3-01 is the foundation story for the Sprint 3 slate; the M2 surfaces it reuses (locomotion, marker, `_DevEntry.unity`) and the M3 dispatch contract shape it accommodates are all already-built (Sprint 2 M2/M3 closures `b4cb377`, `1166cae`, `fb77f83`, `25c94ee`, `ee7c450`). | N/A |
 
-**Sprint-level pre-condition (tracked, resolves before this PR — not a story dependency):** `dotnet format` setup. Per active.md and `sprint-3.md:120`, the format gate must pass locally before any Sprint 3 PR; format-setup branch `codex/dotnet-format-setup` does not exist (verified 2026-05-23). Resolve via standalone format-setup commit on `main` before opening this story's PR, or fold into the implementation PR with explicit reviewer note (D015 / D006 routing TBD at the time).
+**Sprint-level pre-condition (RESOLVED, no longer blocking this PR):** `dotnet format` setup. Per `sprint-3.md:120` the format gate had to pass locally before any Sprint 3 PR; that pre-condition is now resolved by PR #2 merge commit `90821f2` (2026-05-24), which landed the policy commit `f040493`, the baseline commit `a0785d8`, and the hook-wiring commit `cf1c204` together. The pre-commit hook at `.githooks/pre-commit:12-15` now runs `dotnet format --verify-no-changes --exclude-diagnostics IDE1006` on the two .NET project files, so the gate is enforceable on every Sprint 3 PR including this one. Story author still runs the gate locally before opening the PR (see Test Evidence).
 
 ## Blockers
 
-None. All four governing D-entries (D001, D003, D012, D016) are Locked. No Proposed ADRs in scope. No unresolved design questions — the plan's Story Ledger row, the TD feasibility consult result, and the CD pillar consult together close the design surface for the harness contract.
+None. All four governing D-entries (D001, D003, D012, D016) are Locked. **ADRs: N/A for this story** — no new architecture decision is required and no Proposed ADRs are in scope; the harness composes existing M2/M3 surfaces under already-Locked D-entries, and the interface shape it introduces (`IPlayerInteractTarget`) is a story-local contract, not an architecture-level decision. No unresolved design questions — the plan's Story Ledger row, the TD feasibility consult result, and the CD pillar consult together close the design surface for the harness contract.
 
 Watch items (not blockers):
 - `m2_renderer_material_property_access` — if harness feedback touches renderer state, follow the `MaterialPropertyBlock` lesson

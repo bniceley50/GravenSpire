@@ -8,7 +8,7 @@
 > **Estimate**: 1.0 day (HIGH confidence — thin wiring onto already-built M3 system, per `sprint-3.md:156`)
 > **Manifest Version**: Unavailable (control-manifest absent project-wide per `production/qa/plans/qa-plan-sprint-2-20260509.md:54,60`; documented fallback applies — `control_manifest_absence_pre_existing` carryover)
 > **Generated**: 2026-05-23
-> **Owner**: (unassigned — assign before commit per D016)
+> **Owner**: Codex
 
 ## Context
 

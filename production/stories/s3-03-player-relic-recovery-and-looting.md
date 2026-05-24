@@ -8,7 +8,7 @@
 > **Estimate**: 1.0 day (MEDIUM confidence — per `sprint-3.md:157`; densest wiring of the slate, 1.5-day actuals would not be a deviation)
 > **Manifest Version**: Unavailable (control-manifest absent project-wide per `production/qa/plans/qa-plan-sprint-2-20260509.md:54,60`; documented fallback applies)
 > **Generated**: 2026-05-23
-> **Owner**: (unassigned — assign before commit per D016)
+> **Owner**: Codex
 
 ## Context
 

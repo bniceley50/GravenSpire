@@ -8,7 +8,7 @@
 > **Estimate**: 1.0 day (MEDIUM confidence — per `sprint-3.md:160`; new runner reuses telemetry vocabulary, but the M2 melee-RNG fix touches the 2156-line M2 controller and the human-play protocol is non-trivial)
 > **Manifest Version**: Unavailable (control-manifest absent project-wide per `production/qa/plans/qa-plan-sprint-2-20260509.md:54,60`; documented fallback applies)
 > **Generated**: 2026-05-23
-> **Owner**: (unassigned — assign before commit per D016; must be design-aware owner — Brian or Codex, NOT Qwen3-Coder, per `sprint-3.md:166` — composes greenfield orchestration + carries the slate's emotional payload via human-play AC)
+> **Owner**: Codex (design-aware owner per `sprint-3.md:166`; Qwen3-Coder not eligible)
 
 > **Pattern-establishing notice**: this is the slate's emotional payload story and the second Sprint 3 story to establish a new evidence pattern. S3-05 established the greybox spatial-validation pattern; S3-06 establishes the **Tier-1 human-play feel-check pattern** — a pillar-anchored binary verdict with structured supporting evidence, N=1 self-test selection bias acknowledged, optional second-playtester both-reads-recorded. The shape S3-06 takes for the human-play protocol becomes the precedent for any future "is this loop worth playing" feel-check story. Inherits the structural template from `tests/evidence/S2-M3-04/human-play-20260520.md` (the originating deferral artifact). Recorded for Sprint 3 close-out promotion to `tasks/lessons.md` as the "T1 human-play feel-check evidence pattern" — bundled with the S3-05 spatial-validation pattern and the `feedback_external_review_verification` promotion already pending.
 

@@ -9,15 +9,15 @@ generated: "2026-05-23"
 updated: "2026-05-24"
 branch: "main"
 head: "90821f25163c367cda6218b4838dddc0b21da94e"
-qa_plan: ""
+qa_plan: "production/qa/plans/qa-plan-sprint-3-20260524.md"
 plan: "production/sprints/sprint-3.md"
 slice_review: ""
-implementation_gate: "Sprint 3 slate opened 2026-05-23 with the 6-story slate S3-01–S3-06 written (slate commit 9bf60e1) and Story Ledger linked (back-fill commit ecbea5e). Format-gate pre-condition resolved 2026-05-24 by PR #2 merge commit 90821f2 (policy f040493, baseline a0785d8, hook cf1c204); .githooks/pre-commit now runs dotnet format on the test + harness csproj with --exclude-diagnostics IDE1006 (pre-existing naming debt tracked as ide1006_naming_debt_excluded_from_format_gate). Remaining pre-conditions before any S3-01 implementation PR: (1) owner assignment per story — all six carry empty owner fields per D016 pre-commit gate; (2) Sprint 3 /qa-plan exists and names the human-play-AC-on-S3-06-only rule."
-progress: "Sprint 3 slate opened 2026-05-23 — 6 stories written, committed, ledger-linked, 0 closed. Format-gate pre-condition resolved 2026-05-24 by PR #2 / 90821f2. S3-01 ready; S3-02/03/04/05/06 blocked on dependency chain. Two pre-conditions remain: owner assignment + Sprint 3 /qa-plan. Next: assign one owner per story → run Sprint 3 /qa-plan → /story-readiness for S3-01."
+implementation_gate: "Sprint 3 slate opened 2026-05-23 with the 6-story slate S3-01–S3-06 written (slate commit 9bf60e1) and Story Ledger linked (back-fill commit ecbea5e). Format-gate pre-condition resolved 2026-05-24 by PR #2 merge commit 90821f2 (policy f040493, baseline a0785d8, hook cf1c204); .githooks/pre-commit now runs dotnet format on the test + harness csproj with --exclude-diagnostics IDE1006 (pre-existing naming debt tracked as ide1006_naming_debt_excluded_from_format_gate). Owner assignment and Sprint 3 /qa-plan resolved 2026-05-24; next gate before implementation is /story-readiness for S3-01."
+progress: "Sprint 3 slate opened 2026-05-23 — 6 stories written, committed, ledger-linked, 0 closed. Format-gate pre-condition resolved 2026-05-24 by PR #2 / 90821f2. Owner assignment and Sprint 3 /qa-plan resolved 2026-05-24. S3-01 ready; S3-02/03/04/05/06 blocked on dependency chain. Next: /story-readiness production/stories/s3-01-standalone-player-interaction-harness.md."
 completed_stories: 0
 total_stories: 6
 next_active_story: "S3-01"
-next_active_command: "Assign one owner per story (D016 pre-commit gate), run Sprint 3 /qa-plan, then /story-readiness production/stories/s3-01-standalone-player-interaction-harness.md"
+next_active_command: "/story-readiness production/stories/s3-01-standalone-player-interaction-harness.md"
 
 carryover:
   # ----------------------------------------------------------------
@@ -80,7 +80,7 @@ stories:
     file: "production/stories/s3-01-standalone-player-interaction-harness.md"
     priority: must-have
     status: ready
-    owner: ""
+    owner: "Codex"
     estimate_days: 1.5
     blocker: ""
     completed: ""
@@ -89,7 +89,7 @@ stories:
     file: "production/stories/s3-02-player-driven-npc-interaction.md"
     priority: must-have
     status: blocked
-    owner: ""
+    owner: "Codex"
     estimate_days: 1.0
     blocker: "S3-01"
     completed: ""
@@ -98,7 +98,7 @@ stories:
     file: "production/stories/s3-03-player-relic-recovery-and-looting.md"
     priority: must-have
     status: blocked
-    owner: ""
+    owner: "Codex"
     estimate_days: 1.0
     blocker: "S3-02"
     completed: ""
@@ -107,7 +107,7 @@ stories:
     file: "production/stories/s3-04-player-driven-vendor.md"
     priority: must-have
     status: blocked
-    owner: ""
+    owner: "Codex"
     estimate_days: 1.0
     blocker: "S3-03"
     completed: ""
@@ -116,7 +116,7 @@ stories:
     file: "production/stories/s3-05-navigable-greybox-first-district.md"
     priority: must-have
     status: blocked
-    owner: ""
+    owner: "Codex"
     estimate_days: 1.5
     blocker: "S3-01"
     completed: ""
@@ -125,7 +125,7 @@ stories:
     file: "production/stories/s3-06-playable-end-to-end-and-human-play.md"
     priority: must-have
     status: blocked
-    owner: ""
+    owner: "Codex"
     estimate_days: 1.0
     blocker: "S3-02, S3-03, S3-04, S3-05"
     completed: ""

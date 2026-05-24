@@ -8,7 +8,7 @@
 > **Estimate**: 1.5 days (LOW confidence — scene-authoring volume uncertainty; the largest single scene change in the sprint, per `sprint-3.md:159`)
 > **Manifest Version**: Unavailable (control-manifest absent project-wide per `production/qa/plans/qa-plan-sprint-2-20260509.md:54,60`; documented fallback applies)
 > **Generated**: 2026-05-23
-> **Owner**: (unassigned — assign before commit per D016; must be design-aware owner — Brian or Codex, NOT Qwen3-Coder, per `sprint-3.md:166` — spatial design + Pillar 2 review judgment + scene-authoring volume make this de facto design-aware-required)
+> **Owner**: Codex (design-aware owner per `sprint-3.md:166`; Qwen3-Coder not eligible)
 
 > **Pattern-establishing notice**: this is the first Sprint 3 story without a clean Sprint 2 precedent for evidence methodology. The four wiring stories (S3-01 through S3-04) inherited the Try*-contract + telemetry assertion pattern from S2-M2/S2-M3 closures. S3-05 introduces three new evidence artifacts — mechanical reachability check, soft-lock scan, Pillar-2 wayfinding-cue review — that have no prior precedent in this project. The shape these artifacts take in this story becomes the precedent for future district/zone work. Recorded for Sprint 3 close-out promotion to `tasks/lessons.md` as the "greybox spatial-validation evidence pattern."
 
