@@ -1,2 +1,82 @@
+# Canonical repository text policy.
+* text=auto eol=lf
+
+# Source, documentation, config, and Unity Force Text serialization.
+*.cs text eol=lf
+*.csx text eol=lf
+*.md text eol=lf
+*.json text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.ps1 text eol=lf
+*.psm1 text eol=lf
+*.psd1 text eol=lf
+*.txt text eol=lf
+*.xml text eol=lf
+*.uxml text eol=lf
+*.uss text eol=lf
+*.csproj text eol=lf
+*.sln text eol=lf
+*.props text eol=lf
+*.targets text eol=lf
+*.asmdef text eol=lf
+*.asmref text eol=lf
+*.inputactions text eol=lf
+*.shader text eol=lf
+*.hlsl text eol=lf
+*.compute text eol=lf
+*.mat text eol=lf
+*.asset text eol=lf
+*.prefab text eol=lf
+*.unity text eol=lf
+*.meta text eol=lf
+*.anim text eol=lf
+*.controller text eol=lf
+*.overrideController text eol=lf
+*.physicMaterial text eol=lf
+*.physicsMaterial2D text eol=lf
+*.preset text eol=lf
+*.playable text eol=lf
+*.mixer text eol=lf
+*.mask text eol=lf
+*.sh text eol=lf
+
+# Platform-specific text policy.
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+# ProjectSettings exceptions already used by the pre-commit whitespace gate.
 ProjectSettings/TagManager.asset whitespace=-blank-at-eol
 ProjectSettings/PackageManagerSettings.asset whitespace=-blank-at-eol
+
+# Binary assets: do not normalize line endings or diff as text.
+*.png binary -eol
+*.jpg binary -eol
+*.jpeg binary -eol
+*.tga binary -eol
+*.psd binary -eol
+*.psb binary -eol
+*.exr binary -eol
+*.hdr binary -eol
+*.gif binary -eol
+*.bmp binary -eol
+*.ico binary -eol
+*.fbx binary -eol
+*.blend binary -eol
+*.ttf binary -eol
+*.otf binary -eol
+*.woff binary -eol
+*.woff2 binary -eol
+*.wav binary -eol
+*.mp3 binary -eol
+*.ogg binary -eol
+*.mp4 binary -eol
+*.mov binary -eol
+*.avi binary -eol
+*.dll binary -eol
+*.exe binary -eol
+*.pdb binary -eol
+*.pdf binary -eol
+*.zip binary -eol
+*.7z binary -eol
+*.rar binary -eol
