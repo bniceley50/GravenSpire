@@ -3,6 +3,28 @@
 **Last Updated:** 2026-05-24
 **Project Stage:** Pre-Production — Sprint 3 (Playable Vertical-Slice Assembly) — Slate Open, 2 of 3 Pre-Conditions Cleared
 
+## Session Extract — /dev-story 2026-05-24 (S3-01 Phase 1)
+
+- Story: `production/stories/s3-01-standalone-player-interaction-harness.md` — S3-01 Standalone Player Interaction Harness.
+- Worktree / branch: `N:\GravenSpire-codex` on `codex/s3-01-standalone-player-interaction-harness`, created from `origin/main` at `df5fdec`.
+- Files changed:
+  - `Assets/Scripts/S3PlayerInteractionHarness.cs` + `.meta` — standalone distance-check interaction harness, `IPlayerInteractTarget`, `InteractContext`, single `KeyCode.E` verb, range-gated prompt state, and fired/missed/blocked telemetry/feedback acknowledgements.
+  - `Assets/Editor/GravenspireS3PlayerInteractionHarnessBuilder.cs` + `.meta` — Unity builder that wires a distinct `S3_PlayerInteractionHarnessRoot` to `ClericShellMarker` without editing `M2SingleTrashMedLoopController`.
+  - `Assets/Editor/GravenspireS3PlayerInteractionHarnessVerificationRunner.cs` + `.meta` — story-specific Unity runner for S3-01 T1-T6 using a mock registered target and `DateTimeOffset.UtcNow` / `EditorApplication.timeSinceStartup`.
+- Verification run in Phase 1:
+  - `dotnet test tests\Gravenspire.Combat.Tests.csproj --logger "console;verbosity=minimal"` — PASS 189/189.
+  - `dotnet format tests\Gravenspire.Combat.Tests.csproj --verify-no-changes --exclude-diagnostics IDE1006` — PASS.
+  - `dotnet format prototypes\combat-slice-T1\Harness\CombatSliceHarness.csproj --verify-no-changes --exclude-diagnostics IDE1006` — PASS.
+  - Explicit Phase 1 source scan over the new S3 files — PASS for no `DateTime.UtcNow`, no Unity Input System package, no `CharacterController`, no Tier-2/network/LLM terms, and no direct M3 `Try*` calls from the harness.
+  - Explicit trailing-whitespace scan over the new S3 files — PASS.
+- Scope notes:
+  - No `Assets/Scripts/M2SingleTrashMedLoopController.cs` change.
+  - No existing M3 runtime file change.
+  - No hand-authored `_DevEntry.unity` scene change and no hand-authored S3-01 evidence artifact.
+- Blockers / next:
+  - Phase 2 remains mandatory before S3-01 can close: run Unity builder to generate/save the `_DevEntry.unity` scene delta, run `GravenspireS3PlayerInteractionHarnessVerificationRunner`, run the three M2 preservation runners in separate Unity invocations with `tests/evidence/S3-01/` output paths, then create `tests/evidence/S3-01/verification.md`.
+  - After Phase 2 evidence: `/code-review` with Sprint 3 review-subagent layer, then `/story-done production/stories/s3-01-standalone-player-interaction-harness.md`.
+
 ## Current Task
 
 Sprint 3 ("Playable Vertical-Slice Assembly") is open per `DECISIONS.md` D016, and the slate is fully opened on 2026-05-23. Six-commit arc on `origin/main`: `d7acfbf` (close Sprint 2) → `62c0f66` (Sprint 3 plan + active.md refresh) → `9bf60e1` (six story files as slate commit) → `ecbea5e` (Story Ledger back-fill linking ledger to slate) → `4ea9e2d` (sprint-status.yaml regen) → `90821f2` (format-gate PR #2 merge 2026-05-24, three commits: policy `f040493` + baseline `a0785d8` + hook `cf1c204`). Six story files at `production/stories/s3-01..s3-06-*.md` on disk, ledger-linked, status synchronized; sprint-status.yaml carryover stays at 21 live (`gitattributes_crlf_normalization_unconfigured` retired with format-gate merge, `ide1006_naming_debt_excluded_from_format_gate` added in its place), 8 retired with visible-trace comment block, 3 RESOLUTION CONDITIONs threading carryover→AC retirement causally.
