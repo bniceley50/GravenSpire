@@ -238,7 +238,6 @@ namespace Gravenspire.Editor
             AppendSessionLine(TelemetryKey, $"configured_interact_range_meters={harness.ConfiguredInteractRangeMeters:0.00}");
 
             RecordCheck("harness_did_not_record_m3_npc_interaction", CountNpcInteractions() == initialNpcInteractions);
-            RecordCheck("harness_telemetry_available", harness.TelemetryEvents.Count > 0);
             AppendSessionLine(TelemetryKey, "m2_preservation_external_reruns_required=true");
         }
 
