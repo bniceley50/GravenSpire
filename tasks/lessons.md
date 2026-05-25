@@ -21,6 +21,16 @@ Promote repeating lessons to `CLAUDE-patterns.md` (cross-cutting) or a
 
 ## Entries (newest first)
 
+### 2026-05-25 — [GLOBAL][CI] Unity batchmode ShaderGraph settings drift is not story scope
+
+**Context:** Unity settings drift has now appeared in two related ways during runtime/story verification. During S2-M2-04, a Unity cold import incidentally re-serialized `ProjectSettings/ShaderGraphSettings.asset` with a trailing-space artifact and no semantic change; the file was restored to committed content plus canonical CRLF before closure. During S2-M3-04, the project was briefly opened in Unity 6.4 during the human-play attempt, upgrading six tracked files including `ProjectSettings/ShaderGraphSettings.asset`, `ProjectVersion.txt`, package manifests, URP global settings, and `_DevEntry.unity`; all six were reverted before closure to restore the Unity 6.3.14f1 pin.
+
+**Lesson:** Treat Unity-generated project-settings drift as suspect until proven intentional. Batchmode runs, cold imports, and wrong-editor-version launches can dirty ShaderGraph/URP/package/project-version files without serving the story. A story may keep only settings changes that are explicitly in scope, evidence-backed, and version-compatible with D001; otherwise restore the drift, record the restore in verification evidence, and keep the changeset focused on the approved story surface.
+
+**Evidence:** `tests/evidence/S2-M2-04/verification.md:52` records the zero-semantic-change `ShaderGraphSettings.asset` re-serialization and restore; `tests/evidence/S2-M3-04/verification.md:44` records the Unity 6.4 six-file drift and full revert before closure; `production/session-state/active.md:268` and `production/session-state/active.md:557` preserve the same incidents in session state.
+
+**Promotion status:** open — promote to `.claude/rules/game-dev-governance.md` or a Unity evidence checklist if another Unity-runtime story repeats the same settings-drift pattern.
+
 ### 2026-05-20 — [GLOBAL][SCOPE][TEST] Feel-gates belong only on playable stories; playability is a milestone entry condition
 
 **Context:** The 2026-05-14 lesson "convert gameplay-feel acceptance into telemetry so blockout builds can still gate" was correct for M2's *mechanical* questions, but it was over-applied across the M3 slate: telemetry quietly substituted for player-facing assembly everywhere. Every M3 story (`S2-M3-01` through `S2-M3-04`) was typed Integration / Visual-Feel yet implemented as a runner-driven verification harness with no player input path — `Input.GetKey` appears in exactly one file in `Assets/Scripts` (`M2SingleTrashMedLoopController.cs`, the M2 combat loop). The M3 objective layer (named NPC, objective state, relic, loot, vendor) was proven by automated runners but never wired so a human could drive it. `S2-M3-04`'s AC-06 then asked the project lead to human-play and feel-judge a loop that had no input path and no navigable world; the lead opened the build and correctly reported it was not playable as a loop. A producer + creative-director reassessment confirmed the pillars and systems are sound; what failed is sequencing and the definition of "done" (D016).

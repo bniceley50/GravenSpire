@@ -1,7 +1,16 @@
 # Active Session State
 
-**Last Updated:** 2026-05-24
-**Project Stage:** Pre-Production — Sprint 3 (Playable Vertical-Slice Assembly) — Slate Open, 2 of 3 Pre-Conditions Cleared
+**Last Updated:** 2026-05-25
+**Current Stage Note:** PR #3 merged to `origin/main` at `9072bcb`; `/story-done` can now be rerun on updated `main` to close S3-01.
+**Project Stage:** Pre-Production — Sprint 3 (Playable Vertical-Slice Assembly) — S3-01 merged, closure pending
+
+## Session Extract - /story-done 2026-05-25 (S3-01 blocked before PR #3 merge)
+
+- Attempted `/story-done production/stories/s3-01-standalone-player-interaction-harness.md` in lean mode (default; `production/review-mode.txt` absent).
+- Verdict at the time: BLOCKED for main-branch closure. PR #3 was OPEN, `draft=false`, head `d7cde93c1860ff3230be1d77d9cb49566e89b20d`, and `mergeCommit=null` by `gh pr view 3 --json state,isDraft,headRefOid,mergeCommit`; `origin/main` remained at `df5fdec` by `git log origin/main`, while `d7cde93` was present only on `origin/codex/s3-01-standalone-player-interaction-harness` by `git branch -r --contains d7cde93`.
+- Branch evidence: S3-01 verification on the PR branch reports `PASS` at `tests/evidence/S3-01/verification.md:8` (read via `git show origin/codex/s3-01-standalone-player-interaction-harness:tests/evidence/S3-01/verification.md`); all 9 AC rows are PASS at `tests/evidence/S3-01/verification.md:14-22`; M2 preservation rows are PASS at `tests/evidence/S3-01/verification.md:28-30`; the story smoke result is PASS at `tests/evidence/S3-01/unity-player-interaction-harness-20260524-smoke.md:7`, with checks listed at `:11-44`.
+- No closure writes were made to story status or `production/sprint-status.yaml`, because main did not contain the S3-01 implementation/evidence files yet.
+- Update: PR #3 later merged to `origin/main` as `9072bcb`, so the next run can close S3-01 on updated `main`.
 
 ## Session Extract — /dev-story 2026-05-24 (S3-01 Phase 1)
 
@@ -26,6 +35,8 @@
   - After Phase 2 evidence: `/code-review` with Sprint 3 review-subagent layer, then `/story-done production/stories/s3-01-standalone-player-interaction-harness.md`.
 
 ## Current Task
+
+Current as of 2026-05-25: PR #3 has merged to `origin/main` at `9072bcb`; rerun `/story-done production/stories/s3-01-standalone-player-interaction-harness.md` on updated `main` to close S3-01 and unblock S3-02/S3-05. The paragraphs below are retained as older session context and no longer describe the live gate state.
 
 Sprint 3 ("Playable Vertical-Slice Assembly") is open per `DECISIONS.md` D016, and the slate is fully opened on 2026-05-23. Six-commit arc on `origin/main`: `d7acfbf` (close Sprint 2) → `62c0f66` (Sprint 3 plan + active.md refresh) → `9bf60e1` (six story files as slate commit) → `ecbea5e` (Story Ledger back-fill linking ledger to slate) → `4ea9e2d` (sprint-status.yaml regen) → `90821f2` (format-gate PR #2 merge 2026-05-24, three commits: policy `f040493` + baseline `a0785d8` + hook `cf1c204`). Six story files at `production/stories/s3-01..s3-06-*.md` on disk, ledger-linked, status synchronized; sprint-status.yaml carryover stays at 21 live (`gitattributes_crlf_normalization_unconfigured` retired with format-gate merge, `ide1006_naming_debt_excluded_from_format_gate` added in its place), 8 retired with visible-trace comment block, 3 RESOLUTION CONDITIONs threading carryover→AC retirement causally.
 
