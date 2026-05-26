@@ -1,0 +1,54 @@
+S3-05 Greybox Presentation Scan
+
+Date: 2026-05-26
+Story: production/stories/s3-05-navigable-greybox-first-district.md
+Scene: Assets/Scenes/_DevEntry.unity
+Runner: Assets/Editor/GravenspireS3DistrictGreyboxPresentationScanVerificationRunner.cs
+Result: PASS
+
+Scan Scope:
+- Scene object scan: Light components, AudioSource components, district primitive mesh geometry, rendered object material palette.
+- Scene source scan: serialized skybox material assignment.
+- Asset scan: Assets/Materials material location, greybox material texture/emission state, produced-art/audio file extensions under Assets.
+
+Checks:
+- PASS scene_loaded
+- PASS first_district_greybox_root_exists
+- PASS uniform_ambient_flat_mode
+- PASS scene_fog_disabled
+- PASS no_light_components_in_scene
+- PASS no_audio_sources_in_scene
+- PASS district_uses_blocky_primitive_meshes
+- PASS rendered_objects_use_greybox_palette
+- PASS greybox_material_assets_are_solid_color
+- PASS no_non_greybox_material_assets
+- PASS no_produced_art_asset_files_under_assets
+- PASS scene_has_no_authored_skybox_assignment
+
+Greybox Material Palette:
+- `GreyboxBoundary` path=`Assets/Materials/Greybox/GreyboxBoundary.mat` shader=`Universal Render Pipeline/Lit` baseColor=`rgba(0.565, 0.565, 0.565, 1)`
+- `GreyboxFloor` path=`Assets/Materials/Greybox/GreyboxFloor.mat` shader=`Universal Render Pipeline/Lit` baseColor=`rgba(0.478, 0.478, 0.478, 1)`
+- `GreyboxLandmarkCool` path=`Assets/Materials/Greybox/GreyboxLandmarkCool.mat` shader=`Universal Render Pipeline/Lit` baseColor=`rgba(0.471, 0.533, 0.596, 1)`
+- `GreyboxLandmarkDark` path=`Assets/Materials/Greybox/GreyboxLandmarkDark.mat` shader=`Universal Render Pipeline/Lit` baseColor=`rgba(0.353, 0.353, 0.353, 1)`
+- `GreyboxLandmarkWarm` path=`Assets/Materials/Greybox/GreyboxLandmarkWarm.mat` shader=`Universal Render Pipeline/Lit` baseColor=`rgba(0.659, 0.596, 0.471, 1)`
+
+Classified Observations:
+- District mesh `FirstDistrict_Greybox/FirstDistrict_NavMeshSurface/DevEntry_DistrictBlockout_Floor` uses Unity built-in primitive mesh `Plane`.
+- District mesh `FirstDistrict_Greybox/Greybox_CaretakerHall_Massing` uses Unity built-in primitive mesh `Cube`.
+- District mesh `FirstDistrict_Greybox/Greybox_CourtVendorHall_Massing` uses Unity built-in primitive mesh `Cube`.
+- District mesh `FirstDistrict_Greybox/Greybox_RelicStorehouse_Massing` uses Unity built-in primitive mesh `Cube`.
+- District mesh `FirstDistrict_Greybox/GreyboxBoundary_North` uses Unity built-in primitive mesh `Cube`.
+- District mesh `FirstDistrict_Greybox/GreyboxBoundary_South` uses Unity built-in primitive mesh `Cube`.
+- District mesh `FirstDistrict_Greybox/GreyboxBoundary_East` uses Unity built-in primitive mesh `Cube`.
+- District mesh `FirstDistrict_Greybox/GreyboxBoundary_West` uses Unity built-in primitive mesh `Cube`.
+- Scene skybox setting: `m_SkyboxMaterial: {fileID: 10304, guid: 0000000000000000f000000000000000, type: 0}`.
+- The serialized skybox line points at Unity's built-in default material, not an authored scene skybox swap.
+
+Blocking Findings:
+- None.
+
+Warnings:
+- None.
+
+Errors:
+- None.

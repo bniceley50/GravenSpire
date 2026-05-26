@@ -2,7 +2,7 @@
 
 > **Sprint**: Sprint 3 — Playable Vertical-Slice Assembly
 > **Sprint Plan**: `production/sprints/sprint-3.md` (Story Ledger row, line 70)
-> **Status**: Ready (depends on S3-01 being Done)
+> **Status**: Done with Notes
 > **Layer**: Core / Presentation
 > **Type**: Integration (primary) + Visual/Feel (secondary evidence per `sprint-3.md:140`)
 > **Estimate**: 1.5 days (LOW confidence — scene-authoring volume uncertainty; the largest single scene change in the sprint, per `sprint-3.md:159`)
@@ -250,3 +250,19 @@ Watch items (not blockers):
 - **AC-12 rollforward**: if S3-05 closes "Done with Notes" on AC-12 (per closure semantics), the carryover key (e.g., `s3_05_ac12_partial_rollforward_to_s3_06`) must be added to `production/sprint-status.yaml` so S3-06 inherits the full-chain assertion responsibility explicitly.
 - **Pattern-establishing closure follow-up**: at Sprint 3 close-out, promote (a) the greybox spatial-validation evidence pattern and (b) the NavMesh agent profile as canonical T1 reference to `tasks/lessons.md` so future district/zone stories inherit the shape rather than re-deriving them. Bundle with the existing `feedback_external_review_verification` promotion already pending.
 - **Pillar 1 framing watch**: the district must read as a place that exists, not a place built for the player. Reviewer evaluates AC-08's four reject criteria with R-P1-PROTAGONIST-DRIFT in mind — focal-point framing is both a Pillar 2 wayfinding hazard AND a Pillar 1 "world-built-for-you" hazard.
+
+## Closure Notes
+
+**Completed:** 2026-05-26
+**Verdict:** DONE WITH NOTES
+**Criteria:** 12/12 addressed. AC-01 through AC-07, AC-10, and AC-11 pass on blocking mechanical evidence. AC-08 and AC-09 pass with documented visual-readability concerns. AC-12 passes only as the story-defined graceful-degradation partial; the full downstream S3-02/03/04 objective-chain assertion rolls forward to S3-06.
+**Evidence:** `tests/evidence/S3-05/verification.md`
+**Commit range:** `bf3705d..HEAD` after the Phase 8 closure commit; pre-closure implementation evidence landed across `bf3705d..31ff817`.
+
+### Notes Carryforward
+
+- AC-12 rollforward is explicit: `production/sprint-status.yaml` carries `s3_05_ac12_partial_rollforward_to_s3_06`, and S3-06 owns the full playable end-to-end assertion after S3-02, S3-03, and S3-04 close.
+- AC-11 reconciliation is documented in `tests/evidence/S3-05/verification.md`: the authoritative AC-11 is M2 combat camp preservation; the walkthrough log is advisory T5 coverage for AC-07 scan gaps.
+- The advisory walkthrough artifact exists at `tests/evidence/S3-05/walkthrough-log-20260526.md`, but no Phase 8 human play session occurred and no verbatim human feedback was fabricated.
+- AC-08 and AC-09 retain PASS WITH CONCERNS because the marker-free screenshot is dark and the second landmark is less visually distinct than the builder sightline evidence proves mechanically.
+- Phase 7 introduced the `-gravenspireSkipBuilder` M2 runner flag so future authored-scene preservation reruns can test the authored scene instead of rebuilding the M2 baseline first.
