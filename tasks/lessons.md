@@ -21,6 +21,36 @@ Promote repeating lessons to `CLAUDE-patterns.md` (cross-cutting) or a
 
 ## Entries (newest first)
 
+### 2026-05-26 — [GLOBAL][CI] Unity-generated material and meta files can carry trailing whitespace
+
+**Context:** S3-05 Phase 1 authored the first greybox material palette for the First District. Unity-generated `.mat` and `.meta` files introduced trailing whitespace that failed the local whitespace gate before the Phase 1 commit `bf3705d`. The content was semantically correct, but the generated text still needed cleanup before staging.
+
+**Lesson:** Treat Unity-generated YAML/text assets as generated-but-reviewable, not automatically clean. After material, prefab, scene, NavMesh, or `.meta` authoring, run `git diff --check` and a trailing-whitespace scan before staging. If the generated artifact has only whitespace dirt, normalize it in the approved file scope and record the cleanup in the phase evidence rather than letting the pre-commit hook be the first detector.
+
+**Evidence:** S3-05 Phase 1 commit `bf3705d`; greybox palette files under `Assets/Materials/Greybox/`; `tests/evidence/S3-05/verification.md` Pattern Notes.
+
+**Promotion status:** open — promote to a Unity asset-authoring checklist if this repeats on another scene/material story.
+
+### 2026-05-26 — [GLOBAL][CI][SCOPE] Unity batchmode ProjectSettings drift must be restored unless it is story scope
+
+**Context:** During S3-05 Phase 4, Unity batchmode repeatedly dirtied `ProjectSettings/GraphicsSettings.asset` (`m_LightsUseLinearIntensity` and `m_LightsUseColorTemperature`) and `ProjectSettings/QualitySettings.asset` (`antiAliasing`) while generating spawn-view and wayfinding evidence. Those changes were restored from `HEAD` as out-of-scope story drift, and later phases verified no ProjectSettings or Packages drift shipped.
+
+**Lesson:** Unity batchmode can reserialize project settings while doing legitimate evidence work. Treat settings drift as suspect until the story explicitly requires a settings change. For presentation or scene-evidence stories, inspect the diff, restore unrelated ProjectSettings/Packages churn, and document the restore so the PR proves it changed the authored story surface rather than the editor environment.
+
+**Evidence:** `tests/evidence/S3-05/pillar-2-wayfinding-review-20260526.md` Reviewer Notes; `tests/evidence/S3-05/verification.md` Known Notes; Phase 4 commit `c3d485d`.
+
+**Promotion status:** open — this repeats the 2026-05-25 ShaderGraph/URP drift lesson; promote both together if a third Unity-runtime closure hits the same drift class.
+
+### 2026-05-26 — [TEST][SCOPE] Scene-preservation reruns need skip-builder paths when legacy runners rebuild baselines
+
+**Context:** S3-05 Phase 7 found that all three existing M2 preservation runners called `GravenspireM2SingleTrashLoopBuilder.Build()` before verification. That preserved S2 behavior for standalone M2 evidence, but it would clobber an authored district scene by restoring the M2 baseline first. Phase 7 added `-gravenspireSkipBuilder` to the three runners; the flag defaults to false for backward compatibility and skips only the builder call when district stories need to test the currently authored scene.
+
+**Lesson:** A preservation rerun must preserve the authored scene it claims to test. If a legacy smoke runner begins by rebuilding its own baseline, future scene-authoring stories need a narrow, explicit skip-builder path rather than a wrapper, reflection hack, or duplicated smoke logic. The default path must remain backward-compatible, and the skip flag must change only setup mutation, not the verification itself.
+
+**Evidence:** Phase 7 commit `31ff817`; `Assets/Editor/GravenspireM2SingleTrashLoopVerificationRunner.cs`; `Assets/Editor/GravenspireM2LinkedTrashOverpullVerificationRunner.cs`; `Assets/Editor/GravenspireM2NamedBlockerVerificationRunner.cs`; `tests/evidence/S3-05/m2-02-preservation-20260526-smoke.md`; `tests/evidence/S3-05/m2-03-preservation-20260526-smoke.md`; `tests/evidence/S3-05/m2-04-preservation-20260526-smoke.md`.
+
+**Promotion status:** open — promote to the Unity runner checklist when the next district/zone story reuses the same skip-builder pattern.
+
 ### 2026-05-25 — [GLOBAL][CI] Unity batchmode ShaderGraph settings drift is not story scope
 
 **Context:** Unity settings drift has now appeared in two related ways during runtime/story verification. During S2-M2-04, a Unity cold import incidentally re-serialized `ProjectSettings/ShaderGraphSettings.asset` with a trailing-space artifact and no semantic change; the file was restored to committed content plus canonical CRLF before closure. During S2-M3-04, the project was briefly opened in Unity 6.4 during the human-play attempt, upgrading six tracked files including `ProjectSettings/ShaderGraphSettings.asset`, `ProjectVersion.txt`, package manifests, URP global settings, and `_DevEntry.unity`; all six were reverted before closure to restore the Unity 6.3.14f1 pin.
