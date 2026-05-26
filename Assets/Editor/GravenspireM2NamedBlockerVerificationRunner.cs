@@ -31,6 +31,7 @@ namespace Gravenspire.Editor
         private const string EvidencePathKey = "GravenspireM2NamedBlocker.EvidencePath";
         private const string PlayStartedKey = "GravenspireM2NamedBlocker.PlayStartedTicks";
         private const string EvidencePathArgumentName = "-gravenspireEvidencePath";
+        private const string SkipBuilderArgumentName = "-gravenspireSkipBuilder";
         private const double SmokeDelaySeconds = 1.0;
 
         static GravenspireM2NamedBlockerVerificationRunner()
@@ -59,7 +60,11 @@ namespace Gravenspire.Editor
                 var evidencePath = ResolveEvidencePathFromCommandLine(DefaultEvidencePath());
                 SessionState.SetString(EvidencePathKey, evidencePath);
                 Directory.CreateDirectory(Path.GetDirectoryName(evidencePath) ?? ".");
-                GravenspireM2SingleTrashLoopBuilder.Build();
+                if (!ShouldSkipBuilderFromCommandLine())
+                {
+                    GravenspireM2SingleTrashLoopBuilder.Build();
+                }
+
                 var scene = EditorSceneManager.OpenScene(ScenePath, OpenSceneMode.Single);
                 RecordCheck("scene_loaded", scene.IsValid() && scene.path == ScenePath);
                 RecordCheck("camp_rest_point_exists", GameObject.Find("M2_CampRestPoint") != null);
@@ -279,6 +284,20 @@ namespace Gravenspire.Editor
             }
 
             return defaultEvidencePath;
+        }
+
+        private static bool ShouldSkipBuilderFromCommandLine()
+        {
+            var arguments = Environment.GetCommandLineArgs();
+            for (var i = 0; i < arguments.Length; i++)
+            {
+                if (string.Equals(arguments[i], SkipBuilderArgumentName, StringComparison.OrdinalIgnoreCase))
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         private static void AppendEvidenceLines(StringBuilder builder, List<string> lines)
