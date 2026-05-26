@@ -62,6 +62,9 @@
 - `com.unity.nuget.newtonsoft-json` — Unity package dependency for local
   Combat Core fixture deserialization in `S2-M2-01`; .NET/headless Combat Core
   tests continue to use `System.Text.Json`.
+- `com.unity.ai.navigation` — Unity package dependency for NavMesh authoring
+  and runtime path queries in `S3-05` and downstream district/zone stories.
+  Pinned to `2.0.12` for Unity 6.3 LTS.
 
 <!--
 Deferred libraries (planned but NOT yet approved for use):
