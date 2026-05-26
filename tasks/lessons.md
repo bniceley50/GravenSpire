@@ -27,7 +27,7 @@ Promote repeating lessons to `CLAUDE-patterns.md` (cross-cutting) or a
 
 **Lesson:** Treat Unity-generated project-settings drift as suspect until proven intentional. Batchmode runs, cold imports, and wrong-editor-version launches can dirty ShaderGraph/URP/package/project-version files without serving the story. A story may keep only settings changes that are explicitly in scope, evidence-backed, and version-compatible with D001; otherwise restore the drift, record the restore in verification evidence, and keep the changeset focused on the approved story surface.
 
-**Evidence:** `tests/evidence/S2-M2-04/verification.md:52` records the zero-semantic-change `ShaderGraphSettings.asset` re-serialization and restore; `tests/evidence/S2-M3-04/verification.md:44` records the Unity 6.4 six-file drift and full revert before closure; `production/session-state/active.md:268` and `production/session-state/active.md:557` preserve the same incidents in session state.
+**Evidence:** `tests/evidence/S2-M2-04/verification.md:52` records the zero-semantic-change `ShaderGraphSettings.asset` re-serialization and restore; `tests/evidence/S2-M3-04/verification.md:44` records the Unity 6.4 six-file drift and full revert before closure; `production/session-state/active.md:282` and `production/session-state/active.md:571` preserve the same incidents in session state.
 
 **Promotion status:** open — promote to `.claude/rules/game-dev-governance.md` or a Unity evidence checklist if another Unity-runtime story repeats the same settings-drift pattern.
 

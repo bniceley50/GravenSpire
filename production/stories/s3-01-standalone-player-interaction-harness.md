@@ -2,7 +2,7 @@
 
 > **Sprint**: Sprint 3 — Playable Vertical-Slice Assembly
 > **Sprint Plan**: `production/sprints/sprint-3.md` (Story Ledger row, line 66)
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Core
 > **Type**: Integration
 > **Estimate**: 1.5 days (MEDIUM confidence — greenfield composition layer, per `sprint-3.md:155`)
@@ -43,15 +43,15 @@
 
 ## Acceptance Criteria
 
-- [ ] **S3-01-01**: A new standalone Unity MonoBehaviour component (proposed name: `S3PlayerInteractionHarness`) is created under `Assets/Scripts/`, wired into `Assets/Scenes/_DevEntry.unity`, and is NOT bolted onto `M2SingleTrashMedLoopController` (USER DECISION recorded at `sprint-3.md:75`).
-- [ ] **S3-01-02**: The harness extends/reuses the existing player marker (`ClericShellMarker`) and the M2 locomotion at `M2SingleTrashMedLoopController.cs:564-583`. The harness contains no locomotion code; movement code in `M2SingleTrashMedLoopController` has zero diff in this story.
-- [ ] **S3-01-03**: A single interact verb fires from one player-input keycode (proposed: `KeyCode.E`, matching M2's legacy `UnityEngine.Input` pattern). The verb triggers either a raycast from the player's forward axis or a distance-check against registered targets — implementation choice is the developer's, but the chosen mechanism is documented in the harness header XML doc.
-- [ ] **S3-01-04**: The harness exposes a dispatch interface (proposed shape: `IPlayerInteractTarget { bool TryInteract(string playerActorId, float distanceMeters, out InteractContext context); }`) that S3-02, S3-03, and S3-04 will route their M3 `Try*` methods through. The interface design must accommodate the M3 dispatch shape at `M3NamedNpcObjectiveFrame.cs:112`. If no target is in range or no target is hit, no dispatch occurs.
-- [ ] **S3-01-05**: The harness implements zero objective, loot, or vendor logic. It only dispatches. A code-review reject signal: any rewrite of `M3*` state transitions, loot resolution, or the F4 vendor formula in this story (D016 red flag, `sprint-3.md:83`).
-- [ ] **S3-01-06**: **Interact-fired** (dispatch returned `true`): the player perceives an acknowledgement of their action (visual flash, brief tone, or equivalent). The acknowledgement names the action (e.g., "interacted") or its result (e.g., "objective accepted" when S3-02 lands), never advertises a quest, locator, or routing hint.
-- [ ] **S3-01-07**: **Interact-missed** (raycast/distance-check found nothing): the player perceives an acknowledgement that the verb fired and missed (subtle audio cue or equivalent). No proximity hint, no "look over there" arrow, no nearest-target highlight.
-- [ ] **S3-01-08**: **Interact-blocked** (target found, but its `Try*` returned `false` — e.g., out of M3's own range, or invalid state): the player perceives an acknowledgement that the action did not succeed. No diagnostic text explaining why, no routing hint, no quest-marker overlay.
-- [ ] **S3-01-09**: Any visible interact prompt ("Press [E]" or equivalent) is **range-gated**: it appears only when a valid target is within the interact threshold. It must never display as a far-distance locator (Pillar 2 violation; reject in review). The threshold is a configurable serialized field on the harness component, default value to be set during implementation and documented in the verification evidence.
+- [x] **S3-01-01**: A new standalone Unity MonoBehaviour component (proposed name: `S3PlayerInteractionHarness`) is created under `Assets/Scripts/`, wired into `Assets/Scenes/_DevEntry.unity`, and is NOT bolted onto `M2SingleTrashMedLoopController` (USER DECISION recorded at `sprint-3.md:75`).
+- [x] **S3-01-02**: The harness extends/reuses the existing player marker (`ClericShellMarker`) and the M2 locomotion at `M2SingleTrashMedLoopController.cs:564-583`. The harness contains no locomotion code; movement code in `M2SingleTrashMedLoopController` has zero diff in this story.
+- [x] **S3-01-03**: A single interact verb fires from one player-input keycode (proposed: `KeyCode.E`, matching M2's legacy `UnityEngine.Input` pattern). The verb triggers either a raycast from the player's forward axis or a distance-check against registered targets — implementation choice is the developer's, but the chosen mechanism is documented in the harness header XML doc.
+- [x] **S3-01-04**: The harness exposes a dispatch interface (proposed shape: `IPlayerInteractTarget { bool TryInteract(string playerActorId, float distanceMeters, out InteractContext context); }`) that S3-02, S3-03, and S3-04 will route their M3 `Try*` methods through. The interface design must accommodate the M3 dispatch shape at `M3NamedNpcObjectiveFrame.cs:112`. If no target is in range or no target is hit, no dispatch occurs.
+- [x] **S3-01-05**: The harness implements zero objective, loot, or vendor logic. It only dispatches. A code-review reject signal: any rewrite of `M3*` state transitions, loot resolution, or the F4 vendor formula in this story (D016 red flag, `sprint-3.md:83`).
+- [x] **S3-01-06**: **Interact-fired** (dispatch returned `true`): the player perceives an acknowledgement of their action (visual flash, brief tone, or equivalent). The acknowledgement names the action (e.g., "interacted") or its result (e.g., "objective accepted" when S3-02 lands), never advertises a quest, locator, or routing hint.
+- [x] **S3-01-07**: **Interact-missed** (raycast/distance-check found nothing): the player perceives an acknowledgement that the verb fired and missed (subtle audio cue or equivalent). No proximity hint, no "look over there" arrow, no nearest-target highlight.
+- [x] **S3-01-08**: **Interact-blocked** (target found, but its `Try*` returned `false` — e.g., out of M3's own range, or invalid state): the player perceives an acknowledgement that the action did not succeed. No diagnostic text explaining why, no routing hint, no quest-marker overlay.
+- [x] **S3-01-09**: Any visible interact prompt ("Press [E]" or equivalent) is **range-gated**: it appears only when a valid target is within the interact threshold. It must never display as a far-distance locator (Pillar 2 violation; reject in review). The threshold is a configurable serialized field on the harness component, default value to be set during implementation and documented in the verification evidence.
 
 ## Implementation Notes
 
@@ -149,7 +149,7 @@ Companion artifacts:
 - `.githooks/pre-commit` — `[pre-commit] OK`
 - `dotnet format --verify-no-changes` — PASS (resolves Style Gate; format-setup pre-condition already landed via PR #2 / `90821f2`, so the hook is wired before this PR opens — no longer an open finding)
 
-**Evidence status**: Not started
+**Evidence status**: Complete — `tests/evidence/S3-01/verification.md`
 
 **M2 preservation rerun execution note** (per `m2_melee_rng_not_reset` carryover): the three M2 preservation smokes above **cannot be chained in a single Unity batchmode invocation**. The M2 controller's four `LoopingMeleeRandomSource` melee-RNG cursors at `M2SingleTrashMedLoopController.cs:76-79` are `readonly`, created once, and never reset by `ResetLoop` / `ResetOverpullMetrics` / `ResetNamedBlockerMetrics`. Determinism holds for one smoke per Play session but breaks when smokes are chained — chained runs yield stale RNG state and bogus results. Run each preservation smoke in its own `Unity.exe -batchmode -executeMethod ...` invocation, each with its own `-gravenspireEvidencePath` override. This is the pattern S2-M3-04 ultimately landed on after the chained-smoke failure that surfaced the carryover (see the active.md S2-M3-04 closure extract).
 
@@ -171,3 +171,15 @@ Watch items (not blockers):
 - `m2_melee_rng_not_reset` — the M2 controller's four `LoopingMeleeRandomSource` melee-RNG cursors at `M2SingleTrashMedLoopController.cs:76-79` are `readonly` and never reset by `ResetLoop` / `ResetOverpullMetrics` / `ResetNamedBlockerMetrics`. Operational impact for this story: the three M2 preservation smokes (single-trash, overpull, named-blocker) cannot be chained in one batchmode invocation; each requires a separate `Unity.exe -batchmode` invocation. See the Test Evidence "M2 preservation rerun execution note" above.
 - `control_manifest_absence_pre_existing` — Manifest Version header carries `Unavailable` per documented fallback
 - Format Gate — see Dependencies section
+
+## Completion Notes
+
+- Closed via `/story-done` 2026-05-25 with verdict **COMPLETE WITH NOTES** (9/9 AC passing).
+- Implementation landed through PR #3: `fecd121` created the standalone harness, `45459cb` fixed the runner's redundant telemetry check, `d7cde93` added the Unity scene/evidence pass, and merge commit `9072bcb` brought S3-01 to `main`.
+- Evidence: `tests/evidence/S3-01/verification.md:8` records PASS; `tests/evidence/S3-01/verification.md:14-22` maps all 9 ACs to passing evidence; `tests/evidence/S3-01/unity-player-interaction-harness-20260524-smoke.md:7` records the S3 runner PASS; `tests/evidence/S3-01/unity-player-interaction-harness-20260524-smoke.md:11-44` lists the passing story-specific checks.
+- M2 preservation: `tests/evidence/S3-01/verification.md:28-30` records the three M2 preservation smokes as PASS, and each smoke file records `**Result:** PASS` at line 7. The smokes were run as separate Unity invocations per `m2_melee_rng_not_reset`.
+- Local gates rerun at closure: `dotnet test tests\Gravenspire.Combat.Tests.csproj --logger "console;verbosity=minimal"` PASS 189/189; `git diff --name-only df5fdec..9072bcb -- Assets/Scripts/M2SingleTrashMedLoopController.cs` returned no path, confirming no M2 controller modification in S3-01.
+- Scope scan: PASS WITH CLASSIFIED HITS. Hits were story out-of-scope/GDD references, `ClericShellMarker` references, and the runner's player-facing deny-list term (`minimap`); no runtime implementation of netcode, Save/Load, live LLM, quest log, minimap, `CharacterController`, or Unity Input System was added.
+- Code review: PR #3 review and body verification completed before merge; `/story-done` lead-programmer gate skipped under lean mode.
+- Known follow-ups, not closed here: C2 (`IMGUI` prompt/feedback is acceptable for S3-01 wiring but not final S3-06 feel UI) and C3 (`_autoDiscoverTargetsOnStart = true` should become an executable S3-02 assertion if separately approved).
+- Next gate: `/story-readiness production/stories/s3-02-player-driven-npc-interaction.md`. S3-05 is also unblocked by S3-01, but S3-02 remains the dependency-chain next active story.

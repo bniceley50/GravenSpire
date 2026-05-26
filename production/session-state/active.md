@@ -1,8 +1,22 @@
 # Active Session State
 
 **Last Updated:** 2026-05-25
-**Current Stage Note:** PR #3 merged to `origin/main` at `9072bcb`; `/story-done` can now be rerun on updated `main` to close S3-01.
-**Project Stage:** Pre-Production — Sprint 3 (Playable Vertical-Slice Assembly) — S3-01 merged, closure pending
+**Current Stage Note:** S3-01 closed COMPLETE WITH NOTES; S3-02 is the next active story and S3-05 is also unblocked.
+**Project Stage:** Pre-Production — Sprint 3 (Playable Vertical-Slice Assembly) — 1 of 6 Stories Complete
+
+## Session Extract - /story-done 2026-05-25 (S3-01)
+
+- Verdict: COMPLETE WITH NOTES (9/9 AC passing).
+- Story: `production/stories/s3-01-standalone-player-interaction-harness.md` — S3-01 Standalone Player Interaction Harness.
+- Merge/evidence chain: implementation `fecd121`, runner fix `45459cb`, Phase 2 evidence `d7cde93`, PR #3 merge `9072bcb`, doc/state follow-up base `325d47c`.
+- Evidence: `tests/evidence/S3-01/verification.md:8` records PASS; `tests/evidence/S3-01/verification.md:14-22` maps all 9 ACs to PASS; `tests/evidence/S3-01/unity-player-interaction-harness-20260524-smoke.md:7` records the S3 runner PASS; `tests/evidence/S3-01/unity-player-interaction-harness-20260524-smoke.md:11-44` lists the passing story checks.
+- M2 preservation: `tests/evidence/S3-01/verification.md:28-30` records M2 single-trash, linked-trash, and named-blocker preservation smokes as PASS, each run as a separate Unity invocation per `m2_melee_rng_not_reset`.
+- Closure gate rerun: `dotnet test tests\Gravenspire.Combat.Tests.csproj --logger "console;verbosity=minimal"` PASS 189/189 on 2026-05-25.
+- Scope: no `Assets/Scripts/M2SingleTrashMedLoopController.cs` path in `git diff --name-only df5fdec..9072bcb -- Assets/Scripts/M2SingleTrashMedLoopController.cs`; negative-scope scan PASS WITH CLASSIFIED HITS (story out-of-scope/GDD references, `ClericShellMarker` references, and runner deny-list term only).
+- Code review: PR #3 review/body verification completed before merge; `/story-done` lead-programmer gate skipped under lean mode.
+- Tech debt logged: none in `production/sprint-status.yaml` this turn. Known follow-ups remain C2 (replace IMGUI prompt/feedback before S3-06 feel validation) and C3 (turn auto-discovery into S3-02 executable assertion if separately approved).
+- Routing: `production/sprint-status.yaml` now marks S3-01 done, S3-02 ready, and S3-05 ready. S3-02 remains the next active story in dependency order.
+- Next recommended: `/story-readiness production/stories/s3-02-player-driven-npc-interaction.md`.
 
 ## Session Extract - /story-done 2026-05-25 (S3-01 blocked before PR #3 merge)
 
@@ -36,11 +50,11 @@
 
 ## Current Task
 
-Current as of 2026-05-25: PR #3 has merged to `origin/main` at `9072bcb`; rerun `/story-done production/stories/s3-01-standalone-player-interaction-harness.md` on updated `main` to close S3-01 and unblock S3-02/S3-05. The paragraphs below are retained as older session context and no longer describe the live gate state.
+Current as of 2026-05-25: S3-01 is closed COMPLETE WITH NOTES. S3-02 and S3-05 are unblocked; S3-02 is the next active story in dependency order. The paragraphs below are retained as older session context and no longer describe the live gate state.
 
 Sprint 3 ("Playable Vertical-Slice Assembly") is open per `DECISIONS.md` D016, and the slate is fully opened on 2026-05-23. Six-commit arc on `origin/main`: `d7acfbf` (close Sprint 2) → `62c0f66` (Sprint 3 plan + active.md refresh) → `9bf60e1` (six story files as slate commit) → `ecbea5e` (Story Ledger back-fill linking ledger to slate) → `4ea9e2d` (sprint-status.yaml regen) → `90821f2` (format-gate PR #2 merge 2026-05-24, three commits: policy `f040493` + baseline `a0785d8` + hook `cf1c204`). Six story files at `production/stories/s3-01..s3-06-*.md` on disk, ledger-linked, status synchronized; sprint-status.yaml carryover stays at 21 live (`gitattributes_crlf_normalization_unconfigured` retired with format-gate merge, `ide1006_naming_debt_excluded_from_format_gate` added in its place), 8 retired with visible-trace comment block, 3 RESOLUTION CONDITIONs threading carryover→AC retirement causally.
 
-Two pre-conditions block S3-01 implementation (parallelizable; can be taken in any order): (1) **owner assignment per story** — all six carry empty `owner` fields per D016 pre-commit gate (design-aware required for S3-01/S3-05/S3-06, wiring-OK for S3-02/03/04, Qwen3-Coder NOT eligible per D015); (2) **Sprint 3 `/qa-plan`** — must ratify the human-play-AC-on-S3-06-only rule, M2 preservation discipline, and the pattern-establishing story shapes for S3-05 (spatial validation) and S3-06 (human-play feel check) as enforceable QA gates. Format-gate pre-condition resolved 2026-05-24 by PR #2 merge commit `90821f2`; `.githooks/pre-commit` now runs `dotnet format --verify-no-changes --exclude-diagnostics IDE1006` on `tests/Gravenspire.Combat.Tests.csproj` + `prototypes/combat-slice-T1/Harness/CombatSliceHarness.csproj` (pre-existing IDE1006 naming debt tracked as `ide1006_naming_debt_excluded_from_format_gate` carryover, NOT Sprint 3 scope). Both remaining pre-conditions are governance gates that block PR-opening but not implementation validity.
+Sprint 3 preconditions are resolved: format-gate PR #2 merged at `90821f2`, owner assignment and Sprint 3 `/qa-plan` landed at `df5fdec`, and S3-01 merged through PR #3 at `9072bcb`. The current routing gate is S3-02 story readiness.
 
 ## Status
 
@@ -54,15 +68,15 @@ Two pre-conditions block S3-01 implementation (parallelizable; can be taken in a
 - ✓ Sprint 3 slate opened 2026-05-23 — six story files at `production/stories/s3-NN-*.md` committed as slate commit `9bf60e1` (one logical slate-opening event per §14 coordinated-cross-doc exception). Story Ledger in `sprint-3.md` back-filled at `ecbea5e` with markdown links to each story file; intro sentence updated past-tense to reflect the slate-opened state with slate-commit SHA anchor.
 - ✓ Sprint 3 `sprint-status.yaml` regenerated at `4ea9e2d` — schema preserved verbatim from Sprint 2; 21 live carryovers, 7 retired with visible-trace YAML comment block at top of `carryover:`, 3 new entries (`feedback_external_review_verification`, `sprint_3_pattern_promotion_bundle`, `gitattributes_crlf_normalization_unconfigured`), 3 RESOLUTION CONDITIONs appended (`s2_m3_04_ac06_transfer` retires on S3-06 AC-08 PASS, `m2_melee_rng_not_reset` on S3-06 AC-04 PASS, `m3_04_low_review_notes` item 1 partial-retires on S3-06 AC-05 PASS). Schema-managed-by-skill convention paused for the regen, not violated; future updates go through `/story-done`.
 - ✓ Format-gate pre-condition resolved 2026-05-24 by PR #2 merge commit `90821f2` (policy `f040493`, baseline `a0785d8`, hook `cf1c204`). `.githooks/pre-commit` runs `dotnet format --verify-no-changes --exclude-diagnostics IDE1006` on the test + harness csproj; pre-existing IDE1006 naming debt excluded via the new `ide1006_naming_debt_excluded_from_format_gate` carryover (NOT Sprint 3 scope).
-- Pre-implementation pre-conditions outstanding (parallelizable; see Current Task): owner assignment per story (D016 pre-commit gate); Sprint 3 `/qa-plan`. Both are governance gates that block PR-opening but not implementation validity.
+- ✓ S3-01 closed COMPLETE WITH NOTES on 2026-05-25 — standalone player interaction harness merged through PR #3 (`9072bcb`), story/evidence/routing closure updated by `/story-done`; S3-02 and S3-05 unblocked.
 - Pending (Sprint 3 close-out): six-item lessons promotion to `tasks/lessons.md` per `sprint_3_pattern_promotion_bundle` carryover — (1) S3-05 greybox spatial-validation evidence pattern; (2) S3-05 NavMesh agent profile as canonical T1 reference; (3) S3-06 T1 human-play feel-check evidence pattern; (4) `feedback_external_review_verification` (occurrence #2 logged); (5) skill-vs-project-convention deviation (the `/create-stories` §0.4 "stop, run /create-epics first" trip-wire); (6) D006 implementer-worktree-boundary discipline. Plus uncommitted-meta-rationale chain from this session: hybrid-skill/project-convention deliberation, two-adapter-per-GameObject S3-03 reasoning, binary-pillar-anchored S3-06 verdict choice — captured implicitly in story Out-of-Scope + Implementation Notes sections but not in source-of-truth lesson form.
 
 ## Files Being Worked On
 
-- **Active:** Sprint 3 pre-implementation. Slate fully opened on `origin/main`; format-gate cleared by PR #2 / `90821f2` on 2026-05-24. Two pre-conditions remain (owner assignment, `/qa-plan`) before S3-01 implementation can start. No active code work.
+- **Active:** Sprint 3 implementation. S3-01 is closed; S3-02 is next active story and S3-05 is also ready.
 - Sprint 3 plan + ledger: [production/sprints/sprint-3.md](../sprints/sprint-3.md) (ledger IDs link to story files)
-- Sprint 3 stories (six, all `production/stories/s3-NN-*.md`): [s3-01](../stories/s3-01-standalone-player-interaction-harness.md) `ready`; [s3-02](../stories/s3-02-player-driven-npc-interaction.md), [s3-03](../stories/s3-03-player-relic-recovery-and-looting.md), [s3-04](../stories/s3-04-player-driven-vendor.md), [s3-05](../stories/s3-05-navigable-greybox-first-district.md), [s3-06](../stories/s3-06-playable-end-to-end-and-human-play.md) all `blocked` per dependency chain.
-- Sprint 3 status: [production/sprint-status.yaml](../sprint-status.yaml) — 6 stories, 0 complete; `head: 90821f2`; carryover-triaged (21 live, 8 retired with visible-trace block; includes `ide1006_naming_debt_excluded_from_format_gate` post-merge).
+- Sprint 3 stories (six, all `production/stories/s3-NN-*.md`): [s3-01](../stories/s3-01-standalone-player-interaction-harness.md) `done`; [s3-02](../stories/s3-02-player-driven-npc-interaction.md) and [s3-05](../stories/s3-05-navigable-greybox-first-district.md) `ready`; [s3-03](../stories/s3-03-player-relic-recovery-and-looting.md), [s3-04](../stories/s3-04-player-driven-vendor.md), and [s3-06](../stories/s3-06-playable-end-to-end-and-human-play.md) remain `blocked` per dependency chain.
+- Sprint 3 status: [production/sprint-status.yaml](../sprint-status.yaml) — 6 stories, 1 complete; `head: 325d47c`; carryover-triaged (21 live, 8 retired with visible-trace block; includes `ide1006_naming_debt_excluded_from_format_gate` post-merge).
 - M3 quick-design (Sprint 3's design source for the systems being wired): [design/quick/quick-design-m3-objective-npc-loot.md](../../design/quick/quick-design-m3-objective-npc-loot.md)
 - M3/M2 systems Sprint 3 wires (reuse, not rebuild; zero-diff invariants on the M3 files per S3-02/03/04 ACs): `Assets/Scripts/M3NamedNpcObjectiveFrame.cs`, `Assets/Scripts/M3ObjectiveStateRelicHandIn.cs`, `Assets/Scripts/M3LootTableFixedProfileVendor.cs`, `src/gameplay/npc/m3-objective/**`, `Assets/Scenes/_DevEntry.unity` (M3 anchors), `Assets/Scripts/M2SingleTrashMedLoopController.cs` (player locomotion + combat loop; bounded modification at `:76-79` reset hooks per S3-06 AC-04).
 - Game concept / pillars: [design/gdd/game-concept.md](../../design/gdd/game-concept.md); DECISIONS.md (D001–D016).
