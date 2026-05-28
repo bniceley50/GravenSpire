@@ -99,23 +99,23 @@ namespace Gravenspire.Editor
                 new Vector3(3.0f, 4.0f, -7.0f),
                 new Vector3(3.0f, 8.0f, 4.0f),
                 materials.LandmarkWarm,
-                root.transform);
+                surfaceRoot.transform);
             EnsurePrimitive(
                 "Greybox_CourtVendorHall_Massing",
                 PrimitiveType.Cube,
                 new Vector3(6.0f, 2.0f, -6.0f),
                 new Vector3(6.0f, 4.0f, 4.0f),
                 materials.LandmarkCool,
-                root.transform);
+                surfaceRoot.transform);
             EnsurePrimitive(
                 "Greybox_RelicStorehouse_Massing",
                 PrimitiveType.Cube,
-                new Vector3(-3.0f, 3.0f, 5.0f),
+                new Vector3(-3.0f, 3.0f, 9.0f),
                 new Vector3(4.0f, 6.0f, 4.0f),
                 materials.LandmarkDark,
-                root.transform);
+                surfaceRoot.transform);
 
-            EnsureBoundaryWalls(root.transform, materials.Boundary);
+            EnsureBoundaryWalls(surfaceRoot.transform, materials.Boundary);
             AssignAnchorGreyboxMaterials(materials);
             EnsureNavMeshSurface(surfaceRoot);
             ConfigureCamera();
@@ -250,7 +250,22 @@ namespace Gravenspire.Editor
             existing.transform.rotation = Quaternion.identity;
             existing.transform.localScale = scale;
             AssignMaterial(existing, material);
+            EnsureNotWalkableModifierVolume(existing);
             return existing;
+        }
+
+        private static void EnsureNotWalkableModifierVolume(GameObject gameObject)
+        {
+            const int notWalkableArea = 1;
+
+            if (!gameObject.TryGetComponent<NavMeshModifierVolume>(out var modifierVolume))
+            {
+                modifierVolume = gameObject.AddComponent<NavMeshModifierVolume>();
+            }
+
+            modifierVolume.area = notWalkableArea;
+            modifierVolume.center = Vector3.zero;
+            modifierVolume.size = Vector3.one;
         }
 
         private static void AssignMaterial(GameObject gameObject, Material material)

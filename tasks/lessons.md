@@ -21,6 +21,16 @@ Promote repeating lessons to `CLAUDE-patterns.md` (cross-cutting) or a
 
 ## Entries (newest first)
 
+### 2026-05-28 — [GLOBAL][TEST] Evidence runners must assert their own preconditions
+
+**Context:** S3-05 originally closed with reachability and soft-lock evidence that reported `PathComplete` routes and `900/0/0` soft-lock samples, but post-merge review found the NavMeshSurface was not baking obstacle geometry. Correcting that foundational assumption exposed a four-layer cascade: the bake scope excluded obstacles, `M3_ObjectiveRelic` overlapped the Relic Storehouse footprint once obstacles mattered, `M2_NamedBlocker` then overlapped the adjusted Storehouse footprint, and collider inclusion still did not carve holes until explicit Not Walkable `NavMeshModifierVolume` components were added.
+
+**Lesson:** Evidence runners must assert the preconditions that make their claims meaningful. For NavMesh, "path complete" is not enough: the runner must also prove the bake/query model includes the relevant obstacles, those obstacles actually carve not-walkable space, and gameplay destinations remain reachable after carving. Volume bake scope is unsafe in mixed scenes where gameplay-marker GameObjects with colliders share the volume; prefer Children or a layer-mask allowlist that matches the intended bake set. Collider-in-bake-scope does not equal carve-hole; use `NavMeshModifierVolume(area=Not Walkable)` for deterministic obstacle holes. When a foundational assumption was wrong, expect a cascade: correcting one precondition can expose layout overlaps and mechanism gaps that the earlier flat evidence masked.
+
+**Evidence:** S3-05.1 correction branch `codex/s3-05-1-navmesh-obstacle-inclusion-correction`; correction commit pending at time of entry; `tests/evidence/S3-05/verification-correction-20260527.md`; corrected soft-lock divergence in `tests/evidence/S3-05/soft-lock-scan-20260527-correction-smoke.md`; bake-scope proof in `tests/evidence/S3-05/navmesh-bake-scope-20260527-smoke.md`; corrected reachability proof in `tests/evidence/S3-05/reachability-20260527-correction-smoke.md`.
+
+**Promotion status:** open — promote to a Unity NavMesh evidence checklist or `.claude/rules/test-standards.md` if the next district/zone runner needs the same bake-precondition pattern.
+
 ### 2026-05-26 — [GLOBAL][CI] Unity-generated material and meta files can carry trailing whitespace
 
 **Context:** S3-05 Phase 1 authored the first greybox material palette for the First District. Unity-generated `.mat` and `.meta` files introduced trailing whitespace that failed the local whitespace gate before the Phase 1 commit `bf3705d`. The content was semantically correct, but the generated text still needed cleanup before staging.
