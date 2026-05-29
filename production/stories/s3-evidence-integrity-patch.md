@@ -2,7 +2,7 @@
 
 > **Sprint**: Sprint 3 — Playable Vertical-Slice Assembly
 > **Sprint Plan**: `production/sprints/sprint-3.md` (out-of-band evidence integrity patch before S3-06)
-> **Status**: Ready for Story Readiness
+> **Status**: Complete
 > **Layer**: Test Infrastructure / Evidence Integrity
 > **Type**: Integration / test-infrastructure
 > **Estimate**: 1.0 day (MEDIUM confidence — bounded runner/evidence work, with two negative controls)
@@ -124,7 +124,7 @@ Companion artifacts:
 - `.githooks/pre-commit` — `[pre-commit] OK`
 - `dotnet format --verify-no-changes` — PASS
 
-**Evidence status**: Not started
+**Evidence status**: Complete — all required artifacts present under `tests/evidence/S3-EVIDENCE-01/` (committed `5f8f8b6` AC-1, `11f898c` AC-2, `94229fc` AC-3/AC-4). `dotnet format --verify-no-changes` is BLOCKED by tooling scope (Unity-Editor-only changes, no tracked csproj covers `Assets/Editor/`); recorded as documented scoped rationale in `tests/evidence/S3-EVIDENCE-01/verification.md` Code Style Gate section.
 
 ## Dependencies
 
@@ -144,3 +144,17 @@ Watch items (not blockers):
 - `m2_melee_rng_not_reset` — remains S3-06 AC-04 scope; this story adds preservation builder-skip evidence but does not reset M2 RNG cursors.
 - `m2_02_runner_date_hardcoded` — do not introduce new hardcoded dates while touching preservation runners.
 - `control_manifest_absence_pre_existing` — Manifest Version `Unavailable` per fallback.
+
+## Completion Notes
+
+**Completed**: 2026-05-29
+**Verdict**: COMPLETE WITH NOTES
+**Criteria**: 4/4 ACs PASS (both AC-01 and AC-03 negative controls FAIL as designed)
+**Deferred/Untested Criteria**: None
+**Test Evidence**: `tests/evidence/S3-EVIDENCE-01/verification.md` + 8 companion artifacts. Commits: AC-1 `5f8f8b6`, AC-2 `11f898c`, AC-3/AC-4 `94229fc` on `codex/s3-evidence-integrity-patch`. Combat regression PASS 189/189; `git diff --check` clean; `.githooks/pre-commit` OK against the staged index.
+**GDD/ADR Deviations**: None. D003 honored (AC-04 is a visibility-only stub, no Tier 2 composability framework). Unity API `NavMeshBuilder.BuildNavMeshData` UNVERIFIED in engine-reference → empirically verified, recorded with a `## Unity API Verification` block in the negative-control evidence.
+**Scope Notes**: 3 runner `.cs` + 5 evidence `.md`; no `.unity`/`.prefab` touched. Raw Unity `.log` files intentionally excluded from the commit (local/licensing identifiers).
+**Review Gates**: `/code-review` PASS_WITH_NOTES — no blocking/high; one Medium (cross-runner duplication) and two Low (negative-control null guard; date-stamped default artifact path) deferred as runner-hygiene tech-debt.
+**Code Style Gate**: BLOCKED by tooling scope — Unity-Editor-only changes are not in any tracked `.csproj`, so `dotnet format --verify-no-changes` has no workspace to target. Compensating evidence: all four Unity 6.3 batchmode runs compiled the changed scripts cleanly. Documented in `verification.md`. Same precedent as S3-01.
+**Forced Completion**: No.
+**Main-lane follow-up (not Codex per D006)**: `production/sprint-status.yaml` has no S3-EVIDENCE-01 row (out-of-band patch story); sprint-status reconciliation is out of this story's scope and belongs to the main-checkout lane.
