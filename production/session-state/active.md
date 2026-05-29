@@ -1,8 +1,22 @@
 # Active Session State
 
-**Last Updated:** 2026-05-25
-**Current Stage Note:** S3-01 closed COMPLETE WITH NOTES; S3-02 is the next active story and S3-05 is also unblocked.
-**Project Stage:** Pre-Production — Sprint 3 (Playable Vertical-Slice Assembly) — 1 of 6 Stories Complete
+**Last Updated:** 2026-05-29
+**Current Stage Note:** S3-EVIDENCE-01 (out-of-band evidence-integrity patch) merged to main via PR #6 (cfbfc02), COMPLETE WITH NOTES. Main checkout synced to cfbfc02. S3-02 remains the next active slate story. NOTE: S3-05/S3-05.1 slate-row reconciliation in sprint-status.yaml is still pending main-lane review (completed date + count not back-filled).
+**Project Stage:** Pre-Production — Sprint 3 (Playable Vertical-Slice Assembly)
+
+## Session Extract — main-lane merge + bookkeeping 2026-05-29 (S3-EVIDENCE-01)
+
+- PR #6 (`codex/s3-evidence-integrity-patch`) merged to `main` at `cfbfc02`; main checkout fast-forwarded from `05b25a3` (clean ancestor).
+- Story `production/stories/s3-evidence-integrity-patch.md` closed COMPLETE WITH NOTES (4/4 ACs; both AC-01 and AC-03 negative controls FAIL as designed). Evidence: `tests/evidence/S3-EVIDENCE-01/verification.md` + 8 companion artifacts.
+- Phases committed: AC-1 `5f8f8b6`, AC-2 `11f898c`, AC-3/AC-4 `94229fc`, story-close `1dd23dc`.
+- Code review: PASS_WITH_NOTES (1 Medium cross-runner duplication; 2 Low). `/code-review` + `/story-done` run in the Codex worktree; merge + bookkeeping in the main-checkout lane per D006.
+- Code Style Gate: BLOCKED by Unity-Editor-only tooling scope (no tracked csproj covers `Assets/Editor/`); compensating evidence = clean Unity 6.3 batchmode compilation. Documented in verification.md. No formal waiver written (user accepted documented rationale).
+- Raw Unity `.log` files were intentionally excluded from the commit (local/licensing identifiers); a stale untracked pre-completion copy of the story file in the main checkout was removed (strict subset of the merged version, zero unique content) to allow the fast-forward.
+- Pre-existing main-checkout WIP preserved untouched (6 modified tracked files: art-director.md, two M3 session files, three combat/M3 tests).
+- bookkeeping applied to sprint-status.yaml: `updated`→2026-05-29, `head`→cfbfc02, progress rewritten, S3-EVIDENCE-01 added as an out-of-band patch row (slate counts unchanged).
+- Bookkeeping commit `1f3e115` (sprint-status.yaml only) pushed to `origin/main`.
+- Open follow-ups: (1) S3-05/S3-05.1 slate-row reconciliation in sprint-status.yaml (likely S3-05 completed date 2026-05-26 per sprint-status.yaml carryover, pending confirmation); (2) runner-hygiene tech-debt (shared CLI resolver / precondition emit across the verification runners).
+- Next recommended: `/story-readiness production/stories/s3-02-player-driven-npc-interaction.md`.
 
 ## Session Extract - /story-done 2026-05-25 (S3-01)
 
