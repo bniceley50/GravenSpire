@@ -6,14 +6,14 @@ goal: "Gravenspire T1: Playable Vertical-Slice Assembly — wire the runner-prov
 start: "2026-05-21"
 end: "2026-06-03"
 generated: "2026-05-23"
-updated: "2026-05-25"
+updated: "2026-05-29"
 branch: "main"
-head: "325d47cd9e2d44d853b702417391c2ca9067b1a2"
+head: "cfbfc0284329a6a8a5c22e02fec61b5537bbf2b6"
 qa_plan: "production/qa/plans/qa-plan-sprint-3-20260524.md"
 plan: "production/sprints/sprint-3.md"
 slice_review: ""
 implementation_gate: "Sprint 3 slate opened 2026-05-23 with the 6-story slate S3-01–S3-06 written (slate commit 9bf60e1) and Story Ledger linked (back-fill commit ecbea5e). Format-gate pre-condition resolved 2026-05-24 by PR #2 merge commit 90821f2 (policy f040493, baseline a0785d8, hook cf1c204); owner assignment and Sprint 3 /qa-plan resolved 2026-05-24 at df5fdec. S3-01 closed COMPLETE WITH NOTES on 2026-05-25; next implementation gate is /story-readiness for S3-02."
-progress: "S3-01 closed COMPLETE WITH NOTES on 2026-05-25 after PR #3 merged to main at 9072bcb and the doc/state follow-up landed at 325d47c. S3-02 and S3-05 are now ready; S3-03, S3-04, and S3-06 remain blocked by the dependency chain. Next: /story-readiness production/stories/s3-02-player-driven-npc-interaction.md."
+progress: "S3-EVIDENCE-01 (out-of-band evidence-integrity patch, NOT part of the S3-01..S3-06 slate) closed COMPLETE WITH NOTES and merged to main via PR #6 at cfbfc02 on 2026-05-29 (4/4 ACs; both negative controls FAIL as designed; dotnet format gate BLOCKED by Unity-Editor-only tooling scope, documented in tests/evidence/S3-EVIDENCE-01/verification.md). S3-05 (PR #4, 0d3ea58) and S3-05.1 NavMesh obstacle inclusion correction (PR #5, 7cade4b) also merged since the 2026-05-25 bookkeeping snapshot; their slate-row reconciliation (S3-05 completed date + completed_stories count) is still PENDING main-lane review and was NOT auto-applied here. Slate state: S3-01 done; S3-05 done-with-notes (completed date unrecorded); S3-02 ready; S3-03/S3-04/S3-06 blocked by the dependency chain. Next: /story-readiness production/stories/s3-02-player-driven-npc-interaction.md."
 completed_stories: 1
 total_stories: 6
 next_active_story: "S3-02"
@@ -130,3 +130,16 @@ stories:
     estimate_days: 1.0
     blocker: "S3-02, S3-03, S3-04, S3-05"
     completed: ""
+  # Out-of-band evidence-integrity patch (pre-S3-06). NOT part of the
+  # S3-01..S3-06 slate, so it is intentionally excluded from total_stories
+  # and completed_stories. Recorded here for traceability only.
+  - id: "S3-EVIDENCE-01"
+    name: "S3 Evidence Integrity Patch (AC-1..AC-4)"
+    file: "production/stories/s3-evidence-integrity-patch.md"
+    priority: must-have
+    status: done
+    owner: "Codex"
+    estimate_days: 1.0
+    blocker: ""
+    completed: "2026-05-29"
+    note: "COMPLETE WITH NOTES; merged via PR #6 at cfbfc02. dotnet format gate BLOCKED by Unity-Editor-only tooling scope (documented). Out-of-band patch; not in the slate count."
