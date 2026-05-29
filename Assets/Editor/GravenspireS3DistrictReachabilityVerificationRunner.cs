@@ -21,6 +21,7 @@ namespace Gravenspire.Editor
         private const string StorySlug = "s3-05-navigable-greybox-first-district";
         private const string ScenePath = "Assets/Scenes/_DevEntry.unity";
         private const string EvidencePathArgumentName = "-gravenspireEvidencePath";
+        private const string BakeScopeArtifactArgumentName = "-gravenspireBakeScopeArtifact";
         private const float SampleMaxDistanceMeters = 2.0f;
 
         private static readonly string[] AnchorNames =
@@ -280,6 +281,8 @@ namespace Gravenspire.Editor
             builder.AppendLine("**Runner:** `Assets/Editor/GravenspireS3DistrictReachabilityVerificationRunner.cs`");
             builder.AppendLine($"**Result:** {(exitCode == 0 ? "PASS" : "FAIL")}");
             builder.AppendLine();
+            AppendComposabilityPrecondition(builder);
+            builder.AppendLine();
             AppendNavMeshProfile(builder);
             builder.AppendLine();
             builder.AppendLine("## Checks");
@@ -326,6 +329,22 @@ namespace Gravenspire.Editor
             Debug.Log($"{StoryId} district reachability verification wrote {evidencePath} with exit code {exitCode}.");
             ClearState();
             EditorApplication.Exit(exitCode);
+        }
+
+        private static void AppendComposabilityPrecondition(StringBuilder builder)
+        {
+            var bakeScopeArtifact = ResolveBakeScopeArtifactFromCommandLine(DefaultBakeScopeArtifactPath());
+
+            builder.AppendLine("## Composability Precondition");
+            builder.AppendLine();
+            builder.AppendLine("- `precondition_artifact_required`: `navmesh-bake-scope`");
+            builder.AppendLine($"- `bake_scope_artifact_path`: `{bakeScopeArtifact}`");
+            builder.AppendLine("- `enforcement`: `visibility-only`");
+            builder.AppendLine(
+                "- This block names the bake-scope footprint artifact this reachability evidence "
+                + "depends on. It is a visibility stub for future composability: it does NOT verify "
+                + "artifact freshness, file hashes, scene hashes, or NavMesh asset identity. No "
+                + "Tier 2 composability framework is implied (D003 — Tier 1 single-player offline).");
         }
 
         private static void AppendNavMeshProfile(StringBuilder builder)
@@ -378,6 +397,26 @@ namespace Gravenspire.Editor
                 "evidence",
                 StoryId,
                 $"reachability-{DateTimeOffset.UtcNow.ToString("yyyyMMdd", CultureInfo.InvariantCulture)}-smoke.md");
+        }
+
+        private static string ResolveBakeScopeArtifactFromCommandLine(string defaultArtifactPath)
+        {
+            var arguments = Environment.GetCommandLineArgs();
+            for (var i = 0; i < arguments.Length - 1; i++)
+            {
+                if (string.Equals(arguments[i], BakeScopeArtifactArgumentName, StringComparison.OrdinalIgnoreCase))
+                {
+                    return arguments[i + 1];
+                }
+            }
+
+            return defaultArtifactPath;
+        }
+
+        private static string DefaultBakeScopeArtifactPath()
+        {
+            return "tests/evidence/S3-EVIDENCE-01/"
+                + $"navmesh-bake-scope-footprint-{DateTimeOffset.UtcNow.ToString("yyyyMMdd", CultureInfo.InvariantCulture)}-smoke.md";
         }
 
         private static void AppendEvidenceLines(StringBuilder builder, List<string> lines)
