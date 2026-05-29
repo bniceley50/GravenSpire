@@ -94,3 +94,27 @@ The three Phase 7 preservation files intentionally retain their S2-M2-0X titles 
 - The Phase 4 screenshot perspective limitation is retained: the first capture read like an oblique scout view and was replaced with a 70-degree player-perspective capture before the review verdict.
 - Unity batchmode ProjectSettings drift was observed during Phase 4 and restored from `HEAD`; it did not ship as S3-05 scope.
 - The soft-lock scan is non-exhaustive by design. Human qualitative walkthrough remains advisory-deferred until an interactive play session occurs.
+
+## Post-Merge Correction (S3-05.1)
+
+Post-merge review found that the original AC-05/06/07 NavMesh evidence was based
+on a non-functional flat-plane bake: obstacle geometry was excluded from the
+NavMeshSurface collection model, so `PathComplete` and soft-lock evidence proved
+reachability across a floor that was not being carved by the district obstacles.
+
+The correction record lives in
+`tests/evidence/S3-05/verification-correction-20260527.md`. It documents the
+four-layer cascade: bake scope excluded obstacles, `M3_ObjectiveRelic` overlapped
+the Relic Storehouse footprint once obstacles mattered, `M2_NamedBlocker` then
+overlapped the adjusted Storehouse footprint, and collider inclusion still did
+not carve holes until explicit Not Walkable `NavMeshModifierVolume` components
+were added.
+
+This amendment does not rewrite the original S3-05 closure record. The original
+`DONE WITH NOTES` verdict stands as the historical closure, with the
+NavMesh-functionality caveat now resolved by S3-05.1. The original
+`reachability-20260526-smoke.md` and `soft-lock-scan-20260526-smoke.md` files are
+retained for audit but superseded for NavMesh-functionality claims by
+`navmesh-bake-scope-20260527-smoke.md`,
+`reachability-20260527-correction-smoke.md`, and
+`soft-lock-scan-20260527-correction-smoke.md`.
