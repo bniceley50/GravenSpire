@@ -1,8 +1,16 @@
 # Active Session State
 
 **Last Updated:** 2026-05-29
-**Current Stage Note:** S3-EVIDENCE-01 (out-of-band evidence-integrity patch) merged to main via PR #6 (cfbfc02), COMPLETE WITH NOTES. Main checkout synced to cfbfc02. S3-02 remains the next active slate story. NOTE: S3-05/S3-05.1 slate-row reconciliation in sprint-status.yaml is still pending main-lane review (completed date + count not back-filled).
+**Current Stage Note:** S3-05/S3-05.1 slate-row reconciliation APPLIED and pushed to origin/main at `265615b` (S3-05 completed 2026-05-26; completed_stories→2; S3-05.1 NavMesh correction PR #5/7cade4b recorded as a parent-row note). S3-02 cleared `/story-readiness` = READY (2026-05-29). Main checkout = origin/main at `265615b`. Next: `/dev-story` for S3-02 in the Codex lane (`N:/GravenSpire-codex`).
 **Project Stage:** Pre-Production — Sprint 3 (Playable Vertical-Slice Assembly)
+
+## Session Extract — main-lane reconciliation + S3-02 readiness 2026-05-29
+
+- `/story-readiness production/stories/s3-02-player-driven-npc-interaction.md` = **READY** (lean). S3-01 dependency Complete; D001/D003/D012/D016 Locked, D004 Provisional but T1 boundary respected as telemetry-data-only. Warnings non-blocking (D004 provisional, control-manifest-absent fallback, scene-discipline reminder).
+- S3-05/S3-05.1 reconciliation APPLIED (resolves the S3-EVIDENCE-01 extract's open follow-up #1): S3-05 `completed`→`2026-05-26` (sourced from carryover `s3_05_ac12_partial_rollforward_to_s3_06`); `completed_stories`→2; S3-05.1 (PR #5 / `7cade4b`) recorded as a note on the S3-05 row, not a slate story. `implementation_gate`/`progress`/`next_active_command` refreshed to `/dev-story` S3-02.
+- Bookkeeping commit `265615b` (sprint-status.yaml only) pushed (a2dfee6..265615b); `main` = `origin/main`, no drift.
+- Pre-existing main-checkout WIP still preserved untouched (6 modified tracked files: art-director.md, two M3 session files, three combat/M3 tests).
+- Next recommended: `/dev-story production/stories/s3-02-player-driven-npc-interaction.md` (Codex lane).
 
 ## Session Extract — main-lane merge + bookkeeping 2026-05-29 (S3-EVIDENCE-01)
 
