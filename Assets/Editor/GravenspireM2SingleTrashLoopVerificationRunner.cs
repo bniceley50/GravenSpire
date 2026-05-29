@@ -26,7 +26,11 @@ namespace Gravenspire.Editor
         private const string EventsKey = "GravenspireM2SingleTrashLoop.Events";
         private const string WarningsKey = "GravenspireM2SingleTrashLoop.Warnings";
         private const string EvidencePathKey = "GravenspireM2SingleTrashLoop.EvidencePath";
+        private const string PreservationModeKey = "GravenspireM2SingleTrashLoop.PreservationMode";
+        private const string BuilderSkippedKey = "GravenspireM2SingleTrashLoop.BuilderSkipped";
+        private const string BuilderInvokedKey = "GravenspireM2SingleTrashLoop.BuilderInvoked";
         private const string EvidencePathArgumentName = "-gravenspireEvidencePath";
+        private const string PreservationModeArgumentName = "-gravenspirePreservationMode";
         private const string SkipBuilderArgumentName = "-gravenspireSkipBuilder";
         private const double SmokeDelaySeconds = 1.0;
         private static readonly DateTime RunDate = new DateTime(2026, 5, 12, 0, 0, 0, DateTimeKind.Utc);
@@ -55,10 +59,25 @@ namespace Gravenspire.Editor
             try
             {
                 var evidencePath = ResolveEvidencePathFromCommandLine(DefaultEvidencePath);
+                var preservationMode = IsCommandLineFlagPresent(PreservationModeArgumentName);
+                var builderSkipped = IsCommandLineFlagPresent(SkipBuilderArgumentName);
                 SessionState.SetString(EvidencePathKey, evidencePath);
+                SessionState.SetBool(PreservationModeKey, preservationMode);
+                SessionState.SetBool(BuilderSkippedKey, builderSkipped);
+                SessionState.SetBool(BuilderInvokedKey, false);
                 Directory.CreateDirectory(Path.GetDirectoryName(evidencePath) ?? ".");
-                if (!ShouldSkipBuilderFromCommandLine())
+                if (preservationMode && !builderSkipped)
                 {
+                    RecordCheck("preservation_mode_requires_skip_builder", false);
+                    AppendSessionLine(ErrorsKey, "Preservation mode requires -gravenspireSkipBuilder; no builder call was executed.");
+                    WriteEvidenceAndExit(1);
+                    return;
+                }
+
+                RecordCheck("preservation_mode_requires_skip_builder", true);
+                if (!builderSkipped)
+                {
+                    SessionState.SetBool(BuilderInvokedKey, true);
                     GravenspireM2SingleTrashLoopBuilder.Build();
                 }
 
@@ -200,6 +219,15 @@ namespace Gravenspire.Editor
             builder.AppendLine("**Scene:** `Assets/Scenes/_DevEntry.unity`");
             builder.AppendLine("**Runner:** `Assets/Editor/GravenspireM2SingleTrashLoopVerificationRunner.cs`");
             builder.AppendLine($"**Result:** {(exitCode == 0 ? "PASS" : "FAIL")}");
+            builder.AppendLine($"**Preservation Mode:** {EvidenceBool(CurrentPreservationMode())}");
+            builder.AppendLine($"**Builder Skipped:** {EvidenceBool(CurrentBuilderSkipped())}");
+            builder.AppendLine($"**Builder Invoked:** {EvidenceBool(CurrentBuilderInvoked())}");
+            builder.AppendLine();
+            builder.AppendLine("## Evidence Metadata");
+            builder.AppendLine();
+            builder.AppendLine($"- preservation_mode={EvidenceBool(CurrentPreservationMode())}");
+            builder.AppendLine($"- builder_skipped={EvidenceBool(CurrentBuilderSkipped())}");
+            builder.AppendLine($"- builder_invoked={EvidenceBool(CurrentBuilderInvoked())}");
             builder.AppendLine();
             builder.AppendLine("## Checks");
             builder.AppendLine();
@@ -251,18 +279,38 @@ namespace Gravenspire.Editor
             return defaultEvidencePath;
         }
 
-        private static bool ShouldSkipBuilderFromCommandLine()
+        private static bool IsCommandLineFlagPresent(string argumentName)
         {
             var arguments = Environment.GetCommandLineArgs();
             for (var i = 0; i < arguments.Length; i++)
             {
-                if (string.Equals(arguments[i], SkipBuilderArgumentName, StringComparison.OrdinalIgnoreCase))
+                if (string.Equals(arguments[i], argumentName, StringComparison.OrdinalIgnoreCase))
                 {
                     return true;
                 }
             }
 
             return false;
+        }
+
+        private static bool CurrentPreservationMode()
+        {
+            return SessionState.GetBool(PreservationModeKey, false);
+        }
+
+        private static bool CurrentBuilderSkipped()
+        {
+            return SessionState.GetBool(BuilderSkippedKey, false);
+        }
+
+        private static bool CurrentBuilderInvoked()
+        {
+            return SessionState.GetBool(BuilderInvokedKey, false);
+        }
+
+        private static string EvidenceBool(bool value)
+        {
+            return value ? "true" : "false";
         }
 
         private static void AppendEvidenceLines(StringBuilder builder, List<string> lines)
@@ -302,6 +350,9 @@ namespace Gravenspire.Editor
             SessionState.EraseString(EventsKey);
             SessionState.EraseString(WarningsKey);
             SessionState.EraseString(EvidencePathKey);
+            SessionState.EraseBool(PreservationModeKey);
+            SessionState.EraseBool(BuilderSkippedKey);
+            SessionState.EraseBool(BuilderInvokedKey);
             SessionState.EraseString("GravenspireM2SingleTrashLoop.StartTicks");
             SessionState.EraseString("GravenspireM2SingleTrashLoop.PlayStartedTicks");
         }

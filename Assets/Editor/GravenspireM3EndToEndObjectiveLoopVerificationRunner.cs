@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Reflection;
 using System.Text;
 using Gravenspire.Gameplay.Npc.M3Objective;
 using Gravenspire.UnityRuntime.Combat;
@@ -29,9 +30,20 @@ namespace Gravenspire.Editor
         private const string WarningsKey = "GravenspireM3EndToEndObjectiveLoop.Warnings";
         private const string TelemetryKey = "GravenspireM3EndToEndObjectiveLoop.Telemetry";
         private const string EvidencePathKey = "GravenspireM3EndToEndObjectiveLoop.EvidencePath";
+        private const string FakeFactionConsequenceEventsKey = "GravenspireM3EndToEndObjectiveLoop.FakeFactionConsequenceEvents";
+        private const string FakeFactionConsequenceEnabledKey = "GravenspireM3EndToEndObjectiveLoop.FakeFactionConsequenceEnabled";
         private const string PlayStartedKey = "GravenspireM3EndToEndObjectiveLoop.PlayStartedTicks";
         private const string EvidencePathArgumentName = "-gravenspireEvidencePath";
+        private const string FakeFactionConsequenceArgumentName = "-gravenspireFakeFactionConsequence";
+        private const string FakeFactionConsequenceObjectName = "RunnerLocalFakeFactionConsequenceProbe";
         private const double SmokeDelaySeconds = 1.0d;
+        private static readonly string[] FactionConsequenceMarkers =
+        {
+            "FactionConsequence",
+            "FactionReaction",
+            "FactionStandingConsequence",
+            "FactionSink"
+        };
 
         static GravenspireM3EndToEndObjectiveLoopVerificationRunner()
         {
@@ -58,6 +70,7 @@ namespace Gravenspire.Editor
             {
                 var evidencePath = ResolveEvidencePathFromCommandLine(DefaultEvidencePath());
                 SessionState.SetString(EvidencePathKey, evidencePath);
+                SessionState.SetBool(FakeFactionConsequenceEnabledKey, HasCommandLineFlag(FakeFactionConsequenceArgumentName));
                 Directory.CreateDirectory(Path.GetDirectoryName(evidencePath) ?? ".");
 
                 GravenspireM3NamedNpcObjectiveFrameBuilder.Build();
@@ -177,9 +190,9 @@ namespace Gravenspire.Editor
             AppendSessionLine(TelemetryKey, $"npc_anchor_present={npc != null}");
 
             // --- Session reset ---
-            npc.ClearSessionInteractions();
-            objective.ResetSessionObjective();
-            vendor.ResetSessionVendor();
+            npc!.ClearSessionInteractions();
+            objective!.ResetSessionObjective();
+            vendor!.ResetSessionVendor();
 
             // --- Step 1: Position player and compute distance ---
             playerMarker.transform.position = npc.transform.position + new Vector3(0.0f, 0.0f, -1.25f);
@@ -268,13 +281,35 @@ namespace Gravenspire.Editor
             RecordCheck("no_save_load_state_written", noSaveLoadState);
             AppendSessionLine(TelemetryKey, $"no_save_load_state_written={noSaveLoadState}");
 
-            // --- Step 10: no_faction_consequence_applied (AC-04) ---
-            // None of the M3-01/02/03 components expose a faction path.
-            // Assert true unconditionally; the absence of a faction property is the
-            // positive evidence (no faction component exists in this scene configuration).
-            var noFactionConsequence = true;
-            RecordCheck("no_faction_consequence_applied", noFactionConsequence);
-            AppendSessionLine(TelemetryKey, $"no_faction_consequence_applied={noFactionConsequence}");
+            // --- Step 10: no_faction_consequence_applied (AC-04 / S3-EVIDENCE-01 AC-1) ---
+            if (SessionState.GetBool(FakeFactionConsequenceEnabledKey, false))
+            {
+                TriggerRunnerLocalFakeFactionConsequenceProbe();
+            }
+
+            var factionAbsence = EvaluateFactionConsequenceAbsence(vendor);
+            RecordCheck("no_faction_consequence_scene_object_present", !factionAbsence.SceneObjectPresent);
+            RecordCheck("no_faction_consequence_component_present", !factionAbsence.ComponentPresent);
+            RecordCheck("no_faction_consequence_event_present", !factionAbsence.EventPresent);
+            RecordCheck("no_faction_consequence_event_fired", !factionAbsence.EventFired);
+            RecordCheck("m5_vendor_reputation_discount_hook_absent", !vendor.HasReputationDiscountHook);
+            RecordCheck("m5_vendor_faction_rank_goods_hook_absent", !vendor.HasFactionRankGoodsHook);
+            RecordCheck("no_faction_consequence_applied", factionAbsence.NoFactionConsequenceApplied);
+            if (SessionState.GetBool(FakeFactionConsequenceEnabledKey, false))
+            {
+                RecordCheck(
+                    "runner_local_fake_faction_consequence_negative_control_tripped",
+                    factionAbsence.EventFired && !factionAbsence.NoFactionConsequenceApplied);
+            }
+
+            AppendSessionLine(TelemetryKey, $"runner_local_fake_faction_consequence_enabled={SessionState.GetBool(FakeFactionConsequenceEnabledKey, false)}");
+            AppendSessionLine(TelemetryKey, $"faction_consequence_scene_objects={FormatMatches(factionAbsence.SceneObjectMatches)}");
+            AppendSessionLine(TelemetryKey, $"faction_consequence_components={FormatMatches(factionAbsence.ComponentMatches)}");
+            AppendSessionLine(TelemetryKey, $"faction_consequence_events={FormatMatches(factionAbsence.EventMatches)}");
+            AppendSessionLine(TelemetryKey, $"runner_local_fake_faction_consequence_events={factionAbsence.FakeEventCount.ToString(CultureInfo.InvariantCulture)}");
+            AppendSessionLine(TelemetryKey, $"vendor_reputation_discount_hook={vendor.HasReputationDiscountHook}");
+            AppendSessionLine(TelemetryKey, $"vendor_faction_rank_goods_hook={vendor.HasFactionRankGoodsHook}");
+            AppendSessionLine(TelemetryKey, $"no_faction_consequence_applied={factionAbsence.NoFactionConsequenceApplied}");
 
             // --- State sequence correctness check ---
             RecordCheck(
@@ -332,6 +367,113 @@ namespace Gravenspire.Editor
             return null;
         }
 
+        private static void TriggerRunnerLocalFakeFactionConsequenceProbe()
+        {
+            var probe = new RunnerLocalFakeFactionConsequenceProbe();
+            probe.FactionConsequenceApplied += () =>
+            {
+                SessionState.SetInt(
+                    FakeFactionConsequenceEventsKey,
+                    SessionState.GetInt(FakeFactionConsequenceEventsKey, 0) + 1);
+            };
+            _ = new GameObject(FakeFactionConsequenceObjectName);
+            probe.Fire();
+        }
+
+        private static FactionConsequenceAbsenceResult EvaluateFactionConsequenceAbsence(M3LootTableFixedProfileVendor vendor)
+        {
+            var sceneObjectMatches = new List<string>();
+            var componentMatches = new List<string>();
+            var eventMatches = new List<string>();
+            var scene = SceneManager.GetActiveScene();
+
+            if (scene.IsValid())
+            {
+                foreach (var root in scene.GetRootGameObjects())
+                {
+                    foreach (var transform in root.GetComponentsInChildren<Transform>(includeInactive: true))
+                    {
+                        if (ContainsFactionConsequenceMarker(transform.name))
+                        {
+                            sceneObjectMatches.Add(GetScenePath(transform));
+                        }
+                    }
+                }
+            }
+
+            foreach (var component in UnityEngine.Object.FindObjectsByType<MonoBehaviour>(
+                         FindObjectsInactive.Include,
+                         FindObjectsSortMode.None))
+            {
+                if (component == null || component.gameObject.scene != scene)
+                {
+                    continue;
+                }
+
+                var type = component.GetType();
+                if (ContainsFactionConsequenceMarker(component.gameObject.name) ||
+                    ContainsFactionConsequenceMarker(type.FullName ?? type.Name))
+                {
+                    componentMatches.Add($"{GetScenePath(component.transform)}:{type.FullName}");
+                }
+
+                foreach (var eventInfo in type.GetEvents(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance))
+                {
+                    if (ContainsFactionConsequenceMarker(eventInfo.Name))
+                    {
+                        eventMatches.Add($"{type.FullName}.{eventInfo.Name}");
+                    }
+                }
+            }
+
+            var fakeEventCount = SessionState.GetInt(FakeFactionConsequenceEventsKey, 0);
+            var noFactionConsequenceApplied =
+                sceneObjectMatches.Count == 0 &&
+                componentMatches.Count == 0 &&
+                eventMatches.Count == 0 &&
+                fakeEventCount == 0 &&
+                !vendor.HasReputationDiscountHook &&
+                !vendor.HasFactionRankGoodsHook;
+
+            return new FactionConsequenceAbsenceResult(
+                sceneObjectMatches,
+                componentMatches,
+                eventMatches,
+                fakeEventCount,
+                noFactionConsequenceApplied);
+        }
+
+        private static bool ContainsFactionConsequenceMarker(string value)
+        {
+            foreach (var marker in FactionConsequenceMarkers)
+            {
+                if (value.IndexOf(marker, StringComparison.OrdinalIgnoreCase) >= 0)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private static string GetScenePath(Transform transform)
+        {
+            var segments = new Stack<string>();
+            var cursor = transform;
+            while (cursor != null)
+            {
+                segments.Push(cursor.name);
+                cursor = cursor.parent;
+            }
+
+            return string.Join("/", segments);
+        }
+
+        private static string FormatMatches(IReadOnlyList<string> matches)
+        {
+            return matches.Count == 0 ? "none" : string.Join("|", matches);
+        }
+
         private static void CaptureLog(string condition, string stackTrace, LogType type)
         {
             if (GravenspireScenarioSmokeRunnerHelpers.IsEditorStartupNoise(condition, stackTrace, type))
@@ -378,8 +520,15 @@ namespace Gravenspire.Editor
             builder.AppendLine();
             builder.AppendLine($"**Date:** {DateTimeOffset.UtcNow.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture)}");
             builder.AppendLine($"**Story:** `production/stories/{StorySlug}.md`");
+            builder.AppendLine("**Evidence Patch:** `production/stories/s3-evidence-integrity-patch.md`");
             builder.AppendLine("**Scene:** `Assets/Scenes/_DevEntry.unity`");
             builder.AppendLine("**Runner:** `Assets/Editor/GravenspireM3EndToEndObjectiveLoopVerificationRunner.cs`");
+            builder.AppendLine("**Scene Preparation:** Existing runner builder chain rebuilds before play; AC-1 verifies faction-consequence structural absence in runtime code/components, not authored-scene preservation.");
+            if (SessionState.GetBool(FakeFactionConsequenceEnabledKey, false))
+            {
+                builder.AppendLine("**Negative Control:** runner-local fake faction consequence enabled; expected result FAIL");
+            }
+
             builder.AppendLine($"**Result:** {(exitCode == 0 ? "PASS" : "FAIL")}");
             builder.AppendLine();
             builder.AppendLine("## Checks");
@@ -441,6 +590,20 @@ namespace Gravenspire.Editor
             return defaultEvidencePath;
         }
 
+        private static bool HasCommandLineFlag(string flagName)
+        {
+            var arguments = Environment.GetCommandLineArgs();
+            foreach (var argument in arguments)
+            {
+                if (string.Equals(argument, flagName, StringComparison.OrdinalIgnoreCase))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
         private static void AppendEvidenceLines(StringBuilder builder, List<string> lines)
         {
             if (lines.Count == 0)
@@ -478,7 +641,54 @@ namespace Gravenspire.Editor
             SessionState.EraseString(WarningsKey);
             SessionState.EraseString(TelemetryKey);
             SessionState.EraseString(EvidencePathKey);
+            SessionState.EraseInt(FakeFactionConsequenceEventsKey);
+            SessionState.EraseBool(FakeFactionConsequenceEnabledKey);
             SessionState.EraseString(PlayStartedKey);
+        }
+
+        private sealed class RunnerLocalFakeFactionConsequenceProbe
+        {
+            public event Action? FactionConsequenceApplied;
+
+            public void Fire()
+            {
+                FactionConsequenceApplied?.Invoke();
+            }
+        }
+
+        private readonly struct FactionConsequenceAbsenceResult
+        {
+            public FactionConsequenceAbsenceResult(
+                IReadOnlyList<string> sceneObjectMatches,
+                IReadOnlyList<string> componentMatches,
+                IReadOnlyList<string> eventMatches,
+                int fakeEventCount,
+                bool noFactionConsequenceApplied)
+            {
+                SceneObjectMatches = sceneObjectMatches;
+                ComponentMatches = componentMatches;
+                EventMatches = eventMatches;
+                FakeEventCount = fakeEventCount;
+                NoFactionConsequenceApplied = noFactionConsequenceApplied;
+            }
+
+            public IReadOnlyList<string> SceneObjectMatches { get; }
+
+            public IReadOnlyList<string> ComponentMatches { get; }
+
+            public IReadOnlyList<string> EventMatches { get; }
+
+            public int FakeEventCount { get; }
+
+            public bool SceneObjectPresent => SceneObjectMatches.Count > 0;
+
+            public bool ComponentPresent => ComponentMatches.Count > 0;
+
+            public bool EventPresent => EventMatches.Count > 0;
+
+            public bool EventFired => FakeEventCount > 0;
+
+            public bool NoFactionConsequenceApplied { get; }
         }
     }
 }

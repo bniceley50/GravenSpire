@@ -21,12 +21,17 @@ namespace Gravenspire.Editor
         private const string StorySlug = "s3-05-navigable-greybox-first-district";
         private const string ScenePath = "Assets/Scenes/_DevEntry.unity";
         private const string EvidencePathArgumentName = "-gravenspireEvidencePath";
+        private const string FlatFloorNegativeControlArgumentName = "-gravenspireFlatFloorNegativeControl";
+        private const string FloorObjectName = "DevEntry_DistrictBlockout_Floor";
         private const float TightProbeRadiusMeters = 0.3f;
         private const float WideProbeRadiusMeters = 3.0f;
         private const float AnchorProbeRadiusMeters = 0.3f;
         private const float AnchorMaxHorizontalDisplacementMeters = 0.3f;
         private const float BoundsToleranceMeters = 0.01f;
         private const float DisplacementEpsilonMeters = 0.001f;
+        private const float FootprintProbeStepMeters = 1.0f;
+        private const int MaxFootprintSamplesPerAxis = 13;
+        private const int WalkableArea = 0;
         private const int NotWalkableArea = 1;
 
         private static readonly BakeObjectSpec[] RequiredBakeObjects =
@@ -71,7 +76,11 @@ namespace Gravenspire.Editor
         private static readonly List<StaticScopeResult> StaticScopeResults = new();
         private static readonly List<RuntimeProbeResult> RuntimeProbeResults = new();
         private static readonly List<AnchorProbeResult> AnchorProbeResults = new();
+        private static readonly List<FootprintCoverageResult> FootprintCoverageResults = new();
         private static string SurfaceScopeSummary = string.Empty;
+        private static bool FlatFloorNegativeControl;
+        private static float AgentRadiusMeters = float.NaN;
+        private static NavMeshDataInstance FlatFloorNavMeshInstance;
 
         [MenuItem("Gravenspire/Verify S3 District NavMesh Bake Scope")]
         public static void Run()
@@ -99,6 +108,8 @@ namespace Gravenspire.Editor
 
         private static void RunChecks()
         {
+            FlatFloorNegativeControl = IsCommandLineFlagPresent(FlatFloorNegativeControlArgumentName);
+
             var scene = EditorSceneManager.OpenScene(ScenePath, OpenSceneMode.Single);
             RecordCheck("scene_loaded", scene.IsValid() && scene.path == ScenePath);
             if (!scene.IsValid())
@@ -138,7 +149,17 @@ namespace Gravenspire.Editor
                 throw new IOException("FirstDistrict_NavMeshSurface has no baked NavMeshData assigned.");
             }
 
-            surface.AddData();
+            AgentRadiusMeters = NavMesh.GetSettingsByID(surface.agentTypeID).agentRadius;
+            RecordCheck("agent_radius_resolved", !float.IsNaN(AgentRadiusMeters) && AgentRadiusMeters > 0.0f);
+
+            if (FlatFloorNegativeControl)
+            {
+                BuildAndAddFlatFloorNavMesh(surface);
+            }
+            else
+            {
+                surface.AddData();
+            }
 
             foreach (var obstacleName in RuntimeObstacleNames)
             {
@@ -147,6 +168,13 @@ namespace Gravenspire.Editor
 
             RecordCheck("all_obstacle_tight_probes_fail", RuntimeProbeResults.TrueForAll(result => !result.TightSampled));
             RecordCheck("all_obstacle_wide_probes_resolve_displaced", RuntimeProbeResults.TrueForAll(result => result.WideSampled && result.WideHorizontalDisplacementMeters + DisplacementEpsilonMeters >= result.RequiredDisplacementMeters));
+
+            foreach (var obstacleName in RuntimeObstacleNames)
+            {
+                FootprintCoverageResults.Add(CheckObstacleFootprintCoverage(obstacleName));
+            }
+
+            RecordCheck("all_obstacle_footprints_fully_carved", FootprintCoverageResults.TrueForAll(result => result.FullyCarved));
 
             foreach (var anchorName in RuntimeAnchorNames)
             {
@@ -368,6 +396,160 @@ namespace Gravenspire.Editor
                 verticalDisplacement);
         }
 
+        private static FootprintCoverageResult CheckObstacleFootprintCoverage(string obstacleName)
+        {
+            var gameObject = FindSceneObjectIncludingInactive(obstacleName);
+            if (gameObject == null)
+            {
+                RecordCheck($"{obstacleName}_footprint_fully_carved", false);
+                return FootprintCoverageResult.Missing(obstacleName, "Object missing from scene.");
+            }
+
+            var colliderBounds = CalculateCombinedColliderBounds(gameObject);
+            if (!colliderBounds.HasValue)
+            {
+                RecordCheck($"{obstacleName}_footprint_fully_carved", false);
+                return FootprintCoverageResult.Missing(obstacleName, "No enabled collider resolved.");
+            }
+
+            var bounds = colliderBounds.Value;
+            var probePoints = BuildFootprintProbePoints(bounds, out var axisNote);
+            var probes = new List<FootprintProbe>(probePoints.Count);
+            var fullyCarved = true;
+
+            foreach (var (point, classification) in probePoints)
+            {
+                var sampled = NavMesh.SamplePosition(point, out var hit, TightProbeRadiusMeters, NavMesh.AllAreas);
+                var displacement = sampled ? HorizontalDistance(point, hit.position) : float.NaN;
+                var carved = !sampled;
+                fullyCarved &= carved;
+                probes.Add(new FootprintProbe(point, classification, sampled, sampled ? hit.position : Vector3.zero, displacement, carved));
+            }
+
+            RecordCheck($"{obstacleName}_footprint_fully_carved", fullyCarved);
+            return new FootprintCoverageResult(obstacleName, bounds, AgentRadiusMeters, axisNote, probes, fullyCarved);
+        }
+
+        private static List<(Vector3 point, string classification)> BuildFootprintProbePoints(Bounds bounds, out string axisNote)
+        {
+            var notes = new List<string>();
+            var xSamples = BuildFootprintAxisSamples(bounds.center.x, bounds.extents.x, "x", notes);
+            var zSamples = BuildFootprintAxisSamples(bounds.center.z, bounds.extents.z, "z", notes);
+            axisNote = notes.Count == 0
+                ? "Both footprint axes exceeded the agent radius; full inset grid probed."
+                : string.Join(" ", notes);
+
+            var points = new List<(Vector3, string)>(xSamples.Count * zSamples.Count);
+            for (var xi = 0; xi < xSamples.Count; xi++)
+            {
+                for (var zi = 0; zi < zSamples.Count; zi++)
+                {
+                    var isXEdge = xi == 0 || xi == xSamples.Count - 1;
+                    var isZEdge = zi == 0 || zi == zSamples.Count - 1;
+                    string classification;
+                    if (xSamples.Count == 1 && zSamples.Count == 1)
+                    {
+                        classification = "centerline-point";
+                    }
+                    else if (isXEdge && isZEdge)
+                    {
+                        classification = "corner";
+                    }
+                    else if (isXEdge || isZEdge)
+                    {
+                        classification = "edge";
+                    }
+                    else
+                    {
+                        classification = "interior";
+                    }
+
+                    points.Add((new Vector3(xSamples[xi], 0.0f, zSamples[zi]), classification));
+                }
+            }
+
+            return points;
+        }
+
+        private static List<float> BuildFootprintAxisSamples(float center, float extent, string axisName, List<string> notes)
+        {
+            if (extent <= AgentRadiusMeters + DisplacementEpsilonMeters)
+            {
+                notes.Add($"Footprint {axisName}-axis half-extent {FormatFloat(extent)} m <= agent radius {FormatFloat(AgentRadiusMeters)} m; probed along centerline only.");
+                return new List<float> { center };
+            }
+
+            var insetMin = center - (extent - AgentRadiusMeters);
+            var insetMax = center + (extent - AgentRadiusMeters);
+            var span = insetMax - insetMin;
+            var stepCount = Mathf.Clamp(Mathf.CeilToInt(span / FootprintProbeStepMeters) + 1, 2, MaxFootprintSamplesPerAxis);
+
+            var samples = new List<float>(stepCount);
+            for (var i = 0; i < stepCount; i++)
+            {
+                var t = (float)i / (stepCount - 1);
+                samples.Add(Mathf.Lerp(insetMin, insetMax, t));
+            }
+
+            return samples;
+        }
+
+        private static void BuildAndAddFlatFloorNavMesh(NavMeshSurface surface)
+        {
+            var floor = FindSceneObjectIncludingInactive(FloorObjectName);
+            RecordCheck("flat_floor_object_exists", floor != null);
+            if (floor == null)
+            {
+                throw new IOException($"{FloorObjectName} is missing; cannot build the flat-floor negative control.");
+            }
+
+            var floorBounds = CalculateCombinedColliderBounds(floor);
+            RecordCheck("flat_floor_collider_bounds_resolved", floorBounds.HasValue);
+            if (!floorBounds.HasValue)
+            {
+                throw new IOException($"{FloorObjectName} has no enabled collider; cannot build the flat-floor negative control.");
+            }
+
+            var bounds = floorBounds.Value;
+            var settings = NavMesh.GetSettingsByID(surface.agentTypeID);
+
+            var source = new NavMeshBuildSource
+            {
+                shape = NavMeshBuildSourceShape.Box,
+                size = new Vector3(bounds.size.x, 0.01f, bounds.size.z),
+                transform = Matrix4x4.TRS(new Vector3(bounds.center.x, 0.0f, bounds.center.z), Quaternion.identity, Vector3.one),
+                area = WalkableArea
+            };
+
+            var buildBounds = new Bounds(
+                new Vector3(bounds.center.x, 0.0f, bounds.center.z),
+                new Vector3(bounds.size.x + 4.0f, 4.0f, bounds.size.z + 4.0f));
+
+            var data = NavMeshBuilder.BuildNavMeshData(
+                settings,
+                new List<NavMeshBuildSource> { source },
+                buildBounds,
+                Vector3.zero,
+                Quaternion.identity);
+
+            RecordCheck("flat_floor_navmesh_built", data != null);
+            FlatFloorNavMeshInstance = NavMesh.AddNavMeshData(data);
+            RecordCheck("flat_floor_navmesh_added", FlatFloorNavMeshInstance.valid);
+        }
+
+        private static bool IsCommandLineFlagPresent(string argumentName)
+        {
+            foreach (var argument in Environment.GetCommandLineArgs())
+            {
+                if (string.Equals(argument, argumentName, StringComparison.OrdinalIgnoreCase))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
         private static Bounds CalculateSurfaceVolumeBounds(Transform surfaceTransform, NavMeshSurface surface)
         {
             var worldCenter = surfaceTransform.TransformPoint(surface.center);
@@ -504,6 +686,14 @@ namespace Gravenspire.Editor
             builder.AppendLine("**Scene:** `Assets/Scenes/_DevEntry.unity`");
             builder.AppendLine("**Runner:** `Assets/Editor/GravenspireS3DistrictNavMeshBakeScopeVerificationRunner.cs`");
             builder.AppendLine($"**Result:** {(exitCode == 0 ? "PASS" : "FAIL")}");
+            builder.AppendLine($"**Negative Control Mode:** {(FlatFloorNegativeControl ? "true" : "false")}");
+            builder.AppendLine($"**Agent Radius (m):** {FormatFloat(AgentRadiusMeters)}");
+            builder.AppendLine();
+            builder.AppendLine("## Evidence Metadata");
+            builder.AppendLine();
+            builder.AppendLine($"- negative_control_mode={(FlatFloorNegativeControl ? "true" : "false")}");
+            builder.AppendLine($"- agent_radius_meters={FormatFloat(AgentRadiusMeters)}");
+            builder.AppendLine($"- expected_result={(FlatFloorNegativeControl ? "FAIL" : "PASS")}");
             builder.AppendLine();
             AppendMethodology(builder);
             builder.AppendLine();
@@ -526,6 +716,8 @@ namespace Gravenspire.Editor
             AppendStaticScopeResults(builder);
             builder.AppendLine();
             AppendRuntimeProbeResults(builder);
+            builder.AppendLine();
+            AppendFootprintCoverageResults(builder);
             builder.AppendLine();
             AppendAnchorProbeResults(builder);
             builder.AppendLine();
@@ -552,6 +744,19 @@ namespace Gravenspire.Editor
             builder.AppendLine($"- Runtime outcome check: at each obstacle ground center, `NavMesh.SamplePosition` with radius {TightProbeRadiusMeters.ToString("0.###", CultureInfo.InvariantCulture)} m must fail, proving no NavMesh exists inside the obstacle footprint.");
             builder.AppendLine($"- Runtime perimeter check: a wider {WideProbeRadiusMeters.ToString("0.###", CultureInfo.InvariantCulture)} m probe must resolve to a horizontally displaced point at least as far as the obstacle's minimum X/Z half-footprint, proving the nearest NavMesh sits at the obstacle perimeter rather than inside it.");
             builder.AppendLine($"- Runtime anchor-clearance check: at each gameplay anchor ground center, `NavMesh.SamplePosition` with radius {AnchorProbeRadiusMeters.ToString("0.###", CultureInfo.InvariantCulture)} m must succeed with horizontal displacement no greater than {AnchorMaxHorizontalDisplacementMeters.ToString("0.###", CultureInfo.InvariantCulture)} m, proving anchors remain on walkable NavMesh after obstacle carving.");
+            builder.AppendLine($"- Runtime footprint-coverage check: across each obstacle footprint a grid of ground-plane probe points (corners, edge midpoints, and interior samples inset by the agent radius {FormatFloat(AgentRadiusMeters)} m, stepped at {FootprintProbeStepMeters.ToString("0.###", CultureInfo.InvariantCulture)} m and capped at {MaxFootprintSamplesPerAxis} samples/axis) must each fail a {TightProbeRadiusMeters.ToString("0.###", CultureInfo.InvariantCulture)} m `NavMesh.SamplePosition`, proving the entire footprint — not just its center — is carved. Footprint axes thinner than the agent radius collapse to their centerline with a recorded skip reason; long thin boundary walls are therefore covered along their full length.");
+            if (FlatFloorNegativeControl)
+            {
+                builder.AppendLine("- NEGATIVE CONTROL: this run skipped the surface's baked NavMeshData and instead added a synthetic flat-floor NavMesh that ignores every obstacle. The footprint-coverage and center-carve checks are EXPECTED to FAIL — a PASS here would be a false negative proving the carve assertions cannot detect an uncarved district.");
+                builder.AppendLine();
+                builder.AppendLine("## Unity API Verification");
+                builder.AppendLine();
+                builder.AppendLine("- API / feature: `NavMeshBuilder.BuildNavMeshData`, `NavMeshBuildSource`, `NavMeshBuildSourceShape.Box`, `NavMesh.AddNavMeshData`, `NavMeshDataInstance` (UnityEngine.AI runtime navmesh building).");
+                builder.AppendLine("- Unity version: 6.3 LTS (6000.3.x).");
+                builder.AppendLine("- Reference files checked: `docs/engine-reference/unity/modules/navigation.md` (documents `NavMeshSurface`, `NavMesh.SamplePosition`, `NavMesh.GetSettingsByID`, runtime baking via `NavMeshSurface.BuildNavMesh`; does NOT document `NavMeshBuilder.BuildNavMeshData`).");
+                builder.AppendLine("- Status: UNVERIFIED against engine-reference; verified EMPIRICALLY by this batchmode run (the runner builds and adds the synthetic mesh, then `NavMesh.SamplePosition` resolves on it, proving the API path compiles and executes under Unity 6.3).");
+                builder.AppendLine("- Decision impact: confined to the negative-control fixture; the additive instance never touches `surface.navMeshData` or the committed `.asset`, and is removed after the run.");
+            }
         }
 
         private static void AppendStaticScopeResults(StringBuilder builder)
@@ -585,6 +790,43 @@ namespace Gravenspire.Editor
                     result.WideHorizontalDisplacementMeters + DisplacementEpsilonMeters >= result.RequiredDisplacementMeters;
 
                 builder.AppendLine($"| `{result.ObstacleName}` | {FormatVector(result.QueryGroundCenter)} | {tight} | {wide} | {FormatFloat(result.WideHorizontalDisplacementMeters)} | {FormatFloat(result.RequiredDisplacementMeters)} | {(passed ? "PASS" : "FAIL")} |");
+            }
+        }
+
+        private static void AppendFootprintCoverageResults(StringBuilder builder)
+        {
+            builder.AppendLine("## Runtime Obstacle-Footprint Coverage Assertions");
+            builder.AppendLine();
+            builder.AppendLine("| Obstacle | Footprint bounds | Agent radius (m) | Probe points | Carved probes | Uncarved probes | Axis notes | Result |");
+            builder.AppendLine("|---|---|---:|---:|---:|---:|---|---|");
+
+            foreach (var result in FootprintCoverageResults)
+            {
+                var carvedCount = result.Probes.FindAll(probe => probe.Carved).Count;
+                var uncarvedCount = result.Probes.Count - carvedCount;
+                builder.AppendLine($"| `{result.ObstacleName}` | {FormatBounds(result.FootprintBounds)} | {FormatFloat(result.AgentRadiusMeters)} | {result.Probes.Count} | {carvedCount} | {uncarvedCount} | {EscapeTableCell(result.AxisNote)} | {(result.FullyCarved ? "PASS" : "FAIL")} |");
+            }
+
+            if (FootprintCoverageResults.Exists(result => !result.FullyCarved))
+            {
+                builder.AppendLine();
+                builder.AppendLine("### Uncarved Probe Detail");
+                builder.AppendLine();
+                builder.AppendLine("| Obstacle | Classification | Probe point | Resolved NavMesh point | Horizontal displacement (m) |");
+                builder.AppendLine("|---|---|---|---|---:|");
+
+                foreach (var result in FootprintCoverageResults)
+                {
+                    foreach (var probe in result.Probes)
+                    {
+                        if (probe.Carved)
+                        {
+                            continue;
+                        }
+
+                        builder.AppendLine($"| `{result.ObstacleName}` | {probe.Classification} | {FormatVector(probe.ProbePoint)} | {FormatVector(probe.ResolvedPosition)} | {FormatFloat(probe.HorizontalDisplacementMeters)} |");
+                    }
+                }
             }
         }
 
@@ -704,7 +946,17 @@ namespace Gravenspire.Editor
             StaticScopeResults.Clear();
             RuntimeProbeResults.Clear();
             AnchorProbeResults.Clear();
+            FootprintCoverageResults.Clear();
             SurfaceScopeSummary = string.Empty;
+
+            if (FlatFloorNavMeshInstance.valid)
+            {
+                FlatFloorNavMeshInstance.Remove();
+            }
+
+            FlatFloorNavMeshInstance = default;
+            FlatFloorNegativeControl = false;
+            AgentRadiusMeters = float.NaN;
         }
 
         private readonly struct BakeObjectSpec
@@ -873,6 +1125,73 @@ namespace Gravenspire.Editor
             public static AnchorProbeResult Missing(string anchorName)
             {
                 return new AnchorProbeResult(anchorName, Vector3.zero, AnchorProbeRadiusMeters, false, Vector3.zero, float.NaN, float.NaN);
+            }
+        }
+
+        private readonly struct FootprintProbe
+        {
+            public FootprintProbe(
+                Vector3 probePoint,
+                string classification,
+                bool sampled,
+                Vector3 resolvedPosition,
+                float horizontalDisplacementMeters,
+                bool carved)
+            {
+                ProbePoint = probePoint;
+                Classification = classification;
+                Sampled = sampled;
+                ResolvedPosition = resolvedPosition;
+                HorizontalDisplacementMeters = horizontalDisplacementMeters;
+                Carved = carved;
+            }
+
+            public Vector3 ProbePoint { get; }
+
+            public string Classification { get; }
+
+            public bool Sampled { get; }
+
+            public Vector3 ResolvedPosition { get; }
+
+            public float HorizontalDisplacementMeters { get; }
+
+            public bool Carved { get; }
+        }
+
+        private readonly struct FootprintCoverageResult
+        {
+            public FootprintCoverageResult(
+                string obstacleName,
+                Bounds footprintBounds,
+                float agentRadiusMeters,
+                string axisNote,
+                List<FootprintProbe> probes,
+                bool fullyCarved)
+            {
+                ObstacleName = obstacleName;
+                FootprintBounds = footprintBounds;
+                AgentRadiusMeters = agentRadiusMeters;
+                AxisNote = axisNote;
+                Probes = probes;
+                FullyCarved = fullyCarved;
+            }
+
+            public string ObstacleName { get; }
+
+            public Bounds FootprintBounds { get; }
+
+            public float AgentRadiusMeters { get; }
+
+            public string AxisNote { get; }
+
+            public List<FootprintProbe> Probes { get; }
+
+            public bool FullyCarved { get; }
+
+            public static FootprintCoverageResult Missing(string obstacleName, string reason)
+            {
+                return new FootprintCoverageResult(obstacleName, default, float.NaN, reason, new List<FootprintProbe>(), false);
             }
         }
     }
