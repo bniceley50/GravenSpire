@@ -12,12 +12,12 @@ head: "cfbfc0284329a6a8a5c22e02fec61b5537bbf2b6"
 qa_plan: "production/qa/plans/qa-plan-sprint-3-20260524.md"
 plan: "production/sprints/sprint-3.md"
 slice_review: ""
-implementation_gate: "Sprint 3 slate opened 2026-05-23 with the 6-story slate S3-01–S3-06 written (slate commit 9bf60e1) and Story Ledger linked (back-fill commit ecbea5e). Format-gate pre-condition resolved 2026-05-24 by PR #2 merge commit 90821f2 (policy f040493, baseline a0785d8, hook cf1c204); owner assignment and Sprint 3 /qa-plan resolved 2026-05-24 at df5fdec. S3-01 closed COMPLETE WITH NOTES on 2026-05-25; next implementation gate is /story-readiness for S3-02."
-progress: "S3-EVIDENCE-01 (out-of-band evidence-integrity patch, NOT part of the S3-01..S3-06 slate) closed COMPLETE WITH NOTES and merged to main via PR #6 at cfbfc02 on 2026-05-29 (4/4 ACs; both negative controls FAIL as designed; dotnet format gate BLOCKED by Unity-Editor-only tooling scope, documented in tests/evidence/S3-EVIDENCE-01/verification.md). S3-05 (PR #4, 0d3ea58) and S3-05.1 NavMesh obstacle inclusion correction (PR #5, 7cade4b) also merged since the 2026-05-25 bookkeeping snapshot; their slate-row reconciliation (S3-05 completed date + completed_stories count) is still PENDING main-lane review and was NOT auto-applied here. Slate state: S3-01 done; S3-05 done-with-notes (completed date unrecorded); S3-02 ready; S3-03/S3-04/S3-06 blocked by the dependency chain. Next: /story-readiness production/stories/s3-02-player-driven-npc-interaction.md."
-completed_stories: 1
+implementation_gate: "Sprint 3 slate opened 2026-05-23 with the 6-story slate S3-01–S3-06 written (slate commit 9bf60e1) and Story Ledger linked (back-fill commit ecbea5e). Format-gate pre-condition resolved 2026-05-24 by PR #2 merge commit 90821f2 (policy f040493, baseline a0785d8, hook cf1c204); owner assignment and Sprint 3 /qa-plan resolved 2026-05-24 at df5fdec. S3-01 closed COMPLETE WITH NOTES on 2026-05-25. S3-02 cleared /story-readiness = READY on 2026-05-29 (S3-01 dependency Complete; D004 T1 boundary respected as telemetry-data-only); next implementation gate is /dev-story for S3-02."
+progress: "S3-EVIDENCE-01 (out-of-band evidence-integrity patch, NOT part of the S3-01..S3-06 slate) closed COMPLETE WITH NOTES and merged to main via PR #6 at cfbfc02 on 2026-05-29 (4/4 ACs; both negative controls FAIL as designed; dotnet format gate BLOCKED by Unity-Editor-only tooling scope, documented in tests/evidence/S3-EVIDENCE-01/verification.md). S3-05 (PR #4, 0d3ea58) and S3-05.1 NavMesh obstacle inclusion correction (PR #5, 7cade4b) also merged since the 2026-05-25 bookkeeping snapshot; their slate-row reconciliation was APPLIED 2026-05-29 (S3-05 completed back-filled to 2026-05-26 per carryover s3_05_ac12_partial_rollforward_to_s3_06; completed_stories bumped 1->2 to count S3-05 done-with-notes; S3-05.1 recorded as a note on the S3-05 row, not a slate story). Slate state: S3-01 done; S3-05 done-with-notes (completed 2026-05-26); S3-02 ready (/story-readiness = READY, verified 2026-05-29); S3-03/S3-04/S3-06 blocked by the dependency chain. Next: /dev-story production/stories/s3-02-player-driven-npc-interaction.md."
+completed_stories: 2
 total_stories: 6
 next_active_story: "S3-02"
-next_active_command: "/story-readiness production/stories/s3-02-player-driven-npc-interaction.md"
+next_active_command: "/dev-story production/stories/s3-02-player-driven-npc-interaction.md"
 
 carryover:
   # ----------------------------------------------------------------
@@ -120,7 +120,8 @@ stories:
     owner: "Codex"
     estimate_days: 1.5
     blocker: ""
-    completed: ""
+    completed: "2026-05-26"
+    note: "DONE WITH NOTES (2026-05-26, PR #4 / 0d3ea58). Follow-up correction S3-05.1 (NavMesh obstacle inclusion) merged via PR #5 / 7cade4b; not a slate story, no separate count. AC-12 partial roll-forward to S3-06 AC-03 per carryover s3_05_ac12_partial_rollforward_to_s3_06."
   - id: "S3-06"
     name: "Playable end-to-end + human-play feel check"
     file: "production/stories/s3-06-playable-end-to-end-and-human-play.md"
