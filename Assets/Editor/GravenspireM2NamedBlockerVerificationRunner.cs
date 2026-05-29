@@ -30,7 +30,11 @@ namespace Gravenspire.Editor
         private const string TelemetryKey = "GravenspireM2NamedBlocker.Telemetry";
         private const string EvidencePathKey = "GravenspireM2NamedBlocker.EvidencePath";
         private const string PlayStartedKey = "GravenspireM2NamedBlocker.PlayStartedTicks";
+        private const string PreservationModeKey = "GravenspireM2NamedBlocker.PreservationMode";
+        private const string BuilderSkippedKey = "GravenspireM2NamedBlocker.BuilderSkipped";
+        private const string BuilderInvokedKey = "GravenspireM2NamedBlocker.BuilderInvoked";
         private const string EvidencePathArgumentName = "-gravenspireEvidencePath";
+        private const string PreservationModeArgumentName = "-gravenspirePreservationMode";
         private const string SkipBuilderArgumentName = "-gravenspireSkipBuilder";
         private const double SmokeDelaySeconds = 1.0;
 
@@ -58,10 +62,25 @@ namespace Gravenspire.Editor
             try
             {
                 var evidencePath = ResolveEvidencePathFromCommandLine(DefaultEvidencePath());
+                var preservationMode = IsCommandLineFlagPresent(PreservationModeArgumentName);
+                var builderSkipped = IsCommandLineFlagPresent(SkipBuilderArgumentName);
                 SessionState.SetString(EvidencePathKey, evidencePath);
+                SessionState.SetBool(PreservationModeKey, preservationMode);
+                SessionState.SetBool(BuilderSkippedKey, builderSkipped);
+                SessionState.SetBool(BuilderInvokedKey, false);
                 Directory.CreateDirectory(Path.GetDirectoryName(evidencePath) ?? ".");
-                if (!ShouldSkipBuilderFromCommandLine())
+                if (preservationMode && !builderSkipped)
                 {
+                    RecordCheck("preservation_mode_requires_skip_builder", false);
+                    AppendSessionLine(ErrorsKey, "Preservation mode requires -gravenspireSkipBuilder; no builder call was executed.");
+                    WriteEvidenceAndExit(1);
+                    return;
+                }
+
+                RecordCheck("preservation_mode_requires_skip_builder", true);
+                if (!builderSkipped)
+                {
+                    SessionState.SetBool(BuilderInvokedKey, true);
                     GravenspireM2SingleTrashLoopBuilder.Build();
                 }
 
@@ -213,11 +232,20 @@ namespace Gravenspire.Editor
             var builder = new StringBuilder();
             builder.AppendLine($"# {StoryId} Unity Named-Blocker Camp-Boundary Smoke");
             builder.AppendLine();
-            builder.AppendLine($"**Date:** {DateTime.UtcNow.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture)}");
+            builder.AppendLine($"**Date:** {DateTimeOffset.UtcNow.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture)}");
             builder.AppendLine($"**Story:** `production/stories/{StorySlug}.md`");
             builder.AppendLine("**Scene:** `Assets/Scenes/_DevEntry.unity`");
             builder.AppendLine("**Runner:** `Assets/Editor/GravenspireM2NamedBlockerVerificationRunner.cs`");
             builder.AppendLine($"**Result:** {(exitCode == 0 ? "PASS" : "FAIL")}");
+            builder.AppendLine($"**Preservation Mode:** {EvidenceBool(CurrentPreservationMode())}");
+            builder.AppendLine($"**Builder Skipped:** {EvidenceBool(CurrentBuilderSkipped())}");
+            builder.AppendLine($"**Builder Invoked:** {EvidenceBool(CurrentBuilderInvoked())}");
+            builder.AppendLine();
+            builder.AppendLine("## Evidence Metadata");
+            builder.AppendLine();
+            builder.AppendLine($"- preservation_mode={EvidenceBool(CurrentPreservationMode())}");
+            builder.AppendLine($"- builder_skipped={EvidenceBool(CurrentBuilderSkipped())}");
+            builder.AppendLine($"- builder_invoked={EvidenceBool(CurrentBuilderInvoked())}");
             builder.AppendLine();
             builder.AppendLine("## Checks");
             builder.AppendLine();
@@ -269,7 +297,7 @@ namespace Gravenspire.Editor
                 "tests",
                 "evidence",
                 StoryId,
-                $"unity-named-blocker-runner-{DateTime.UtcNow.ToString("yyyyMMdd", CultureInfo.InvariantCulture)}-smoke.md");
+                $"unity-named-blocker-runner-{DateTimeOffset.UtcNow.ToString("yyyyMMdd", CultureInfo.InvariantCulture)}-smoke.md");
         }
 
         private static string ResolveEvidencePathFromCommandLine(string defaultEvidencePath)
@@ -286,18 +314,38 @@ namespace Gravenspire.Editor
             return defaultEvidencePath;
         }
 
-        private static bool ShouldSkipBuilderFromCommandLine()
+        private static bool IsCommandLineFlagPresent(string argumentName)
         {
             var arguments = Environment.GetCommandLineArgs();
             for (var i = 0; i < arguments.Length; i++)
             {
-                if (string.Equals(arguments[i], SkipBuilderArgumentName, StringComparison.OrdinalIgnoreCase))
+                if (string.Equals(arguments[i], argumentName, StringComparison.OrdinalIgnoreCase))
                 {
                     return true;
                 }
             }
 
             return false;
+        }
+
+        private static bool CurrentPreservationMode()
+        {
+            return SessionState.GetBool(PreservationModeKey, false);
+        }
+
+        private static bool CurrentBuilderSkipped()
+        {
+            return SessionState.GetBool(BuilderSkippedKey, false);
+        }
+
+        private static bool CurrentBuilderInvoked()
+        {
+            return SessionState.GetBool(BuilderInvokedKey, false);
+        }
+
+        private static string EvidenceBool(bool value)
+        {
+            return value ? "true" : "false";
         }
 
         private static void AppendEvidenceLines(StringBuilder builder, List<string> lines)
@@ -340,6 +388,9 @@ namespace Gravenspire.Editor
             SessionState.EraseString(TelemetryKey);
             SessionState.EraseString(EvidencePathKey);
             SessionState.EraseString(PlayStartedKey);
+            SessionState.EraseBool(PreservationModeKey);
+            SessionState.EraseBool(BuilderSkippedKey);
+            SessionState.EraseBool(BuilderInvokedKey);
         }
     }
 }
