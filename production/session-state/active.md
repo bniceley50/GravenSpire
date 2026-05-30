@@ -1,8 +1,30 @@
 # Active Session State
 
 **Last Updated:** 2026-05-30
-**Current Stage Note:** S3-03 (Player Relic Recovery + Looting) closed COMPLETE via /story-done and merged to main via PR #8 at `1a03330` (12/12 ACs; both protected M3 files zero-diff; partial-success branch verified genuinely forced under Evidence Rule v2). completed_stories→4/6. Main checkout synced to origin/main post-merge. Next: `/story-readiness` for S3-04 (Player-Driven Vendor, now unblocked) in the Codex lane (`N:/GravenSpire-codex`). S3-06 remains blocked pending S3-04.
+**Current Stage Note:** S3-04 (Player-Driven Vendor, sell-side only) implemented in the Codex lane on `codex/s3-04-player-driven-vendor`; evidence PASS locally (Unity S3-04 smoke, S3-01 harness regression, three separate M2 preservation smokes, zero-diff/buy-side scans, Combat 189/189, format gates, diff hygiene, pre-commit). Ready for `/code-review` handoff and PR; S3-06 remains blocked pending S3-04 merge/closure.
 **Project Stage:** Pre-Production — Sprint 3 (Playable Vertical-Slice Assembly)
+
+## Session Extract — /dev-story 2026-05-30 (S3-04)
+
+- Story: `production/stories/s3-04-player-driven-vendor.md` — S3-04 Player-Driven Vendor (Sell-Side Only).
+- Worktree / branch: `N:\GravenSpire-codex` on `codex/s3-04-player-driven-vendor`, fast-forwarded to `origin/main` at `0a1de42` before implementation.
+- Files changed:
+  - `Assets/Scripts/M3VendorInteractTarget.cs` + `.meta` — new sell-side vendor adapter; `SERVER-AUTH-INTENT` annotated per D017; calls `TrySellRecoveredSalvage` only; emits `vendor_salvage_sold` then `vendor_sell_copper_applied`.
+  - `Assets/Scripts/S3PlayerInteractionHarness.cs` — additive optional `InteractContext.FeedbackText`, used by the vendor adapter for `+N copper` result feedback without changing generic missed/blocked feedback.
+  - `Assets/Editor/GravenspireS3PlayerDrivenVendorBuilder.cs` + `.meta` — adapter-only scene wiring builder.
+  - `Assets/Editor/GravenspireS3PlayerDrivenVendorVerificationRunner.cs` + `.meta` — Unity S3-04 runner for blocked sale, success sale, state assertions, feedback rule, buy-side absence, and end-to-end harness path.
+  - `Assets/Scenes/_DevEntry.unity` — adapter-only scene wiring: `M3_CourtVendor` gains `M3VendorInteractTarget` with `_vendor` bound to the existing M3 vendor component.
+  - `tests/evidence/S3-04/*` — verification summary, Unity smoke, S3-01 regression, three M2 preservation smokes, zero-diff artifact, and buy-side absence scan.
+- Verification:
+  - S3-04 Unity smoke PASS: `tests/evidence/S3-04/unity-player-driven-vendor-20260530-smoke.md` (blocked path, success path, `+7 copper` feedback, full accept->recover->sell vocabulary, no warnings/errors).
+  - S3-01 harness regression PASS: `tests/evidence/S3-04/s3-01-harness-regression-20260530-smoke.md`.
+  - M2 preservation PASS x3, each separate with `Builder Invoked: false`: `m2-02-preservation-20260530-smoke.md`, `m2-03-preservation-20260530-smoke.md`, `m2-04-preservation-20260530-smoke.md`.
+  - Protected M3 vendor source zero-diff: `tests/evidence/S3-04/m3-loot-vendor-zero-diff-20260530.txt`.
+  - Buy-side absence scan PASS: `tests/evidence/S3-04/buy-side-absence-scan-20260530.txt`.
+  - `dotnet test tests\Gravenspire.Combat.Tests.csproj --logger "console;verbosity=minimal"` PASS 189/189; both `dotnet format --verify-no-changes --exclude-diagnostics IDE1006` targets PASS; `git diff --check` PASS; trailing-whitespace scan PASS; T1 negative-scope scan PASS with D017 annotation classified; `.githooks/pre-commit` PASS.
+- Scope notes: `M3LootTableFixedProfileVendor.cs` and `.meta` remain zero-diff. No buy-side dispatch, vendor UI, tuned economy, Save/Load/currency persistence, faction consequence, routing feedback, networking, or live LLM added.
+- Correction mid-session: S3-01 regression runner reintroduced legacy builder scene drift locally (`FirstDistrict_ShellOnly_NoGameplay`, directional light, camera color). Final `_DevEntry.unity` diff was cleaned back to the S3-04 adapter-only surface.
+- Next recommended: `/code-review` the S3-04 implementation/evidence files, then open the S3-04 PR for main-lane review.
 
 ## Session Extract — /story-done 2026-05-30 (S3-03)
 

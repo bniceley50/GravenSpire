@@ -1,0 +1,17 @@
+S3-04 buy-side absence scan artifact
+Date: 2026-05-30
+
+Command:
+rg -n "TryPurchaseFixedVendorGood" Assets/Scripts/M3VendorInteractTarget.cs
+
+Result:
+PASS - command exited 1 and produced no matches.
+
+Companion deny-pattern command:
+rg -n "TryPurchaseFixedVendorGood|vendor_purchase|purchase|buy" Assets/Scripts/M3VendorInteractTarget.cs
+
+Result:
+PASS - command exited 1 and produced no matches.
+
+Scope:
+This verifies S3-04 T6 / Out of Scope: the new M3VendorInteractTarget adapter wires only TrySellRecoveredSalvage and contains no buy-side dispatch or affordance.

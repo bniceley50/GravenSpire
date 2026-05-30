@@ -1,0 +1,17 @@
+S3-04 M3 loot/vendor zero-diff artifact
+Date: 2026-05-30
+
+Command:
+git diff --stat -- Assets/Scripts/M3LootTableFixedProfileVendor.cs Assets/Scripts/M3LootTableFixedProfileVendor.cs.meta
+
+Result:
+PASS - command exited 0 and produced no diff-stat output.
+
+Companion check:
+git diff --name-only -- Assets/Scripts/M3LootTableFixedProfileVendor.cs Assets/Scripts/M3LootTableFixedProfileVendor.cs.meta
+
+Result:
+PASS - command exited 0 and produced no file-name output.
+
+Scope:
+This verifies S3-04 AC-03: M3LootTableFixedProfileVendor.cs and its .meta file have zero diff in this story.

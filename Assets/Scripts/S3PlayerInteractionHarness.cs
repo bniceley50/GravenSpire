@@ -37,6 +37,33 @@ namespace Gravenspire.UnityRuntime.Interaction
             string primaryPayload = "",
             string secondaryPayload = "",
             int amount = 0)
+            : this(
+                telemetryEvent,
+                playerActorId,
+                targetId,
+                actionLabel,
+                resultLabel,
+                distanceMeters,
+                payloadKind,
+                primaryPayload,
+                secondaryPayload,
+                amount,
+                string.Empty)
+        {
+        }
+
+        public InteractContext(
+            string telemetryEvent,
+            string playerActorId,
+            string targetId,
+            string actionLabel,
+            string resultLabel,
+            float distanceMeters,
+            string payloadKind,
+            string primaryPayload,
+            string secondaryPayload,
+            int amount,
+            string feedbackText)
         {
             TelemetryEvent = telemetryEvent;
             PlayerActorId = playerActorId;
@@ -48,6 +75,7 @@ namespace Gravenspire.UnityRuntime.Interaction
             PrimaryPayload = primaryPayload;
             SecondaryPayload = secondaryPayload;
             Amount = amount;
+            FeedbackText = feedbackText;
         }
 
         public string TelemetryEvent { get; }
@@ -70,6 +98,8 @@ namespace Gravenspire.UnityRuntime.Interaction
 
         public int Amount { get; }
 
+        public string FeedbackText { get; }
+
         public InteractContext WithFeedbackEvent(
             string telemetryEvent,
             string resultLabel,
@@ -85,7 +115,8 @@ namespace Gravenspire.UnityRuntime.Interaction
                 PayloadKind,
                 PrimaryPayload,
                 SecondaryPayload,
-                Amount);
+                Amount,
+                FeedbackText);
         }
     }
 
@@ -338,7 +369,10 @@ namespace Gravenspire.UnityRuntime.Interaction
 
                 var firedContext = primaryTelemetryContext
                     .WithFeedbackEvent(FiredTelemetryEvent, NonBlank(targetContext.ResultLabel, FiredFeedbackText), distanceMeters);
-                RecordOutcome(InteractFeedbackOutcome.Fired, firedContext, FiredFeedbackText);
+                RecordOutcome(
+                    InteractFeedbackOutcome.Fired,
+                    firedContext,
+                    NonBlank(primaryTelemetryContext.FeedbackText, FiredFeedbackText));
                 return true;
             }
 
@@ -458,7 +492,8 @@ namespace Gravenspire.UnityRuntime.Interaction
                 NonBlank(context.PayloadKind, string.Empty),
                 NonBlank(context.PrimaryPayload, string.Empty),
                 NonBlank(context.SecondaryPayload, string.Empty),
-                context.Amount);
+                context.Amount,
+                NonBlank(context.FeedbackText, string.Empty));
         }
 
         private InteractContext CreateHarnessContext(
