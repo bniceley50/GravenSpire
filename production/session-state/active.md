@@ -1,8 +1,19 @@
 # Active Session State
 
 **Last Updated:** 2026-05-30
-**Current Stage Note:** S3-04 (Player-Driven Vendor, sell-side only) implemented in the Codex lane on `codex/s3-04-player-driven-vendor`; evidence PASS locally (Unity S3-04 smoke, S3-01 harness regression, three separate M2 preservation smokes, zero-diff/buy-side scans, Combat 189/189, format gates, diff hygiene, pre-commit). Ready for `/code-review` handoff and PR; S3-06 remains blocked pending S3-04 merge/closure.
+**Current Stage Note:** S3-04 (Player-Driven Vendor, sell-side only) closed COMPLETE via /story-done and merged to main via PR #9 at `b2c8d6c` (8/8 ACs; M3 vendor zero-diff; buy-side proven absent; first D017 application — runner-asserted SERVER-AUTH-INTENT annotation). completed_stories→5/6. **S3-06 (Playable End-to-End + Human-Play Feel Check) is now FULLY UNBLOCKED** — all four prerequisites (S3-02/03/04/05) complete. S3-06 is the final slate story and the milestone exit gate (AC-08 human-play verdict). Main synced to origin/main post-merge. Next: `/story-readiness` for S3-06 in the Codex lane (`N:/GravenSpire-codex`).
 **Project Stage:** Pre-Production — Sprint 3 (Playable Vertical-Slice Assembly)
+
+## Session Extract — /story-done 2026-05-30 (S3-04)
+
+- Story: `production/stories/s3-04-player-driven-vendor.md` — S3-04 Player-Driven Vendor (sell-side only). Verdict: **COMPLETE** (8/8 ACs PASS).
+- Merge: PR #9 (`codex/s3-04-player-driven-vendor`) merged to `main` at `b2c8d6c`; implementation commit `cdaf108` (rebased clean onto 0a1de42). Main synced from `1a03330`.
+- Review (main-lane, Evidence Rule v2 + REVIEW mode): verified four distrust-points against the diff — (1) harness `FeedbackText` widening is a NEW additive constructor overload, old 11-arg ctor preserved/delegating, S3-02/03 call-sites intact (S3-01 regression PASS); (2) **D017 SERVER-AUTH-INTENT annotation real in code AND runner-self-asserted** (`vendor_authority_annotation_present`) — first post-D017 story, annotation regression-protected; (3) buy-side proven *absent* (source + scene + runtime `vendor_purchase_fixed_good == 0`), not just untested; (4) adapter-only scene delta (15 lines, no drift). Verdict GO/APPROVE; one advisory (S3-06 should document the final InteractContext/event-ordering contract after 4 additive harness touches).
+- Evidence: `tests/evidence/S3-04/verification.md` (PASS) + vendor smoke, S3-01 regression, 3× M2 preservation (`Builder Invoked: false`), zero-diff + buy-side-absence artifacts; Combat 189/189; both format targets exit 0; diff-check clean.
+- M3 vendor zero-diff held (AC-03). Builder adapter-only (2026-05-30 builder-chaining lesson applied a third time — S3-01 runner drift caught and cleaned mid-session).
+- Bookkeeping applied: story Status→Complete + 8 ACs + Completion Notes; sprint-status.yaml S3-04→done (2026-05-30), completed_stories→5, head→b2c8d6c, S3-06 fully unblocked (blocker cleared), progress + next pointers refreshed.
+- Pre-existing main-checkout WIP still preserved untouched (6 modified tracked files).
+- Next recommended: `/story-readiness production/stories/s3-06-playable-end-to-end-and-human-play.md` (Codex lane) — the milestone exit gate.
 
 ## Session Extract — /dev-story 2026-05-30 (S3-04)
 

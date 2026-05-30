@@ -2,7 +2,7 @@
 
 > **Sprint**: Sprint 3 — Playable Vertical-Slice Assembly
 > **Sprint Plan**: `production/sprints/sprint-3.md` (Story Ledger row, line 69)
-> **Status**: Ready (depends on S3-03 being Done)
+> **Status**: Complete
 > **Layer**: Core
 > **Type**: Integration
 > **Estimate**: 1.0 day (HIGH confidence — thinnest wiring of the slate, per `sprint-3.md:158`; single M3 subsystem, single Try*, no state machine)
@@ -47,18 +47,18 @@
 
 ## Acceptance Criteria
 
-- [ ] **S3-04-01**: A new thin adapter MonoBehaviour (proposed name: `M3VendorInteractTarget`) is created under `Assets/Scripts/`, implements `IPlayerInteractTarget` (from S3-01), and is attached to the `M3_CourtVendor` GameObject in `_DevEntry.unity:382`.
-- [ ] **S3-04-02**: The adapter holds a serialized reference to a `M3LootTableFixedProfileVendor` instance and, on `TryInteract(...)`, calls `vendor.TrySellRecoveredSalvage(out int creditedCopper)`. The adapter returns the boolean result. The harness sees a uniform `InteractContext`; the adapter populates it with the sale outcome data (`creditedCopper`, post-sale `CarriedCurrencyCopper`, and the `SalvageItemId`).
-- [ ] **S3-04-03**: `M3LootTableFixedProfileVendor.cs` has **zero diff** in this story. S2-M3-03 closure (`25c94ee`) is preserved verbatim. Same for `M3LootTableFixedProfileVendor.cs.meta`.
-- [ ] **S3-04-04**: On a successful sale (Try* returned `true` with `creditedCopper > 0`), telemetry records **two** events:
+- [x] **S3-04-01**: A new thin adapter MonoBehaviour (proposed name: `M3VendorInteractTarget`) is created under `Assets/Scripts/`, implements `IPlayerInteractTarget` (from S3-01), and is attached to the `M3_CourtVendor` GameObject in `_DevEntry.unity:382`.
+- [x] **S3-04-02**: The adapter holds a serialized reference to a `M3LootTableFixedProfileVendor` instance and, on `TryInteract(...)`, calls `vendor.TrySellRecoveredSalvage(out int creditedCopper)`. The adapter returns the boolean result. The harness sees a uniform `InteractContext`; the adapter populates it with the sale outcome data (`creditedCopper`, post-sale `CarriedCurrencyCopper`, and the `SalvageItemId`).
+- [x] **S3-04-03**: `M3LootTableFixedProfileVendor.cs` has **zero diff** in this story. S2-M3-03 closure (`25c94ee`) is preserved verbatim. Same for `M3LootTableFixedProfileVendor.cs.meta`.
+- [x] **S3-04-04**: On a successful sale (Try* returned `true` with `creditedCopper > 0`), telemetry records **two** events:
   - `vendor_salvage_sold` with payload `{ vendorId, salvageItemId, quantity: 1, source: "player_driven", playerActorId, distanceMeters }` — the sale-happened event
   - `vendor_sell_copper_applied` with payload `{ vendorId, creditedCopper, newCarriedCurrencyCopper, source: "player_driven" }` — the currency-credited event
 
   Both events are required by the plan row at `sprint-3.md:69`. Emit order: `vendor_salvage_sold` first, `vendor_sell_copper_applied` second (the credit is a consequence of the sale). Note: unlike S3-03 AC-03's ordering (forced by `TryAcceptObjectiveFromNpc`'s internal call sequence at `M3ObjectiveStateRelicHandIn.cs:65→71`), this ordering is an **adapter-side contract decision** — both events fire after `TrySellRecoveredSalvage` returns, so order is chosen, not forced. The adapter emits in the documented order; the test asserts the order; S3-06's fixture inherits it as established contract.
-- [ ] **S3-04-05**: Post-sale state assertions: `vendor.CarriedCurrencyCopper` has increased by exactly `creditedCopper`; `vendor.CarriedItemSlotsUsed` has decreased by exactly 1; if the vendor held exactly one salvage pre-sale, `vendor.CarriesSalvage` is now `false`; if more than one, `CarriesSalvage` remains `true` and a second `TryInteract` call sells another unit.
-- [ ] **S3-04-06**: On a failed sale (Try* returned `false`, e.g., no salvage carried), the adapter returns `false`; the harness's interact-blocked feedback fires (per S3-01 AC-08); no `vendor_salvage_sold` event fires; no `vendor_sell_copper_applied` event fires; `vendor.CarriedCurrencyCopper` is unchanged; `vendor.LastRejectionReason` is populated by the M3 layer. The blocked feedback does NOT explain why (e.g., "no salvage to sell") — that would be a routing/diagnostic hint forbidden by the Sprint 3 feedback rule. The player's "I tried and nothing happened" feedback is enough at greybox; the M3 rejection reason is captured in telemetry for the implementer/QA, not surfaced to the player.
-- [ ] **S3-04-07**: Sale feedback at the harness layer acknowledges the action's *result* (e.g., a "+N copper" floating number, brief tone, or equivalent) — it does NOT surface buy-side affordances ("you have N copper, buy a fixed good!"), does NOT advertise the existence of `TryPurchaseFixedVendorGood`, does NOT show the buy-side inventory list, does NOT route the player anywhere. The sale acknowledgement is a *what just happened* answer, not a *what next* hint (Sprint 3 feedback rule direction test).
-- [ ] **S3-04-08**: Player-driven path is end-to-end: harness keypress → harness raycast/distance-check finds the `M3_CourtVendor`-mounted adapter → harness invokes `adapter.TryInteract(...)` → adapter calls `vendor.TrySellRecoveredSalvage(...)` → on success, the two telemetry events fire and the harness's interact-fired feedback (per S3-01 AC-06) plays. No runner-side shortcut path that bypasses the harness.
+- [x] **S3-04-05**: Post-sale state assertions: `vendor.CarriedCurrencyCopper` has increased by exactly `creditedCopper`; `vendor.CarriedItemSlotsUsed` has decreased by exactly 1; if the vendor held exactly one salvage pre-sale, `vendor.CarriesSalvage` is now `false`; if more than one, `CarriesSalvage` remains `true` and a second `TryInteract` call sells another unit.
+- [x] **S3-04-06**: On a failed sale (Try* returned `false`, e.g., no salvage carried), the adapter returns `false`; the harness's interact-blocked feedback fires (per S3-01 AC-08); no `vendor_salvage_sold` event fires; no `vendor_sell_copper_applied` event fires; `vendor.CarriedCurrencyCopper` is unchanged; `vendor.LastRejectionReason` is populated by the M3 layer. The blocked feedback does NOT explain why (e.g., "no salvage to sell") — that would be a routing/diagnostic hint forbidden by the Sprint 3 feedback rule. The player's "I tried and nothing happened" feedback is enough at greybox; the M3 rejection reason is captured in telemetry for the implementer/QA, not surfaced to the player.
+- [x] **S3-04-07**: Sale feedback at the harness layer acknowledges the action's *result* (e.g., a "+N copper" floating number, brief tone, or equivalent) — it does NOT surface buy-side affordances ("you have N copper, buy a fixed good!"), does NOT advertise the existence of `TryPurchaseFixedVendorGood`, does NOT show the buy-side inventory list, does NOT route the player anywhere. The sale acknowledgement is a *what just happened* answer, not a *what next* hint (Sprint 3 feedback rule direction test).
+- [x] **S3-04-08**: Player-driven path is end-to-end: harness keypress → harness raycast/distance-check finds the `M3_CourtVendor`-mounted adapter → harness invokes `adapter.TryInteract(...)` → adapter calls `vendor.TrySellRecoveredSalvage(...)` → on success, the two telemetry events fire and the harness's interact-fired feedback (per S3-01 AC-06) plays. No runner-side shortcut path that bypasses the harness.
 
 ## Implementation Notes
 
@@ -154,7 +154,7 @@ Companion artifacts:
 - `.githooks/pre-commit` — `[pre-commit] OK`
 - `dotnet format --verify-no-changes` — PASS
 
-**Evidence status**: Not started
+**Evidence status**: Complete
 
 **Vendor adapter telemetry-shape summary in verification.md**: enumerate the two terminal telemetry shapes (sale success / sale blocked) with example payloads, so the S3-06 end-to-end fixture author has the vocabulary catalog without re-deriving it. Simpler than S3-03's three shapes — no partial-success branch because `TrySellRecoveredSalvage` is atomic at the M3 layer.
 
@@ -180,3 +180,16 @@ Watch items (not blockers):
 - `control_manifest_absence_pre_existing` — Manifest Version `Unavailable` per fallback
 - Format Gate — see Dependencies
 - **Buy-side temptation watch**: the vendor exposes a fully-functional `TryPurchaseFixedVendorGood` (line 119). Reviewer rejects any PR that wires it in this story. No future story should backdoor it via S3-04's adapter.
+
+## Completion Notes
+
+**Completed**: 2026-05-30
+**Verdict**: COMPLETE
+**Criteria**: 8/8 passing (S3-04-01 … S3-04-08)
+**Deferred/Untested Criteria**: None
+**Test Evidence**: `tests/evidence/S3-04/verification.md` (PASS) + companions — S3-04 player-driven vendor smoke (blocked sale, success sale, +N copper feedback, full accept→recover→sell vocabulary), S3-01 harness regression (PASS — harness gained optional feedback text), 3× M2 preservation (separate Unity invocations, `Builder Invoked: false`), `m3-loot-vendor-zero-diff` artifact, and `buy-side-absence-scan`. Combat 189/189, both `dotnet format` targets exit 0, `git diff --check` clean, T1 negative-scope scan (D017 annotation classified).
+**GDD/ADR Deviations**: None. `M3LootTableFixedProfileVendor.cs` held zero-diff (AC-03). **D017 first application:** the adapter carries the `SERVER-AUTH-INTENT` ownership annotation (`M3VendorInteractTarget.cs:12`) and the runner self-asserts its presence (`vendor_authority_annotation_present`) — economy is a D017 mandatory-seam system; the annotation is now regression-protected against removal.
+**Scope Notes**: Buy-side is proven *absent*, not merely untested — source scan (`buy_side_absent_from_vendor_adapter_source`), scene-affordance scan, and runtime `CountEvent("vendor_purchase_fixed_good") == 0`. `TryPurchaseFixedVendorGood` exists on the M3 vendor but is never wired (buy-side-temptation watch honored). Cross-story harness touch (S3-01 deliverable, the 4th additive touch S3-01→02→03→04): `FeedbackText` added as a NEW `InteractContext` constructor overload — the existing 11-arg constructor is preserved and delegates, so S3-02/S3-03 call-sites do not break; opt-in feedback override only. Builder adapter-only (15-line scene delta; the 2026-05-30 builder-chaining lesson held — the S3-01 regression runner reintroduced drift mid-session and was cleaned back).
+**Review Gates**: Main-lane REVIEW mode (Evidence Rule v2). Verified the additive struct-overload (prior call-sites intact, S3-01 regression PASS), the runner-enforced D017 annotation, the buy-side *absence* proofs, and the adapter-only scene delta. Verdict GO/APPROVE, no blocking findings; one advisory (document the final `InteractContext`/event-ordering contract in S3-06, now that the harness has four additive touches).
+**Forced Completion**: No
+**Merge**: PR #9 (`codex/s3-04-player-driven-vendor`) merged to `main` at `b2c8d6c` on 2026-05-30; implementation commit `cdaf108`.

@@ -8,16 +8,16 @@ end: "2026-06-03"
 generated: "2026-05-23"
 updated: "2026-05-30"
 branch: "main"
-head: "1a033304d144fd3b6077fae72cc3b1abcd87c7bb"
+head: "b2c8d6cb2d4259db286c213514c844e4c0c2cff6"
 qa_plan: "production/qa/plans/qa-plan-sprint-3-20260524.md"
 plan: "production/sprints/sprint-3.md"
 slice_review: ""
 implementation_gate: "Sprint 3 slate opened 2026-05-23 with the 6-story slate S3-01–S3-06 written (slate commit 9bf60e1) and Story Ledger linked (back-fill commit ecbea5e). Format-gate pre-condition resolved 2026-05-24 by PR #2 merge commit 90821f2 (policy f040493, baseline a0785d8, hook cf1c204); owner assignment and Sprint 3 /qa-plan resolved 2026-05-24 at df5fdec. S3-01 closed COMPLETE WITH NOTES on 2026-05-25. S3-02 cleared /story-readiness = READY on 2026-05-29 (S3-01 dependency Complete; D004 T1 boundary respected as telemetry-data-only); next implementation gate is /dev-story for S3-02."
-progress: "S3-03 (Player Relic Recovery + Looting) closed COMPLETE via /story-done on 2026-05-30 (12/12 ACs PASS; both protected M3 files M3ObjectiveStateRelicHandIn.cs + M3LootTableFixedProfileVendor.cs held zero-diff; full accept->recover->hand-in loop end-to-end player-driven; partial-success branch genuinely forced via null-vendor injection with negative assertion, verified under Evidence Rule v2) and merged to main via PR #8 at 1a03330 (implementation commit fab8f31). completed_stories now 4/6. Prior context: S3-02 merged via PR #7 at 8acb53b; S3-EVIDENCE-01 via PR #6 at cfbfc02; S3-05 + S3-05.1 reconciliation applied 2026-05-29. Slate state: S3-01 done; S3-02 done (2026-05-30); S3-03 done (2026-05-30); S3-05 done-with-notes (2026-05-26); S3-04 now unblocked (ready); S3-06 still blocked (needs S3-04). Next: /story-readiness production/stories/s3-04-player-driven-vendor.md."
-completed_stories: 4
+progress: "S3-04 (Player-Driven Vendor, sell-side only) closed COMPLETE via /story-done on 2026-05-30 (8/8 ACs PASS; M3LootTableFixedProfileVendor.cs zero-diff held; buy-side proven ABSENT via source+scene+runtime scans; first D017 application — adapter carries SERVER-AUTH-INTENT annotation, runner self-asserts it; harness FeedbackText added as additive constructor overload preserving S3-02/03 call-sites; verified under Evidence Rule v2) and merged to main via PR #9 at b2c8d6c (implementation commit cdaf108). completed_stories now 5/6. Prior context: S3-03 merged via PR #8 at 1a03330; S3-02 via PR #7 at 8acb53b; S3-EVIDENCE-01 via PR #6 at cfbfc02; S3-05 + S3-05.1 reconciliation applied 2026-05-29. Slate state: S3-01 done; S3-02 done; S3-03 done; S3-04 done (2026-05-30); S3-05 done-with-notes (2026-05-26); S3-06 now FULLY UNBLOCKED (all of S3-02/03/04/05 complete) — the final story, the human-play feel gate. Next: /story-readiness production/stories/s3-06-playable-end-to-end-and-human-play.md."
+completed_stories: 5
 total_stories: 6
-next_active_story: "S3-04"
-next_active_command: "/story-readiness production/stories/s3-04-player-driven-vendor.md"
+next_active_story: "S3-06"
+next_active_command: "/story-readiness production/stories/s3-06-playable-end-to-end-and-human-play.md"
 
 carryover:
   # ----------------------------------------------------------------
@@ -107,11 +107,11 @@ stories:
     name: "Player-driven vendor (sell-side only)"
     file: "production/stories/s3-04-player-driven-vendor.md"
     priority: must-have
-    status: ready
+    status: done
     owner: "Codex"
     estimate_days: 1.0
     blocker: ""
-    completed: ""
+    completed: "2026-05-30"
   - id: "S3-05"
     name: "Navigable greybox First District"
     file: "production/stories/s3-05-navigable-greybox-first-district.md"
@@ -126,10 +126,10 @@ stories:
     name: "Playable end-to-end + human-play feel check"
     file: "production/stories/s3-06-playable-end-to-end-and-human-play.md"
     priority: must-have
-    status: blocked
+    status: ready
     owner: "Codex"
     estimate_days: 1.0
-    blocker: "S3-02, S3-03, S3-04, S3-05"
+    blocker: ""
     completed: ""
   # Out-of-band evidence-integrity patch (pre-S3-06). NOT part of the
   # S3-01..S3-06 slate, so it is intentionally excluded from total_stories
