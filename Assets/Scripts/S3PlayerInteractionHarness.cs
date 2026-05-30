@@ -268,7 +268,7 @@ namespace Gravenspire.UnityRuntime.Interaction
         {
             foreach (var behaviour in FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None))
             {
-                if (behaviour == this || behaviour is not IPlayerInteractTarget target)
+                if (behaviour == this || !behaviour.isActiveAndEnabled || behaviour is not IPlayerInteractTarget target)
                 {
                     continue;
                 }
@@ -304,7 +304,10 @@ namespace Gravenspire.UnityRuntime.Interaction
 
             if (nearest.Target.TryInteract(PlayerActorId, distanceMeters, out var targetContext))
             {
-                var firedContext = NormalizeTargetContext(targetContext, nearest, distanceMeters)
+                var targetTelemetryContext = NormalizeTargetContext(targetContext, nearest, distanceMeters);
+                _telemetryEvents.Add(targetTelemetryContext);
+
+                var firedContext = targetTelemetryContext
                     .WithFeedbackEvent(FiredTelemetryEvent, NonBlank(targetContext.ResultLabel, FiredFeedbackText), distanceMeters);
                 RecordOutcome(InteractFeedbackOutcome.Fired, firedContext, FiredFeedbackText);
                 return true;

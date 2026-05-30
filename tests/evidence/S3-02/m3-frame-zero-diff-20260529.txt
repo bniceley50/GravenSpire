@@ -1,0 +1,11 @@
+S3-02 M3 frame zero-diff artifact
+Date: 2026-05-29
+
+Command:
+git diff --stat -- Assets/Scripts/M3NamedNpcObjectiveFrame.cs Assets/Scripts/M3NamedNpcObjectiveFrame.cs.meta
+
+Result:
+PASS - command exited 0 and produced no diff-stat output.
+
+Scope:
+This verifies S3-02 AC-03: M3NamedNpcObjectiveFrame.cs and its .meta file have zero diff in this story.
