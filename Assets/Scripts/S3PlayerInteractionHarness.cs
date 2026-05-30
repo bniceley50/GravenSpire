@@ -19,6 +19,11 @@ namespace Gravenspire.UnityRuntime.Interaction
         bool TryInteract(string playerActorId, float distanceMeters, out InteractContext context);
     }
 
+    public interface IPlayerInteractTelemetryTarget
+    {
+        IReadOnlyList<InteractContext> LastInteractTelemetryEvents { get; }
+    }
+
     public readonly struct InteractContext
     {
         public InteractContext(
@@ -123,6 +128,7 @@ namespace Gravenspire.UnityRuntime.Interaction
 
         private GUIStyle? _promptStyle;
         private GUIStyle? _feedbackStyle;
+        private bool _isRefreshingTargetsFromScene;
         private float _feedbackExpiresAtSeconds;
 
         public Transform? PlayerMarker => _playerMarker;
@@ -236,13 +242,20 @@ namespace Gravenspire.UnityRuntime.Interaction
                 {
                     registered.Target = target;
                     registered.TargetTransform = targetTransform;
-                    RefreshPromptState();
+                    if (!_isRefreshingTargetsFromScene)
+                    {
+                        RefreshPromptState();
+                    }
+
                     return;
                 }
             }
 
             _registeredTargets.Add(new RegisteredInteractTarget(target, targetTransform));
-            RefreshPromptState();
+            if (!_isRefreshingTargetsFromScene)
+            {
+                RefreshPromptState();
+            }
         }
 
         public void UnregisterTarget(IPlayerInteractTarget target)
@@ -266,6 +279,12 @@ namespace Gravenspire.UnityRuntime.Interaction
 
         public void RefreshRegisteredTargetsFromScene()
         {
+            RefreshRegisteredTargetsFromScene(refreshPromptAfter: true);
+        }
+
+        private void RefreshRegisteredTargetsFromScene(bool refreshPromptAfter)
+        {
+            _isRefreshingTargetsFromScene = true;
             foreach (var behaviour in FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None))
             {
                 if (behaviour == this || !behaviour.isActiveAndEnabled || behaviour is not IPlayerInteractTarget target)
@@ -274,6 +293,12 @@ namespace Gravenspire.UnityRuntime.Interaction
                 }
 
                 RegisterTarget(target, behaviour.transform);
+            }
+
+            _isRefreshingTargetsFromScene = false;
+            if (refreshPromptAfter)
+            {
+                RefreshPromptState();
             }
         }
 
@@ -304,10 +329,14 @@ namespace Gravenspire.UnityRuntime.Interaction
 
             if (nearest.Target.TryInteract(PlayerActorId, distanceMeters, out var targetContext))
             {
-                var targetTelemetryContext = NormalizeTargetContext(targetContext, nearest, distanceMeters);
-                _telemetryEvents.Add(targetTelemetryContext);
+                var targetTelemetryContexts = ResolveTargetTelemetryContexts(nearest.Target, targetContext);
+                var primaryTelemetryContext = NormalizeTargetContext(targetTelemetryContexts[0], nearest, distanceMeters);
+                for (var i = 0; i < targetTelemetryContexts.Count; i++)
+                {
+                    _telemetryEvents.Add(NormalizeTargetContext(targetTelemetryContexts[i], nearest, distanceMeters));
+                }
 
-                var firedContext = targetTelemetryContext
+                var firedContext = primaryTelemetryContext
                     .WithFeedbackEvent(FiredTelemetryEvent, NonBlank(targetContext.ResultLabel, FiredFeedbackText), distanceMeters);
                 RecordOutcome(InteractFeedbackOutcome.Fired, firedContext, FiredFeedbackText);
                 return true;
@@ -348,6 +377,11 @@ namespace Gravenspire.UnityRuntime.Interaction
                 return false;
             }
 
+            if (_autoDiscoverTargetsOnStart)
+            {
+                RefreshRegisteredTargetsFromScene(refreshPromptAfter: false);
+            }
+
             PruneInvalidTargets();
             var nearestDistance = float.MaxValue;
             var found = false;
@@ -380,12 +414,29 @@ namespace Gravenspire.UnityRuntime.Interaction
             return true;
         }
 
+        private static IReadOnlyList<InteractContext> ResolveTargetTelemetryContexts(
+            IPlayerInteractTarget target,
+            InteractContext fallbackContext)
+        {
+            if (target is IPlayerInteractTelemetryTarget telemetryTarget &&
+                telemetryTarget.LastInteractTelemetryEvents.Count > 0)
+            {
+                return telemetryTarget.LastInteractTelemetryEvents;
+            }
+
+            return new[] { fallbackContext };
+        }
+
         private void PruneInvalidTargets()
         {
             for (var i = _registeredTargets.Count - 1; i >= 0; i--)
             {
                 var registered = _registeredTargets[i];
-                if (registered.TargetTransform == null || registered.Target is Component component && component == null)
+                if (registered.TargetTransform == null ||
+                    registered.Target is Component component &&
+                    (component == null ||
+                        !component.gameObject.activeInHierarchy ||
+                        component is Behaviour behaviour && !behaviour.isActiveAndEnabled))
                 {
                     _registeredTargets.RemoveAt(i);
                 }

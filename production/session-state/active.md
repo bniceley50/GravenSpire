@@ -1,8 +1,31 @@
 # Active Session State
 
-**Last Updated:** 2026-05-29
-**Current Stage Note:** S3-02 (Player-Driven NPC Interaction) closed COMPLETE via /story-done and merged to main via PR #7 at `8acb53b` (7/7 ACs; M3 frame zero-diff held; additive cross-story harness edit with S3-01 regression PASS). completed_stories→3/6. Main checkout synced to origin/main at the post-merge head. Next: `/story-readiness` for S3-03 (now unblocked) in the Codex lane (`N:/GravenSpire-codex`).
+**Last Updated:** 2026-05-30
+**Current Stage Note:** S3-03 (Player Relic Recovery + Looting) implemented in the Codex lane on `codex/s3-03-player-relic-recovery-and-looting`, pending `/code-review` and `/story-done`. S3-03 Unity smoke PASS, S3-02 regression PASS, S3-01 harness regression PASS, M2 preservation PASS x3, M3 objective/loot zero-diff PASS, Combat 189/189 PASS, format gates PASS, pre-commit PASS. Main checkout remains the merge target; Codex worktree carries the implementation/evidence WIP.
 **Project Stage:** Pre-Production — Sprint 3 (Playable Vertical-Slice Assembly)
+
+## Session Extract — /dev-story 2026-05-30 (S3-03)
+
+- Story: `production/stories/s3-03-player-relic-recovery-and-looting.md` — S3-03 Player Relic Recovery + Looting.
+- Worktree / branch: `N:\GravenSpire-codex` on `codex/s3-03-player-relic-recovery-and-looting`, created from `origin/main` at `dea8692`.
+- Files changed:
+  - `Assets/Scripts/S3PlayerInteractionHarness.cs` — additive multi-event target telemetry support; active target refresh/pruning so the relic adapter can register when the M3 state system activates the relic.
+  - `Assets/Scripts/M3NamedNpcInteractTarget.cs` — expanded S3-02 NPC adapter to route by objective state: accept, re-talk, hand-in, post-complete re-talk.
+  - `Assets/Scripts/M3RelicInteractTarget.cs` + `.meta` — new relic interaction adapter for recover + loot resolve, including partial-success telemetry.
+  - `Assets/Editor/GravenspireS3PlayerRelicRecoveryAndLootingBuilder.cs` + `.meta` — adapter-only scene wiring builder; does not invoke legacy M2/M3 builders after a local drift catch.
+  - `Assets/Editor/GravenspireS3PlayerRelicRecoveryAndLootingVerificationRunner.cs` + `.meta` — Unity batchmode S3-03 runner covering T1-T8 and S3-02 Accepted-state regression.
+  - `Assets/Scenes/_DevEntry.unity` — scene wiring only: NPC adapter `_objectiveState` reference and `M3RelicInteractTarget` on `M3_ObjectiveRelic`.
+  - `tests/evidence/S3-03/*` — verification summary and companion smoke/zero-diff artifacts.
+- Verification:
+  - S3-03 Unity smoke PASS: `tests/evidence/S3-03/unity-player-relic-recovery-and-looting-20260530-smoke.md` (no warnings, no errors).
+  - S3-02 regression PASS: `tests/evidence/S3-03/s3-02-regression-20260530-smoke.md`.
+  - S3-01 harness regression PASS: `tests/evidence/S3-03/s3-01-harness-regression-20260530-smoke.md` (run because harness behavior widened).
+  - M2 preservation PASS x3, each in a separate Unity invocation with `-gravenspireSkipBuilder`: `m2-02-preservation-20260530-smoke.md`, `m2-03-preservation-20260530-smoke.md`, `m2-04-preservation-20260530-smoke.md`.
+  - Protected M3 files zero-diff: `m3-objective-state-zero-diff-20260530.txt` and `m3-loot-vendor-zero-diff-20260530.txt`.
+  - `dotnet test tests\Gravenspire.Combat.Tests.csproj --logger "console;verbosity=minimal"` PASS 189/189; both `dotnet format --verify-no-changes --exclude-diagnostics IDE1006` targets PASS; `git diff --check` PASS; T1 negative-scope scan PASS; `.githooks/pre-commit` PASS via `C:\Program Files\Git\bin\bash.exe`.
+- Scope notes: `M3ObjectiveStateRelicHandIn.cs` and `M3LootTableFixedProfileVendor.cs` remain zero-diff. No vendor sell/buy, Save/Load, faction consequence, route hints, quest UI, minimap, live LLM, networking, or rollback behavior added. Partial-success behavior is telemetry-only and leaves the objective at `RelicRecovered`, as specified.
+- Correction mid-session: initial local builder pass chained legacy builders and re-authored unrelated scene surfaces (`FirstDistrict_ShellOnly_NoGameplay`, directional light, camera background). The S3-03 builder was tightened to adapter-only wiring and final scene diff was cleaned back to the S3-03 surface.
+- Next recommended: `/code-review` the S3-03 implementation/evidence files, then `/story-done production/stories/s3-03-player-relic-recovery-and-looting.md`.
 
 ## Session Extract — /story-done 2026-05-30 (S3-02)
 
