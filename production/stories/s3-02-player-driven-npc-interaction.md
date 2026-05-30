@@ -2,7 +2,7 @@
 
 > **Sprint**: Sprint 3 — Playable Vertical-Slice Assembly
 > **Sprint Plan**: `production/sprints/sprint-3.md` (Story Ledger row, line 67)
-> **Status**: Ready (depends on S3-01 being Done)
+> **Status**: Complete
 > **Layer**: Core
 > **Type**: Integration
 > **Estimate**: 1.0 day (HIGH confidence — thin wiring onto already-built M3 system, per `sprint-3.md:156`)
@@ -43,13 +43,13 @@
 
 ## Acceptance Criteria
 
-- [ ] **S3-02-01**: A new thin adapter MonoBehaviour (proposed name: `M3NamedNpcInteractTarget`) is created under `Assets/Scripts/`, implements `IPlayerInteractTarget` (from S3-01), and is attached to the `M3_Caretaker` GameObject in `Assets/Scenes/_DevEntry.unity`.
-- [ ] **S3-02-02**: The adapter holds a serialized reference to a `M3NamedNpcObjectiveFrame` instance and, on `TryInteract(...)`, calls `frame.TryRecordIntentionalInteraction(playerActorId, distanceMeters, out NpcInteractionContext npcContext)`. The adapter returns the boolean result directly and maps `npcContext` into the harness's `InteractContext` (the adapter is the mapping point; the harness sees a uniform `InteractContext`).
-- [ ] **S3-02-03**: `M3NamedNpcObjectiveFrame.cs` has **zero diff** in this story. S2-M3-01 closure (`1166cae`) is preserved. No additional public methods, no signature changes, no field changes on the M3 frame component.
-- [ ] **S3-02-04**: On a successful adapter dispatch (Try* returned `true`), telemetry records a `npc_interaction_intentional` event with all `NpcInteractionContext` fields: `npcId`, `playerActorId`, `activeZoneId`, `InteractionState`, `InteractionKind`, `dialogueTemplateSetId`, `objectiveFrameTextKey`, `wasIntentional` (must be `true`), `distanceMeters`. The event source attribution is `player_driven` (not `runner_driven`), distinguishing this from the S2-M3-01 runner-only path.
-- [ ] **S3-02-05**: The templated `dialogueTemplateSetId` and `objectiveFrameTextKey` are surfaced **as data** in the telemetry payload only. No Dialogue System UI / dialogue window / dialogue box renders. No live LLM call. No overhead NPC name plate, no quest marker, no minimap pin, no objective signpost (S2-M3-01 boundary and Sprint 3 feedback rule both hold).
-- [ ] **S3-02-06**: Player-driven path is end-to-end: harness keypress → harness raycast/distance-check finds the `M3_Caretaker`-mounted adapter → harness invokes `adapter.TryInteract(...)` → adapter calls `frame.TryRecordIntentionalInteraction(...)` → telemetry records the event → harness's interact-fired feedback (per S3-01 AC-06) plays. No runner-side shortcut path that bypasses the harness; the runner exercises the same player-input path as a real player session would.
-- [ ] **S3-02-07**: When the player keypress fires from outside the M3 frame's `ConfiguredInteractionRangeMeters` (M3 returns `false`), the harness's interact-blocked feedback (per S3-01 AC-08) plays. No diagnostic text explaining the M3 internal reason; no routing hint to "get closer."
+- [x] **S3-02-01**: A new thin adapter MonoBehaviour (proposed name: `M3NamedNpcInteractTarget`) is created under `Assets/Scripts/`, implements `IPlayerInteractTarget` (from S3-01), and is attached to the `M3_Caretaker` GameObject in `Assets/Scenes/_DevEntry.unity`.
+- [x] **S3-02-02**: The adapter holds a serialized reference to a `M3NamedNpcObjectiveFrame` instance and, on `TryInteract(...)`, calls `frame.TryRecordIntentionalInteraction(playerActorId, distanceMeters, out NpcInteractionContext npcContext)`. The adapter returns the boolean result directly and maps `npcContext` into the harness's `InteractContext` (the adapter is the mapping point; the harness sees a uniform `InteractContext`).
+- [x] **S3-02-03**: `M3NamedNpcObjectiveFrame.cs` has **zero diff** in this story. S2-M3-01 closure (`1166cae`) is preserved. No additional public methods, no signature changes, no field changes on the M3 frame component.
+- [x] **S3-02-04**: On a successful adapter dispatch (Try* returned `true`), telemetry records a `npc_interaction_intentional` event with all `NpcInteractionContext` fields: `npcId`, `playerActorId`, `activeZoneId`, `InteractionState`, `InteractionKind`, `dialogueTemplateSetId`, `objectiveFrameTextKey`, `wasIntentional` (must be `true`), `distanceMeters`. The event source attribution is `player_driven` (not `runner_driven`), distinguishing this from the S2-M3-01 runner-only path.
+- [x] **S3-02-05**: The templated `dialogueTemplateSetId` and `objectiveFrameTextKey` are surfaced **as data** in the telemetry payload only. No Dialogue System UI / dialogue window / dialogue box renders. No live LLM call. No overhead NPC name plate, no quest marker, no minimap pin, no objective signpost (S2-M3-01 boundary and Sprint 3 feedback rule both hold).
+- [x] **S3-02-06**: Player-driven path is end-to-end: harness keypress → harness raycast/distance-check finds the `M3_Caretaker`-mounted adapter → harness invokes `adapter.TryInteract(...)` → adapter calls `frame.TryRecordIntentionalInteraction(...)` → telemetry records the event → harness's interact-fired feedback (per S3-01 AC-06) plays. No runner-side shortcut path that bypasses the harness; the runner exercises the same player-input path as a real player session would.
+- [x] **S3-02-07**: When the player keypress fires from outside the M3 frame's `ConfiguredInteractionRangeMeters` (M3 returns `false`), the harness's interact-blocked feedback (per S3-01 AC-08) plays. No diagnostic text explaining the M3 internal reason; no routing hint to "get closer."
 
 ## Implementation Notes
 
@@ -138,7 +138,7 @@ Companion artifacts:
 - `.githooks/pre-commit` — `[pre-commit] OK`
 - `dotnet format --verify-no-changes` — PASS
 
-**Evidence status**: Not started
+**Evidence status**: Complete
 
 **M2 preservation rerun execution note** (per `m2_melee_rng_not_reset` carryover): the three M2 preservation smokes cannot be chained in a single Unity batchmode invocation. The M2 controller's four `LoopingMeleeRandomSource` melee-RNG cursors at `M2SingleTrashMedLoopController.cs:76-79` are `readonly`, created once, and never reset between smokes within a Play session — chained runs yield stale RNG and bogus results. Run each preservation smoke in its own `Unity.exe -batchmode -executeMethod ...` invocation, each with its own `-gravenspireEvidencePath` override. Pattern established in S2-M3-04 closure.
 
@@ -161,3 +161,16 @@ Watch items (not blockers):
 - `control_manifest_absence_pre_existing` — Manifest Version header carries `Unavailable` per documented fallback
 - Format Gate — see Dependencies
 - **D004 templated-dialogue boundary**: if T3 ever lands LLM dialogue, the adapter is the natural seam to gate live LLM behind a config switch — this story does not implement that switch, but the adapter shape should not preclude it
+
+## Completion Notes
+
+**Completed**: 2026-05-30
+**Verdict**: COMPLETE
+**Criteria**: 7/7 passing (S3-02-01 … S3-02-07)
+**Deferred/Untested Criteria**: None
+**Test Evidence**: `tests/evidence/S3-02/verification.md` (PASS) + companions — S3-02 player-driven smoke (T1–T5), S3-01 harness regression smoke (PASS after the cross-story harness edit), 3× M2 preservation smokes (separate Unity invocations, `Builder Invoked: false`), `m3-frame-zero-diff-20260529.txt` (zero output), Combat regression 189/189, both `dotnet format` targets exit 0, `git diff --check` clean, T1 negative-scope scan (classified runner-guard hits only).
+**GDD/ADR Deviations**: None. D004 T1 boundary respected (templated dialogue handle surfaced as telemetry data only, no render). `M3NamedNpcObjectiveFrame.cs` zero-diff (AC-03).
+**Scope Notes**: One intentional cross-story touch — `Assets/Scripts/S3PlayerInteractionHarness.cs` (S3-01 deliverable) edited additively so the NPC target telemetry event is recorded before the appended `interact_fired` feedback event (anticipated by AC-02). S3-01 regression smoke PASS confirms no S3-01 behavior break. Also added a `!isActiveAndEnabled` registration guard (covers the T1 "disabled adapter → not registered" edge case).
+**Review Gates**: lean (Task subagents skipped). Codex pre-PR review (no blocking findings) + main-lane read-only staged-set verification + /story-done evidence review.
+**Forced Completion**: No
+**Merge**: PR #7 (`codex/s3-02-player-driven-npc-interaction`) merged to `main` at `8acb53b` on 2026-05-30; implementation commit `e1ed954`.

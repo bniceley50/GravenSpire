@@ -1,8 +1,19 @@
 # Active Session State
 
 **Last Updated:** 2026-05-29
-**Current Stage Note:** S3-05/S3-05.1 slate-row reconciliation APPLIED and pushed to origin/main at `265615b` (S3-05 completed 2026-05-26; completed_stories→2; S3-05.1 NavMesh correction PR #5/7cade4b recorded as a parent-row note). S3-02 cleared `/story-readiness` = READY (2026-05-29). Main checkout = origin/main at `265615b`. Next: `/dev-story` for S3-02 in the Codex lane (`N:/GravenSpire-codex`).
+**Current Stage Note:** S3-02 (Player-Driven NPC Interaction) closed COMPLETE via /story-done and merged to main via PR #7 at `8acb53b` (7/7 ACs; M3 frame zero-diff held; additive cross-story harness edit with S3-01 regression PASS). completed_stories→3/6. Main checkout synced to origin/main at the post-merge head. Next: `/story-readiness` for S3-03 (now unblocked) in the Codex lane (`N:/GravenSpire-codex`).
 **Project Stage:** Pre-Production — Sprint 3 (Playable Vertical-Slice Assembly)
+
+## Session Extract — /story-done 2026-05-30 (S3-02)
+
+- Story: `production/stories/s3-02-player-driven-npc-interaction.md` — S3-02 Player-Driven NPC Interaction. Verdict: **COMPLETE** (7/7 ACs PASS).
+- Merge: PR #7 (`codex/s3-02-player-driven-npc-interaction`) merged to `main` at `8acb53b`; implementation commit `e1ed954`. Main checkout fast-synced from `2ebcd30`.
+- Evidence: `tests/evidence/S3-02/verification.md` (PASS) + S3-02 smoke (T1–T5), S3-01 harness regression smoke (PASS after the additive cross-story harness edit), 3× M2 preservation smokes (separate Unity invocations, `Builder Invoked: false`), `m3-frame-zero-diff-20260529.txt` (zero output), Combat 189/189, both `dotnet format` targets exit 0, `git diff --check` clean, T1 negative-scope classified.
+- Cross-story note: `Assets/Scripts/S3PlayerInteractionHarness.cs` (S3-01 deliverable) edited additively — target telemetry recorded before appended `interact_fired`; `!isActiveAndEnabled` registration guard added. M3 frame zero-diff (AC-03). D004 T1 boundary respected (dialogue handle = telemetry data only).
+- Main-lane verification before merge: read-only staged-set check (harness additive, scene adapter-only, no M3-frame change, no leftovers) + PR #7 mergeable/CLEAN.
+- Bookkeeping applied: story Status→Complete + Completion Notes; sprint-status.yaml S3-02→done (2026-05-30), completed_stories→3, head→8acb53b, S3-03 unblocked (blocked→ready), progress + next pointers refreshed.
+- Pre-existing main-checkout WIP still preserved untouched (6 modified tracked files).
+- Next recommended: `/story-readiness production/stories/s3-03-player-relic-recovery-and-looting.md` (Codex lane).
 
 ## Session Extract — main-lane reconciliation + S3-02 readiness 2026-05-29
 

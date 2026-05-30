@@ -6,18 +6,18 @@ goal: "Gravenspire T1: Playable Vertical-Slice Assembly — wire the runner-prov
 start: "2026-05-21"
 end: "2026-06-03"
 generated: "2026-05-23"
-updated: "2026-05-29"
+updated: "2026-05-30"
 branch: "main"
-head: "cfbfc0284329a6a8a5c22e02fec61b5537bbf2b6"
+head: "8acb53b879a8ea55e68f3892406988239359e2dd"
 qa_plan: "production/qa/plans/qa-plan-sprint-3-20260524.md"
 plan: "production/sprints/sprint-3.md"
 slice_review: ""
 implementation_gate: "Sprint 3 slate opened 2026-05-23 with the 6-story slate S3-01–S3-06 written (slate commit 9bf60e1) and Story Ledger linked (back-fill commit ecbea5e). Format-gate pre-condition resolved 2026-05-24 by PR #2 merge commit 90821f2 (policy f040493, baseline a0785d8, hook cf1c204); owner assignment and Sprint 3 /qa-plan resolved 2026-05-24 at df5fdec. S3-01 closed COMPLETE WITH NOTES on 2026-05-25. S3-02 cleared /story-readiness = READY on 2026-05-29 (S3-01 dependency Complete; D004 T1 boundary respected as telemetry-data-only); next implementation gate is /dev-story for S3-02."
-progress: "S3-EVIDENCE-01 (out-of-band evidence-integrity patch, NOT part of the S3-01..S3-06 slate) closed COMPLETE WITH NOTES and merged to main via PR #6 at cfbfc02 on 2026-05-29 (4/4 ACs; both negative controls FAIL as designed; dotnet format gate BLOCKED by Unity-Editor-only tooling scope, documented in tests/evidence/S3-EVIDENCE-01/verification.md). S3-05 (PR #4, 0d3ea58) and S3-05.1 NavMesh obstacle inclusion correction (PR #5, 7cade4b) also merged since the 2026-05-25 bookkeeping snapshot; their slate-row reconciliation was APPLIED 2026-05-29 (S3-05 completed back-filled to 2026-05-26 per carryover s3_05_ac12_partial_rollforward_to_s3_06; completed_stories bumped 1->2 to count S3-05 done-with-notes; S3-05.1 recorded as a note on the S3-05 row, not a slate story). Slate state: S3-01 done; S3-05 done-with-notes (completed 2026-05-26); S3-02 ready (/story-readiness = READY, verified 2026-05-29); S3-03/S3-04/S3-06 blocked by the dependency chain. Next: /dev-story production/stories/s3-02-player-driven-npc-interaction.md."
-completed_stories: 2
+progress: "S3-02 (Player-Driven NPC Interaction) closed COMPLETE via /story-done on 2026-05-30 (7/7 ACs PASS; M3NamedNpcObjectiveFrame.cs zero-diff held; intentional additive cross-story harness edit records the NPC target telemetry event before the appended interact_fired feedback, with S3-01 regression smoke PASS) and merged to main via PR #7 at 8acb53b (implementation commit e1ed954). completed_stories now 3/6. Prior context: S3-EVIDENCE-01 merged via PR #6 at cfbfc02; S3-05 + S3-05.1 reconciliation applied 2026-05-29 (S3-05 completed 2026-05-26). Slate state: S3-01 done; S3-02 done (2026-05-30); S3-05 done-with-notes (2026-05-26); S3-03 now unblocked (ready); S3-04/S3-06 blocked by the dependency chain. Next: /story-readiness production/stories/s3-03-player-relic-recovery-and-looting.md."
+completed_stories: 3
 total_stories: 6
-next_active_story: "S3-02"
-next_active_command: "/dev-story production/stories/s3-02-player-driven-npc-interaction.md"
+next_active_story: "S3-03"
+next_active_command: "/story-readiness production/stories/s3-03-player-relic-recovery-and-looting.md"
 
 carryover:
   # ----------------------------------------------------------------
@@ -89,19 +89,19 @@ stories:
     name: "Player-driven NPC interaction"
     file: "production/stories/s3-02-player-driven-npc-interaction.md"
     priority: must-have
-    status: ready
+    status: done
     owner: "Codex"
     estimate_days: 1.0
     blocker: ""
-    completed: ""
+    completed: "2026-05-30"
   - id: "S3-03"
     name: "Player relic recovery + looting (Accept, Recover, Hand-In, Loot)"
     file: "production/stories/s3-03-player-relic-recovery-and-looting.md"
     priority: must-have
-    status: blocked
+    status: ready
     owner: "Codex"
     estimate_days: 1.0
-    blocker: "S3-02"
+    blocker: ""
     completed: ""
   - id: "S3-04"
     name: "Player-driven vendor (sell-side only)"
