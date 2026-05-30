@@ -8,16 +8,16 @@ end: "2026-06-03"
 generated: "2026-05-23"
 updated: "2026-05-30"
 branch: "main"
-head: "8acb53b879a8ea55e68f3892406988239359e2dd"
+head: "1a033304d144fd3b6077fae72cc3b1abcd87c7bb"
 qa_plan: "production/qa/plans/qa-plan-sprint-3-20260524.md"
 plan: "production/sprints/sprint-3.md"
 slice_review: ""
 implementation_gate: "Sprint 3 slate opened 2026-05-23 with the 6-story slate S3-01–S3-06 written (slate commit 9bf60e1) and Story Ledger linked (back-fill commit ecbea5e). Format-gate pre-condition resolved 2026-05-24 by PR #2 merge commit 90821f2 (policy f040493, baseline a0785d8, hook cf1c204); owner assignment and Sprint 3 /qa-plan resolved 2026-05-24 at df5fdec. S3-01 closed COMPLETE WITH NOTES on 2026-05-25. S3-02 cleared /story-readiness = READY on 2026-05-29 (S3-01 dependency Complete; D004 T1 boundary respected as telemetry-data-only); next implementation gate is /dev-story for S3-02."
-progress: "S3-02 (Player-Driven NPC Interaction) closed COMPLETE via /story-done on 2026-05-30 (7/7 ACs PASS; M3NamedNpcObjectiveFrame.cs zero-diff held; intentional additive cross-story harness edit records the NPC target telemetry event before the appended interact_fired feedback, with S3-01 regression smoke PASS) and merged to main via PR #7 at 8acb53b (implementation commit e1ed954). completed_stories now 3/6. Prior context: S3-EVIDENCE-01 merged via PR #6 at cfbfc02; S3-05 + S3-05.1 reconciliation applied 2026-05-29 (S3-05 completed 2026-05-26). Slate state: S3-01 done; S3-02 done (2026-05-30); S3-05 done-with-notes (2026-05-26); S3-03 now unblocked (ready); S3-04/S3-06 blocked by the dependency chain. Next: /story-readiness production/stories/s3-03-player-relic-recovery-and-looting.md."
-completed_stories: 3
+progress: "S3-03 (Player Relic Recovery + Looting) closed COMPLETE via /story-done on 2026-05-30 (12/12 ACs PASS; both protected M3 files M3ObjectiveStateRelicHandIn.cs + M3LootTableFixedProfileVendor.cs held zero-diff; full accept->recover->hand-in loop end-to-end player-driven; partial-success branch genuinely forced via null-vendor injection with negative assertion, verified under Evidence Rule v2) and merged to main via PR #8 at 1a03330 (implementation commit fab8f31). completed_stories now 4/6. Prior context: S3-02 merged via PR #7 at 8acb53b; S3-EVIDENCE-01 via PR #6 at cfbfc02; S3-05 + S3-05.1 reconciliation applied 2026-05-29. Slate state: S3-01 done; S3-02 done (2026-05-30); S3-03 done (2026-05-30); S3-05 done-with-notes (2026-05-26); S3-04 now unblocked (ready); S3-06 still blocked (needs S3-04). Next: /story-readiness production/stories/s3-04-player-driven-vendor.md."
+completed_stories: 4
 total_stories: 6
-next_active_story: "S3-03"
-next_active_command: "/story-readiness production/stories/s3-03-player-relic-recovery-and-looting.md"
+next_active_story: "S3-04"
+next_active_command: "/story-readiness production/stories/s3-04-player-driven-vendor.md"
 
 carryover:
   # ----------------------------------------------------------------
@@ -98,19 +98,19 @@ stories:
     name: "Player relic recovery + looting (Accept, Recover, Hand-In, Loot)"
     file: "production/stories/s3-03-player-relic-recovery-and-looting.md"
     priority: must-have
-    status: ready
+    status: done
     owner: "Codex"
     estimate_days: 1.0
     blocker: ""
-    completed: ""
+    completed: "2026-05-30"
   - id: "S3-04"
     name: "Player-driven vendor (sell-side only)"
     file: "production/stories/s3-04-player-driven-vendor.md"
     priority: must-have
-    status: blocked
+    status: ready
     owner: "Codex"
     estimate_days: 1.0
-    blocker: "S3-03"
+    blocker: ""
     completed: ""
   - id: "S3-05"
     name: "Navigable greybox First District"

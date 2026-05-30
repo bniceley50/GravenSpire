@@ -1,8 +1,19 @@
 # Active Session State
 
 **Last Updated:** 2026-05-30
-**Current Stage Note:** S3-03 (Player Relic Recovery + Looting) implemented in the Codex lane on `codex/s3-03-player-relic-recovery-and-looting`, pending `/code-review` and `/story-done`. S3-03 Unity smoke PASS, S3-02 regression PASS, S3-01 harness regression PASS, M2 preservation PASS x3, M3 objective/loot zero-diff PASS, Combat 189/189 PASS, format gates PASS, pre-commit PASS. Main checkout remains the merge target; Codex worktree carries the implementation/evidence WIP.
+**Current Stage Note:** S3-03 (Player Relic Recovery + Looting) closed COMPLETE via /story-done and merged to main via PR #8 at `1a03330` (12/12 ACs; both protected M3 files zero-diff; partial-success branch verified genuinely forced under Evidence Rule v2). completed_stories→4/6. Main checkout synced to origin/main post-merge. Next: `/story-readiness` for S3-04 (Player-Driven Vendor, now unblocked) in the Codex lane (`N:/GravenSpire-codex`). S3-06 remains blocked pending S3-04.
 **Project Stage:** Pre-Production — Sprint 3 (Playable Vertical-Slice Assembly)
+
+## Session Extract — /story-done 2026-05-30 (S3-03)
+
+- Story: `production/stories/s3-03-player-relic-recovery-and-looting.md` — S3-03 Player Relic Recovery + Looting. Verdict: **COMPLETE** (12/12 ACs PASS).
+- Merge: PR #8 (`codex/s3-03-player-relic-recovery-and-looting`) merged to `main` at `1a03330`; implementation commit `fab8f31` (rebased clean onto 53f4fe7). Main synced from `53f4fe7`.
+- Review (main-lane, Evidence Rule v2): verified the partial-success branch is genuinely forced via `lootVendor: null` injection with negative assertion `objective_loot_resolved == 0` (not a constant pass), and the adapter-only scene delta (17 lines, no light/camera/settings/NavMesh drift). Verdict GO/APPROVE; one advisory (document harness event-ordering contract in S3-06).
+- Evidence: `tests/evidence/S3-03/verification.md` (PASS) + T1–T7 smoke, S3-02 + S3-01 regression smokes, 3× M2 preservation (`Builder Invoked: false`), 2 zero-diff artifacts; Combat 189/189; both format targets exit 0; diff-check clean.
+- Both protected M3 runtime files held zero-diff (AC-09/AC-10). Cross-story harness touch (S3-01 deliverable) additive — third additive touch across S3-01→02→03; both regressions PASS. Builder adapter-only (2026-05-30 builder-chaining lesson held).
+- Bookkeeping applied: story Status→Complete + 12 ACs checked + Completion Notes; sprint-status.yaml S3-03→done (2026-05-30), completed_stories→4, head→1a03330, S3-04 unblocked (blocked→ready), progress + next pointers refreshed.
+- Pre-existing main-checkout WIP still preserved untouched (6 modified tracked files).
+- Next recommended: `/story-readiness production/stories/s3-04-player-driven-vendor.md` (Codex lane).
 
 ## Session Extract — /dev-story 2026-05-30 (S3-03)
 

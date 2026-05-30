@@ -2,7 +2,7 @@
 
 > **Sprint**: Sprint 3 — Playable Vertical-Slice Assembly
 > **Sprint Plan**: `production/sprints/sprint-3.md` (Story Ledger row, line 68)
-> **Status**: Ready (depends on S3-02 being Done)
+> **Status**: Complete
 > **Layer**: Core
 > **Type**: Integration
 > **Estimate**: 1.0 day (MEDIUM confidence — per `sprint-3.md:157`; densest wiring of the slate, 1.5-day actuals would not be a deviation)
@@ -54,28 +54,28 @@
 
 ### NPC adapter state-routing expansion
 
-- [ ] **S3-03-01**: The S3-02 NPC adapter `M3NamedNpcInteractTarget` is modified to route based on the current objective state (read from `M3ObjectiveStateRelicHandIn.State`):
+- [x] **S3-03-01**: The S3-02 NPC adapter `M3NamedNpcInteractTarget` is modified to route based on the current objective state (read from `M3ObjectiveStateRelicHandIn.State`):
   - `NotIntroduced` → call `state.TryAcceptObjectiveFromNpc(frame, playerActorId, distance)` (which internally records NPC interaction + transitions to Accepted — no separate `frame.TryRecordIntentionalInteraction` call to avoid double-recording)
   - `Accepted` → call `frame.TryRecordIntentionalInteraction(playerActorId, distance, out context)` only (re-talk; no state change)
   - `RelicRecovered` → call `state.TryReturnRelicToNpc(frame)` (transitions to Complete)
   - `Complete` → call `frame.TryRecordIntentionalInteraction(...)` only (post-completion re-talk; no state change)
-- [ ] **S3-03-02**: S3-02's player-driven NPC interaction test (S3-02-T2) continues to pass after this modification — when the objective state is `Accepted` or `Complete`, the adapter still records intentional interaction and the `npc_interaction_intentional` telemetry event still fires with `player_driven` source. Regression discipline.
-- [ ] **S3-03-03**: On a successful `TryAcceptObjectiveFromNpc` dispatch, telemetry records a new `objective_accepted` event with payload `{ npcId, playerActorId, fromState: "NotIntroduced", toState: "Accepted", source: "player_driven", distanceMeters }`. The `npc_interaction_intentional` event ALSO fires (since `TryAcceptObjectiveFromNpc` internally calls `TryRecordIntentionalInteraction` at `M3ObjectiveStateRelicHandIn.cs:65` BEFORE `_session.TryAcceptObjective` at `:71`). Event order is **`npc_interaction_intentional` first, then `objective_accepted`** — forced by the M3 system's internal call sequence, not a separate scheduling decision. The test asserts both events present in that order.
-- [ ] **S3-03-04**: On a successful `TryReturnRelicToNpc` dispatch, telemetry records a new `relic_handed_in` event with payload `{ npcId, playerActorId, fromState: "RelicRecovered", toState: "Complete", source: "player_driven" }`. No `npc_interaction_intentional` event fires (hand-in does not internally record).
+- [x] **S3-03-02**: S3-02's player-driven NPC interaction test (S3-02-T2) continues to pass after this modification — when the objective state is `Accepted` or `Complete`, the adapter still records intentional interaction and the `npc_interaction_intentional` telemetry event still fires with `player_driven` source. Regression discipline.
+- [x] **S3-03-03**: On a successful `TryAcceptObjectiveFromNpc` dispatch, telemetry records a new `objective_accepted` event with payload `{ npcId, playerActorId, fromState: "NotIntroduced", toState: "Accepted", source: "player_driven", distanceMeters }`. The `npc_interaction_intentional` event ALSO fires (since `TryAcceptObjectiveFromNpc` internally calls `TryRecordIntentionalInteraction` at `M3ObjectiveStateRelicHandIn.cs:65` BEFORE `_session.TryAcceptObjective` at `:71`). Event order is **`npc_interaction_intentional` first, then `objective_accepted`** — forced by the M3 system's internal call sequence, not a separate scheduling decision. The test asserts both events present in that order.
+- [x] **S3-03-04**: On a successful `TryReturnRelicToNpc` dispatch, telemetry records a new `relic_handed_in` event with payload `{ npcId, playerActorId, fromState: "RelicRecovered", toState: "Complete", source: "player_driven" }`. No `npc_interaction_intentional` event fires (hand-in does not internally record).
 
 ### Relic adapter (new) + loot resolution
 
-- [ ] **S3-03-05**: A new MonoBehaviour `M3RelicInteractTarget` is created under `Assets/Scripts/`, implements `IPlayerInteractTarget` (from S3-01), and is attached to the `M3_ObjectiveRelic` GameObject in `_DevEntry.unity:1556`.
-- [ ] **S3-03-06**: The relic adapter holds serialized references to a `M3ObjectiveStateRelicHandIn` instance and a `M3LootTableFixedProfileVendor` instance. On `TryInteract(...)`, it calls `state.TryRecoverRelic()`. If that returns `false`, the adapter returns `false` immediately and the harness's interact-blocked feedback fires.
-- [ ] **S3-03-07**: On a successful `TryRecoverRelic` (returns `true`), the adapter **atomically** calls `vendor.TryResolveObjectiveLoot()`. Both calls succeed or the adapter records the partial-success edge case (`TryRecoverRelic` true, `TryResolveObjectiveLoot` false) explicitly in telemetry as `objective_loot_resolution_failed` with the rejection reason. The relic recovery transition is NOT rolled back (the M3 systems do not expose rollback); the partial state is recorded honestly.
-- [ ] **S3-03-08**: On a successful atomic dispatch (both calls returned `true`), telemetry records two events: `relic_recovered` with payload `{ relicObjectName, relicItemId, fromState: "Accepted", toState: "RelicRecovered", source: "player_driven" }` and `objective_loot_resolved` with payload `{ lootTableId, resolvedItemIds, source: "player_driven" }`. The relic GameObject becomes inactive (M3's `ApplyRelicAvailability` handles this automatically; the test asserts the GameObject is inactive post-recovery).
+- [x] **S3-03-05**: A new MonoBehaviour `M3RelicInteractTarget` is created under `Assets/Scripts/`, implements `IPlayerInteractTarget` (from S3-01), and is attached to the `M3_ObjectiveRelic` GameObject in `_DevEntry.unity:1556`.
+- [x] **S3-03-06**: The relic adapter holds serialized references to a `M3ObjectiveStateRelicHandIn` instance and a `M3LootTableFixedProfileVendor` instance. On `TryInteract(...)`, it calls `state.TryRecoverRelic()`. If that returns `false`, the adapter returns `false` immediately and the harness's interact-blocked feedback fires.
+- [x] **S3-03-07**: On a successful `TryRecoverRelic` (returns `true`), the adapter **atomically** calls `vendor.TryResolveObjectiveLoot()`. Both calls succeed or the adapter records the partial-success edge case (`TryRecoverRelic` true, `TryResolveObjectiveLoot` false) explicitly in telemetry as `objective_loot_resolution_failed` with the rejection reason. The relic recovery transition is NOT rolled back (the M3 systems do not expose rollback); the partial state is recorded honestly.
+- [x] **S3-03-08**: On a successful atomic dispatch (both calls returned `true`), telemetry records two events: `relic_recovered` with payload `{ relicObjectName, relicItemId, fromState: "Accepted", toState: "RelicRecovered", source: "player_driven" }` and `objective_loot_resolved` with payload `{ lootTableId, resolvedItemIds, source: "player_driven" }`. The relic GameObject becomes inactive (M3's `ApplyRelicAvailability` handles this automatically; the test asserts the GameObject is inactive post-recovery).
 
 ### Cross-cutting invariants
 
-- [ ] **S3-03-09**: `M3ObjectiveStateRelicHandIn.cs` has **zero diff** in this story. S2-M3-02 closure (`fb77f83`) is preserved verbatim. The same applies to `M3ObjectiveStateRelicHandIn.cs.meta`.
-- [ ] **S3-03-10**: `M3LootTableFixedProfileVendor.cs` has **zero diff** in this story. S2-M3-03 closure (`25c94ee`) is preserved verbatim. Same for `.meta`.
-- [ ] **S3-03-11**: All feedback at each transition obeys S3-01's contract (interact-fired on success, interact-blocked on failure) AND the Sprint 3 feedback rule. No "objective accepted, now go to the relic" routing text. No "you got the relic, return to the caretaker" hint. No quest log entry, minimap pin, or arrow. The relic appearing/disappearing in the scene is the M3 system's existing diegetic cue and is not a new advertising element.
-- [ ] **S3-03-12**: Full Tier-1 objective loop is end-to-end player-driven through this story's wiring: player interacts with `M3_Caretaker` (state goes NotIntroduced → Accepted; relic appears in scene); player walks to the now-visible relic and interacts (state goes Accepted → RelicRecovered, relic vanishes from scene, objective loot resolves into vendor inventory); player walks back to `M3_Caretaker` and interacts (state goes RelicRecovered → Complete). This loop is exercised end-to-end in a single test scenario (T7 below).
+- [x] **S3-03-09**: `M3ObjectiveStateRelicHandIn.cs` has **zero diff** in this story. S2-M3-02 closure (`fb77f83`) is preserved verbatim. The same applies to `M3ObjectiveStateRelicHandIn.cs.meta`.
+- [x] **S3-03-10**: `M3LootTableFixedProfileVendor.cs` has **zero diff** in this story. S2-M3-03 closure (`25c94ee`) is preserved verbatim. Same for `.meta`.
+- [x] **S3-03-11**: All feedback at each transition obeys S3-01's contract (interact-fired on success, interact-blocked on failure) AND the Sprint 3 feedback rule. No "objective accepted, now go to the relic" routing text. No "you got the relic, return to the caretaker" hint. No quest log entry, minimap pin, or arrow. The relic appearing/disappearing in the scene is the M3 system's existing diegetic cue and is not a new advertising element.
+- [x] **S3-03-12**: Full Tier-1 objective loop is end-to-end player-driven through this story's wiring: player interacts with `M3_Caretaker` (state goes NotIntroduced → Accepted; relic appears in scene); player walks to the now-visible relic and interacts (state goes Accepted → RelicRecovered, relic vanishes from scene, objective loot resolves into vendor inventory); player walks back to `M3_Caretaker` and interacts (state goes RelicRecovered → Complete). This loop is exercised end-to-end in a single test scenario (T7 below).
 
 ## Implementation Notes
 
@@ -187,7 +187,7 @@ Companion artifacts:
 - `.githooks/pre-commit` — `[pre-commit] OK`
 - `dotnet format --verify-no-changes` — PASS
 
-**Evidence status**: Not started
+**Evidence status**: Complete
 
 **Relic adapter telemetry-shape summary in verification.md**: the verification.md must explicitly enumerate the three terminal telemetry shapes (full success / partial success / blocked) with example payloads, so the S3-06 end-to-end fixture author does not have to re-derive them. See Implementation Notes for the shape catalog.
 
@@ -213,3 +213,16 @@ Watch items (not blockers):
 - `control_manifest_absence_pre_existing` — Manifest Version `Unavailable` per fallback
 - Format Gate — see Dependencies
 - **Partial-success edge case (S3-03-07 / telemetry shape (2))**: if `TryResolveObjectiveLoot` fails after `TryRecoverRelic` succeeds, the state is RelicRecovered but loot is not in vendor inventory. The greybox-acceptable behavior is to record the failure and continue; a future story can address rollback if it becomes necessary. Flag for review consideration.
+
+## Completion Notes
+
+**Completed**: 2026-05-30
+**Verdict**: COMPLETE
+**Criteria**: 12/12 passing (S3-03-01 … S3-03-12)
+**Deferred/Untested Criteria**: None
+**Test Evidence**: `tests/evidence/S3-03/verification.md` (PASS) + companions — S3-03 player-driven smoke (T1–T7, full accept→recover→hand-in loop), S3-02 regression (PASS), S3-01 harness regression (PASS — harness widened a third time), 3× M2 preservation (separate Unity invocations, `Builder Invoked: false`), and two zero-diff artifacts (`m3-objective-state-zero-diff` + `m3-loot-vendor-zero-diff`). Combat regression 189/189, both `dotnet format` targets exit 0, `git diff --check` clean, T1 negative-scope scan classified.
+**GDD/ADR Deviations**: None. Both protected M3 runtime files (`M3ObjectiveStateRelicHandIn.cs`, `M3LootTableFixedProfileVendor.cs`) held zero-diff (AC-09/AC-10). Partial-success edge case recorded honestly as telemetry (`objective_loot_resolution_failed`), no rollback (M3 exposes none) — greybox-acceptable, flagged for any future rollback story.
+**Scope Notes**: Cross-story harness touch (`S3PlayerInteractionHarness.cs`, the S3-01 deliverable) — additive widening to a multi-event target telemetry vocabulary (new `IPlayerInteractTelemetryTarget` interface + append loop + a `_isRefreshingTargetsFromScene` re-entrancy guard). This is the third additive touch (S3-01→02→03); S3-01 and S3-02 regression smokes both PASS. Builder is adapter-only (the 2026-05-30 builder-chaining lesson held); scene delta is 17 lines — one component ref + the `M3RelicInteractTarget` block on `M3_ObjectiveRelic`, no light/camera/settings/NavMesh drift.
+**Review Gates**: Main-lane REVIEW mode (Evidence Rule v2). Verified the partial-success branch is *genuinely forced* via `lootVendor: null` injection with the negative assertion `objective_loot_resolved == 0` (does not pass on a constant), and the adapter-only scene delta. Verdict GO/APPROVE, no blocking findings; one advisory (document the harness event-ordering contract in S3-06).
+**Forced Completion**: No
+**Merge**: PR #8 (`codex/s3-03-player-relic-recovery-and-looting`) merged to `main` at `1a03330` on 2026-05-30; implementation commit `fab8f31`.
