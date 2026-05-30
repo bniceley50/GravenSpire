@@ -286,4 +286,14 @@ if the same class of near-miss recurs during T1.
 
 ---
 
+### 2026-05-30 — [GLOBAL][TEST] S3 builders must not chain legacy builders over later-authored scenes
+
+**Context:** During S3-03 implementation, the first verification-builder pass chained the existing M3 builders to wire the scene. Because `_DevEntry.unity` is now authored by later sprint work (the S3-05 greybox First District plus the S3-02 adapter attachment), re-running the legacy builders re-authored parts of the scene outside S3-03's scope — the same scene-rebuild trap that produced the S3-05 NavMesh cascade and that S3-02 hit when the S3-01 regression runner rebuilt the baseline. Codex caught and corrected it mid-session; the final S3-03 builder is adapter-only (it wires new components onto existing main-lane scene anchors and never invokes a legacy builder), and the resulting scene diff is just the NPC-state reference plus the new relic adapter component.
+
+**Lesson:** A story's scene builder must only attach/modify the components that story owns; it must never chain an earlier sprint's builder when the current scene is authored by later work, because the legacy builder will re-author (clobber) state it no longer owns. This is the authoring-side twin of the evidence-side rule "runners must prove they tested the authored scene, not a rebuilt baseline." Default to adapter-only builders that operate on existing anchors; a builder that must rebuild is a decision gate, not a default. When a regression runner from an earlier story rebuilds the scene as a side effect, snapshot the authored scene before the run and restore it after (the S3-02 pattern). Verify by inspecting the post-build scene diff: it must contain only the current story's component delta.
+
+**Evidence:** S3-03 branch `codex/s3-03-player-relic-recovery-and-looting`; `tests/evidence/S3-03/verification.md` (builder-chaining correction session note; final builder adapter-only); `Assets/Editor/GravenspireS3PlayerRelicRecoveryAndLootingBuilder.cs`. Related precedents: 2026-05-28 NavMesh evidence-precondition entry (below); `docs/brian-system-prompt-v4-6.md` §15 (scene evidence must state authored-scene vs rebuilt-baseline).
+
+**Promotion status:** open — promote to `.claude/rules/game-dev-governance.md` Scene Discipline (or a dedicated builder-discipline rule) if a third story trips the same scene-rebuild trap; the pattern has now appeared across S3-02, S3-05, and S3-03.
+
 <!-- Add new lessons above this line (newest first). -->
