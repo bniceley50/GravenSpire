@@ -1,7 +1,7 @@
 # Active Session State
 
 **Last Updated:** 2026-05-30
-**Current Stage Note:** S3-04 (Player-Driven Vendor, sell-side only) closed COMPLETE via /story-done and merged to main via PR #9 at `b2c8d6c` (8/8 ACs; M3 vendor zero-diff; buy-side proven absent; first D017 application — runner-asserted SERVER-AUTH-INTENT annotation). completed_stories→5/6. **S3-06 (Playable End-to-End + Human-Play Feel Check) is now FULLY UNBLOCKED** — all four prerequisites (S3-02/03/04/05) complete. S3-06 is the final slate story and the milestone exit gate (AC-08 human-play verdict). Main synced to origin/main post-merge. Next: `/story-readiness` for S3-06 in the Codex lane (`N:/GravenSpire-codex`).
+**Current Stage Note:** S3-04 (Player-Driven Vendor, sell-side only) closed COMPLETE via /story-done and merged to main via PR #9 at `b2c8d6c` (8/8 ACs; M3 vendor zero-diff; buy-side proven absent; first D017 application — runner-asserted SERVER-AUTH-INTENT annotation). completed_stories→5/6. **S3-06 (Playable End-to-End + Human-Play Feel Check) is now FULLY UNBLOCKED** — all four prerequisites (S3-02/03/04/05) complete. S3-06 is the final slate story and the milestone exit gate (AC-08 human-play verdict). Main synced to origin/main post-merge. Next: `/story-readiness` for S3-06 in the Codex lane (`N:/GravenSpire-codex`). S3-06 feel-gate plan (decided 2026-05-30): AC-08 human-play verdict is an N=1 self-test — Brian plays the assembled vertical slice and records the verdict (voluntary re-engagement + names objective/NPC/relic as the reason); Codex builds the loop + evidence scaffold only. The feel verdict is a human call, not a runner output.
 **Project Stage:** Pre-Production — Sprint 3 (Playable Vertical-Slice Assembly)
 
 ## Session Extract — /story-done 2026-05-30 (S3-04)
