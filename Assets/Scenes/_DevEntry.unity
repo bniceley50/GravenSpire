@@ -1521,6 +1521,7 @@ MonoBehaviour:
   m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::Gravenspire.UnityRuntime.Npc.M3NamedNpcInteractTarget
   _objectiveFrame: {fileID: 1076475469}
+  _objectiveState: {fileID: 619567942}
 --- !u!1 &1116114059
 GameObject:
   m_ObjectHideFlags: 0
@@ -2093,6 +2094,7 @@ GameObject:
   - component: {fileID: 1497852076}
   - component: {fileID: 1497852075}
   - component: {fileID: 1497852074}
+  - component: {fileID: 1497852078}
   m_Layer: 0
   m_Name: M3_ObjectiveRelic
   m_TagString: Untagged
@@ -2193,6 +2195,20 @@ Transform:
   m_Children: []
   m_Father: {fileID: 619567943}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1497852078
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1497852073}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ee876288857c47c8aae81d303e64a26a, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::Gravenspire.UnityRuntime.Npc.M3RelicInteractTarget
+  _objectiveState: {fileID: 619567942}
+  _lootVendor: {fileID: 510273452}
 --- !u!1 &1508214670
 GameObject:
   m_ObjectHideFlags: 0

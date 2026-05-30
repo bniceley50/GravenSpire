@@ -1,0 +1,11 @@
+S3-03 M3 objective state zero-diff artifact
+Date: 2026-05-30
+
+Command:
+git diff --stat -- Assets/Scripts/M3ObjectiveStateRelicHandIn.cs Assets/Scripts/M3ObjectiveStateRelicHandIn.cs.meta
+
+Result:
+PASS - command exited 0 and produced no diff-stat output.
+
+Scope:
+This verifies S3-03 AC-09: M3ObjectiveStateRelicHandIn.cs and its .meta file have zero diff in this story.
