@@ -612,3 +612,125 @@ human can play, while the Tier-1 goal is a playable First District.
 reassessments (2026-05-20 session); `tasks/lessons.md` 2026-05-20
 definition-of-done entry; the 2026-05-14 telemetry lesson it bounds; D012 (T1
 combat-feel validated).
+
+---
+
+## D017 — Server-Authoritative Design Discipline From Day One
+
+**Date:** 2026-05-30
+**Status:** Locked
+**Context:** A 2026-05 premortem identified the highest-leverage structural
+risk: the T1 vertical slice's architecture is being chosen as if single-player
+offline is the destination, when it is a waypoint. D003 correctly scopes T1 as
+single-player/offline and even states "faction sim runs authoritatively in the
+**client**." That is right *for T1* — but if every C# class is written assuming
+the client owns the truth, the T2 authoritative-server port becomes a rewrite,
+not an extension. Single-player→MMO is a phase transition, not "the same game
+with networking added." The cost of annotating ownership now is one sentence per
+system; the cost of discovering it at T2 is months of rework.
+**Decision:** This entry does **not** change D003's T1 runtime (faction sim
+still runs in-process / client-authoritative through T1). It adds a
+**design-time discipline** that applies from this date forward:
+- Every gameplay/simulation system carries a **"who owns the truth"**
+  annotation: `SERVER-AUTH` (server owns state; client predicts/presents),
+  `CLIENT-LOCAL` (genuinely single-player-only, e.g. settings/UI), or
+  `DETERMINISTIC-SHARED` (lockstep-safe).
+- Default for any system that mutates **faction state, combat outcomes,
+  economy, inventory, objective state, or save data** is `SERVER-AUTH-INTENT`:
+  written so the authority boundary can move to a server without redesigning the
+  type. Concretely: no business logic in `MonoBehaviour.Update` that can't be
+  relocated; state mutations go through a command/intent a server could
+  validate; the client never treats its own computed outcome as final truth for
+  those systems.
+- T1 may still *execute* that authority locally (D003) — but the **seam exists**.
+- Faction sim, combat resolution, and save are the three systems where this is
+  **mandatory, not advisory**.
+**Consequences:**
+- New stories touching the mandatory systems state the ownership annotation in
+  the story file and verify the seam in review (pre-PR-check spirit; not a new
+  RED_TEAM gate at T1).
+- Existing T1 code is **not** retro-rewritten; it is annotated opportunistically
+  when next touched, and D003's client-authority line is now read through this
+  lens.
+- Structural answer to premortem death-stories #1 (inverted authority) and #9
+  (netcode-horse lock-in / no migration path).
+**Revisit triggers:** T2 entry gate — confirm the seams held and the port is an
+extension, not a rewrite. If three or more mandatory-system classes can't move
+authority without redesign, escalate **before** committing to the T2 netcode
+library (D002).
+**Related:** D003 (T1 single-player offline — runtime unchanged), D002 (FishNet
+deferred), D012 (combat-feel validated); premortem 2026-05;
+`docs/brian-system-prompt-v4-6.md` §7 (evidence discipline); `RECOVERY.md`.
+
+---
+
+## D018 — LLM Dialogue Cost Model & Fallback Hierarchy
+
+**Date:** 2026-05-30
+**Status:** Provisional (numbers are TODO; ratify at T3 entry gate)
+**Context:** D004 reserved LLM dialogue for 5–10 named NPCs at T3 and listed
+"cost model, vendor selection, fallback" as T3-entry decisions. The premortem
+(#3) flags the danger of carrying that to T3 unanswered: the LLM-NPC pillar is
+the thing that makes the game *itself*, but full-LLM-per-NPC unit economics can
+exceed revenue-per-player. "Pause cloud dialogue" later = the factions stop
+feeling alive = reviews flip to "false advertising." This entry pulls D004's
+revisit-trigger early so the pillar is committed *with* its economics, not
+before them. It does **not** change D004's T1 boundary (T1 dialogue is fully
+templated, no LLM).
+**Decision:** A three-tier dialogue hierarchy with a hard cost ceiling:
+- **Tier A — Full cloud LLM:** named, story-critical faction NPCs **only** (the
+  D004 5–10). Hard cap on tokens/CCU-hour. Aggressive prompt caching + RAG
+  retrieval. Moderation layer (`.claude/rules/llm-moderation.md`).
+- **Tier B — Local small-model:** regional named NPCs. Runs on player hardware
+  (the qwen-class local-model precedent from D015 informs feasibility). No
+  per-CCU cloud cost.
+- **Tier C — Authored dialogue trees:** everyone else. The T1 templated system
+  (D004) *is* Tier C — so T1 already ships the floor of this hierarchy.
+- **Cost ceiling:** define `$[TODO — SET CEILING]/CCU-hour` for Tier A that
+  revenue must support. If a player's session would exceed it, they
+  **downgrade A→B→C** gracefully rather than the studio eating unbounded cost.
+**Consequences:**
+- T1 unaffected (already fully templated = Tier C; no LLM dependency).
+- The kill criterion in `RECOVERY.md` references this ceiling.
+- Makes the pillar's economics a *design constraint*, not a launch surprise.
+- Structural answer to premortem death-story #3.
+**Revisit triggers:** T3 entry gate — replace the TODO ceiling with measured
+cost-per-CCU-hour after ≥3 optimization passes; confirm the A→B→C downgrade UX
+doesn't break immersion; lock the cloud vendor.
+**Related:** D004 (LLM scope — this satisfies its revisit-trigger early), D015
+(local-model precedent), `RECOVERY.md` (kill criterion), premortem 2026-05.
+
+---
+
+## D019 — Minimum Viable Faction Density
+
+**Date:** 2026-05-30
+**Status:** Provisional (floor is TODO; validate against playtests/sim before
+T2 launch planning)
+**Context:** The pillar is "4–6 undead factions scheming in real time." That
+premise assumes enough players *per faction* that political moves feel like
+amplified player decisions, not set dressing. Premortem (#4): launch at 40 CCU
+across 6 factions = ~6–7/faction, minus AFK/offline = 2–3 active/faction = the
+sim talks to itself; "the MMO part died because there was no MM." Without a
+written floor, there's nothing to plan shards, marketing, or matchmaking around.
+**Decision:** Define a **Minimum Viable Density (MVD)** — the active-players-
+per-faction floor below which the faction sim stops feeling player-driven:
+- **MVD target: `[TODO — SET NUMBER]` active players/faction**, i.e. a
+  per-shard CCU floor of roughly `MVD × faction_count`.
+- Below the floor, the launch response is a **design action, not a marketing
+  hope:** collapse/merge shards to stay above MVD, or gate the doors. Never run
+  a live shard below MVD and call the sim "alive."
+- The number must be **validated**, not guessed: derive it from faction-sim
+  playtests (at what density do testers attribute moves to players vs. AI?) and
+  from sim load tests, before T2 launch planning locks.
+**Consequences:**
+- Launch / marketing / matchmaking inherit one job: never drop a live shard
+  below MVD.
+- Informs the `RECOVERY.md` kill criterion and T2 server-count planning.
+- Pairs with D017: a server-authoritative sim is what *lets* you merge shards to
+  hold MVD without losing state.
+- Structural answer to premortem death-story #4.
+**Revisit triggers:** first faction-sim playtest with variable population; T2
+launch-planning gate (lock the shard-merge policy).
+**Related:** D003 (faction sim), D017 (server-auth enables shard merges),
+premortem 2026-05; `design/gdd/game-concept.md` (faction pillar); `RECOVERY.md`.
