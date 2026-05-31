@@ -2,7 +2,7 @@
 
 > **Sprint**: Sprint 3 — Playable Vertical-Slice Assembly
 > **Sprint Plan**: `production/sprints/sprint-3.md` (Story Ledger row, line 71)
-> **Status**: Ready (depends on S3-02, S3-03, S3-04, S3-05 — the full slate)
+> **Status**: Mechanically complete; human-play feel gate NOT PASSED (presentation-readability); Sprint 4 presentation re-plan pending
 > **Layer**: Core / Integration
 > **Type**: Integration (primary) + Visual/Feel (the human-play AC carries the feel evidence — see ADVISORY/BLOCKING split in QA Test Cases)
 > **Estimate**: 1.0 day (MEDIUM confidence — per `sprint-3.md:160`; new runner reuses telemetry vocabulary, but the M2 melee-RNG fix touches the 2156-line M2 controller and the human-play protocol is non-trivial)
@@ -31,8 +31,11 @@
 | D003 (`DECISIONS.md:51`) | Locked | Tier 1 single-player offline — solo human-play, no co-op feel-check, no remote playtester |
 | D012 (`DECISIONS.md:342`) | Locked | T1 combat-feel validated — the combat camp inside the district is feel-validated; this story validates the *objective-loop* feel on top of that |
 | D016 (`DECISIONS.md:554`) | Locked | "Greybox, not art" presentation minimum — human-play feel-check separates loop-feel from art-feel per R-P2-FEEL-MISATTRIBUTION |
+| D020 (`DECISIONS.md` on main commit `46c6d1b`) | Locked | S3-06 is mechanically complete but the human-play feel gate did not pass; presentation-readability work moves to the art-bible revision and Sprint 4, not an in-story pass flip |
 
 **Sprint 3 feedback rule** (`sprint-3.md:85`): applies to runner output as well as gameplay feedback. The human-play protocol's verdict text and limitations table follow the same trigger/direction discipline — describe what happened and what couldn't be tested, not what the player should do next time.
+
+**Post-playtest outcome (2026-05-30)**: S3-06's runner evidence supports AC-01 through AC-06 mechanically, but the project lead's N=1 human-play attempt did **not** pass the AC-08 feel gate. The failure is recorded as presentation-readability: the slice read as Unity greybox/debug scaffolding rather than a playable classic-MMO-descended gothic slice. The legacy M2 combat debug HUD bleeding over the S3 objective loop was a real presentation bug; the `M2SingleTrashMedLoopController` HUD suppression is kept as a scoped S3-06 presentation-readiness bug fix, but it does **not** retroactively convert the feel gate into PASS.
 
 **Pillar 1 risk (R-P1-PROTAGONIST-DRIFT, `sprint-3.md:134`)**: the "named the objective/NPC/relic as the reason" attribution test cuts against the "world built for you" failure — pass means the player engaged because they cared about the *world's problem*, not because the game prompted them to.
 
@@ -206,7 +209,7 @@ Companion artifacts:
 - `.githooks/pre-commit` — `[pre-commit] OK`
 - `dotnet format --verify-no-changes` — PASS
 
-**Evidence status**: Not started
+**Evidence status**: Mechanical evidence complete; human-play evidence recorded as NOT PASSED. The M2 HUD suppression is recorded as a scoped S3-06 presentation-readiness bug fix, not as grounds to pass AC-08.
 
 **Human-play feel-check pattern documentation**: verification.md must include a `## Pattern Notes` section documenting the new evidence shape (binary pillar-anchored verdict + structural template per AC-09 + R-P2-FEEL-MISATTRIBUTION classification per AC-10 + N=1 acknowledgement + optional second-playtester both-reads) for future Tier-1 human-play stories. This is the pattern-establishing precedent flagged in the header.
 
@@ -236,5 +239,6 @@ Watch items (not blockers):
 - `control_manifest_absence_pre_existing` — Manifest Version `Unavailable` per fallback
 - Format Gate — see Dependencies
 - **Solo-N=1 selection bias** — explicitly named in AC-09 evidence per `sprint-3.md:142`; not a flaw to fix, a constraint to honor
+- **M2 HUD suppression bug fix** — kept and recorded as a scoped S3-06 presentation-readiness bug fix after the human-play attempt exposed legacy M2 combat debug HUD bleed over the objective loop. This fixes a contributor to the bad read, but the AC-08 feel verdict remains NOT PASSED per the recorded playtest and D020.
 - **Pattern-establishing closure follow-up**: at Sprint 3 close-out, promote the T1 human-play feel-check evidence pattern to `tasks/lessons.md`. Bundle with (a) the S3-05 greybox spatial-validation pattern, (b) the S3-05 NavMesh agent profile as canonical T1 reference, and (c) the existing `feedback_external_review_verification` promotion — single Sprint 3 lessons batch.
 - **FAIL verdict downstream impact**: if AC-08 returns FAIL, the next step is NOT in-story polish iteration. It is either (a) a Sprint 3+ polish story scoped to the specific loop-mechanical deficit named in the verbatim feedback, or (b) a milestone re-plan if the failure is structural. Polish-during-this-story would conflate slate completion with loop satisfaction; both decisions are post-Sprint-3 per D016.
