@@ -11,6 +11,21 @@
 
 > **Art Director Sign-Off (AD-ART-BIBLE)**: Skipped — Lean review mode. Run `/setup-engine full` mode if formal sign-off required before Tier 1 production begins.
 
+> ⚠️ **REVISION PENDING — DECISIONS.md D020 (2026-05-30).** The S3-06 N=1
+> human-play attempt (2026-05-30) failed the feel gate for presentation-
+> readability reasons, and the product owner has decided to adopt **more
+> EQ-style play legibility** than this bible currently allows. This is a
+> **pillar-level amendment to P1 ("The World Is Not Your Story")** and its
+> visual-presentation expression. **Sections 1 (Visual Identity / P1), 5
+> (Character Design — silhouette legibility), and 7 (UI/HUD Direction) are under
+> revision and must NOT be executed as-written until the D020 revision pass
+> lands.** The amended pillar will move the line on *allowed legibility
+> affordances* (target/combat readability, structured HUD, clear interaction
+> feedback) while still forbidding *theme-park guidance* (quest markers, objective
+> arrows, minimap pins, "go here" routing). The revision is authored through the
+> `art-director` agent as its own deliberate pass — not in D020 itself. Until
+> then, treat Sections 1/5/7 as **frozen-for-revision**, not current direction.
+
 > **Technical-artist validation flags** (accumulated across sections; require resolution before or during Tier 1 prototype):
 > - S2 State 7: per-camera desat pass for corpse run — URP camera-stacking isolation
 > - S2 State 8: ambient NPC stilling animation — animator state-machine coordination

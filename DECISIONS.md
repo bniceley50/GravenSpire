@@ -734,3 +734,68 @@ per-faction floor below which the faction sim stops feeling player-driven:
 launch-planning gate (lock the shard-merge policy).
 **Related:** D003 (faction sim), D017 (server-auth enables shard merges),
 premortem 2026-05; `design/gdd/game-concept.md` (faction pillar); `RECOVERY.md`.
+
+---
+
+## D020 — Presentation-Legibility Pivot After S3-06 Human-Play Failure
+
+**Date:** 2026-05-30
+**Status:** Locked
+
+**Context:** S3-06 mechanically proved the Sprint 3 playable loop (AC-01–06),
+but the first human-play attempt (Brian, N=1, 2026-05-30) failed the feel gate
+for a presentation-readability reason, not a mechanics reason. The slice reads
+as Unity greybox / debug scaffolding rather than a playable classic-MMO-descended
+gothic slice — compounded by a real bug (the legacy M2 combat debug HUD bleeding
+over the S3 objective loop). The reaction also challenged a deeper thing: the
+art bible's deliberate stance (P1, "The World Is Not Your Story") that Gravenspire
+should reject EQ-style player-service presentation. The product owner, after
+playing, has decided he wants more EQ-style play legibility than the current
+bible allows. This is therefore a pillar-level creative decision, not an
+art-polish request.
+
+**Decision:** Gravenspire adopts more EQ-style **play legibility** while
+preserving the "EQ readability, not EQ cosplay" distinction. The target is **not**
+to copy EverQuest's full visual language, and specifically **not** to import its
+theme-park guidance (quest markers, objective arrows, glowing waypoints). The
+target is to make the T1 slice immediately readable as a playable classic-MMO
+descendant — through camera framing, target/combat readability, HUD structure,
+interaction feedback, and environmental presentation — while retaining
+Gravenspire's gothic identity and faction/world-simulation premise.
+
+This decision **triggers, but does not itself perform**, the following (each is
+its own deliberate follow-up, not folded into this record):
+- A formal revision pass on `design/art/art-bible.md`, especially Sections 1
+  (Visual Identity / P1), 5 (Character Design — silhouette legibility), and 7
+  (UI/HUD Direction). Driven through the `art-director` agent against the amended
+  pillar. **The amended pillar text is authored in that pass, NOT here.**
+- A new presentation-focused milestone (Sprint 4: EQ-Readable Presentation Slice)
+  inserted **before** M4 (Save/Load) and M5 (Faction Consequence).
+- S3-06 recorded as **mechanically complete, human-play feel gate NOT PASSED**
+  (presentation-readiness), milestone re-plan required.
+
+**Consequences:**
+- D016 remains true for Sprint 3: it successfully assembled the player-driven
+  loop mechanically. The Sprint 3 human-play gate does **not** PASS as a feel
+  verdict, because the presentation layer cannot yet carry a loop-pull judgment.
+- The art-bible revision must explicitly distinguish **allowed** legibility
+  affordances (target/combat readability, structured HUD, clear interaction
+  feedback) from **still-disallowed** theme-park guidance (quest markers,
+  objective arrows, minimap pins, "go here" routing). The line moves; it does
+  not disappear.
+- T1 scope still holds: the presentation milestone adds **no** multiplayer, LLM,
+  extra class, second district, Save/Load, or faction-consequence work. It is
+  presentation only, still offline single-player.
+- D017 (server-authoritative discipline) continues to apply to any new
+  presentation-adjacent system that touches a mandatory seam.
+- **Open risk (recorded, not resolved):** the 2026-05 premortem (#5/#7) warns
+  the "wants EQ + wants undead-political-sandbox" audience may be smaller than it
+  looks, and that the anti-performing-world identity is part of what makes
+  Gravenspire distinct. This pivot must be "EQ readability," not "be more like EQ
+  to court the EQ crowd" — flagged so the art-bible revision holds that line.
+
+**Related:** D016 (Sprint 3 assembly), D017 (server-auth discipline),
+`design/art/art-bible.md` (Sections 1/5/7 — revision pending), `RECOVERY.md`
+(premortem-derived governance),
+`production/stories/s3-06-playable-end-to-end-and-human-play.md`; S3-06 N=1
+human-play attempt 2026-05-30.
