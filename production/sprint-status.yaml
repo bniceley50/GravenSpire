@@ -8,17 +8,17 @@ end: ""
 generated: "2026-06-07"
 updated: "2026-06-07"
 branch: "main"
-head: "02de35d"
+head: "d1816fd"
 qa_plan: "production/qa/plans/qa-plan-sprint-4-20260607.md"
 plan: "production/sprints/sprint-4.md"
 slice_review: ""
-implementation_gate: "Sprint 3 slate opened 2026-05-23 with the 6-story slate S3-01–S3-06 written (slate commit 9bf60e1) and Story Ledger linked (back-fill commit ecbea5e). Format-gate pre-condition resolved 2026-05-24 by PR #2 merge commit 90821f2 (policy f040493, baseline a0785d8, hook cf1c204); owner assignment and Sprint 3 /qa-plan resolved 2026-05-24 at df5fdec. S3-01 closed COMPLETE WITH NOTES on 2026-05-25. S3-02 cleared /story-readiness = READY on 2026-05-29 (S3-01 dependency Complete; D004 T1 boundary respected as telemetry-data-only); next implementation gate is /dev-story for S3-02."
-progress: "SPRINT 3 CLOSED 2026-06-07 — mechanically successful / feel-unvalidated. All six S3 stories are mechanically complete (S3-01..S3-05 merged + closed; S3-06 mechanically complete AC-01–06) but S3-06's N=1 human-play feel gate FAILED on 2026-05-30 for presentation-readability reasons (the slice read as Unity greybox/debug scaffolding). Per DECISIONS.md D020 this routed to (a) the art-bible revision — DONE 2026-06-07, §1/§5/§7 revised under the two-register model (commits 33587ce/3ede2c0/67fd8e6) — and (b) SPRINT 4: EQ-Readable Presentation Slice, now the active sprint (plan committed 02de35d). Sprint 4 executes the revised bible so the loop reads as the game and can pass the feel gate; slate S4-00..S4-06 proposed, not yet opened. S3-06 implementation + feel-fail evidence sits on the unmerged branch codex/s3-06-playable-end-to-end-and-human-play (commit 900f296); its merge-or-archive is a tracked Sprint 3 closure question. A 2026-06-07 code review (read-only) surfaced evidence-quality findings F1-F8 to fold into the Sprint 4 stories at /create-stories (F1 artifact-identity tuple; F2 real-traversal-not-teleport; F3 real-input-path; F7 exact-sequence telemetry) and as tech-debt/future-prep (F4 D017-seam-is-a-comment; F5 narrow buy-side claim; F6 vocabulary-bound absence; F8 runner clock-source). Next: /create-stories production/sprints/sprint-4.md."
+implementation_gate: "Sprint 4 slate S4-00..S4-06 authored 2026-06-07 (/create-stories; flat convention production/stories/s4-NN-[slug].md; owners set in-file). Sprint 4 QA plan landed and pushed at d1816fd (production/qa/plans/qa-plan-sprint-4-20260607.md; recorded in qa_plan). Sprint 3->4 reconciliation applied 2026-06-07 (this write): the stories array is regenerated to the S4 slate, total_stories=7, completed_stories=0, and S4-01 is assigned to the Codex lane. Next implementation gate for S4-01 is Codex-worktree cleanup (worktree still dirty on the unmerged codex/s3-06 branch) -> /story-readiness -> /dev-story. The HUD chain (S4-02/03/04) is gated on the S4-00 ux-designer design pass delivering validated numbers (no guessed values). Sprint 3 history retained for reference below: Sprint 3 slate opened 2026-05-23 (slate commit 9bf60e1, Story Ledger back-fill ecbea5e); format gate resolved 2026-05-24 by PR #2 (90821f2); Sprint 3 /qa-plan + owner assignment at df5fdec."
+progress: "SPRINT 4 OPEN — EQ-Readable Presentation Slice, reconciled into status 2026-06-07. Sprint 3 closed 2026-06-07 mechanically-successful / feel-unvalidated (full closure detail in sprint_3_final). The D020 art-bible revision (§1/§5/§7, commits 33587ce/3ede2c0/67fd8e6) is done; the Sprint 4 slate S4-00..S4-06 was authored 2026-06-07 (/create-stories) with the F1/F2/F3/F7 code-review findings folded into the stories, and is now reconciled into this file (stories array regenerated; total_stories=7). The Sprint 4 QA plan landed and was pushed to origin/main at d1816fd (recorded in qa_plan). S4-01 (play camera + debug-HUD isolation) is ASSIGNED to the Codex lane as the first active implementation story; S4-00 (ux HUD thresholds + con-glyph) is the parallel ux-designer design pass that gates the HUD chain (S4-02/03/04). S4-01 start is gated on Codex-worktree cleanup — the worktree is still dirty on the unmerged codex/s3-06 branch (commit 900f296; merge-or-archive remains a tracked Sprint 3 closure question) — before /story-readiness -> /dev-story. Scene-touching stories S4-01 and S4-05 must be sequenced (both edit _DevEntry.unity), never concurrent. Central milestone risk: R-COSPLAY-DRIFT — the interface must not become World Performance — fenced by art-bible §7.11 (State-Report boundary) and the §7.12 exit criteria. Next: Codex-worktree cleanup, then /story-readiness production/stories/s4-01-play-camera-and-debug-hud-isolation.md."
 completed_stories: 0
-total_stories: 0
+total_stories: 7
 sprint_3_final: "6/6 mechanically complete, feel-unvalidated. S3-01 done (2026-05-25); S3-02/03/04 done (2026-05-30); S3-05 done-with-notes (2026-05-26); S3-06 done-with-notes (mechanically complete AC-01–06, human-play feel gate NOT PASSED per D020, replanned into Sprint 4)."
-next_active_story: "S4-00"
-next_active_command: "/create-stories production/sprints/sprint-4.md"
+next_active_story: "S4-01"
+next_active_command: "/story-readiness production/stories/s4-01-play-camera-and-debug-hud-isolation.md (after Codex-worktree cleanup)"
 
 carryover:
   # ----------------------------------------------------------------
@@ -77,72 +77,71 @@ carryover:
   ide1006_naming_debt_excluded_from_format_gate: "PR #2 merged the Sprint 3 format gate at 90821f2. .editorconfig declares IDE1006 naming rules (Style Gate per .claude/rules/game-dev-governance.md), but .githooks/pre-commit:12-15 deliberately runs dotnet format --verify-no-changes --exclude-diagnostics IDE1006 because the naming violations predate this branch on origin/main (verified at branch baseline f040493 — IDE1006 already failed on origin/main, not introduced by the format-gate batch). This is naming-refactor debt, NOT Sprint 3 implementation scope. The exclusion is documented intent (visible in the hook script itself), not a silent gap. RESOLUTION CONDITION: retires when a separate naming-refactor story cleans existing IDE1006 violations and removes the --exclude-diagnostics IDE1006 flag from .githooks/pre-commit:12-15."
 
 stories:
-  - id: "S3-01"
-    name: "Standalone player interaction harness"
-    file: "production/stories/s3-01-standalone-player-interaction-harness.md"
+  # ----------------------------------------------------------------
+  # Sprint 4 slate (EQ-Readable Presentation Slice), reconciled
+  # 2026-06-07 (Sprint 3->4 transition). The retired Sprint 3 slate
+  # S3-01..S3-06 (+ out-of-band S3-EVIDENCE-01) is preserved in
+  # sprint_3_final above and in the story files / git history; its
+  # rows are intentionally not re-listed here. Owners are set in each
+  # story file; statuses mirror the sprint-4.md Story Ledger.
+  # ----------------------------------------------------------------
+  - id: "S4-00"
+    name: "UX HUD threshold + con-glyph pass"
+    file: "production/stories/s4-00-ux-hud-thresholds-and-con-glyph.md"
     priority: must-have
-    status: done
+    status: ready
+    owner: "ux-designer"
+    estimate_days: 0.5
+    blocker: ""
+    note: "Design/spec only, no code. Resolves the art-bible §7.10 deferred HUD numbers + the 5-state con-glyph shape set; gates the HUD chain (S4-02/03/04). Parallel to S4-01 (different owner)."
+  - id: "S4-01"
+    name: "Play camera + debug-HUD isolation"
+    file: "production/stories/s4-01-play-camera-and-debug-hud-isolation.md"
+    priority: must-have
+    status: ready
+    owner: "Codex"
+    estimate_days: 1.0
+    blocker: ""
+    note: "ASSIGNED 2026-06-07 — first active Codex implementation story (next_active_story). Start gated on Codex-worktree cleanup (worktree still dirty on the unmerged codex/s3-06 branch) before /story-readiness -> /dev-story. Scene-touching: sequence against S4-05 (both edit _DevEntry.unity), never concurrent."
+  - id: "S4-02"
+    name: "Layer 1 vitals HUD"
+    file: "production/stories/s4-02-layer-1-vitals-hud.md"
+    priority: must-have
+    status: blocked
+    owner: "Codex"
+    estimate_days: 1.0
+    blocker: "S4-00"
+  - id: "S4-03"
+    name: "Target frame + relative-threat (con) indicator"
+    file: "production/stories/s4-03-target-frame-and-con-indicator.md"
+    priority: must-have
+    status: blocked
+    owner: "Codex"
+    estimate_days: 1.0
+    blocker: "S4-00, S4-02"
+  - id: "S4-04"
+    name: "Cast bar + interaction prompt"
+    file: "production/stories/s4-04-cast-bar-and-interaction-prompt.md"
+    priority: must-have
+    status: blocked
+    owner: "Codex"
+    estimate_days: 1.0
+    blocker: "S4-00, S4-02"
+  - id: "S4-05"
+    name: "First District atmosphere + legibility pass (bounded)"
+    file: "production/stories/s4-05-first-district-atmosphere-and-legibility.md"
+    priority: must-have
+    status: ready
     owner: "Codex"
     estimate_days: 1.5
     blocker: ""
-    completed: "2026-05-25"
-  - id: "S3-02"
-    name: "Player-driven NPC interaction"
-    file: "production/stories/s3-02-player-driven-npc-interaction.md"
+    note: "BOUNDED (greybox practical lighting + massing + placeholder material only; no produced art, D016). Records the [F1] artifact-identity tuple for the S4-06 gate. Scene-touching: sequence against S4-01, never concurrent."
+  - id: "S4-06"
+    name: "EQ-readable human-play gate"
+    file: "production/stories/s4-06-eq-readable-human-play-gate.md"
     priority: must-have
-    status: done
-    owner: "Codex"
+    status: blocked
+    owner: "Brian"
     estimate_days: 1.0
-    blocker: ""
-    completed: "2026-05-30"
-  - id: "S3-03"
-    name: "Player relic recovery + looting (Accept, Recover, Hand-In, Loot)"
-    file: "production/stories/s3-03-player-relic-recovery-and-looting.md"
-    priority: must-have
-    status: done
-    owner: "Codex"
-    estimate_days: 1.0
-    blocker: ""
-    completed: "2026-05-30"
-  - id: "S3-04"
-    name: "Player-driven vendor (sell-side only)"
-    file: "production/stories/s3-04-player-driven-vendor.md"
-    priority: must-have
-    status: done
-    owner: "Codex"
-    estimate_days: 1.0
-    blocker: ""
-    completed: "2026-05-30"
-  - id: "S3-05"
-    name: "Navigable greybox First District"
-    file: "production/stories/s3-05-navigable-greybox-first-district.md"
-    priority: must-have
-    status: "done with notes"
-    owner: "Codex"
-    estimate_days: 1.5
-    blocker: ""
-    completed: "2026-05-26"
-    note: "DONE WITH NOTES (2026-05-26, PR #4 / 0d3ea58). Follow-up correction S3-05.1 (NavMesh obstacle inclusion) merged via PR #5 / 7cade4b; not a slate story, no separate count. AC-12 partial roll-forward to S3-06 AC-03 per carryover s3_05_ac12_partial_rollforward_to_s3_06."
-  - id: "S3-06"
-    name: "Playable end-to-end + human-play feel check"
-    file: "production/stories/s3-06-playable-end-to-end-and-human-play.md"
-    priority: must-have
-    status: "done with notes"
-    owner: "Codex"
-    estimate_days: 1.0
-    blocker: ""
-    completed: "2026-05-30"
-    note: "DONE WITH NOTES (2026-05-30). Mechanically complete (AC-01–06 runner-proven); human-play feel gate (AC-07/08) NOT PASSED — the N=1 play attempt failed for presentation-readability reasons (read as Unity greybox/debug scaffolding). Per D020 the feel work re-planned into Sprint 4 (EQ-Readable Presentation Slice). Implementation + feel-fail evidence on the UNMERGED branch codex/s3-06-playable-end-to-end-and-human-play (commit 900f296); merge-or-archive is a tracked Sprint 3 closure question. This row is historical; the S3-01..S3-06 slate is retired into sprint_3_final above."
-  # Out-of-band evidence-integrity patch (pre-S3-06). NOT part of the
-  # S3-01..S3-06 slate, so it is intentionally excluded from total_stories
-  # and completed_stories. Recorded here for traceability only.
-  - id: "S3-EVIDENCE-01"
-    name: "S3 Evidence Integrity Patch (AC-1..AC-4)"
-    file: "production/stories/s3-evidence-integrity-patch.md"
-    priority: must-have
-    status: done
-    owner: "Codex"
-    estimate_days: 1.0
-    blocker: ""
-    completed: "2026-05-29"
-    note: "COMPLETE WITH NOTES; merged via PR #6 at cfbfc02. dotnet format gate BLOCKED by Unity-Editor-only tooling scope (documented). Out-of-band patch; not in the slate count."
+    blocker: "S4-01, S4-02, S4-03, S4-04, S4-05"
+    note: "Milestone exit gate. Binding N=1 human-play feel verdict (product owner) against art-bible §7.12, plus the F1/F2/F3/F7 hollow-evidence fences. A FAIL re-scopes within Sprint 4; it does not downgrade."

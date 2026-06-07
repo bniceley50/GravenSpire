@@ -201,8 +201,8 @@ mandatory seam.
 - [x] S4-05 bounded; S4-03/S4-04 kept separate (user decisions recorded).
 - [x] Risks named with owners and mitigations; R-COSPLAY-DRIFT flagged as central.
 - [x] QA plan hooks tied to the pre-written §7.12 acceptance criteria.
-- [ ] `/create-stories` run; owners assigned; story files written. *(Next gate.)*
-- [ ] `sprint-status.yaml` Sprint 3->4 reconciliation applied. *(Separate explicit write.)*
+- [x] `/create-stories` run; owners assigned; story files written. *(Done 2026-06-07.)*
+- [x] `sprint-status.yaml` Sprint 3->4 reconciliation applied. *(Done 2026-06-07; S4-01 assigned.)*
 
 ---
 
