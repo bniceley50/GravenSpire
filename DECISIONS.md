@@ -799,3 +799,118 @@ its own deliberate follow-up, not folded into this record):
 (premortem-derived governance),
 `production/stories/s3-06-playable-end-to-end-and-human-play.md`; S3-06 N=1
 human-play attempt 2026-05-30.
+
+---
+
+## D021 — First District Produced-Art Pivot After Second Feel-Failure (Amends D016)
+
+**Date:** 2026-06-07
+**Status:** Locked
+
+**Context:** This is the **second consecutive greybox feel-failure.** S3-06 failed
+human-play (2026-05-30) as "reads as Unity greybox / debug scaffolding"; D020 routed
+the fix to an art-bible legibility revision + a HUD-first Sprint 4 ("EQ-Readable
+Presentation Slice"). The product owner (Brian, N=1) has now played the S4-01 camera +
+debug-HUD-isolation pass (2026-06-07) and the verdict is unchanged: it "doesn't even
+resemble a playable demo." D016 asserted (lines 587–590) that the presentation minimum
+is navigable, readable **greybox — not produced art** — on the premise that "feel is
+carried by interactivity, spatial readability, and feedback, not texture fidelity."
+That premise was a reasonable hypothesis; it has now been tested twice against the only
+playtester who matters for this slice and failed both times. The honest read (creative-
+director, 2026-06-07): for this product owner, on this gothic-MMO-descended product,
+fidelity is not separable from feel — the core fantasy is a *specific cursed city that
+existed before the player*, and a district reading as debug scaffolding structurally
+cannot deliver "cursed" against the EQ-Classic reference frame the slice invokes.
+Greybox validated that the systems were assembled; it could not validate that the slice
+is the game. The bar moves because the evidence moved it.
+
+**Decision:** Amend D016's greybox-not-produced-art presentation minimum. Gravenspire
+authorizes a **first-pass produced-art treatment of the First District** as the feel-
+validation surface, under a hard, narrowly-scoped set of conditions:
+
+- **The reversal is narrow.** Produced art is now permitted **for ONE representative
+  area of the First District** — the spawn → Caretaker Morrvik path the objective loop
+  already walks. **Greybox remains the default everywhere else** (rest of the district,
+  other zones) until explicitly promoted by a later decision. D016's greybox discipline
+  is amended *here*, not abolished.
+- **Design the place before producing art — non-skippable.** The First District was
+  blocked out for *mechanics* (S3-05), never *designed as a place*. No asset is authored
+  until the representative area has design intent: layout/route lock, faction identity,
+  and a 2–3 sentence occupation-history brief per produced building (art-bible §6.4 gate —
+  every prop explainable by a person/activity). Producing art for an undesigned place is
+  the central trap and is forbidden.
+- **First-pass, not final.** "Produced" means materials + practical lighting + dressing
+  that read as a real gothic place — explicitly **not** shipping-final polish. The bar is
+  "resembles a playable demo," not "is it done."
+- **Scope is bounded and capped by an asset manifest.** The first-pass target is **four
+  material sets** (street cobble, primary facade stone, interior plaster, timber trim) +
+  a **practical-source lighting pass** (3–6 source-motivated warm practicals replacing
+  default lighting) + **3–5 hero props**, applied to the representative area only. Any
+  asset beyond the manifest is a `[SCOPE]` lesson and a stop, not a silent add. The
+  scope lever if still too large: shrink to the single first-encounter beat (spawn +
+  Caretaker) and fade the rest to greybox.
+- **Legibility rides the demo bar** (product-owner decision). The two failures had a
+  *legibility* component world art will not fix. The parked **S4-01 (player-steered
+  camera + legacy M2 debug-HUD isolation)** lands as part of this demo bar so a produced
+  district is not viewed through a debug overlay. Minimum vitals readout and the
+  interaction prompt ("Speak — Caretaker Morrvik") are candidates, decided at planning.
+- **Pillar 1 and D020 readability survive — and are *more* at risk under produced art**
+  (it has routing tools greybox lacked). **Practical-source light only** (art-bible §2 /
+  §6.6 — no light placed for the player's benefit without an in-world emitter; to darken,
+  remove a source; to warm, add a fire). **No** guidance lighting, hero-lit objective
+  doors, emissive/glowing interactables, rarity color, atmosphere-as-warning, or
+  composition that frames the objective. The per-element State-Report-vs-World-Performance
+  test (§7.11) applies to the **art** PR, not just HUD PRs; creative-director gate on the
+  produced-art PR.
+- **Perf-budget gate** (technical-director). The four `TO BE CONFIGURED` budgets
+  (framerate, frame budget, draw calls, memory) in `.claude/docs/technical-preferences.md`
+  must be set before production scales, against a named target-hardware tier. Sequence:
+  author one sub-slice → profile on target hardware → lock measured budgets → then scale.
+  **Addressables, character-fidelity, and the full faction material library are
+  explicitly deferred** (not needed for a single produced area).
+- **Tier 1 holds absolutely.** Produced art is presentation; it adds **no** systems —
+  no multiplayer, LLM, Save/Load, faction consequence, second district, or extra class.
+  The confirmed Tier-2+ cuts stand.
+
+This decision **triggers, but does not itself perform**, the following (each its own
+deliberate follow-up):
+- **Close Sprint 4 partial** (bank S4-00 done; carry S4-01 into the demo bar; defer
+  S4-02/03/04 HUD; absorb/supersede S4-05; re-target S4-06) and open a new milestone,
+  **Sprint 5: "First District — Designed & Produced (first-pass)."** A Sprint 4
+  retrospective on the two-consecutive-feel-fail pattern is warranted.
+- The Sprint 5 sequence: **design-the-place → art-direction → asset-spec (set perf
+  budgets) → produce one representative area + land S4-01 legibility → re-validate feel.**
+- The exit gate is the **re-targeted S4-06**: the art-bible §7.12 EQ-legibility criteria
+  are retained (the failure had a legibility axis) **plus** a new place-read criterion
+  ("a first-time viewer reads the area as a gothic place, not a Unity prototype"). The
+  F1/F2/F3/F7 hollow-evidence fences carry forward verbatim.
+
+**Consequences:**
+- **D016 remains true for Sprint 3** — it successfully assembled the player-driven loop.
+  Only its presentation-minimum clause (greybox-not-art) is amended, and only for the
+  First District representative area. Greybox stays the project default elsewhere.
+- **The art bible needs no extension** — §1 (weight-and-age), §2 (practical light), §6
+  (environment language), §8 (asset standards / budgets / import / naming) already govern
+  produced art. The §6.4 occupation-history note must be locked for each produced building
+  before its material pass; the §6.6 practical-light prohibition is the operative light-
+  placement gate.
+- **The feel bar now has two axes** — place-read AND state-read — judged together at S4-06.
+  A gorgeous-but-unreadable slice fails; a readable-but-still-greybox slice no longer
+  passes the place-read question.
+- **Recorded open risk:** a *third* feel-fail if produced art ships pretty-but-unreadable,
+  or is built for an undesigned place. Mitigated by design-first (§6.4 gate),
+  legibility-rides-along (S4-01), and the bounded manifest. If S4-06 fails again, the
+  retro must diagnose *which axis* failed (world-read vs state-read) before re-scoping —
+  not blindly add more art.
+- **Durable lesson (to record in `tasks/lessons.md`):** greybox is not a feel-validation
+  bar for this product owner / this game; "defer art to validate feel" is falsified here.
+- Scene discipline is *more* important, not less: S4-01 (camera/overlay) and the produced-
+  art pass both touch `_DevEntry.unity` — sequence them, never concurrent; one scene edit
+  per PR; no legacy-builder chaining (2026-05-30 lesson); Unity Smart Merge.
+
+**Related:** D016 (Sprint 3 assembly + greybox presentation minimum — amended here),
+D020 (presentation-legibility pivot after S3-06), D003 (Tier-1 scope), D001 (URP);
+`design/art/art-bible.md` §1/§2/§6/§8; `production/sprints/sprint-4.md`;
+`production/qa/evidence/s4-01-play-camera-evidence.md` (the S4-01 pass + the failed
+human-play verdict); the four 2026-06-07 lead assessments (creative-director, art-
+director, producer, technical-director).
