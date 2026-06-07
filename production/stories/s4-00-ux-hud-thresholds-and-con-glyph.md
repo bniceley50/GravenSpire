@@ -2,7 +2,7 @@
 
 > **Sprint**: Sprint 4 — EQ-Readable Presentation Slice
 > **Sprint Plan**: `production/sprints/sprint-4.md` (Story Ledger, S4-00)
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Presentation
 > **Type**: Config/Data (Design — spec only, no code)
 > **Estimate**: 0.5 day
@@ -77,7 +77,7 @@ The spec/validation document the HUD stories build to: the resolved numbers, the
 con-glyph shape set + colorblind-discriminability proof, and any explicit open
 questions with their validation methods.
 
-**Evidence status**: Not started
+**Evidence status**: Delivered — `production/qa/evidence/s4-00-hud-thresholds-evidence.md` (committed `e244460`). All four thresholds resolved as PROPOSED floors with named in-engine/render validation methods (OQ-1..7) routed to the consuming stories.
 
 ## Dependencies
 
@@ -89,3 +89,18 @@ questions with their validation methods.
 
 None. D020 + the revised art bible are the authority; §7.10 is the explicit home for
 these numbers. This story unblocks S4-02/S4-03/S4-04.
+
+## Completion Notes
+
+**Completed**: 2026-06-07
+**Verdict**: COMPLETE WITH NOTES
+**Criteria**: 6/6 passing (S4-00-04 PASS with a forward-assigned empirical test, below)
+**Deferred/Untested Criteria**: None at the spec level. In-engine + render-test validations are routed forward as open questions, not deferred ACs.
+**Test Evidence**: `production/qa/evidence/s4-00-hud-thresholds-evidence.md` (committed `e244460`) — vitals bar-height floor 6px@1080p (3px retired), panel-fill opacity floor 65% (45% retired), cast-bar placement (top edge 70% viewport, clears the 40-60% band), and the 5-state shape-primary con-glyph set with world-palette confirm-colors and colorblind reasoning.
+**GDD/ADR Deviations**: None — executes art-bible §7.10/§7.1.1/§4.3/§4.4/§4.6/§7.8 faithfully.
+**Scope Notes**: Design/spec only, no code (Config/Data type). The deliverable is the threshold/glyph spec plus explicit open-question routing (OQ-1..7).
+**Forward-assigned validations** (per evidence-honesty design + product-owner decision):
+- OQ-1..5 (in-engine bar-height read, panel-opacity ≥3:1 measurement, cast-bar screenshot) → S4-02/S4-04 own them; those stories may not mark the corresponding claims evidence-linked until run.
+- OQ-6/7 (con-glyph 5/5 shape-discriminability render + human naming test) → **assigned forward to S4-03** by explicit product-owner decision (non-strict closure). S4-03 must run it before its con-glyph claim is evidence-linked.
+**Review Gates**: lean mode (no Task gates). Advisory close-out.
+**Forced Completion**: No.

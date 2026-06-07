@@ -8,17 +8,17 @@ end: ""
 generated: "2026-06-07"
 updated: "2026-06-07"
 branch: "main"
-head: "d1816fd"
+head: "e244460"
 qa_plan: "production/qa/plans/qa-plan-sprint-4-20260607.md"
 plan: "production/sprints/sprint-4.md"
 slice_review: ""
 implementation_gate: "Sprint 4 slate S4-00..S4-06 authored 2026-06-07 (/create-stories; flat convention production/stories/s4-NN-[slug].md; owners set in-file). Sprint 4 QA plan landed and pushed at d1816fd (production/qa/plans/qa-plan-sprint-4-20260607.md; recorded in qa_plan). Sprint 3->4 reconciliation applied 2026-06-07 (this write): the stories array is regenerated to the S4 slate, total_stories=7, completed_stories=0, and S4-01 is assigned to the Codex lane. Next implementation gate for S4-01 is Codex-worktree cleanup (worktree still dirty on the unmerged codex/s3-06 branch) -> /story-readiness -> /dev-story. The HUD chain (S4-02/03/04) is gated on the S4-00 ux-designer design pass delivering validated numbers (no guessed values). Sprint 3 history retained for reference below: Sprint 3 slate opened 2026-05-23 (slate commit 9bf60e1, Story Ledger back-fill ecbea5e); format gate resolved 2026-05-24 by PR #2 (90821f2); Sprint 3 /qa-plan + owner assignment at df5fdec."
-progress: "SPRINT 4 OPEN — EQ-Readable Presentation Slice, reconciled into status 2026-06-07. Sprint 3 closed 2026-06-07 mechanically-successful / feel-unvalidated (full closure detail in sprint_3_final). The D020 art-bible revision (§1/§5/§7, commits 33587ce/3ede2c0/67fd8e6) is done; the Sprint 4 slate S4-00..S4-06 was authored 2026-06-07 (/create-stories) with the F1/F2/F3/F7 code-review findings folded into the stories, and is now reconciled into this file (stories array regenerated; total_stories=7). The Sprint 4 QA plan landed and was pushed to origin/main at d1816fd (recorded in qa_plan). S4-01 (play camera + debug-HUD isolation) is ASSIGNED to the Codex lane as the first active implementation story; S4-00 (ux HUD thresholds + con-glyph) is the parallel ux-designer design pass that gates the HUD chain (S4-02/03/04). S4-01 start is gated on Codex-worktree cleanup — the worktree is still dirty on the unmerged codex/s3-06 branch (commit 900f296; merge-or-archive remains a tracked Sprint 3 closure question) — before /story-readiness -> /dev-story. Scene-touching stories S4-01 and S4-05 must be sequenced (both edit _DevEntry.unity), never concurrent. Central milestone risk: R-COSPLAY-DRIFT — the interface must not become World Performance — fenced by art-bible §7.11 (State-Report boundary) and the §7.12 exit criteria. Next: Codex-worktree cleanup, then /story-readiness production/stories/s4-01-play-camera-and-debug-hud-isolation.md."
-completed_stories: 0
+progress: "SPRINT 4 OPEN — EQ-Readable Presentation Slice, reconciled into status 2026-06-07. Sprint 3 closed 2026-06-07 mechanically-successful / feel-unvalidated (full closure detail in sprint_3_final). The D020 art-bible revision (§1/§5/§7, commits 33587ce/3ede2c0/67fd8e6) is done; the Sprint 4 slate S4-00..S4-06 was authored 2026-06-07 (/create-stories) with the F1/F2/F3/F7 code-review findings folded into the stories, and is now reconciled into this file (stories array regenerated; total_stories=7). The Sprint 4 QA plan landed and was pushed to origin/main at d1816fd (recorded in qa_plan). S4-01 (play camera + debug-HUD isolation) is ASSIGNED to the Codex lane as the first active implementation story; S4-00 (ux HUD thresholds + con-glyph) is DONE 2026-06-07 (/story-done COMPLETE WITH NOTES, spec committed e244460), unblocking the HUD chain — S4-02 (vitals) is now Ready (gated only on the in-engine OQ confirmations it owns); S4-03/S4-04 remain blocked on S4-02. S4-01 start is gated on Codex-worktree cleanup — the worktree is still dirty on the unmerged codex/s3-06 branch (commit 900f296; merge-or-archive remains a tracked Sprint 3 closure question) — before /story-readiness -> /dev-story. Scene-touching stories S4-01 and S4-05 must be sequenced (both edit _DevEntry.unity), never concurrent. Central milestone risk: R-COSPLAY-DRIFT — the interface must not become World Performance — fenced by art-bible §7.11 (State-Report boundary) and the §7.12 exit criteria. Next: Codex-worktree cleanup, then /story-readiness production/stories/s4-01-play-camera-and-debug-hud-isolation.md."
+completed_stories: 1
 total_stories: 7
 sprint_3_final: "6/6 mechanically complete, feel-unvalidated. S3-01 done (2026-05-25); S3-02/03/04 done (2026-05-30); S3-05 done-with-notes (2026-05-26); S3-06 done-with-notes (mechanically complete AC-01–06, human-play feel gate NOT PASSED per D020, replanned into Sprint 4)."
-next_active_story: "S4-01"
-next_active_command: "/story-readiness production/stories/s4-01-play-camera-and-debug-hud-isolation.md (after Codex-worktree cleanup)"
+next_active_story: "S4-02"
+next_active_command: "/story-readiness production/stories/s4-02-layer-1-vitals-hud.md (S4-02 newly unblocked by S4-00 closure; S4-01 already in implementation in the Codex lane)"
 
 carryover:
   # ----------------------------------------------------------------
@@ -89,11 +89,12 @@ stories:
     name: "UX HUD threshold + con-glyph pass"
     file: "production/stories/s4-00-ux-hud-thresholds-and-con-glyph.md"
     priority: must-have
-    status: ready
+    status: done
     owner: "ux-designer"
     estimate_days: 0.5
     blocker: ""
-    note: "Design/spec only, no code. Resolves the art-bible §7.10 deferred HUD numbers + the 5-state con-glyph shape set; gates the HUD chain (S4-02/03/04). Parallel to S4-01 (different owner)."
+    completed: "2026-06-07"
+    note: "DONE 2026-06-07 (/story-done COMPLETE WITH NOTES; spec committed e244460). Design/spec deliverable: resolved the art-bible §7.10 deferred HUD numbers + the 5-state con-glyph set in production/qa/evidence/s4-00-hud-thresholds-evidence.md. In-engine validations OQ-1..5 routed to S4-02/04; con-glyph 5/5 discriminability test OQ-6/7 forward-assigned to S4-03 (product-owner decision). Unblocks S4-02."
   - id: "S4-01"
     name: "Play camera + debug-HUD isolation"
     file: "production/stories/s4-01-play-camera-and-debug-hud-isolation.md"
@@ -107,10 +108,11 @@ stories:
     name: "Layer 1 vitals HUD"
     file: "production/stories/s4-02-layer-1-vitals-hud.md"
     priority: must-have
-    status: blocked
+    status: ready
     owner: "Codex"
     estimate_days: 1.0
-    blocker: "S4-00"
+    blocker: ""
+    note: "Unblocked 2026-06-07 — S4-00 (its sole dependency) done. Builds to the S4-00 floors (bar height 6px, panel-fill 65%) and owns OQ-1/OQ-2/OQ-3/OQ-4 in-engine confirmation."
   - id: "S4-03"
     name: "Target frame + relative-threat (con) indicator"
     file: "production/stories/s4-03-target-frame-and-con-indicator.md"
@@ -118,7 +120,8 @@ stories:
     status: blocked
     owner: "Codex"
     estimate_days: 1.0
-    blocker: "S4-00, S4-02"
+    blocker: "S4-02"
+    note: "S4-00 dependency satisfied 2026-06-07. Still blocked on S4-02 (Layer 1 base). Owns OQ-6/OQ-7 (con-glyph 5/5 shape-discriminability render + human naming test) forward-assigned from S4-00."
   - id: "S4-04"
     name: "Cast bar + interaction prompt"
     file: "production/stories/s4-04-cast-bar-and-interaction-prompt.md"
@@ -126,7 +129,8 @@ stories:
     status: blocked
     owner: "Codex"
     estimate_days: 1.0
-    blocker: "S4-00, S4-02"
+    blocker: "S4-02"
+    note: "S4-00 dependency satisfied 2026-06-07. Still blocked on S4-02 (Layer 1 base). Owns OQ-5 (cast-bar placement screenshot) forward-assigned from S4-00."
   - id: "S4-05"
     name: "First District atmosphere + legibility pass (bounded)"
     file: "production/stories/s4-05-first-district-atmosphere-and-legibility.md"
