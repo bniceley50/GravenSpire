@@ -47,6 +47,17 @@
 
 **Why this phrasing:** It targets the exact failure mode of gothic games — mistaking ornamentation for atmosphere. "Weight and age" is *operational*: an artist can ask "does this object look like it has been here for a hundred years and carries that history in its surfaces?" and get a yes or no. It excludes glowing runes, particle-density VFX, and hero-lighting drama. The word *earns* puts the burden on the artist to justify presence.
 
+**The interface gate (added per D020):** The one-line rule governs the *world*
+register. The *interface* register answers to a companion gate:
+
+> **"The world does not attend to the player; the interface attends to the player's own state."**
+
+This is the single sentence that settles disputes: an artist or UI programmer asks
+"is this attending to the world's contents, or to the player's current state?" and
+gets a yes/no. It separates the minimap (forbidden) from the target frame (allowed),
+the quest arrow from the cast bar, the rare-spawn VFX from the hate meter. See
+Principle 4 for the full register distinction.
+
 ### Supporting Principles
 
 #### Principle 1 — Stillness Is The Signal
@@ -76,6 +87,46 @@
 
 **Why this protects the pillar:** The standard gothic game signals threat through monstrous aesthetics: the villain has a skull motif, the dangerous zone is red and black, the enemy reads hostile from across the room. This is player-service aesthetics — the world decorates itself to warn you. Gravenspire's world does not warn you. The Vampire Court is genuinely beautiful. The Pale King's cathedral is genuinely devotional. The wrongness is subtle and requires attention — which is exactly the attention the simulation rewards. Atmosphere-as-warning is the visual equivalent of quest markers.
 
+#### Principle 4 — The Interface Is Not The World
+*Serves the boundary between **The World Is Not Your Story** (P1) and the play-legibility mandate of D020.*
+
+**Definition:** Gravenspire maintains two distinct visual registers. The **world
+register** — environment, character design, lighting, environmental storytelling —
+obeys P1 absolutely: nothing in it performs for the player or routes them toward
+content. The **interface register** — the HUD and its state readouts — exists to
+report the player's own current state clearly. These two registers are never
+confused, and the austerity doctrine of the world register is never applied to the
+interface register.
+
+**Design test:** For any proposed visual element, ask: *"Is this in the world, or is
+it about the player's current state?"* World elements obey P1. State-reporting
+elements obey the legibility mandate. A target frame is not gothic architecture; it
+is the game reporting the player's chosen combat relationship. A cast bar is not
+environmental storytelling; it is the game reporting the player's own in-progress
+action. The interface register stays quiet and recessive in Gravenspire's material
+vocabulary — but it must remain legible. Quiet is the aesthetic; unreadable is a bug.
+
+**The operational line — State Report vs. World Performance:**
+- **Allowed (State Report):** elements that report the player's own state, their
+  *chosen* target's state, or the immediate consequence of a player action. The
+  signal exists *because the player did something* — selected a target, approached
+  an NPC, cast a spell, took damage. Two-question test: *Who initiated this
+  relationship?* (the player) and *What must the world do for this signal to appear?*
+  (nothing — the player's own action triggers it).
+- **Forbidden (World Performance):** elements that direct the player's attention
+  toward things they have not yet chosen to attend to, or assign significance on the
+  player's behalf. The signal exists *because the world contains something* — an
+  important NPC, a loot drop, a rare spawn. These reach into the player's focus and
+  redirect it.
+
+**Why this principle is necessary:** The S3-06 human-play failure (DECISIONS.md
+D020) showed that applying world-austerity doctrine to the interface register makes
+the game unplayable — the player could not read their own combat state, target, or
+casting. The world's indifference to the player is a feature; the interface's clarity
+about what the player is doing is equally non-negotiable. P1 was written to prevent
+*world-performance* failures; Principle 4 exists to prevent P1 from being misapplied
+to *interface-clarity* failures. It does not weaken P1 — it fences it.
+
 ### Productive Tensions Between Principles
 
 - **Stillness ↔ Beautiful-And-Wrong.** Stillness produces unease through *absence*; Beautiful-And-Wrong demands a specific *present* element that doesn't settle. A chapel interior: leave the candles unlit (stillness) or include the half-burned candle that shouldn't still be lit (beautiful-and-wrong)? Usually both — the tension forces the question.
@@ -85,7 +136,7 @@
 
 - **Glowing loot and rarity colors** — the immediate-readability shortcut every RPG uses. In Gravenspire, item value is social and contextual, not visual. A ring does not glow gold because it's rare; it looks like it belongs to someone specific.
 - **Particle-dense ambient VFX** — floating motes, magical shimmer, drifting soul-light. These are the visual equivalent of ambient music that tells you how to feel. Mist in a haunt behaves like mist, not like a mood system.
-- **High-contrast hero silhouettes for player characters** — the temptation to make player characters read as protagonists (broader shoulders, better-lit than the world, agency-communicating posture). The world is not their story; the art refuses to grant them visual priority.
+- **High-contrast hero silhouettes for player characters in the world register** — the temptation to make player characters read as protagonists (broader shoulders, better-lit than the world, agency-communicating posture). The world is not their story; the art refuses to grant them visual priority. *Note: this prohibition governs the world register only. Interface-register state reporting (target frames, cast bars, hate meters, interaction prompts) is governed by the legibility mandate of Principle 4, not by this rule.*
 - **Clean surfaces on anything old** — stone that looks freshly textured, wood grain that reads as an asset, cloth with no weight. The gothic shortcut is to add a dark color overlay and call it aged. Weight-and-age means texture budget goes into surface *history*, not surface complexity.
 - **Jump-cut lighting between zones** — the Bloodborne instinct: each zone has its own color grade applied like a filter. Gravenspire's factions bleed into each other geographically and politically; color language shifts gradually through material and light-source logic, not through a post-process override at a loading seam.
 - **Skeletal / bone-motif decoration as generic "undead" signaling** — skulls on the architecture, bones in the trim. This collapses factional distinction — if everything in the undead city uses death-iconography uniformly, the Vampire Court and the Ghoul Syndicate look like the same faction with different hats. Each faction's death-relationship is specific; the visual language must honor that specificity.
