@@ -4,8 +4,13 @@
 > milestone inserted before M4/M5).
 > **Tier:** T1, offline single-player. No multiplayer, no LLM, no Save/Load (M4),
 > no Faction Consequence (M5), no second district, no extra class.
-> **Status:** Planning. Slate proposed 2026-06-07; not yet opened (`/create-stories`
-> + owner assignment pending — see Next Gate).
+> **Status:** CLOSED PARTIAL 2026-06-07 — superseded by Sprint 5 per `DECISIONS.md` D021.
+> The slate was opened and S4-00 delivered (banked); S4-01 implemented but failed the
+> human-play demo-readiness gate (the second consecutive greybox feel-fail). D021 pivots
+> to first-pass produced First District art; this milestone is re-dispositioned into
+> Sprint 5 (`production/sprints/sprint-5.md`). Disposition: S4-00 banked, S4-01 carried
+> (S5-04), S4-02/03/04 deferred, S4-05 absorbed (S5-03), S4-06 re-targeted (S5-05). See
+> `sprint-status.yaml` `sprint_4_final`.
 
 ## Goal
 
