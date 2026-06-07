@@ -276,7 +276,7 @@ Gravenspire's shapes are the shapes of things that have been under pressure for 
 
 **Readability target (hard constraint).** Faction role must be identifiable at **20-30m in-world distance (~80-120px at 1080p)** on the default third-person camera, under overcast ambient conditions with no compensating hero lighting. Named individuals require proximity (<10m / <50px) and cannot rely on silhouette alone — they require material and face. **If a silhouette is not faction-role-legible at 80px without lighting aids, the design has failed.** Test every character design at this pixel height before approving.
 
-**Hierarchy.** Silhouette alone communicates, in descending order: Faction > occupational role within faction > approximate age/experience weight. Silhouette does **not** communicate: threat level, power tier, named-individual identity, player vs. NPC, or alive-vs-undead status. Those distinctions are carried by material, movement, and proximity.
+**Hierarchy.** Silhouette alone communicates, in descending order: Faction > occupational role within faction > approximate age/experience weight. Silhouette **in the world register** does **not** communicate: threat level, power tier, named-individual identity, player vs. NPC, or alive-vs-undead status. Those distinctions are carried by material, movement, and proximity — and, *when the player actively chooses to engage a target*, by the interface register (target frame, interaction prompt, the con-equivalent in §7), per Principle 4. Silhouette communicates faction and occupation; the interface communicates engagement state. The world never labels itself for browsing.
 
 **Signature faction silhouette shapes:**
 
@@ -694,6 +694,21 @@ In a camp of five players and AI companions, the player reads as one member of t
 
 The player who cannot tell a player from an NPC is getting the new-player experience the design intends. The player who can tell has developed appropriate literacy. Neither is a failure state.
 
+**Focused interaction prompt (interface register — per Principle 4 / D020).**
+The "no marker" rule above governs the **world register** and is unchanged: no
+persistent overhead nameplate, glow, ring, or icon labels entities in the world.
+But when the player moves to interaction range and orients toward a specific
+interactable entity, a minimal **interface-register** prompt naming that one
+focused entity and its available verb is permitted (e.g. "Speak — Caretaker
+Morrvik"). This is State Report, not World Performance: it appears only because
+the player chose to approach and face this entity, it names only the single
+focused target, and it vanishes the moment the player turns away or leaves range.
+It is screen-space interface text in the Layer 1 vocabulary — not floating
+world-space text over the NPC, and never a persistent indicator visible across
+the room. The world still does not pre-select targets for the player; the prompt
+only confirms the target the player has already walked up to. (Visual spec and
+input-display wording: §7.)
+
 #### Named NPC vs. Ambient NPC — Production Material Resolution Tiers
 
 | Attribute | Ambient NPC | Named NPC |
@@ -725,7 +740,7 @@ In Gravenspire, a Ghoul Syndicate member is an undead *person* operating within 
 
 #### Allied Companion (AI Party) vs. Stranger NPC
 
-No floating fellowship marker. No group color ring. No overhead icon. The player learns to identify AI companions through repeated exposure — the mechanism by which you learn to identify people in any social setting.
+No floating fellowship marker. No group color ring. No persistent overhead icon. The player learns to identify AI companions through repeated exposure — the mechanism by which you learn to identify people in any social setting. *(Interface-register exception, per Principle 4: when the player approaches and focuses a companion within interaction range, the focused interaction prompt may name them, exactly as for any other focused entity. This is the player choosing to engage a specific character — not a persistent world-register marker. The no-persistent-marker rule otherwise stands.)*
 
 **Identification mechanisms:**
 1. **Spatial positioning during camp** — AI companions are the characters seated in the light radius of the party's fire.
@@ -838,8 +853,9 @@ Transitions: 0.3-0.5s cross-blend. No snapping.
 
 ### 5.6 — What This Section FORBIDS
 
-- Any visual marker, glow, outline, particle effect, shader highlight, or floating indicator distinguishing a player character from an NPC at equivalent faction dress
-- Any marker, ring, overhead icon, or shader distinguishing AI companions from stranger NPCs
+- Any **persistent world-register** visual marker, glow, outline, particle effect, shader highlight, or floating indicator distinguishing a player character from an NPC at equivalent faction dress. *(Interface-register state reporting — target frame, cast bar, hate meter, the focused interaction prompt — is governed by Principle 4 and §7, not by this rule.)*
+- Any **persistent overhead** marker, ring, icon, or shader distinguishing AI companions from stranger NPCs. *(The proximity-gated, focus-gated interaction prompt naming a companion the player has walked up to is permitted under Principle 4; it is not persistent and not overhead.)*
+- **Any interface-register element that crosses into World Performance** — a target frame or threat indicator that appears on an entity the player has *not* selected; an interaction prompt visible before the player is in range and facing the entity; an overhead nameplate on all entities regardless of focus; loot glow; rare-spawn celebration; or any HUD element that tells the player where to go or what to value. Principle 4 permits the interface to report what the player has chosen and is doing — it does not permit the interface to become the routing/advertising layer P1 forbids in the world.
 - Idle animation that directs the viewer's attention toward the idle character — must fail the stillness test or be reduced
 - Victory poses, defeat poses, or emotive animations following combat resolution
 - Named NPC facial animation exceeding the 8-12 blend-shape budget
