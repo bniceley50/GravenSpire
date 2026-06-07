@@ -61,6 +61,21 @@ Dependency-ordered. Per-story scope boundaries cite the art bible section each s
 executes. `/create-stories` sets precise acceptance criteria; this ledger sets the
 plan-level scope and dependency shape.
 
+**Story files created 2026-06-07** (`/create-stories`; flat convention
+`production/stories/s4-NN-[slug].md`, the F1/F2/F3/F7 code-review findings folded in):
+
+| ID | Story File | Type | Owner | Status |
+|---|---|---|---|---|
+| S4-00 | [`s4-00-ux-hud-thresholds-and-con-glyph`](../stories/s4-00-ux-hud-thresholds-and-con-glyph.md) | Config/Data (Design) | ux-designer | Ready |
+| S4-01 | [`s4-01-play-camera-and-debug-hud-isolation`](../stories/s4-01-play-camera-and-debug-hud-isolation.md) | Integration | Codex | Ready |
+| S4-02 | [`s4-02-layer-1-vitals-hud`](../stories/s4-02-layer-1-vitals-hud.md) | UI | Codex | Blocked (S4-00) |
+| S4-03 | [`s4-03-target-frame-and-con-indicator`](../stories/s4-03-target-frame-and-con-indicator.md) | UI | Codex | Blocked (S4-00, S4-02) |
+| S4-04 | [`s4-04-cast-bar-and-interaction-prompt`](../stories/s4-04-cast-bar-and-interaction-prompt.md) | UI | Codex | Blocked (S4-00, S4-02) |
+| S4-05 | [`s4-05-first-district-atmosphere-and-legibility`](../stories/s4-05-first-district-atmosphere-and-legibility.md) | Visual/Feel | Codex | Ready |
+| S4-06 | [`s4-06-eq-readable-human-play-gate`](../stories/s4-06-eq-readable-human-play-gate.md) | Integration + human-play | Brian | Blocked (S4-01..05) |
+
+Ready to start now: **S4-00** (gates the HUD stories) and **S4-01** (independent).
+
 | ID | Name | Purpose | Bible Authority | Scope Boundary | Depends On |
 |---|---|---|---|---|---|
 | `S4-00` | UX HUD threshold + con-glyph pass *(ux-designer; Design type)* | Resolve the art bible §7.10 **deferred** HUD numbers the revision intentionally left to ux: minimum bar height, panel-fill opacity floor, cast-bar lower-center placement clearing the 40-60% band, and 5-state con-glyph shape discriminability. Output: concrete values the HUD stories build to. | §7.10 (the explicit deferral home); §7.1.1 | Design/spec only — NO implementation. Sets numbers + validates con-glyph shapes (color-disabled discriminability per §4.6). This is the ux-designer pass that owns the deferred thresholds. | — |
