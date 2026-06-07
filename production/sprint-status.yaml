@@ -8,18 +8,18 @@ end: ""
 generated: "2026-06-07"
 updated: "2026-06-07"
 branch: "main"
-head: "6aaf128"
+head: "0f44c35"
 qa_plan: ""
 plan: "production/sprints/sprint-5.md"
 slice_review: ""
 implementation_gate: "Sprint 5 opened 2026-06-07 after Sprint 4 partial-close (see sprint_4_final). Authority DECISIONS.md D021 (committed 6aaf128, pushed to origin/main) — amends D016's greybox-not-art presentation minimum after the second consecutive greybox feel-fail. Plan: production/sprints/sprint-5.md (design-first 6-story sequence S5-00..S5-05). Next gate: /create-stories for S5-00..S5-05, then S5-00 (First District world/level design — level-designer + world-builder) starts. S5-00 is the NON-SKIPPABLE design-the-place gate before any produced asset (art-bible §6.4 — no art for an undesigned place). Perf budgets (currently TO BE CONFIGURED in technical-preferences) get set at S5-02 vs a named target-hardware tier. Scope hard-capped by the S5-01 asset manifest. S4-01 carried as S5-04 (legibility floor). Pillar 1 + D020 no-routing fences hold; the produced-art PR gets a creative-director gate."
 progress: "SPRINT 5 OPEN — First District Designed & Produced (first-pass), reconciled 2026-06-07. Sprint 4 closed PARTIAL (full disposition in sprint_4_final): S4-00 banked (done), S4-01 feel-failed + parked, S4-02/03/04 deferred, S4-05 absorbed, S4-06 re-targeted. Trigger: the SECOND consecutive greybox feel-fail — S3-06 (2026-05-30) and the S4-01 camera/HUD pass (Brian N=1, 2026-06-07) both judged 'does not resemble a playable demo' — which falsified greybox-as-feel-validation for this product. Per DECISIONS.md D021 (committed + pushed, 6aaf128; amends D016) Sprint 5 produces ONE representative area of the First District (spawn -> Caretaker path) as a real gothic place, DESIGNED before produced, with the S4-01 legibility floor landed; greybox stays the default everywhere else; Pillar 1 + D020 readability survive (practical-source light only, no routing). Sequence: S5-00 design-the-place (non-skippable) -> S5-01 art-direction + asset manifest (scope cap) -> S5-02 perf-budgets + asset-spec -> S5-03 produced-art -> S5-04 land S4-01 legibility -> S5-05 re-validate feel (re-targeted §7.12 + place-read). The four 2026-06-07 lead assessments (creative-director, art-director, producer, technical-director) shaped both D021 and this plan. Next: /create-stories production/sprints/sprint-5.md, then S5-00 (level-designer + world-builder)."
-completed_stories: 0
+completed_stories: 1
 total_stories: 6
 sprint_3_final: "6/6 mechanically complete, feel-unvalidated. S3-01 done (2026-05-25); S3-02/03/04 done (2026-05-30); S3-05 done-with-notes (2026-05-26); S3-06 done-with-notes (mechanically complete AC-01–06, human-play feel gate NOT PASSED per D020, replanned into Sprint 4)."
 sprint_4_final: "PARTIAL CLOSE 2026-06-07. 1/7 delivered. S4-00 DONE (HUD threshold + con-glyph spec, commits e244460/bb6ba9f) — banked as a reusable design asset (feeds future HUD work). S4-01 implemented but human-play FAILED demo-readiness (Brian N=1, 2026-06-07; the second consecutive greybox feel-fail) — parked uncommitted on codex/s4-01-play-camera-debug-hud-isolation, CARRIED into Sprint 5 as the legibility floor (S5-04). S4-02/03/04 (HUD) not started — DEFERRED behind Sprint 5. S4-05 (greybox district) SUPERSEDED by Sprint 5 produced-art (S5-03). S4-06 (feel gate) RE-TARGETED as the Sprint 5 exit (S5-05). Cause: DECISIONS.md D021 produced-art pivot (amends D016). The Sprint 4 QA plan (qa-plan-sprint-4-20260607.md) and the D020 art-bible revision remain valid reference. A two-consecutive-feel-fail retrospective is warranted (flagged, non-blocking)."
-next_active_story: "S5-00"
-next_active_command: "/create-stories production/sprints/sprint-5.md (authors S5-00..S5-05; then S5-00 First District world/level design starts — level-designer + world-builder, the non-skippable design-the-place gate per D021)"
+next_active_story: "S5-01"
+next_active_command: "/story-readiness production/stories/s5-01-art-direction-and-asset-manifest.md (S5-01 unblocked by the approved S5-00 design brief; art-director builds the beat-scoped asset manifest)"
 
 carryover:
   # ----------------------------------------------------------------
@@ -90,20 +90,21 @@ stories:
     name: "First District world/level design (representative area)"
     file: "production/stories/s5-00-first-district-world-design.md"
     priority: must-have
-    status: ready
+    status: done
     owner: "level-designer + world-builder"
     estimate_days: 2.0
     blocker: ""
-    note: "NON-SKIPPABLE design-the-place gate (D021): place identity, route lock, faction identity, 2-3 sentence occupation-history per produced building (art-bible §6.4) BEFORE any asset. Gates all produced-art work. No art for an undesigned place."
+    completed: "2026-06-07"
+    note: "DONE 2026-06-07 (/story-done COMPLETE; brief APPROVED/LOCKED at production/qa/evidence/s5-00-first-district-design-brief.md). The Sexton's Court: identity + sexton-guild canon (narrative-director ratified), Court-admin-on-Caretaker-face-only over Resistance substrate (R1), route lock on real S3-05.1 geometry (no revision), no produced interiors (recessed-facade threshold). Product-owner scope decision: first-pass = spawn->Caretaker beat only (relic/vendor stay greybox; R2 deferred). Unblocks S5-01."
   - id: "S5-01"
     name: "Art-direction pass + bounded asset manifest"
     file: "production/stories/s5-01-art-direction-and-asset-manifest.md"
     priority: must-have
-    status: blocked
+    status: ready
     owner: "art-director"
     estimate_days: 1.0
-    blocker: "S5-00"
-    note: "First-pass produced palette/material/lighting/prop direction for the designed area; produces the asset manifest = the hard scope cap (4 material sets + practical lighting + 3-5 hero props). Fences: practical light only, no routing (D021/§6.6/§7.11)."
+    blocker: ""
+    note: "Unblocked 2026-06-07 — S5-00 design brief approved/locked. Build the asset manifest against the brief: 4 material sets + practical lighting + 3-5 hero props, SCOPED TO THE spawn->Caretaker BEAT, Court vocabulary on the Caretaker office face only (R1). The CaretakerHall-entrance-not-framing-Morrvik constraint + boundary-walls-as-city-fabric are binding inputs. Fences: practical light only, no routing (D021/§6.6/§7.11)."
   - id: "S5-02"
     name: "Perf-budget framework + asset-spec"
     file: "production/stories/s5-02-perf-budget-and-asset-spec.md"

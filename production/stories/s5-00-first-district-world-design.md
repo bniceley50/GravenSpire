@@ -2,7 +2,7 @@
 
 > **Sprint**: Sprint 5 — First District — Designed & Produced (First-Pass)
 > **Sprint Plan**: `production/sprints/sprint-5.md` (Story Ledger, S5-00)
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Presentation
 > **Type**: Design (spec/brief — no code, no assets)
 > **Estimate**: 2.0 days
@@ -75,7 +75,7 @@ produces *from* it). **No code, no assets.**
 (the design brief: place identity, locked route, faction identity, per-building
 occupation histories, sightline/massing intent, fence compliance).
 
-**Evidence status**: Not started
+**Evidence status**: Delivered + approved — `production/qa/evidence/s5-00-first-district-design-brief.md` (APPROVED/LOCKED 2026-06-07). Authored by world-builder + level-designer; canon ratified by narrative-director (RATIFY WITH REVISIONS); product-owner sign-off.
 
 ## Dependencies
 
@@ -86,3 +86,15 @@ occupation histories, sightline/massing intent, fence compliance).
 ## Blockers
 
 None. D021 + the art bible are the authority. This story unblocks S5-01.
+
+## Completion Notes
+
+**Completed**: 2026-06-07
+**Verdict**: COMPLETE
+**Criteria**: 6/6 (S5-00-01..06) satisfied by the approved design brief.
+**Test Evidence**: `production/qa/evidence/s5-00-first-district-design-brief.md` — *The Sexton's Court*: district identity + sexton-guild canon, the Court-administrative-over-Resistance-residential faction read (Court vocabulary scoped to the Caretaker office face only, R1), route lock on the real S3-05.1 geometry (no revision), fiction-onto-open-court reconciliation (no produced interiors; recessed-facade threshold), five legibility-without-routing mechanisms + explicit routing rejections, beat-scoped occupation histories, and the fence-compliance statement.
+**Scope decision (product owner)**: first-pass produced scope = **spawn → Caretaker beat only**; relic/vendor rear zones stay greybox this pass (D021 lever). R2 (relic-courtyard Stratum-2 tell) deferred to the rear-zone follow.
+**Canon**: ratified by narrative-director (RATIFY WITH REVISIONS). 6 claims LOCKED; 3 PROVISIONAL (name, Morrvik's 19 years, relic significance); R3 Caretaker-title footnote recorded; two forward watch-items left UNRESOLVED by design (M5 relic politics; Morrvik↔Living-Resistance Tier-3 tension).
+**GDD/ADR Deviations**: None — executes art-bible §1/§2/§4/§5.2/§6 and D021 faithfully.
+**Review Gates**: world-builder + level-designer (execution); narrative-director (canon gate); product-owner sign-off.
+**Forced Completion**: No.

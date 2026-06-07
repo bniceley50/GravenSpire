@@ -691,3 +691,12 @@ After the two pre-conditions land: `/story-readiness production/stories/s3-01-st
 - **HUD chain unblocked:** S4-02 (vitals) is now Ready; S4-03/S4-04 remain blocked on S4-02. `completed_stories` 0->1. `next_active_story` -> S4-02.
 - **S4-01 (Codex lane)** implemented but in-progress on `codex/s4-01-play-camera-debug-hud-isolation` (uncommitted); open item is manual Play Mode visual evidence (AC-01/02), then rebase on `origin/main` -> commit -> PR -> review -> /story-done. S3-06 dirt safe in the Codex worktree `stash@{0}`.
 - Next recommended: `/story-readiness production/stories/s4-02-layer-1-vitals-hud.md` (HUD chain), or capture S4-01 visual evidence.
+
+## Session Extract — 2026-06-07 Sprint 4→5 pivot + S5-00 close
+
+- **Sprint 4 played → FAILED demo-readiness again** (Brian N=1 on the S4-01 camera/HUD pass) — the SECOND consecutive greybox feel-fail. Product owner called: stop, pivot to produced world art.
+- **D021 (Locked, `6aaf128`, pushed)** — First District produced-art pivot, AMENDS D016's greybox-not-art minimum. Narrow: first-pass produced art for ONE representative area; design-the-place-first; bounded manifest; S4-01 legibility rides along; Pillar 1 + D020 fences hold (practical light only, no routing); Tier-1; perf-budget gate. Shaped by 4 lead assessments (CD/AD/producer/TD).
+- **Sprint 4 closed PARTIAL → Sprint 5 opened** (`164611f`, pushed): "First District — Designed & Produced (first-pass)". Slate S5-00..S5-05 authored (`0f44c35`, local). Lesson recorded (greybox isn't a feel-validation bar for this product).
+- **S5-00 DONE (`/story-done` COMPLETE, this session).** Design brief APPROVED/LOCKED: `production/qa/evidence/s5-00-first-district-design-brief.md`. *The Sexton's Court* — sexton-guild canon (narrative-director ratified, RATIFY WITH REVISIONS; 6 LOCKED / 3 PROVISIONAL), Court-admin-on-Caretaker-face-only over Resistance substrate, route lock on real S3-05.1 geometry (no revision), no produced interiors. **Product-owner scope: spawn→Caretaker beat only** (relic/vendor stay greybox). `completed_stories` 1/6; `next_active_story` → S5-01.
+- **Codex lane:** S4-01 parked on `codex/s4-01-play-camera-debug-hud-isolation` (uncommitted, behind origin), carried into Sprint 5 as **S5-04**. No Codex action until S5-04.
+- **Next recommended:** `/story-readiness production/stories/s5-01-art-direction-and-asset-manifest.md` (art-director builds the beat-scoped asset manifest).
