@@ -11,20 +11,17 @@
 
 > **Art Director Sign-Off (AD-ART-BIBLE)**: Skipped — Lean review mode. Run `/setup-engine full` mode if formal sign-off required before Tier 1 production begins.
 
-> ⚠️ **REVISION PENDING — DECISIONS.md D020 (2026-05-30).** The S3-06 N=1
-> human-play attempt (2026-05-30) failed the feel gate for presentation-
-> readability reasons, and the product owner has decided to adopt **more
-> EQ-style play legibility** than this bible currently allows. This is a
-> **pillar-level amendment to P1 ("The World Is Not Your Story")** and its
-> visual-presentation expression. **Sections 1 (Visual Identity / P1), 5
-> (Character Design — silhouette legibility), and 7 (UI/HUD Direction) are under
-> revision and must NOT be executed as-written until the D020 revision pass
-> lands.** The amended pillar will move the line on *allowed legibility
-> affordances* (target/combat readability, structured HUD, clear interaction
-> feedback) while still forbidding *theme-park guidance* (quest markers, objective
-> arrows, minimap pins, "go here" routing). The revision is authored through the
-> `art-director` agent as its own deliberate pass — not in D020 itself. Until
-> then, treat Sections 1/5/7 as **frozen-for-revision**, not current direction.
+> ✅ **D020 REVISION COMPLETE (2026-06-07).** The EQ-readability pivot
+> (DECISIONS.md D020) has been applied: **§1** added Principle 4 (the world/interface
+> two-register model); **§5** scoped identity rules to the world register and opened
+> the proximity/focus-gated interface exceptions; **§7** retired "invisible in
+> practice" for "recessive but legible," and added the Target Frame, Cast Bar,
+> Interaction Prompt, and the relative-threat (con) indicator. The "readability, not
+> cosplay" line holds: no quest markers, minimap, objective arrows, loot glow, or
+> world-routing — fenced by the new §7.11 State-Report boundary and §7.12
+> acceptance criteria. Exact HUD px/opacity numbers are deferred to the ux-designer
+> validation pass (§7.10). **Sprint 4 (EQ-Readable Presentation Slice) slate authoring
+> is now UNBLOCKED.**
 
 > **Technical-artist validation flags** (accumulated across sections; require resolution before or during Tier 1 prototype):
 > - S2 State 7: per-camera desat pass for corpse run — URP camera-stacking isolation
@@ -1195,20 +1192,97 @@ Gravenspire does not explain its environmental literacy. It trusts repeated expo
 
 ### 7.1 — Layer 1 Visual Style (Practical HUD)
 
-**Character.** Layer 1 is a concession, not an asset. It exists because health and hate cannot safely live on a haunt-interior wall during a corpse run. Every decision here earns its place by being **invisible in practice** — something players stop consciously seeing after three sessions. If a Layer 1 element directs the player's aesthetic attention toward the HUD, it has failed.
+**Character.** Layer 1 is the game's **State Report** system (per Principle 4): it
+gives the player clear, immediate access to their own current state and their chosen
+target's state. It stays **quiet and recessive** in Gravenspire's material vocabulary
+— but quiet is the aesthetic, not the goal. The goal is **legible under combat
+conditions**: readable during an active pull without the player studying the screen. A
+Layer 1 element that is architecturally beautiful but unreadable at a glance in combat
+has failed (this was the S3-06 human-play failure, D020). A Layer 1 element that is
+legible *and* coherent with the city's material vocabulary is the target — these are
+not in opposition. The earlier "invisible in practice" framing is retired: the HUD is
+recessive, not invisible. A player looking at a screenshot should be able to identify
+the HUD as an interface; they simply should not have their *aesthetic* attention
+pulled to it.
 
 **Physical analogy.** The Layer 1 panel does not read as "screen-space UI." It reads as if someone has mounted a narrow strip of architectural ironwork at the periphery of vision — a framing element in the vocabulary of the city's structural details. The eye uses it the way it would use a column or an arch terminus: as a spatial anchor, not as a readout.
 
 **Concrete specification:**
 
-- **Panels:** 1px border in Iron Seam `#3D3A38` at 100% opacity. Fill Iron Seam at 45% opacity. Contrast border-to-fill ~1.1:1 — barely perceivable as two elements. No drop shadow, gradient, rounded corners, or beveling.
+- **Panels:** 1px border in Iron Seam `#3D3A38` at 100% opacity. Fill Iron Seam — *opacity under revision per D020: the prior 45% fill value is no longer accepted as proven readable after the S3-06 human-play failure; the corrected minimum is set by ux-designer validation (§7.10), holding the recessive intent while passing a combat-readability floor.* No drop shadow, gradient, rounded corners, or beveling.
 - **Panel frames** use the compressed pointed-arch terminus (Section 3.3) at the right end of horizontal bars only. The left end is a clean vertical cut. The arch terminus references Gravenspire's Romanesque-over-gothic layering — structural, not decorative.
 - **Icon frames:** square with 45° chamfer all corners, matching floor-tile rotational symmetry. Line weight 1px Iron Seam. No fill.
-- **Bars:** 3px height, no glow, no gradient. Health (Render Umber), mana (Pewter Rain), hate (Academic blue-black at 50% opacity, peaking to Rust Iron at max). Bar tracks at Iron Seam 30% opacity — more transparent than the enclosing panel so the bar reads as inside the panel.
+- **Bars:** *height under revision per D020: the prior 3px value is no longer accepted as proven readable after the S3-06 human-play failure; the corrected minimum bar height is set by ux-designer validation (§7.10). The "quiet/recessive" intent holds — the floor exists so the bar can never again be unreadable under combat stress.* No glow, no gradient. Health (Render Umber), mana (Pewter Rain), hate (Academic blue-black at 50% opacity, peaking to Rust Iron at max). Bar tracks at Iron Seam 30% opacity — more transparent than the enclosing panel so the bar reads as inside the panel.
 - **Spacing rule:** all Layer 1 elements live at screen periphery, minimum 48px from nearest edge at 1080p. Nothing in the center of the screen; nothing near vertical center. Default placement: health/mana lower-left; hate/threat lower-right; spell queue centered-bottom above lower margin.
 - **Buttons (invoked from Layer 1 context):** trapezoidal, wider at base, narrower at top — mirrors door-arch geometry. Fill Iron Seam 45%, border 1px 100%, no rounded corners. Width proportioned to label — no fixed-width buttons.
 
 **In a screenshot:** a slim architectural band at lower-left and lower-right — same dark-warm-gray as deep architectural shadow. In a medium-lit exterior or candlelit interior, Layer 1 blends into peripheral architecture. It reads as part of the scene's framing, not as interface superimposed.
+
+### 7.1.1 — Layer 1 State-Report Elements (Target Frame, Cast Bar, Interaction Prompt)
+
+*Added per DECISIONS.md D020 and Principle 4. These elements address the S3-06
+presentation-readability failure: the player could not reliably read target, cast, and
+interaction state. All three are State Report (they appear because the player acted)
+and obey the Layer 1 vocabulary: Iron Seam palette, compressed architectural forms, no
+glow/gradient/rounded corners. They are quiet but legible.*
+
+**Target Frame.** Appears when the player selects a target (tab or click); disappears
+on deselect or target death. It is the single most important EQ-legibility addition.
+- **Placement:** upper-left periphery, above the health/mana panel. Never center-screen.
+- **Contents:** target name (Layer 1 typography, Medium weight); target health bar
+  (same height spec as the player health bar, Render Umber, depleting left-to-right);
+  faction frame treatment (the §7.8 faction icon-frame modifications — Court
+  recessed-surround, Syndicate ledger-notch, etc.); and the relative-threat indicator
+  (below).
+- **It does NOT appear over un-targeted entities.** It is selection-gated. A health bar
+  floating over every enemy is World Performance and remains forbidden; a frame that
+  appears because the player selected a target is State Report.
+
+**Relative-Threat Indicator (the "con" — fully specified per D020).** Displayed inside
+the target frame, left of the name, ONLY for the currently selected target. It reports
+the player's likely combat relationship to a target *they chose to examine* — pure
+State Report (the EQ con model). It is shape-primary and non-color-only (§4.6
+accessibility): shape communicates, color only confirms.
+- **Five states**, each a compressed geometric glyph in the Layer 1 instrument-plate
+  line register (§7.8), never a filled or glowing icon:
+  - **Trivial** — single compressed horizontal bar. Color confirm: Pewter Rain.
+  - **Below** — down-pointing compressed triangle. Color confirm: Quarry Stone.
+  - **Even** — square. Color confirm: Bone Pale.
+  - **Above** — up-pointing compressed triangle. Color confirm: Candlefall Amber.
+  - **Dangerous** — double up-pointing triangle (stacked). Color confirm: Rust Iron.
+- **Colors are drawn only from the existing world palette** — Rust Iron is "iron
+  oxidizing in damp," Candlefall Amber is "candle flame," NOT RPG danger-red /
+  reward-gold (§4.3 semantic vocabulary holds; red and green as signaling colors remain
+  forbidden). The glyph is the primary read; a colorblind player loses nothing.
+- **It is recessive:** the indicator is a small line-glyph, not a loud color badge.
+  This is the §7.1.1 reconciliation of "fully specified" (D020) with "quiet/recessive"
+  (D020) — detailed information, understated delivery.
+- **It does NOT appear on un-selected entities in the world.** No floating con-color
+  over every mob. The player examines a chosen target; the frame reports.
+
+**Cast Bar.** Appears when the player initiates a cast with cast-time > 0; fills
+left-to-right over the cast duration; disappears on completion, interrupt, or fizzle.
+- **Placement:** lower-center, above the spell-queue panel — below the 40-60% center
+  band that §7.11 forbids (this is the sole element permitted in the lower-center zone,
+  present only during an active cast, the player's most time-critical current action).
+  *ux-designer validates exact screen-space height to confirm it sits clear of the
+  forbidden band (§7.10).*
+- **Fill:** linear, no ease — this is a **literal readout of the ongoing cast**, the
+  same category as the med-break mana fill (§7.9), not animation-for-feel. Spell name
+  above the bar in Medium weight. No flourish on completion — the bar reaches full and
+  disappears; the spell fires.
+- **Interrupt:** bar empties and disappears immediately. No animation. The cast failed.
+
+**Interaction Prompt.** Appears when the player is within interaction range and
+oriented (~60° forward cone) toward an interactable entity/object; names the single
+focused target and its verb (e.g. "Speak — Caretaker Morrvik"). Disappears on
+out-of-range or turn-away.
+- **Placement:** lower-center, above the spell queue. Screen-space Layer 1 text — NOT
+  floating world-space text over the NPC, never a persistent across-room indicator.
+- **Style:** Iron Seam panel, no glow, no pulse, no excited state. A quiet label.
+- **Input-display wording** (which key/glyph names the verb) is a ux concern; the art
+  direction fixes only that it is a quiet, proximity/focus-gated, single-target prompt.
+- Does not appear in combat with an active target (interaction is combat-blocked).
 
 ### 7.2 — Layer 2 Visual Style (World Information)
 
@@ -1422,6 +1496,11 @@ These are measurable UX requirements the visual direction must respect:
 - **1px border legibility at 4K:** test the 1px architectural borders at 4K resolution — may need to scale to 1.5-2px at 4K for equivalent perceptual weight.
 - **Dialogue panel obstruction test:** with the faction-specific dialogue panel occupying lower 1/3 of screen, verify NPC head-and-upper-body framing in the upper 2/3 remains cinematically readable.
 - **Journal accessibility:** verify hotkey `J` is remappable, journal text is scalable for low-vision, reduced-motion option available for journal open/close animation.
+- **Layer 1 combat-readability floor (per D020):** the prior 3px bar height and 45% panel fill are no longer accepted as proven readable after the S3-06 human-play failure. Set the corrected minimum bar height and panel-fill opacity that pass a combat-stress readability test while preserving the recessive intent. *This is the home for the D020 "legibility floor, exact numbers deferred to ux" decision — set here, in prototype, not assumed.*
+- **Target frame readability:** target name + health + threat glyph legible within ~1s of selection, at the periphery, under combat scanning. *Validate in prototype.*
+- **Con glyph discriminability:** the five threat glyphs distinguishable by shape alone (color disabled) at HUD scale. *Validate with colorblind simulation.*
+- **Cast bar peripheral read:** cast progress readable from peripheral vision without the player ceasing to monitor health; confirm lower-center placement clears the 40-60% forbidden band.
+- **Interaction prompt timing:** prompt resolves the focused target's name before the player commits the interaction, within range/orientation gating.
 
 ### 7.11 — What This Section FORBIDS
 
@@ -1434,8 +1513,8 @@ These are measurable UX requirements the visual direction must respect:
 - Font sizes outside 24-36px range at 1080p
 - Italic or oblique type anywhere in the interface
 - Color variations on icons beyond the single faction-frame modification
-- Any UI element in vertical center of screen or center horizontal band (40-60% viewport height)
-- Smooth-tween bar updates — all bars snap to value
+- Any UI element in vertical center of screen or center horizontal band (40-60% viewport height) — *exception: the cast bar at lower-center during an active cast only (§7.1.1), which sits below the 40-60% band*
+- Smooth-tween bar updates — all bars snap to value — *exception: the cast bar and the med-break mana fill (§7.9), which are linear readouts of an ongoing process, not feel-tweens*
 - Any HUD element participating in world-desat pass (HUD on Overlay camera, isolated)
 - **The word "satisfying" as a design brief for HUD animation** — satisfaction is not the register
 
@@ -1470,6 +1549,36 @@ These are measurable UX requirements the visual direction must respect:
 - Faction colors at full digital saturation
 - Red as a UI signaling color in any context
 - Green as a UI signaling color in any context
+
+**State-Report boundary (new per D020 / Principle 4) — the interface must not become World Performance:**
+- A target frame, health bar, or threat/con indicator on any entity the player has NOT selected
+- An interaction prompt visible before the player is in range and facing the entity, or naming more than the single focused target
+- Persistent overhead nameplates on all entities regardless of focus
+- Loot glow, rarity color, or rare-spawn celebration in the HUD layer
+- Any HUD element that tells the player where to go, what to do next, or what to value — minimap, quest arrow, objective pin, waypoint, "go here" routing
+- The con indicator rendered as a loud color badge rather than a recessive shape-primary glyph
+- *Principle 4 permits the interface to report what the player has chosen and is doing. It does not permit the interface to become the routing/advertising layer P1 forbids in the world.*
+
+### 7.12 — EQ-Legibility Acceptance Criteria *(added per D020)*
+
+The specific tests a presentation slice must pass to demonstrate D020's "EQ-readable,
+not EQ-cosplay" mandate is met — the visual-direction acceptance criteria:
+
+1. **Combat-state read:** a player 10s into a pull can tell they are in combat and read
+   their approximate health, without studying the screen.
+2. **Target identification:** on selecting a target, its name and rough threat level are
+   legible within ~1s.
+3. **Interaction confirmation:** approaching an interactable and triggering it, the
+   prompt named the target beforehand and the result (accepted / blocked / transition)
+   is legible.
+4. **Cast-state read:** initiating a timed cast, the cast bar is readable from
+   peripheral vision while still monitoring health.
+5. **HUD coherence:** Layer 1 shares the city's material vocabulary (Iron Seam,
+   compressed architectural forms, arch terminus) — it does not look imported from
+   another game.
+6. **No routing:** none of the above tells the player where to go, what to value, or
+   what to feel. They report what the player is doing and what is happening to them. The
+   world tells no one anything.
 
 ---
 
