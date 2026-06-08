@@ -39,10 +39,10 @@
 
 ## Performance Budgets
 
-- **Target Framerate**: [TO BE CONFIGURED — set during Tier 1 prototype once target hardware is known]
-- **Frame Budget**: [TO BE CONFIGURED]
-- **Draw Calls**: [TO BE CONFIGURED]
-- **Memory Ceiling**: [TO BE CONFIGURED]
+- **Target Framerate**: 60 fps at 1080p (provisional S5-02 produced-area gate; GTX 1070-class minimum-spec anchor / RTX 4070+ target-comfort anchor; confirm by S5-03 profiling)
+- **Frame Budget**: 16.67 ms/frame total (provisional); S5 representative-art sub-slice target is no more than 2.0 ms additional CPU + GPU over the current greybox baseline until profiled
+- **Draw Calls**: <= 1,500/frame global URP ceiling; S5 spawn->Caretaker produced sub-slice target is <= 120 additional draw calls before profiling
+- **Memory Ceiling**: <= 350 MB resident texture memory per active zone; S5 produced sub-slice target is <= 64 MB new resident texture memory before profiling
 
 ## Testing
 

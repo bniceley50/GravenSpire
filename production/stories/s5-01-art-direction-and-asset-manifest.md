@@ -35,7 +35,7 @@ occupation histories). This story does NOT design the place — it directs art f
 
 ## Acceptance Criteria
 
-- [ ] **S5-01-01**: A first-pass **material vocabulary** is selected for the representative area against the S5-00 brief + art bible §4/§6 — the **4 material sets** (street cobble, primary facade stone, interior plaster, timber trim), each with palette, age tier, and faction context (per the S5-00 faction identity).
+- [ ] **S5-01-01**: A first-pass **material vocabulary** is selected for the representative area against the S5-00 brief + art bible Section 4 / Section 6 - the **4 material sets** (street cobble, Caretaker-face Court ashlar, residential facade stone, timber trim), each with palette, age tier, and faction context (per the S5-00 faction identity).
 - [ ] **S5-01-02**: The **practical-lighting approach** is specified: 3–6 source-motivated warm practicals (~2200–2600K) at actual in-world emitter positions, replacing default/greybox lighting. **Practical-source only** (§2 / §6.6) — no light placed for the player's benefit without an emitter.
 - [ ] **S5-01-03**: **3–5 hero props** are identified (e.g. lantern post, faction-board physical object, doorstep threshold deposit) with material treatment, **each tied to an S5-00 occupation-history cause** (§6.4).
 - [ ] **S5-01-04**: The **asset manifest** is produced — the explicit, capped list of every asset to author (the 4 material sets + the practical-lighting rig + the 3–5 hero props). **This manifest is the scope cap**: anything beyond it is a `[SCOPE]` lesson and a stop, not a silent add.

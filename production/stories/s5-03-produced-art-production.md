@@ -39,7 +39,7 @@ an unprofiled project; URP materials/lighting/GI — verify against
 
 ## Acceptance Criteria
 
-- [ ] **S5-03-01**: The **4 material sets** are authored to the S5-02 asset-spec and applied to the representative-area geometry (street, primary facade, interior plaster, timber trim) per §4/§6 and the S5-01 direction. **First deliverable + mid-pass review**: the street + facade material in-engine on the S3-05 geometry, evaluated by the art-director before the rest is committed.
+- [ ] **S5-03-01**: The **4 material sets** are authored to the S5-02 asset-spec and applied to the representative-area geometry (street cobble, Caretaker-face Court ashlar, residential facade stone, timber trim) per art bible Section 4 / Section 6 and the S5-01 direction. **First deliverable + mid-pass review**: the street + facade material in-engine on the S3-05 geometry, evaluated by the art-director before the rest is committed.
 - [ ] **S5-03-02**: The **practical-lighting pass** is implemented — the 3–6 source-motivated warm practicals at in-world emitter positions; default/greybox lighting removed. **Practical-source only** (§6.6): no light placed for the player's benefit without an emitter.
 - [ ] **S5-03-03**: The **3–5 hero props** are placed with material treatment, **each tied to its S5-00 occupation cause** (§6.4) — no prop exists without a person/activity explaining it.
 - [ ] **S5-03-04**: The **fences hold** (D021 / §7.11): no guidance lighting, hero-lit objective doors, emissive/glowing interactables, rarity color, atmosphere-as-warning, or composition that frames the objective. The per-element State-Report-vs-World-Performance test is applied; **creative-director gate on this PR**.
