@@ -65,6 +65,11 @@
 - `com.unity.ai.navigation` — Unity package dependency for NavMesh authoring
   and runtime path queries in `S3-05` and downstream district/zone stories.
   Pinned to `2.0.12` for Unity 6.3 LTS.
+- `com.coplaydev.unity-mcp` — MCP for Unity (the editor bridge for the Sprint 5 /
+  D021 AI art-production pipeline). MIT license, installed from git
+  (`CoplayDev/unity-mcp`, commit `78ee541`). **Editor-only dev tooling — must be
+  excluded from player builds.** Active-work trigger: S5-03 produced-art
+  production via the Unity editor MCP channel.
 
 <!--
 Deferred libraries (planned but NOT yet approved for use):
