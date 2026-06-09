@@ -26,14 +26,16 @@ lighting under `S5_PracticalLighting`. The S3-05 geometry was reused unmodified.
 
 | Artifact | Value |
 |---|---|
-| `Assets/Scenes/_DevEntry.unity` content SHA | `63535ed143dabc27ea7ce66d26b7afc36a694390` |
+| `Assets/Scenes/_DevEntry.unity` content SHA | `bae11334e62cc72b39ffdd20d6cb10836891dda9` |
 | `Assets/Scenes/_DevEntry/FirstDistrict_Greybox_NavMesh.asset` SHA | `5c20605e530996245a7061c01e82243063ee8dda` |
 | NavMesh asset size | 9,704 bytes |
-| Repo state | `2e84a25` (origin/main) |
+| Repo state | `95a0bb9` (origin/main; scene final state incl. the CD-gate lantern move at `1d92daf`) |
 
 **Reproduce**: `git hash-object Assets/Scenes/_DevEntry.unity` and
-`git hash-object Assets/Scenes/_DevEntry/FirstDistrict_Greybox_NavMesh.asset` at `2e84a25`.
-The S5-05 gate compares the played build against this tuple.
+`git hash-object Assets/Scenes/_DevEntry/FirstDistrict_Greybox_NavMesh.asset` at `95a0bb9`.
+The S5-05 gate compares the played build against this tuple. *(Tuple re-hashed after the
+CD-gate scene adjustment — the original 2e84a25 hash was superseded by the lantern move;
+a stale identity anchor is the F1 failure mode this tuple exists to prevent.)*
 
 ## 3. Perf Snapshot vs S5-02 Budget (editor capture, 2026-06-09)
 
@@ -86,16 +88,22 @@ texture. The **provisional budget framework locks against a real play profile at
 
 ## 7. Open Before S5-03 Closure
 
-1. **M2 preservation reruns (RG-02, BLOCKING)** — the scene was touched; the three M2
-   batchmode smokes require the editor CLOSED (project lock). Run + record before
-   `/story-done`.
+1. ~~M2 preservation reruns (RG-02, BLOCKING)~~ **DONE 2026-06-09: 3/3 PASS** —
+   single-trash / linked-overpull / named-blocker in separate batchmode invocations,
+   preservation mode + builder skipped; evidence at
+   `tests/evidence/S5-03/m2-0{2,3,4}-preservation-20260609-smoke.md` (commit `95a0bb9`).
 2. ~~Creative-director gate (S5-03-04)~~ **DONE 2026-06-09: PASS WITH ADJUSTMENTS**
    (all 9 elements gated; 7 PASS, 2 ADJUST — lantern re-placement + parity evidence —
    **both adjustments applied and re-captured**, see §4). CD on-vision note retained for
    the next pass: place-read clears the D021 bar; "cursed gothic" tone (sky, grime) is a
    deepening item, not a gate failure.
-3. **ProjectSettings drift restore-or-adopt** — decide when the editor closes.
+3. ~~ProjectSettings drift restore-or-adopt~~ **SETTLED 2026-06-09: deliberate ADOPT**
+   (`95a0bb9`) — GraphicsSettings linear-intensity/color-temperature 0→1 is the
+   URP-correct lighting math the gated lantern pass was authored under; legacy
+   QualitySettings AA zeroed (URP owns MSAA); URPProjectSettings whitespace noise.
 4. Final budget lock happens at the S5-05 play profile.
+
+**Closure state: all S5-03 evidence requirements satisfied — `/story-done`-ready.**
 
 ---
 *All work editor-mediated via the Unity MCP channel (D021 pipeline; dependency recorded
