@@ -52,9 +52,15 @@ texture. The **provisional budget framework locks against a real play profile at
 ## 4. Fence Compliance (D021 / §7.11 / S5-00 rejections)
 
 - Practical-source light only: every point light sits in a lantern fixture; the directional is the overcast sun. No light placed for the player's benefit without an emitter.
-- No guidance lighting / hero-lit doors: the ashlar band reads *quiet from spawn* (verified in `s5-03-setdressing-spawn-view.png`); the door niche announces nothing.
-- Door niche at x=3.6 — **off Morrvik's standing axis (x=2)**, honoring the S5-00 "no entrance center-frames Morrvik" rejection.
-- Lantern parity held: CaretakerHall and CourtVendorHall each carry one street lantern; neither reads warmer from spawn.
+- **CD gate (2026-06-09): PASS WITH ADJUSTMENTS — both applied.** The gate caught that the
+  original Caretaker-corner lantern (4.5,0,-5.3) co-lit Morrvik and the door niche (the
+  scene's only warm pool on the objective area = soft routing), and that lantern parity was
+  asserted, not evidenced. **Adjustment:** the lantern moved to (-1.5,0,-3.5)
+  (`S5_LanternPost_CourtWest` — 3.57m from Morrvik, 5.3m from the niche); post-move frame
+  `s5-03-cdgate-lantern-moved-spawn-view.png` shows the warm pool on the residential mass,
+  the niche/NPC in neutral cool light, both lantern posts visible, and **neither hall
+  carrying a warm pool from spawn** (parity shown, not stated).
+- Door niche at x=3.6 — **off Morrvik's standing axis (x=2)**, honoring the S5-00 "no entrance center-frames Morrvik" rejection; post-adjustment, the niche is no longer the lit feature of the face.
 - Faction board notices are **blank pale quads** — no readable text, no routing.
 - No emissive materials, rarity color, atmosphere-as-warning, or objective-framing composition anywhere in the produced set.
 - Warm/cool greybox landmark tinting retired (both halls wear the same residential stone; Court read is material-precision on one face only).
@@ -83,8 +89,11 @@ texture. The **provisional budget framework locks against a real play profile at
 1. **M2 preservation reruns (RG-02, BLOCKING)** — the scene was touched; the three M2
    batchmode smokes require the editor CLOSED (project lock). Run + record before
    `/story-done`.
-2. **Creative-director gate (S5-03-04)** — per-element State-Report-vs-World-Performance
-   review of the produced set.
+2. ~~Creative-director gate (S5-03-04)~~ **DONE 2026-06-09: PASS WITH ADJUSTMENTS**
+   (all 9 elements gated; 7 PASS, 2 ADJUST — lantern re-placement + parity evidence —
+   **both adjustments applied and re-captured**, see §4). CD on-vision note retained for
+   the next pass: place-read clears the D021 bar; "cursed gothic" tone (sky, grime) is a
+   deepening item, not a gate failure.
 3. **ProjectSettings drift restore-or-adopt** — decide when the editor closes.
 4. Final budget lock happens at the S5-05 play profile.
 
