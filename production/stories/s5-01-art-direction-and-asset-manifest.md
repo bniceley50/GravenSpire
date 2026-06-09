@@ -2,7 +2,7 @@
 
 > **Sprint**: Sprint 5 — First District — Designed & Produced (First-Pass)
 > **Sprint Plan**: `production/sprints/sprint-5.md` (Story Ledger, S5-01)
-> **Status**: Blocked (depends on S5-00)
+> **Status**: Complete
 > **Layer**: Presentation
 > **Type**: Design (direction + manifest — no code, no assets)
 > **Estimate**: 1.0 day
@@ -71,7 +71,9 @@ occupation histories). This story does NOT design the place — it directs art f
 (the art-direction brief: material vocabulary, practical-lighting plan, hero-prop list
 with §6.4 causes, the capped asset manifest, fence compliance).
 
-**Evidence status**: Not started
+**Evidence status**: Delivered — `production/qa/evidence/s5-01-art-direction-and-manifest.md`
+(committed `19193eb`; Art Judge v0 taste gate + capped manifest, consumed by S5-02/S5-03).
+Closed 2026-06-09 in the S5-03 close-out reconciliation.
 
 ## Dependencies
 

@@ -2,7 +2,7 @@
 
 > **Sprint**: Sprint 5 — First District — Designed & Produced (First-Pass)
 > **Sprint Plan**: `production/sprints/sprint-5.md` (Story Ledger, S5-03)
-> **Status**: Blocked (depends on S5-02)
+> **Status**: Complete
 > **Layer**: Presentation
 > **Type**: Visual/Feel
 > **Estimate**: 3.0 days
@@ -88,3 +88,30 @@ confirmation; the perf profile vs budget; fence + scene-discipline confirmation;
 
 Blocked on S5-02 (asset-spec + budgets), which is blocked on S5-01 (manifest), which is
 blocked on S5-00 (design). Sequence vs S5-04 for scene safety.
+
+## Completion Notes
+
+**Completed**: 2026-06-09
+**Verdict**: COMPLETE WITH NOTES
+**Criteria**: 6/6 PASS (S5-03-05 with the by-design note that the provisional budget
+framework locks finally at the S5-05 play profile).
+**Test Evidence**: `production/qa/evidence/s5-03-produced-art-evidence.md` — manifest
+completion (4 material sets + lighting + 5 props at cap), [F1] tuple at final scene
+state (`bae11334` @ `67fe9c4`), perf snapshot all-PASS, fence register, scene-discipline
+record, 8 walkthrough screenshots in `tests/evidence/S5-03/`, and M2 preservation
+**3/3 PASS** (`m2-0{2,3,4}-preservation-20260609-smoke.md`).
+**Review Gates**: product-owner mid-pass GO; **creative-director gate PASS WITH
+ADJUSTMENTS** — caught the Caretaker-corner lantern co-lighting Morrvik + the door niche
+(soft routing) and an unevidenced parity claim; both adjustments applied and re-captured
+(`1d92daf`). The Evidence Rule working as intended: the register was corrected to match
+pixels.
+**GDD/ADR Deviations**: None. D021 fences held; Tier-1 intact; URP-only.
+**Scope Notes**: NPC placeholder palette added mid-story by product-owner direction
+(design pass + tints; commit `443db2f`) — recorded, bounded, no manifest breach. Cobble
+intake briefly deviated to 2048; caught by Codex-lane review, corrected to the 1024 spec
+(`32f6451`). ProjectSettings linear-intensity/color-temperature adopted deliberately
+(the gated lighting depends on it; `95a0bb9`).
+**Carried forward**: CD tone-deepening note ("cursed gothic" sky/grime — next art pass);
+NPC body production (Hyper3D experiment or rigged-mesh path) routed separately; final
+budget lock at S5-05.
+**Forced Completion**: No.

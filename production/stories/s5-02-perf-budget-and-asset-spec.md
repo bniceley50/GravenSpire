@@ -2,7 +2,7 @@
 
 > **Sprint**: Sprint 5 — First District — Designed & Produced (First-Pass)
 > **Sprint Plan**: `production/sprints/sprint-5.md` (Story Ledger, S5-02)
-> **Status**: Blocked (depends on S5-01)
+> **Status**: Complete
 > **Layer**: Presentation
 > **Type**: Config/Data (perf-budget + asset-spec)
 > **Estimate**: 1.0 day
@@ -79,7 +79,10 @@ project; URP material/import standards — verify §6.x post-cutoff APIs against
 (the asset-spec + the sequencing rule + deferral list) **plus** the
 `.claude/docs/technical-preferences.md` Performance-Budgets edit (cited file:line).
 
-**Evidence status**: Not started
+**Evidence status**: Delivered — `production/qa/evidence/s5-02-perf-budget-and-asset-spec.md`
++ the provisional budgets in `.claude/docs/technical-preferences.md` (committed `3cab743`;
+consumed by S5-03, validated by the S5-03 perf snapshot). Final budget lock at S5-05.
+Closed 2026-06-09 in the S5-03 close-out reconciliation.
 
 ## Dependencies
 
