@@ -85,3 +85,7 @@ ProjectSettings/PackageManagerSettings.asset whitespace=-blank-at-eol
 # trailing spaces (e.g. "userData: "); exempt from whitespace checks rather
 # than fighting the engine (generated-file policy).
 *.meta -whitespace
+*.unity -whitespace
+*.mat -whitespace
+*.asset -whitespace
+*.prefab -whitespace

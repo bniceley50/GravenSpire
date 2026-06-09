@@ -156,3 +156,7 @@ $RECYCLE.BIN/
 # Aider writes chat history, input history, and tag cache into the working dir.
 .aider*
 
+
+# Editor screenshot scratch (evidence copies live in tests/evidence/)
+Assets/Screenshots/
+Assets/Screenshots.meta
