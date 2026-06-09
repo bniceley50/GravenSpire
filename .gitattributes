@@ -80,3 +80,8 @@ ProjectSettings/PackageManagerSettings.asset whitespace=-blank-at-eol
 *.zip binary -eol
 *.7z binary -eol
 *.rar binary -eol
+
+# Unity-generated .meta files: Unity's YAML serializer canonically emits
+# trailing spaces (e.g. "userData: "); exempt from whitespace checks rather
+# than fighting the engine (generated-file policy).
+*.meta -whitespace
