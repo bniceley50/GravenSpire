@@ -2,7 +2,7 @@
 
 > **Sprint**: Sprint 5 — First District — Designed & Produced (First-Pass)
 > **Sprint Plan**: `production/sprints/sprint-5.md` (Story Ledger, S5-04)
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Presentation
 > **Type**: Integration
 > **Estimate**: 0.5 day
@@ -76,7 +76,9 @@ post-6.0 camera API against `docs/engine-reference/unity/`).
 (carries forward the S4-01 evidence + the post-rebase re-validation + the Play Mode
 behavior confirmation + the optional-lever decision).
 
-**Evidence status**: Not started (S4-01 evidence exists and is carried)
+**Evidence status**: Complete — `production/qa/evidence/s5-04-legibility-floor-evidence.md`
+(PASS WITH NOTES) + `tests/evidence/S5-04/` (3× post-fix M2 preservation PASS + the
+objective-freewalk fix artifact). Merged via PR #10 (`ab031b4`).
 
 ## Dependencies
 
@@ -88,3 +90,29 @@ behavior confirmation + the optional-lever decision).
 
 None. Independent of the design/art chain (the S4-01 code exists). Sequence against
 S5-03 if any scene edit arises.
+
+## Completion Notes
+
+**Completed**: 2026-06-09 (merged 2026-06-10 UTC via PR #10, merge `ab031b4`)
+**Verdict**: COMPLETE WITH NOTES
+**Criteria**: 5/5 — rebase + re-validation (S5-04-01), S4-01 behaviors held incl. the
+AC-04 no-scene-delta acceptance (S5-04-02), manual Play Mode confirmation (S5-04-03),
+optional-lever decision (S5-04-04: prompt scaled; vitals/full prompt deferred), scene
+discipline (S5-04-05: code-only, no scene delta).
+**The story grew a real fix mid-flight**: the first manual check FAILED (1 PASS / 2 FAIL
+/ 1 indeterminate), which surfaced three diagnoses — (F-A) the legacy M2 controller
+stomped Play Mode presentation every frame (near-black fog, ambient override, floor
+repaint over the produced cobble — meaning every prior Play Mode session, including both
+feel-fails, was judged through the stomp); (F-B) M2 proximity body-pull yanked the
+player next to Morrvik; (F-C) the S3 prompt was a tiny unscaled label. Fixed via the
+`ShouldSuppressLegacyM2DuringObjectiveFreeWalk` guard (explicit batchmode/_smokeRunning
+scenario discrimination — suppression is human-free-walk only; combat re-enables
+everything) + prompt scaling. Re-checks: manual PASS WITH NOTES; post-fix M2
+preservation 3/3 PASS; dotnet 189/189; format x2; no scene/settings/package drift.
+**Notes (routed forward, not S5-04 scope)**: player avatar/orientation read → the
+character/NPC body story (spec drafted, uncommitted); ability surface (harness exposes
+auto-attack + Smite only; combat-core names Lesser Heal / Bash / Defensive Prayer) →
+a combat ability-surface story.
+**Review Gates**: Codex four-question PR body; main-lane review APPROVE (guard condition
++ surface verified post-merge); product-owner merge.
+**Forced Completion**: No.
