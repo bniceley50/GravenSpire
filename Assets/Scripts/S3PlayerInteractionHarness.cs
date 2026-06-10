@@ -217,6 +217,9 @@ namespace Gravenspire.UnityRuntime.Interaction
 
         private void OnGUI()
         {
+            var previousMatrix = GUI.matrix;
+            var hudScale = CalculateHudScale();
+            GUI.matrix = Matrix4x4.TRS(Vector3.zero, Quaternion.identity, new Vector3(hudScale, hudScale, 1.0f));
             EnsureGuiStyles();
 
             if (PromptVisible)
@@ -228,6 +231,15 @@ namespace Gravenspire.UnityRuntime.Interaction
             {
                 GUI.Label(new Rect(24.0f, 418.0f, 260.0f, 28.0f), LastFeedbackText, _feedbackStyle);
             }
+
+            GUI.matrix = previousMatrix;
+        }
+
+        private static float CalculateHudScale()
+        {
+            var portraitSimulatorScale = Screen.height > Screen.width * 1.35f ? 2.7f : 1.0f;
+            var landscapeEditorScale = Screen.width > Screen.height ? Screen.width / 1000.0f : 1.0f;
+            return Mathf.Clamp(Mathf.Max(Mathf.Max(Screen.height / 900.0f, portraitSimulatorScale), landscapeEditorScale), 1.0f, 3.2f);
         }
 
         public void Configure(

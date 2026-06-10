@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using Gravenspire.Gameplay.Combat;
 using Gravenspire.Gameplay.Combat.Fixtures;
+using Gravenspire.UnityRuntime.Interaction;
 using UnityEngine;
 
 namespace Gravenspire.UnityRuntime.Combat
@@ -33,8 +34,11 @@ namespace Gravenspire.UnityRuntime.Combat
         private const float M2MeleeRangeMeters = 1.5f;
         private const float HostileMoveSpeedMeters = 2.2f;
         private const float PlayerMoveSpeedMeters = 4.0f;
-        private const float CameraFollowHeight = 7.0f;
-        private const float CameraFollowBack = 8.0f;
+        private const float CameraFollowHeight = 5.4f;
+        private const float CameraFollowBack = 8.4f;
+        private const float CameraPitchDegrees = 36.0f;
+        private const float CameraFieldOfViewDegrees = 50.0f;
+        private const float CameraSteerDegreesPerSecond = 82.0f;
         private const int MaxSmokeTicksPerPull = 5000;
         private const double Feel03HateWindowSeconds = 5.0d;
         private const double DangerHealthRatio = 0.20d;
@@ -88,6 +92,7 @@ namespace Gravenspire.UnityRuntime.Combat
         private bool _smokeRunning;
         private int _pullsCompleted;
         private int _manaRestoredTotal;
+        private float _cameraYawDegrees;
         private long? _smiteCooldownEndsTick;
         private string _lastStatus = "Ready: approach the baseline trash to body-pull.";
 
@@ -195,8 +200,13 @@ namespace Gravenspire.UnityRuntime.Combat
             }
 
             HandlePlayerMovement();
+            HandleCameraSteering();
             HandleInput();
-            TryStartBodyPull();
+            if (!ShouldSuppressLegacyM2DuringObjectiveFreeWalk())
+            {
+                TryStartBodyPull();
+            }
+
             MoveHostileTowardPlayer();
             AdvanceFixedTime(Time.deltaTime);
             ApplySceneVisualState();
@@ -205,6 +215,11 @@ namespace Gravenspire.UnityRuntime.Combat
         private void OnGUI()
         {
             if (!IsInitialized)
+            {
+                return;
+            }
+
+            if (ShouldSuppressLegacyM2DuringObjectiveFreeWalk())
             {
                 return;
             }
@@ -254,6 +269,37 @@ namespace Gravenspire.UnityRuntime.Combat
             DrawHudButton(new Rect(492, 292, 132, 34), "Sit/Stand X", ToggleSitStand, canSitStand);
             DrawHudButton(new Rect(24, 334, 100, 34), "Reset R", ResetLoop, enabled: true);
             GUI.matrix = previousMatrix;
+        }
+
+        // CLIENT-LOCAL: suppress legacy M2 presentation and proximity aggro during human objective free-walk.
+        private bool ShouldSuppressLegacyM2DuringObjectiveFreeWalk()
+        {
+            if (Application.isBatchMode || _smokeRunning)
+            {
+                return false;
+            }
+
+            if (GameObject.Find(S3PlayerInteractionHarness.HarnessRootName) == null)
+            {
+                return false;
+            }
+
+            if (_pullActive || _pullsCompleted > 0 || _targetSelected || _playerAttackState.IsAttackOn)
+            {
+                return false;
+            }
+
+            if (_player is not null && _player.CombatState != CombatState.OutOfCombat)
+            {
+                return false;
+            }
+
+            if (_hostile is not null && _hostile.CombatState != CombatState.OutOfCombat)
+            {
+                return false;
+            }
+
+            return true;
         }
 
         private void EnsureHudStyles()
@@ -579,6 +625,22 @@ namespace Gravenspire.UnityRuntime.Combat
             }
 
             playerMarker.position += input.normalized * PlayerMoveSpeedMeters * Time.deltaTime;
+            FollowCamera();
+        }
+
+        // CLIENT-LOCAL: local camera orbit only; never pulls toward NPCs, relics, vendors, or other POIs.
+        private void HandleCameraSteering()
+        {
+            var yawInput = Axis(KeyCode.E, KeyCode.Q);
+            if (Mathf.Abs(yawInput) <= 0.0001f)
+            {
+                return;
+            }
+
+            var frameSeconds = Mathf.Clamp(Time.unscaledDeltaTime, 0.0f, 0.05f);
+            _cameraYawDegrees = Mathf.Repeat(
+                _cameraYawDegrees + yawInput * CameraSteerDegreesPerSecond * frameSeconds,
+                360.0f);
             FollowCamera();
         }
 
@@ -2055,13 +2117,20 @@ namespace Gravenspire.UnityRuntime.Combat
                 return;
             }
 
+            var yawRotation = Quaternion.Euler(0.0f, _cameraYawDegrees, 0.0f);
+            var followOffset = yawRotation * new Vector3(0.0f, CameraFollowHeight, -CameraFollowBack);
             _camera.transform.SetPositionAndRotation(
-                _playerMarker.position + new Vector3(0.0f, CameraFollowHeight, -CameraFollowBack),
-                Quaternion.Euler(48.0f, 0.0f, 0.0f));
+                _playerMarker.position + followOffset,
+                Quaternion.Euler(CameraPitchDegrees, _cameraYawDegrees, 0.0f));
         }
 
         private void ApplySceneVisualState()
         {
+            if (ShouldSuppressLegacyM2DuringObjectiveFreeWalk())
+            {
+                return;
+            }
+
             ApplyColor(_floor, new Color(0.19f, 0.20f, 0.21f));
             ApplyColor(_playerMarker, new Color(0.25f, 0.70f, 1.0f));
             ApplyColor(_campRestPoint, new Color(0.12f, 0.55f, 0.32f));
@@ -2079,6 +2148,11 @@ namespace Gravenspire.UnityRuntime.Combat
 
         private void ApplyPresentationSettings()
         {
+            if (ShouldSuppressLegacyM2DuringObjectiveFreeWalk())
+            {
+                return;
+            }
+
             RenderSettings.ambientLight = new Color(0.28f, 0.30f, 0.34f);
             RenderSettings.fog = true;
             RenderSettings.fogColor = new Color(0.04f, 0.045f, 0.05f);
@@ -2094,7 +2168,7 @@ namespace Gravenspire.UnityRuntime.Combat
             _camera.clearFlags = CameraClearFlags.SolidColor;
             _camera.backgroundColor = new Color(0.035f, 0.038f, 0.043f);
             _camera.orthographic = false;
-            _camera.fieldOfView = 44.0f;
+            _camera.fieldOfView = CameraFieldOfViewDegrees;
         }
 
         private void ApplyColor(Transform? target, Color color)
