@@ -934,6 +934,24 @@ namespace Gravenspire.UnityRuntime.Combat
             {
                 _hostile = result.TargetAfterResolution;
                 UpdateHostileScale();
+
+                int smiteDamage = 0;
+                foreach (var effect in result.AppliedEffects)
+                {
+                    if (effect.Damage.HasValue)
+                    {
+                        smiteDamage += effect.Damage.Value;
+                    }
+                }
+                if (_baselineTrash != null)
+                {
+                    CombatJuice.Instance.SpawnDamageText($"SMITE -{smiteDamage}!", _baselineTrash.position, Color.yellow);
+                    if (_baselineTrash.TryGetComponent<Renderer>(out var r))
+                    {
+                        CombatJuice.Instance.Flash(r, Color.yellow, 0.25f);
+                    }
+                }
+                CombatJuice.Instance.TriggerCameraShake(0.28f, 0.32f);
             }
 
             _lastStatus = "Smite resolved.";
@@ -1105,6 +1123,14 @@ namespace Gravenspire.UnityRuntime.Combat
                     if (playerResult.AppliedDamage)
                     {
                         RecordEvent($"player_melee_hit:{playerResult.Damage}");
+                        if (_baselineTrash != null)
+                        {
+                            CombatJuice.Instance.SpawnDamageText($"-{playerResult.Damage}", _baselineTrash.position, Color.white);
+                            if (_baselineTrash.TryGetComponent<Renderer>(out var r))
+                            {
+                                CombatJuice.Instance.Flash(r, Color.white);
+                            }
+                        }
                     }
                 }
             }
@@ -1128,6 +1154,14 @@ namespace Gravenspire.UnityRuntime.Combat
                     if (hostileResult.AppliedDamage)
                     {
                         RecordEvent($"hostile_melee_hit:{hostileResult.Damage}");
+                        if (_playerMarker != null)
+                        {
+                            CombatJuice.Instance.SpawnDamageText($"-{hostileResult.Damage}", _playerMarker.position, Color.red);
+                            if (_playerMarker.TryGetComponent<Renderer>(out var r))
+                            {
+                                CombatJuice.Instance.Flash(r, Color.red);
+                            }
+                        }
                     }
                 }
             }
