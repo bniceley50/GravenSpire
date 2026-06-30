@@ -57,11 +57,13 @@ namespace Gravenspire.UnityRuntime.Combat
         private Transform? _campRestPoint;
         private Transform? _pullLane;
         private Transform? _floor;
+        private Transform? _playerSword;
         private Camera? _camera;
         private GUIStyle? _labelStyle;
         private GUIStyle? _titleStyle;
         private GUIStyle? _buttonStyle;
         private GUIStyle? _statusStyle;
+        private Coroutine? _playerSwordSwing;
 
         private CombatFixturePackage? _fixturePackage;
         private CombatTacticalAbilityProfile? _smiteProfile;
@@ -1131,6 +1133,8 @@ namespace Gravenspire.UnityRuntime.Combat
                                 CombatJuice.Instance.Flash(r, Color.white);
                             }
                         }
+
+                        TriggerPlayerSwordSwing();
                     }
                 }
             }
@@ -2136,12 +2140,91 @@ namespace Gravenspire.UnityRuntime.Combat
             _pullLane ??= FindTransform("M2_PullLane");
             _floor ??= FindTransform("DevEntry_DistrictBlockout_Floor");
             _camera ??= Camera.main ?? FindFirstObjectByType<Camera>();
+            EnsurePlayerSword();
         }
 
         private static Transform? FindTransform(string objectName)
         {
             var found = GameObject.Find(objectName);
             return found == null ? null : found.transform;
+        }
+
+        private void EnsurePlayerSword()
+        {
+            if (_playerSword is not null || _playerMarker is null)
+            {
+                return;
+            }
+
+            var swordObject = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            swordObject.name = "M2_PlayerSlashSword";
+            swordObject.transform.SetParent(_playerMarker, worldPositionStays: false);
+            swordObject.transform.localPosition = new Vector3(0.55f, 0.30f, 0.45f);
+            swordObject.transform.localRotation = Quaternion.Euler(0.0f, 0.0f, -75.0f);
+            swordObject.transform.localScale = new Vector3(0.08f, 0.85f, 0.08f);
+
+            if (swordObject.TryGetComponent<Collider>(out var collider))
+            {
+                collider.enabled = false;
+            }
+
+            if (swordObject.TryGetComponent<Renderer>(out var renderer))
+            {
+                var block = new MaterialPropertyBlock();
+                renderer.GetPropertyBlock(block);
+                block.SetColor(BaseColorPropertyName, new Color(0.95f, 0.86f, 0.55f));
+                block.SetColor(ColorPropertyName, new Color(0.95f, 0.86f, 0.55f));
+                renderer.SetPropertyBlock(block);
+            }
+
+            swordObject.SetActive(false);
+            _playerSword = swordObject.transform;
+        }
+
+        private void TriggerPlayerSwordSwing()
+        {
+            EnsurePlayerSword();
+            if (_playerSword is null)
+            {
+                return;
+            }
+
+            if (_playerSwordSwing is not null)
+            {
+                StopCoroutine(_playerSwordSwing);
+            }
+
+            _playerSwordSwing = StartCoroutine(SwingPlayerSword());
+        }
+
+        private System.Collections.IEnumerator SwingPlayerSword()
+        {
+            if (_playerSword is null)
+            {
+                yield break;
+            }
+
+            var sword = _playerSword;
+            var start = Quaternion.Euler(0.0f, 0.0f, -75.0f);
+            var end = Quaternion.Euler(0.0f, 0.0f, 105.0f);
+            const float duration = 0.15f;
+
+            sword.gameObject.SetActive(true);
+            sword.localRotation = start;
+
+            var elapsed = 0.0f;
+            while (elapsed < duration)
+            {
+                elapsed += Time.deltaTime;
+                var t = Mathf.Clamp01(elapsed / duration);
+                t = 1.0f - Mathf.Pow(1.0f - t, 3.0f);
+                sword.localRotation = Quaternion.Slerp(start, end, t);
+                yield return null;
+            }
+
+            sword.localRotation = start;
+            sword.gameObject.SetActive(false);
+            _playerSwordSwing = null;
         }
 
         private void FollowCamera()
